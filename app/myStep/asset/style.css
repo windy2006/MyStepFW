@@ -1,0 +1,105 @@
+@media (min-width: 768px) {
+    #list {
+        width: 200px;
+    }
+    #main {
+        padding: 20px 10px 20px 10px;
+        width: calc(100% - 200px);
+    }
+}
+
+@media (max-width: 768px) {
+    #list {
+        display:none;
+    }
+    #main {
+        padding: 30px 10px 20px 10px;
+        width: 100%;
+    }
+}
+
+.bd-navbar {
+    min-height: 4rem;
+    background-color: #563d7c;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05), inset 0 -1px 0 rgba(0, 0, 0, .1);
+}
+
+.bd-navbar .navbar-nav .nav-link {
+    color: #cbbde2
+}
+
+.bd-navbar .navbar-nav .nav-link.active, .bd-navbar .navbar-nav .nav-link:hover {
+    color: #fff;
+}
+
+.bd-navbar .navbar-nav .nav-link.active {
+    font-weight: 600
+}
+
+.bd-navbar .dropdown-menu {
+    font-size: .875rem
+}
+
+.bd-navbar .dropdown-item.active {
+    font-weight: 600;
+    color: #212529;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23292b2c' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: .4rem .6rem;
+    background-size: .75rem .75rem
+}
+
+.bd-navbar .dropdown-item:hover {
+    font-weight: 600;
+    background-color: #CCCCCC;
+}
+
+.navbar-dark .navbar-brand {
+    font-weight: 600;
+    color: #ffe484;
+    border-color: #ffe484
+}
+
+.navbar-brand:active, .navbar-dark .navbar-brand:hover {
+    color: #2a2730;
+    background-color: #ffe484;
+    border-color: #ffe484;
+    box-shadow: 0 0 0 3px rgba(255, 228, 132, .25)
+}
+
+.card {
+    overflow:hidden;
+}
+
+.card-body .rotate {
+    z-index: 8;
+    float: right;
+    height: 100%;
+}
+
+.card-body .rotate i {
+    color: rgba(20, 20, 20, 0.15);
+    position: absolute;
+    left: 0;
+    left: auto;
+    right: -10px;
+    bottom: 0;
+    display: block;
+    -webkit-transform: rotate(-44deg);
+    -moz-transform: rotate(-44deg);
+    -o-transform: rotate(-44deg);
+    -ms-transform: rotate(-44deg);
+    transform: rotate(-44deg);
+}
+
+#phpinfo td, #phpinfo th {border: 1px solid #666;}
+#phpinfo h1 {font-size: 150%; text-align: center;}
+#phpinfo h2 {font-size: 125%; text-align: center;}
+#phpinfo .p {text-align: left;}
+#phpinfo .e {background-color: #ccf; max-width: 300px; font-weight: bold; word-wrap: break-word;}
+#phpinfo .h {background-color: #99c; font-weight: bold;}
+#phpinfo .v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}
+#phpinfo .v i {color: #999;}
+#phpinfo img {float: right; border: 0;}
+#phpinfo hr {width:100%; background-color: #ccc; border: 0; height: 1px;}
