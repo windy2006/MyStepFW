@@ -1,0 +1,21 @@
+<?PHP
+return array (
+  'myApi' => 'api',
+  'myCache' => 'cache',
+  'myConfig' => 'cfg',
+  'myController' => 'c',
+  'myDb' => 'db',
+  'myEmail' => 'mail',
+  'myEncrypt' => 'enc',
+  'myExcel' => 'xls',
+  'myFile' => 'f',
+  'myImg' => 'img',
+  'myMinify' => 'mini',
+  'myReflection' => 'err',
+  'myReq' => 'r',
+  'myRouter' => 'router',
+  'myString' => 's',
+  'myTemplate' => 'tpl',
+  'myUploader' => 'ul',
+  'myZip' => 'zip',
+);
