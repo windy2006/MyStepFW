@@ -1,0 +1,103 @@
+.showImage {
+    position: relative;
+    background-color: #efefef;
+    width: 460px;
+    margin: 0px auto 0px auto;
+    border: 1px #dddddd solid;
+}
+
+.showImage .container_show {
+    background-color: #eeeeee;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+}
+
+.showImage .container_show .main {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    z-index: 1;
+}
+
+.showImage .container_show img {
+    width: auto;
+    height: 300px;
+    max-width: calc(100% - 20px);
+    margin: 10px;
+    border: 1px #dddddd solid;
+}
+
+.showImage .container_show .jump {
+    position: absolute;
+    top: 0px;
+    display: block;
+    width: 40%;
+    cursor: pointer;
+    z-index: 2;
+    background-color: #ffffff;
+}
+
+.showImage .container_show .forward {
+    right: 0px;
+    cursor: url("right.cur"), e-resize;
+}
+
+.showImage .container_show .back {
+    left: 0px;
+    cursor: url("left.cur"), w-resize;
+}
+
+.showImage .container_list {
+    position: relative;
+    background-color: #eeeeee;
+    padding-bottom: 5px;
+    height: 90px;
+    overflow: hidden;
+    z-index: 3;
+}
+
+.showImage .container_list .wrapper {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    white-space: nowrap;
+    width: auto;
+    overflow: hidden;
+}
+
+.showImage .container_list img {
+    margin: 5px 5px;
+    border: 1px #dddddd solid;
+    cursor: pointer;
+}
+
+.showImage .container_list .arrow {
+    display: block;
+    height: 36px;
+    width: 37px;
+    background: url("arrow.png") no-repeat 0 0;
+    text-indent: -999px;
+    position: absolute;
+    top: 30px;
+    cursor: pointer;
+}
+
+.showImage .container_list .forward {
+    background-position: 0 0;
+    right: 0;
+}
+
+.showImage .container_list .forward:hover {
+    background-position: 0 -36px;
+}
+
+.showImage .container_list .back {
+    background-position: 0 -72px;
+    left: 0;
+}
+
+.showImage .container_list .back:hover {
+    background-position: 0 -108px;
+}

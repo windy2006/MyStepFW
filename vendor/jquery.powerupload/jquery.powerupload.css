@@ -1,0 +1,42 @@
+.info_upload{
+	margin:0px 0px 10px 0px;
+}
+.info_upload .info{
+	color:#009900;
+	font-weight:bold;
+	text-align:center;
+}
+.info_upload .file_info {
+	width:260px;
+	height:40px;
+	float:left;
+	margin:10px 0 0 10px;
+	position:relative;
+	text-align:left;
+	border-bottom:1px #333333 dashed;
+}
+.info_upload .file_info .file_name{
+	width:260px;
+	white-space:nowrap;
+	overflow:hidden;
+}
+.info_upload .progressHolder{
+	position:absolute;
+	background-color:#fffff;
+	border:1px #2586d0 solid;
+	height:14px;
+	width:100%;
+	left:0;
+	bottom:0;
+	margin-bottom:5px;
+}
+.info_upload .progress{
+	font-size:8px;
+	background-color:#2586d0;
+	position:absolute;
+	height:100%;
+	left:0;
+	width:0;
+	color:#000000;
+	text-align:left;
+}

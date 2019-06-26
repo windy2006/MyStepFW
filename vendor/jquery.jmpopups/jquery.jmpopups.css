@@ -1,0 +1,12 @@
+.popshow {position:absolute; border:1px #000 solid; display:none; overflow:hidden;}
+.popshow .title {text-align:left; border:1px solid #629DC5; padding:5px 5px 5px 25px; font-weight:bold; color:#fff; background-color:#3275AB; background-image:url("arrow.gif"); background-repeat:no-repeat; background-position:5px center;}
+.popshow .content {padding:10px 10px 10px 10px; background-color:#fff; text-align:left;}
+.popshow DL {float:left; margin: 0px 5px 10px 5px;}
+.popshow DT IMG {border:1px #dddddd solid; width:120px; height:90px; cursor:pointer;}
+.popshow DD {font-size:14px; font-weight:bold; padding:5px 0px 0px 0px; text-align:center;}
+
+#info_show {display:none;float:left;}
+.info_show {}
+.info_show .info{font-size:16px;white-space:nowrap;word-wrap:keep-all;line-height:24px;}
+.info_show .button{text-align:center; padding:10px 0px 0px 0px;}
+.info_show .button button{padding:0px 10px 0px 10px;margin:0px 10px 0px 10px;}
