@@ -1,0 +1,17 @@
+* {font-size:14px;}
+.font-sm{font-size:12px;}
+.font-md{font-size:16px;}
+.rb {border:1px red solid;}
+td {vertical-align: middle;word-break:break-all;word-wrap:break-word;}
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+    -khtml-user-select: none; /* Konqueror */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently not supported by any browser */
+}
+.text-break {
+     word-break: break-word !important;
+     overflow-wrap: break-word !important;
+}
