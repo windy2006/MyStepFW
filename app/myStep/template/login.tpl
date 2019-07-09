@@ -36,13 +36,13 @@
                             <div class="input-group-prepend">
                                 <div class="input-group-text"><span class="glyphicon glyphicon-user"></span> &nbsp; <!--lng_login_username--></div>
                             </div>
-                            <input name="username" type="text" class="form-control" placeholder="<!--lng_login_username-->" need="" />
+                            <input name="username" value="mystep" type="text" class="form-control" placeholder="<!--lng_login_username-->" need="" />
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-prepend">
                                 <div class="input-group-text"><span class="glyphicon glyphicon-asterisk"></span> &nbsp; <!--lng_login_password--></div>
                             </div>
-                            <input name="password" type="password" class="form-control" placeholder="<!--lng_login_password-->" need="" />
+                            <input name="password" value="123456" type="password" class="form-control" placeholder="<!--lng_login_password-->" need="" />
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-prepend">
