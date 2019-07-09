@@ -1,8 +1,8 @@
 <?PHP
 $preload_list = array (
-  'Document' => '/Users/sunkai/Documents/website/mystep_fw/app/Document/lib.php',
-  'cms' => '/Users/sunkai/Documents/website/mystep_fw/app/cms/lib.php',
-  'myStep' => '/Users/sunkai/Documents/website/mystep_fw/app/myStep/lib.php',
+  'Document' => '/Users/sunkai/MyStepFW/app/Document/lib.php',
+  'cms' => '/Users/sunkai/MyStepFW/app/cms/lib.php',
+  'myStep' => '/Users/sunkai/MyStepFW/app/myStep/lib.php',
 );
 
 $format_list = array (

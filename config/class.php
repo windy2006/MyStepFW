@@ -2,7 +2,7 @@
 return array (
   0 => 
   array (
-    'path' => '/Users/sunkai/Documents/website/mystep_fw/lib/',
+    'path' => '/Users/sunkai/MyStepFW/lib/',
     'ext' => '.php,.class.php',
     'idx' => 
     array (
@@ -13,7 +13,7 @@ return array (
   ),
   1 => 
   array (
-    'path' => '/Users/sunkai/Documents/website/mystep_fw/lib/database/',
+    'path' => '/Users/sunkai/MyStepFW/lib/database/',
     'ext' => '.php,.class.php',
     'idx' => 
     array (
