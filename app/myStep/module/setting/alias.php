@@ -24,7 +24,8 @@ $filter = '*'.str_replace(',',',*',$info['ext']);
 $filter = explode(',',$filter);
 $files = array();
 foreach($filter as $f) {
-    $files += myFile::find($f, myFile::realPath($info['path']));
+    if(myFile::find($f, myFile::realPath($info['path'])))
+        $files += myFile::find($f, myFile::realPath($info['path']));
 }
 $i = 0;
 foreach($files as $class) {
@@ -35,4 +36,4 @@ foreach($files as $class) {
     }
 }
 $t->assign('dummy', ($i%2?'<td colspan="2"></td>':''));
-$tpl->assign('path', 'setting/class');
+$tpl->assign('path', 'manager/setting/class');

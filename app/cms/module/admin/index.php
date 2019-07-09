@@ -5,5 +5,4 @@ if(!file_exists($setting_tpl['path'].'/'.$setting_tpl['style'].'/'.$setting_tpl[
     myStep::info($mystep->getLanguage('module_missing'));
 }
 $t = new myTemplate($setting_tpl, false, true);
-$t->assign('path_root', ROOT_WEB);
-$content = $t->display('', false);
+$content = $mystep->display($t, '', false);

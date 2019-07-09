@@ -13,22 +13,4 @@ define('VENDOR', ROOT.'vendor/');
 define('FILE', ROOT.'files/');
 
 require_once(LIB.'function.php');
-initConfig();
-
-$router = new myRouter((array)$s->router);
-$router->setRules(CONFIG.'route.php');
-if(!$router->check($lib_list)) {
-    $info_app = $router->parse();
-    if(!empty($info_app)) {
-        if(!is_dir(APP.$info_app['app'])) {
-            array_unshift($info_app['path'], $info_app['app']);
-            $info_app['app'] = $s->router->default_app;
-        }
-        if(is_file(APP.$info_app['app'].'/config.php')) {
-            $s->merge(APP.$info_app['app'].'/config.php');
-        }
-        require(APP.$info_app['app'].'/index.php');
-    } else {
-        myController::redirect('/');
-    }
-}
+initFW();

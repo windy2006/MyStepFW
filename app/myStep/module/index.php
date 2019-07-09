@@ -54,5 +54,4 @@ if($module=='phpinfo') {
     $t->assign('err_msg', $err_msg);
     $t->assign('err_output', $err_output);
 }
-$t->assign('path_root', ROOT_WEB);
-$content = $t->display('db,s', false);
+$content = $mystep->display($t, 'db,s', false);

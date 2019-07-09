@@ -84,7 +84,7 @@ switch($method) {
             }
         }
         $t->assign('setting', $result);
-        $mystep->setAddedContent('end', '<script language="JavaScript" src="'.ROOT_WEB.'static/js/checkForm.js"></script>');
+        $mystep->setAddedContent('end', '<script language="JavaScript" src="static/js/checkForm.js"></script>');
         break;
     case 'active':
         $active = $mydb->result('idx='.$idx, 'active');
@@ -165,4 +165,4 @@ switch($method) {
         $t->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));
 }
 $mydb->close();
-$tpl->assign('path', 'function/plugin');
+$tpl->assign('path', 'manager/function/plugin');

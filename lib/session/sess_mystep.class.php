@@ -10,7 +10,7 @@ class sess_mystep implements interface_session {
 		$agent = strtolower($_SERVER['HTTP_USER_AGENT']);
 		if(strpos($agent, "spider")!==false || strpos($agent, "bot")!==false || checkSign(1)) self::$skip = true;
 		if(!self::$skip){
-			include(ROOT_PATH."/include/config.php");
+			include(ROOT."/include/config.php");
 			self::$cnt = mysqli_connect($setting['db']['host'], $setting['db']['user'], $setting['db']['pass'], $setting['db']['name']);
 			mysqli_query(self::$cnt, "SET NAMES '".$setting['db']['charset']."'");
 		};
@@ -43,7 +43,7 @@ class sess_mystep implements interface_session {
 		$sess_data['userinfo'] = mysqli_real_escape_string(self::$cnt, serialize($sess_data['userinfo']));
 		extract($sess_data);
 		
-		include(ROOT_PATH."/include/config.php");
+		include(ROOT."/include/config.php");
 		$reflash = $_SERVER["REQUEST_TIME"];
 		if(empty($username)) $username = "Guest";
 		if(empty($usertype)) $usertype = 1;
@@ -60,7 +60,7 @@ class sess_mystep implements interface_session {
 	
 	public static function gc() {
 		if(self::$skip) return true;
-		include(ROOT_PATH."/include/config.php");
+		include(ROOT."/include/config.php");
 		if(is_object(self::$cnt)) {
 			mysqli_query(self::$cnt, "DELETE FROM ".$setting['db']['pre']."user_online WHERE reflash < " . ($_SERVER["REQUEST_TIME"] - $setting['session']['expire'] * 60));
 			mysqli_close(self::$cnt);

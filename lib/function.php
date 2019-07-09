@@ -14,9 +14,10 @@
 /**
  * 框架变量初始化
  */
-function initConfig() {
+function initFW() {
 	$class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
 	if(empty($class) || !is_dir($class[0]['path'])) {
+	    $old_root = preg_replace('#lib/$#', '', $class[0]['path']);
 		$class[0] = array(
 			'path' => ROOT . 'lib/',
 			'ext' => '.php,.class.php',
@@ -27,6 +28,9 @@ function initConfig() {
 					'JavaScriptPacker' => 'myMinify.class.php',
 				),
 		);
+		for($i=1,$m=count($class);$i<$m;$i++) {
+            $class[$i]['path'] = preg_replace('#^'.$old_root.'#', ROOT, $class[$i]['path']);
+        }
 		@unlink(CONFIG.'class.php');
 		file_put_contents(CONFIG.'class.php', '<?php'.chr(10).'return '.var_export($class, true).';');
 
@@ -72,14 +76,39 @@ function initConfig() {
 	preg_match('#^(.+?)(&(.+))?$#', $qstr, $match);
 	$p = $match[1];
 	$q = $match[3] ?? '';
+	route();
 	return;
+}
+
+/**
+ * 应用路由
+ */
+function route() {
+    global $lib_list, $info_app, $s, $setting_tpl, $mystep;
+    $router = new myRouter((array)$s->router);
+    $router->setRules(CONFIG.'route.php');
+    if(!$router->check($lib_list)) {
+        $info_app = $router->parse();
+        if(!empty($info_app)) {
+            if(!is_dir(APP.$info_app['app'])) {
+                array_unshift($info_app['path'], $info_app['app']);
+                $info_app['app'] = $s->router->default_app;
+            }
+            if(is_file(APP.$info_app['app'].'/config.php')) {
+                $s->merge(APP.$info_app['app'].'/config.php');
+            }
+            require(APP.$info_app['app'].'/index.php');
+        } else {
+            myController::redirect('/');
+        }
+    }
 }
 
 /**
  * 应用模块初始化参数设置
  */
 function initPara() {
-	global $info_app, $mystep, $setting_tpl, $setPlugin, $s;
+	global $info_app, $mystep, $setting_tpl, $setPlugin;
 	if($mystep!=null) return;
 	if(!defined('PATH')) {
 		define('PATH', APP.$info_app['app'].'/');
@@ -145,6 +174,7 @@ function getModule($m) {
 		if(empty($f))  myStep::info($mystep->getLanguage('module_missing'));
 	}
 	$tpl = new myTemplate($setting_tpl, $setting_cache);
+	if(count($info_app['path'])==1) $info_app['path'][1]='';
 	$tpl->assign('path', implode('/', $info_app['path']));
 	include($f);
 	if(isset($content)) $tpl->assign('main', $content);

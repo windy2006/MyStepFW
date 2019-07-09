@@ -39,4 +39,4 @@ foreach($methods as $method) {
     $t->setLoop('method', array('name'=>$name, 'alias'=>$k, 'tr'=>$tr));
 }
 $t->assign('dummy', ($i%2?'<td colspan="2"></td>':''));
-$tpl->assign('path', 'setting/class');
+$tpl->assign('path', 'manager/setting/class');

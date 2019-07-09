@@ -13,7 +13,7 @@
                 </tr>
                 <tr>
 <!--loop:start key="class"-->
-                    <td class="text-right align-middle"><a href="<!--path_root-->manager/setting/detail/<!--class_name-->"><!--class_name--></a></td>
+                    <td class="text-right align-middle"><a href="manager/setting/detail/<!--class_name-->"><!--class_name--></a></td>
                     <td><input type="text" class="form-control" name="<!--class_name-->" value="<!--class_alias-->" /></td>
                     <!--class_tr-->
 <!--loop:end-->

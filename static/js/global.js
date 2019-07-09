@@ -21,7 +21,7 @@ function getPath(lvl) {
     var protocol = location.protocol;
     if(port!='') port = ':' + port;
     if(isNaN(lvl)) lvl = 0;
-    return protocol + "//" + hostname + port + contextPath.slice(0,lvl).join('/');
+    return protocol + "//" + hostname + port + contextPath.slice(0,lvl+1).join('/');
 }
 
 //获取某ID元素

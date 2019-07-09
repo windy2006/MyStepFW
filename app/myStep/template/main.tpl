@@ -107,8 +107,7 @@ function resizeMain() {
 }
 $(function(){
     $('[data-toggle="tooltip"]').tooltip();
-    $("a[href='manager/<!--path-->']").addClass('active');
-    $("a[href='manager/<!--path-->/']").addClass('active');
+    $("a[href='<!--path-->']").addClass('active');
     $.get('api/myStep/error/'+Math.random(), function(data, status){
         if(typeof data == 'object' && data.count > 0) {
             var badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);

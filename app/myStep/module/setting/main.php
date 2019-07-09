@@ -45,4 +45,4 @@ foreach($list as $v) {
                 ']);
     }
 }
-$tpl->assign('path', 'setting/');
+$tpl->assign('path', 'manager/setting/');

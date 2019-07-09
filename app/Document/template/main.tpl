@@ -8,7 +8,7 @@
 <meta name="keywords" content="<!--page_keywords-->" />
 <meta name="description" content="<!--page_description-->" />
 <base href="<!--web_url--><!--path_root-->" />
-<link rel="Shortcut Icon" href="<!--path_root-->favicon.ico" />
+<link rel="Shortcut Icon" href="favicon.ico" />
 <!--page_start-->
 </head>
 <body>

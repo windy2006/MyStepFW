@@ -12,8 +12,7 @@ if(is_file($script)) {
 } else {
     myStep::info($mystep->getLanguage('page_error_module'));
 }
-$t->assign('path_root', ROOT_WEB);
-$content = $t->display('s', false);
+$content = $mystep->display($t, 's', false);
 $mystep->setAddedContent('end', '
-<script language="JavaScript" src="'.ROOT_WEB.'static/js/checkForm.js"></script>
+<script language="JavaScript" src="static/js/checkForm.js"></script>
 ');

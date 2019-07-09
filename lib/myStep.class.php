@@ -16,6 +16,7 @@
 self::getInstance($calledClass)                 // 取得类实例
 self::start($setPlugin)                         // 框架执行入口，初始化所有变量
 self::show(myTemplate $tpl)                     // 通过模板类显示页面
+self::display(myTemplate $tpl)                  // 通过模板类输出页面内容
 self::end()                                     // 框架终止，销毁相关变量
 self::login($user_id, $user_pwd)                // 登录接口
 self::logout()                                  // 退出登录接口
@@ -140,13 +141,21 @@ class myStep extends myController {
 	 * @param string $dummy
 	 */
 	public function show(myTemplate $tpl, $dummy = '') {
-		$tpl->assign('web_title', $this->setting->web->title);
-		$tpl->assign('web_url', $this->setting->web->url);
-		$tpl->assign('page_keywords', $this->setting->web->keyword);
-		$tpl->assign('page_description',$this->setting->web->description);
-		$tpl->assign('charset', $this->setting->gen->charset);
-		$tpl->assign('path_root', ROOT_WEB);
-		$tpl->assign('path_app', str_replace(myFile::rootPath(), '/', PATH));
+        $paras = [
+            'web_title' => $this->setting->web->title,
+            'web_url' => $this->setting->web->url,
+            'page_keywords' => $this->setting->web->keyword,
+            'page_description' => $this->setting->web->description,
+            'charset' => $this->setting->gen->charset,
+            'path_root' => ROOT_WEB,
+            'path_app' => str_replace(myFile::rootPath(), '/', PATH),
+        ];
+        if(is_array($dummy)) {
+            $paras = array_merge($paras, $dummy);
+        }
+        foreach($paras as $k => $v) {
+            $tpl->assign($k, $v);
+        }
 		if(gettype($this->setting->css)=='string') {
 			$this->CSS($this->setting->css);
 			$this->setAddedContent('start', '<link rel="stylesheet" media="screen" type="text/css" href="cache/script/'.basename($this->setting->css).'" />');
@@ -157,6 +166,27 @@ class myStep extends myController {
 		}
 		parent::show($tpl, $this->setting->web->minify);
 	}
+
+    /**
+     * 通过模板类输出页面内容
+     * @param myTemplate $tpl
+     * @return mixed|string
+     */
+    public function display(myTemplate $tpl) {
+        $args = func_get_args();
+        array_shift($args);
+        $paras = [
+            'path_root' => ROOT_WEB,
+            'path_app' => str_replace(myFile::rootPath(), '/', PATH)
+        ];
+        if(is_array($args[0])) {
+            $paras = array_merge($paras, array_shift($args));
+        }
+        foreach($paras as $k => $v) {
+            $tpl->assign($k, $v);
+        }
+        return call_user_func_array([$tpl, 'display'], $args);
+    }
 
 	/**
 	 * 框架终止，销毁相关变量
@@ -364,8 +394,9 @@ class myStep extends myController {
 				'keyword' => $setting['setting']['web']['keyword'],
 				'description' => $setting['setting']['web']['description'],
 				'update' => $setting['setting']['web']['update'],
-				'root_path' => str_replace(myFile::rootPath(),'/',ROOT),
-				'app_path' => str_replace(myFile::rootPath(),'/',APP.$module),
+                'path_layer' => count(explode('/',trim(ROOT_WEB, '/'))),
+				'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
+				'path_app' => str_replace(myFile::rootPath(),'/',APP.$module),
 				'js' => $setting['setting']['js'] ?? array(),
 			);
 

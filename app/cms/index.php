@@ -1,6 +1,5 @@
 <?php
-define('PATH', dirname(__FILE__).'/');
-define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
+initPara();
 require_once(PATH.'lib.php');
 
 $module = reset($info_app['path']);

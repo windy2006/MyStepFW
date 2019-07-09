@@ -143,7 +143,7 @@ switch($method) {
                 }
             }
             deleteCache("news_cat");
-            $the_file = ROOT_PATH."/".$setting['path']['template']."/default/list_cat_".$cat_id.".tpl";
+            $the_file = ROOT."/".$setting['path']['template']."/default/list_cat_".$cat_id.".tpl";
             if(!empty($template)) {
                 WriteFile($the_file, $template, "wb");
             } else {

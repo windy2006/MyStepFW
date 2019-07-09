@@ -27,6 +27,5 @@ if(isset($_GET['out'])) {
 
 $setting_tpl['name'] = 'login';
 $t = new myTemplate($setting_tpl, false);
-$t->assign('path_root', ROOT_WEB);
 $mystep->show($t);
 $mystep->end();

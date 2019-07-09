@@ -6,7 +6,7 @@
         <form method="post">
             <div class="card border-0">
                 <div class="card-header">
-                    <h2>Class: <!--name--> <a href="<!--path_root-->Document/<!--name-->" target="_blank" style="display:<!--display-->">【查看实例】</a></h2>
+                    <h2>Class: <!--name--> <a href="Document/<!--name-->" target="_blank" style="display:<!--display-->">【查看实例】</a></h2>
                 </div>
                 <div class="card-body">
                     <pre class="card-text"><!--doc--></pre>

@@ -61,7 +61,7 @@
             },
             */
             // Custom settings
-            content_css : setting.root_path+"vendor/tinymce/editor.css",
+            content_css : setting.path_root+"vendor/tinymce/editor.css",
             convert_urls: false,
             remove_script_host: false,
             preformatted : false,

@@ -45,7 +45,7 @@
         $("#"+the_id).powerUpload({
             maxfiles: limit_count,
             maxfilesize: limit_size,
-            url: setting.root_path+'upload',
+            url: setting.path_root+'upload',
 
             error: function(err, file, index) {
                 switch(err) {

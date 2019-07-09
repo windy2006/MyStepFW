@@ -188,7 +188,7 @@
     }
     function setTheme(idx) {
         if(idx == null || idx == '') idx = 'default';
-        $('#theme_css').attr('href', setting.app_path+'/asset/theme/'+idx+'.css');
+        $('#theme_css').attr('href', setting.path_app+'/asset/theme/'+idx+'.css');
         $.cookie('ms_theme', idx, {expires: 365});
         $('a[theme]').removeClass('active');
         $('a[theme="'+idx+'"]').addClass('active');
