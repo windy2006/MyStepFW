@@ -15,20 +15,21 @@
   服务器响应及提交信息处理
 		self::init($cookie_opt, $session_opt)           // Set the Request Object
 
-		self::getValue($type, $para)                    // Get any varibes (GLOBAL, GET, SERVER, COOKIE, etc.)
-		self::get($para)                                // Get varible from query string
-		self::post($para)                               // Get varible from post data
-		self::request($para)                            // Get varible from _REQUEST
-		self::server($para)                             // Get varible from _SERVER
-		self::env($para)                                // Get varible from _ENV
-		self::globals($para)                             // Get or Set varible for GLOBAL
+        self::check($idx)                               // Check the variables (POST, GET, FILE, COOKIE, SESSION)
+		self::getValue($type, $para)                    // Get any variables (GLOBAL, GET, SERVER, COOKIE, etc.)
+		self::get($para)                                // Get variable from query string
+		self::post($para)                               // Get variable from post data
+		self::request($para)                            // Get variable from _REQUEST
+		self::server($para)                             // Get variable from _SERVER
+		self::env($para)                                // Get variable from _ENV
+		self::globals($para)                            // Get or Set variable for GLOBAL
 		self::ip()                                      // Get Client IP
 
 		self::setCookieOpt($setting)                                                // Set cookie settings
 		self::setCookie($name, $value, $expire, $path, $domain, $secure)            // Set a cookie
 		self::setCookie_nopre($name, $value, $expire, $path, $domain, $secure)      // Set a cookie without prefix
 		self::removeCookie($name, $pre)                                             // Remove a cookie
-		self::cookie($para)                                                         // Get varible from _COOKIE
+		self::cookie($para)                                                         // Get variable from _COOKIE
 
 		self::setSessionOpt($setting)                   // Set session settings
 		self::sessionStart($handle)                     // Start the session and set the handle functions
@@ -83,6 +84,17 @@ class myReq extends myBase {
 		self::setCookieOpt($cookie_opt);
 		self::setSessionOpt($session_opt);
 	}
+
+    /**
+     * 检测相关环境变量
+     * @param $idx
+     * @return int
+     */
+	public static function check($idx) {
+        $idx = '_'.strtoupper($idx);
+	    global $$idx;
+	    return is_null($$idx) ? 0 : count($$idx);
+    }
 
 	/**
 	 * 获取相关相应值

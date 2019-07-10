@@ -1,6 +1,6 @@
 <?php
 $config = new myConfig(PATH.'data/config/config_multi.php');
-if(count($_POST)>0) {
+if(myReq::check('post')) {
     $config->set($_POST['setting']);
 } else {
     $config->test->new_value = 'new';

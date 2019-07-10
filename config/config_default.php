@@ -21,7 +21,7 @@ $setting['web']['description'] = '开源PHP框架系统';
 $setting['web']['gzip_level'] = true;
 $setting['web']['minify'] = false;
 $setting['web']['etag'] = 'etag_20190109';
-$setting['web']['update'] = 'http://new.mysteps.cn/update/';
+$setting['web']['update'] = 'http://www.mysteps.cn/update/';
 
 $setting['upload']['path_mode'] = 'Y/m/';
 $setting['upload']['ban_ext'] = 'php,exe,com,bat,pif';
@@ -41,7 +41,7 @@ $setting['session']['gc'] = true;
 $setting['session']['trans_sid'] = false;
 
 $setting['cookie'] = array();
-$setting['cookie']['domain'] = 'fw.mystep.com';
+$setting['cookie']['domain'] = 'www.mysteps.cn';
 $setting['cookie']['path'] = '/';
 $setting['cookie']['prefix'] = 'ms_';
 
@@ -52,16 +52,16 @@ $setting['router']['delimiter_para'] = '&';
 
 $setting['email'] = array();
 $setting['email']['mode'] = 'smtp';
-$setting['email']['host'] = 'smtpx.sina.net';
+$setting['email']['host'] = '';
 $setting['email']['port'] = 25;
-$setting['email']['user'] = 'sunkai@cccfna.org.cn';
-$setting['email']['password'] = 'mygod2000';
+$setting['email']['user'] = '';
+$setting['email']['password'] = '';
 
 $setting['db'] = array();
 $setting['db']['type'] = 'mysql';
 $setting['db']['host'] = '127.0.0.1:3306';
 $setting['db']['user'] = 'root';
-$setting['db']['password'] = 123456;
+$setting['db']['password'] = '';
 $setting['db']['pconnect'] = false;
 $setting['db']['charset'] = 'utf8';
 $setting['db']['name'] = 'mystep';

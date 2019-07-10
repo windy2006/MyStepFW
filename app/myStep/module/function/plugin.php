@@ -36,7 +36,7 @@ if(!empty($idx)) {
 
 switch($method) {
     case 'view':
-        if(count($_POST)>0) {
+        if(myReq::check('post')) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
@@ -55,7 +55,7 @@ switch($method) {
         $t->assign('check', $check_info);
         $t->assign('info', $mystep->getLanguage('plugin_check_'.($check?'ok':'fail')));
     case 'setting':
-        if(count($_POST)>0) {
+        if(myReq::check('post')) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
@@ -110,7 +110,7 @@ switch($method) {
         }
         break;
     case "upload":
-        if(count($_POST) > 0){
+        if(myReq::check('post')){
             $path_upload = CACHE."tmp";
             $upload = new myUploader($path_upload, true);
             $upload->do(false);
@@ -129,7 +129,7 @@ switch($method) {
         }
         break;
     default:
-        if(count($_POST)>0) {
+        if(myReq::check('post')) {
             $idx = myReq::post('idx');
             $order = myReq::post('order');
             $records = $mydb->records();

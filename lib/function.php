@@ -59,31 +59,42 @@ function initFW() {
 		'exit_on_error' =>  false
 	));
 
-	global $s, $p, $q;
-	$s = new myConfig(CONFIG.'config.php');
-	$qstr = trim(myReq::svr('QUERY_STRING'));
-	$the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
-	$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
-	$ext_list = explode(',', $s->gen->static);
-	if(strpos($qstr,'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
-
-	if(($s->cookie->domain = strstr(myReq::server('HTTP_HOST'), ':', true))===false) {
-		$s->cookie->domain = myReq::server('HTTP_HOST');
-	}
-	$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
-	$s->web->url = 'http://'.myReq::server('HTTP_HOST');
-	array_shift($_GET);
-	preg_match('#^(.+?)(&(.+))?$#', $qstr, $match);
-	$p = $match[1];
-	$q = $match[3] ?? '';
-	route();
+    if(is_file(CONFIG.'config.php')) {
+        runFW();
+    } else {
+        $qstr = trim(myReq::svr('QUERY_STRING'));
+        $the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
+        if(strpos($qstr,'static')===0) {
+            myController::file($the_file);
+        } else {
+            require(APP.'myStep/module/config.php');
+        }
+    }
 	return;
 }
 
 /**
- * 应用路由
+ * 执行框架
  */
-function route() {
+function runFW() {
+    global $s, $p, $q;
+    $s = new myConfig(CONFIG.'config.php');
+    $qstr = trim(myReq::svr('QUERY_STRING'));
+    $the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
+    $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
+    $ext_list = explode(',', $s->gen->static);
+    if(strpos($qstr,'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
+
+    if(($s->cookie->domain = strstr(myReq::server('HTTP_HOST'), ':', true))===false) {
+        $s->cookie->domain = myReq::server('HTTP_HOST');
+    }
+    $s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
+    $s->web->url = 'http://'.myReq::server('HTTP_HOST');
+    array_shift($_GET);
+    preg_match('#^(.+?)(&(.+))?$#', $qstr, $match);
+    $p = $match[1];
+    $q = $match[3] ?? '';
+
     global $lib_list, $info_app, $s, $setting_tpl, $mystep;
     $router = new myRouter((array)$s->router);
     $router->setRules(CONFIG.'route.php');
@@ -159,7 +170,7 @@ function initPara() {
 function getModule($m) {
 	global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $q, $p, $db, $cache;
 	$m = preg_replace('#/.*$#', '', $m);
-	$style = $setting_tpl['style'];
+    $style = $setting_tpl['style'];
 	$files = [
 		PATH.'module/'.$style.'/'.$m.'.php',
 		PATH.'module/'.$style.'/'.($info_app['path'][1]??'').'.php',
@@ -410,7 +421,7 @@ function myEval($code) {
 	fwrite($fp, '<?PHP'.chr(10).$code);
 	$result = include($file);
 	fclose($fp);
-	unlink($file);
+	@unlink($file);
 	return $result;
 }
 

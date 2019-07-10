@@ -1,30 +1,32 @@
 <?php
-$app = $info_app['path'][2] ?? '';
-if(!empty($app)) {
-    $builder = APP.$app.'/config/'.$s->gen->language.'.php';
-    if(!is_file($builder)) myStep::info($mystep->getLanguage('page_error_setting'));
-    $file = APP.$app.'/config.php';
-    if(!is_file($file)) myFile::copy(CONFIG.'config.php', $file);
-} else {
-    $file = CONFIG.'config.php';
-    $builder = CONFIG.'construct/'.$s->gen->language.'.php';
-}
-$config = new myConfig($file);
 if(myReq::check('post')) {
-    if(empty($app) && !empty($_POST['setting']['gen']['s_pwd'])) $_POST['setting']['gen']['s_pwd'] = md5($_POST['setting']['gen']['s_pwd']);
-    $config->set($_POST['setting']);
+    $config = new myConfig(CONFIG.'config.php');
+    $setting = myReq::post('setting');
+    $setting['gen']['s_pwd'] = md5($setting['gen']['s_pwd']);
+    $config->set($setting);
     $config->save('php');
-    $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
+    myController::redirect();
 }
+$setting_tpl = array(
+    'name' => 'config',
+    'path' => APP.'myStep/template',
+    'style' => '',
+    'path_compile' => CACHE.'template/myStep/'
+);
+$t = new myTemplate($setting_tpl, $setting_cache);
+
+$file = CONFIG.'config_default.php';
+$builder = CONFIG.'construct/default.php';
+$config = new myConfig($file);
+$config->cookie->domain = myReq::server('HTTP_HOST');
 
 $dirs = myFile::find('',APP,false, myFile::DIR);
 $dirs = array_map(function($v){return basename($v);} ,$dirs);
-foreach($dirs as $k) {
-    $t->setLoop('app', array('name'=>$k, 'selected'=>($app==$k?'selected':'')));
-}
 $ext_setting = array('router'=>['default_app'=>['select', $dirs]]);
 
+ob_start();
 $list = $config->build($builder, $ext_setting);
+ob_clean();
 foreach($list as $v) {
     if(isset($v['idx'])) {
         $t->setLoop('setting', ['content'=> '</tbody>
@@ -45,4 +47,5 @@ foreach($list as $v) {
                 ']);
     }
 }
-$tpl->assign('path', 'manager/setting/');
+$t->assign('path_root', str_replace(myFile::rootPath(), '/', ROOT));
+$t->display();

@@ -1,5 +1,5 @@
 <?php
-if(count($_POST)>0) {
+if(myReq::check('post')) {
     global $router;
     $name = myReq::p('name');
     $route = myReq::p('route');

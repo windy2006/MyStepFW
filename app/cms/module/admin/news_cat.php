@@ -73,9 +73,7 @@ switch($method) {
         break;
     case "add_ok":
     case "edit_ok":
-        if(count($_POST) == 0) {
-            $goto_url = $setting['info']['self'];
-        } else {
+        if(myReq::check('post')) {
             if($_POST['cat_main']==0) {
                 $_POST['cat_layer'] = 1;
             } else {
@@ -107,7 +105,7 @@ switch($method) {
                 } else {
                     $log_info = $mystep->getLanguage('admin_art_catalog_edit');
                     function multiChange($catid, $layer) {
-                        global $db, $setting;
+                        global $db, $setting, $mystep;
                         if($layer>100) showInfo($mystep->getLanguage('admin_art_catalog_error'));
                         $db->update($setting['db']['pre']."news_cat",array("cat_layer"=>$layer),array("cat_id","n=",$catid));
                         $catid_list = array();
@@ -149,6 +147,8 @@ switch($method) {
             } else {
                 @unlink($the_file);
             }
+        } else {
+            $goto_url = $setting['info']['self'];
         }
         break;
     default:

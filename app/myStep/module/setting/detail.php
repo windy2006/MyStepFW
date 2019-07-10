@@ -1,5 +1,5 @@
 <?php
-if(count($_POST)>0) {
+if(myReq::check('post')) {
     $alias = array();
     foreach($_POST as $k => $v) {
         if(empty($v)) {

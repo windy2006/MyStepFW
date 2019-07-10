@@ -37,7 +37,7 @@ switch ($info_app['path'][1]) {
         }
         break;
     case 3:
-        if(count($_POST)>0) {
+        if(myReq::check('post')) {
             $c = new myConfig(PATH.'/config_default.php');
             $c->set($_POST['setting']);
 

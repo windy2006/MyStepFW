@@ -1,5 +1,5 @@
 <?php
-if(count($_POST)>0) {
+if(myReq::check('post')) {
     $path = myReq::p('path');
     $ext = myReq::p('ext');
     $idx = myReq::p('idx');

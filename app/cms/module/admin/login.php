@@ -6,7 +6,7 @@ if(isset($_GET['out'])) {
     myStep::info($mystep->getLanguage('login_logout'), $path_admin);
 } elseif(r::s('ms_user')!='') {
     myStep::redirect($path_admin);
-} elseif(count($_POST)>0) {
+} elseif(myReq::check('post')) {
     $captcha = strtolower(r::p('captcha'));
     $err_no = 0;
     if(!empty($captcha) && $captcha == strtolower(r::s('captcha'))) {
