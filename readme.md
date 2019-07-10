@@ -13,14 +13,28 @@
 
 重要函数：
 --------
-- initConfig() - 初始化全局设置
+- initFW() - 初始化框架设置
+- runFW() - 执行框架
 - initPara() - 初始化应用设置，注册主要功能某块，并声明$mystep等框架关键变量
 - getModule($m) - 应用模块调用，模块显示结果需通过模版类或ob缓存赋值给$content变量
+- vendor() - 调用第三放组件，参数为类构造函数参数，返回类实例
+- setOp($setting) - opCache 调用及设置
+- regClass($setting) - 设置类载入规则
+- setAlias($list) - 设置类别名
+- getMicrotime($rate) - 获取微秒时间
+- getTimeDiff($time_start, $decimal, $micro) - 取得时间差
+- getDate_cn($date) - 获取中文日期
+- tinyUrl($url) - 获取短网址
+- isMobile() - 判断是否为移动设备
+- isHttps() - 判断当前是否为SSL链接
+- myEval($code) - 自定义代码执行
+- recursionFunction($func, $para) - 递归执行某一函数
+- debug系列函数 - 变量情况查看
 
 执行顺序：
 --------
-- 自定义路径模式 - index.php（调用initConfig()） -> app/name/lib.php（应用目录下的预载文件，调用initPara()，可在此函数调用后，对部分参数做相关修正）-> getModule()（可以添加其他前置检验函数）
-- 程序路径模式 - index.php（调用initConfig()） -> app/name/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
+- 自定义路径模式 - index.php（调用initFW()） -> app/name/lib.php（应用目录下的预载文件，调用initPara()，可在此函数调用后，对部分参数做相关修正）-> getModule()（可以添加其他前置检验函数）
+- 程序路径模式 - index.php（调用initFW()） -> app/name/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
 
 自动载入：
 --------
