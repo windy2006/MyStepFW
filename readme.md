@@ -25,8 +25,8 @@
 
 执行顺序：
 --------
-- 自定义路径模式 - index.php（调用myStep::init()） -> app/name/lib.php（应用目录下的预载文件，调用initPara()，可在此函数调用后，对部分参数做相关修正）-> getModule()（可以添加其他前置检验函数）
-- 程序路径模式 - index.php（调用myStep::init()） -> app/name/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
+- 自定义路径模式 - index.php（调用myStep::init()） -> app/[name]/lib.php（应用目录下的预载文件，调用myStep::setPara()，可在此函数调用后，对部分参数做相关修正）-> myStep::getModule()（可以添加其他前置检验函数）
+- 程序路径模式 - index.php（调用myStep::init()） -> app/[name]/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
 
 自动载入：
 --------
