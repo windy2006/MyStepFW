@@ -29,7 +29,7 @@ $ctrl->setLanguagePack(PATH.'data/controller/language');
 $ctrl->regApi('test', function(){
     return func_get_args();
 });
-$template->assign('api', $ctrl->api('test', [1, 2, 3], 'c'));
+$template->assign('api', $ctrl->runApi('test', [1, 2, 3], 'c'));
 
 // 模块调用
 $ctrl->regModule('test',PATH.'data/controller/module.php');

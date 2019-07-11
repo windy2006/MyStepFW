@@ -15,7 +15,7 @@
   服务器响应及提交信息处理
 		self::init($cookie_opt, $session_opt)           // Set the Request Object
 
-        self::check($idx)                               // Check the variables (POST, GET, FILE, COOKIE, SESSION)
+		self::check($idx)                               // Check the variables (POST, GET, FILE, COOKIE, SESSION)
 		self::getValue($type, $para)                    // Get any variables (GLOBAL, GET, SERVER, COOKIE, etc.)
 		self::get($para)                                // Get variable from query string
 		self::post($para)                               // Get variable from post data
@@ -85,16 +85,16 @@ class myReq extends myBase {
 		self::setSessionOpt($session_opt);
 	}
 
-    /**
-     * 检测相关环境变量
-     * @param $idx
-     * @return int
-     */
+	/**
+	 * 检测相关环境变量
+	 * @param $idx
+	 * @return int
+	 */
 	public static function check($idx) {
-        $idx = '_'.strtoupper($idx);
-	    global $$idx;
-	    return is_null($$idx) ? 0 : count($$idx);
-    }
+		$idx = '_'.strtoupper($idx);
+		global $$idx;
+		return is_null($$idx) ? 0 : count($$idx);
+	}
 
 	/**
 	 * 获取相关相应值

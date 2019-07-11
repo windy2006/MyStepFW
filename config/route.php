@@ -21,7 +21,7 @@ $rule_list = array (
       1 => 
       array (
         0 => 'app\\cms\\logCheck',
-        1 => 'getModule',
+        1 => 'myStep::getModule',
       ),
     ),
   ),
@@ -30,7 +30,7 @@ $rule_list = array (
     0 => 
     array (
       0 => '/api/[any]',
-      1 => 'myStep::getApi',
+      1 => 'myStep::api',
     ),
     1 => 
     array (
@@ -58,7 +58,7 @@ $rule_list = array (
       1 => 
       array (
         0 => 'app\\myStep\\logCheck',
-        1 => 'getModule',
+        1 => 'myStep::getModule',
       ),
     ),
     6 => 

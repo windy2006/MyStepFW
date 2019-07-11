@@ -1,4 +1,5 @@
 <?php
+global $db;
 $db->connect(0, 'mystep');
 $db->reconnect(1, 'mystep');
 $db->changUser('root', 'cfnadb!@#$%', 'mystep');

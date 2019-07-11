@@ -1,5 +1,5 @@
 <?php
-initPara();
+myStep::setPara();
 $module = array_shift($info_app['path']);
 $mode = array_shift($info_app['path']);
 if (is_null($mode)) $mode = 'show';

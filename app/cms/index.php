@@ -1,5 +1,5 @@
 <?php
-initPara();
+myStep::setPara();
 require_once(PATH.'lib.php');
 
 $module = reset($info_app['path']);

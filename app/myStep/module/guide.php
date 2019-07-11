@@ -2,7 +2,7 @@
 if(!file_exists(ROOT.'readme.md')) {
     myStep::info($mystep->getLanguage('page_error_module'));
 }
-$md = vendor('Parsedown');
+$md = myStep::vendor('Parsedown');
 $guide = myFile::getLocal(ROOT.'readme.md');
 $guide = str_replace(chr(13),'', $guide);
 $guide = preg_split('#[\n]{2,}#', $guide);

@@ -97,12 +97,12 @@ class myRouter extends myBase {
 		return $this;
 	}
 
-    /**
-     * 批量设置路由规则
-     * @param $rules
-     * @param string $idx
-     * @return $this
-     */
+	/**
+	 * 批量设置路由规则
+	 * @param $rules
+	 * @param string $idx
+	 * @return $this
+	 */
 	public function setRules($rules, $idx = '') {
 		if(is_array($rules)) {
 			if(isset($rules[0]) && is_string($rules[0])) {
@@ -220,7 +220,7 @@ class myRouter extends myBase {
 			if(!isset($rule_list)) $rule_list = array();
 			if(!isset($api_list)) $rule_list = array();
 			include($path_this);
-            $flag = false;
+			$flag = false;
 			if(isset($preload)) {
 				if(!isset($preload_list[$idx])) {
 					$preload_list[$idx] = dirname($path_this).'/'.$preload;
@@ -256,12 +256,12 @@ class myRouter extends myBase {
 					$result .= '$format_list = ' . var_export($format_list, true) . ';' . chr(10) . chr(10);
 				}
 				if (isset($rule_list)) {
-                    if(isset($rule_list['myStep'])) {
-                        $tmp = $rule_list['myStep'];
-                        unset($rule_list['myStep']);
-                        $rule_list['myStep'] = $tmp;
-                    }
-                    //$result .= myString::toScript($rule_list, 'rule_list').chr(10).chr(10);
+					if(isset($rule_list['myStep'])) {
+						$tmp = $rule_list['myStep'];
+						unset($rule_list['myStep']);
+						$rule_list['myStep'] = $tmp;
+					}
+					//$result .= myString::toScript($rule_list, 'rule_list').chr(10).chr(10);
 					$result .= '$rule_list = ' . var_export($rule_list, true) . ';' . chr(10) . chr(10);
 				}
 				if (isset($api_list)) {

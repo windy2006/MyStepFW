@@ -13,27 +13,38 @@
 
 /**
 核心框架类，扩展于myController
-self::getInstance($calledClass)                 // 取得类实例
-self::start($setPlugin)                         // 框架执行入口，初始化所有变量
-self::show(myTemplate $tpl)                     // 通过模板类显示页面
-self::display(myTemplate $tpl)                  // 通过模板类输出页面内容
-self::end()                                     // 框架终止，销毁相关变量
-self::login($user_id, $user_pwd)                // 登录接口
-self::logout()                                  // 退出登录接口
-self::chg_psw($id,$psw_org,$psw_new)            // 变更密码接口
-self::info($msg, $url)                          // 信息提示，需先声明mystep类
-self::captcha($len, $scope)                     // 生成验证码
-self::language($module, $type)                  // JS语言包接口
-self::setting($module, $type)                   // JS设置信息接口
-self::getApi($para)                             // 框架API执行接口
-self::module($m)                                // 框架模块调用接口
-self::addCSS($file)                             // 添加页面CSS文件
-self::CSS($cache)                               // 生成整合CSS文件
-self::addJS($file)                              // 添加页面脚本文件
-self::JS($cache)                                // 整合页面脚本文件
-self::upload()                                  // 文件上传接口
-self::download($idx)                            // 文件下载接口
+	$this->getInstance($calledClass)                 // 取得类实例
+	$this->start($setPlugin)                         // 框架执行入口，初始化所有变量
+	$this->show(myTemplate $tpl)                     // 通过模板类显示页面
+	$this->display(myTemplate $tpl)                  // 通过模板类输出页面内容
+	$this->end()                                     // 框架终止，销毁相关变量
+	$this->login($user_id, $user_pwd)                // 登录接口
+	$this->logout()                                  // 退出登录接口
+	$this->chg_psw($id,$psw_org,$psw_new)            // 变更密码接口
+	$this->gzOut($level, $query, $time)              // 压缩输出页面内容
+	$this->addCSS($file)                             // 添加页面CSS文件
+	$this->CSS($cache)                               // 生成整合CSS文件
+	$this->addJS($file)                              // 添加页面脚本文件
+	$this->JS($cache)                                // 整合页面脚本文件
+	self::info($msg, $url)                           // 信息提示，需先声明mystep类
+	self::captcha($len, $scope)                      // 生成验证码
+	self::language($module, $type)                   // JS语言包接口
+	self::setting($module, $type)                    // JS设置信息接口
+	self::api($para)                                 // 框架API执行接口
+	self::module($m)                                 // 框架模块调用接口
+	self::upload()                                   // 文件上传接口
+	self::download($idx)                             // 文件下载接口
+	self::remove_ul($idx)                            // 删除文件下载接口
+	self::init()                                     // 框架变量初始化
+	self::go()                                       // 执行框架
+	self::setPara()                                  // 应用模块初始化参数设置
+	self::getModule($m)                              // 应用模块调用
+	self::vendor()                                   // 调用第三放组件
 */
+
+require_once('function.php');
+require_once('myController.class.php');
+
 class myStep extends myController {
 	public $setting;
 	protected
@@ -76,7 +87,7 @@ class myStep extends myController {
 	public function start($setPlugin = false, $dummy = '') {
 		$this->time_start = getMicrotime();
 		$alias = include(CONFIG.'class_alias.php');
-		setAlias($alias);
+		self::setAlias($alias);
 		
 		myException::init(array(
 			'log_mode' => 0,
@@ -141,21 +152,21 @@ class myStep extends myController {
 	 * @param string $dummy
 	 */
 	public function show(myTemplate $tpl, $dummy = '') {
-        $paras = [
-            'web_title' => $this->setting->web->title,
-            'web_url' => $this->setting->web->url,
-            'page_keywords' => $this->setting->web->keyword,
-            'page_description' => $this->setting->web->description,
-            'charset' => $this->setting->gen->charset,
-            'path_root' => ROOT_WEB,
-            'path_app' => str_replace(myFile::rootPath(), '/', PATH),
-        ];
-        if(is_array($dummy)) {
-            $paras = array_merge($paras, $dummy);
-        }
-        foreach($paras as $k => $v) {
-            $tpl->assign($k, $v);
-        }
+		$paras = [
+			'web_title' => $this->setting->web->title,
+			'web_url' => $this->setting->web->url,
+			'page_keywords' => $this->setting->web->keyword,
+			'page_description' => $this->setting->web->description,
+			'charset' => $this->setting->gen->charset,
+			'path_root' => ROOT_WEB,
+			'path_app' => str_replace(myFile::rootPath(), '/', PATH),
+		];
+		if(is_array($dummy)) {
+			$paras = array_merge($paras, $dummy);
+		}
+		foreach($paras as $k => $v) {
+			$tpl->assign($k, $v);
+		}
 		if(gettype($this->setting->css)=='string') {
 			$this->CSS($this->setting->css);
 			$this->setAddedContent('start', '<link rel="stylesheet" media="screen" type="text/css" href="cache/script/'.basename($this->setting->css).'" />');
@@ -167,26 +178,26 @@ class myStep extends myController {
 		parent::show($tpl, $this->setting->web->minify);
 	}
 
-    /**
-     * 通过模板类输出页面内容
-     * @param myTemplate $tpl
-     * @return mixed|string
-     */
-    public function display(myTemplate $tpl) {
-        $args = func_get_args();
-        array_shift($args);
-        $paras = [
-            'path_root' => ROOT_WEB,
-            'path_app' => str_replace(myFile::rootPath(), '/', PATH)
-        ];
-        if(is_array($args[0])) {
-            $paras = array_merge($paras, array_shift($args));
-        }
-        foreach($paras as $k => $v) {
-            $tpl->assign($k, $v);
-        }
-        return call_user_func_array([$tpl, 'display'], $args);
-    }
+	/**
+	 * 通过模板类输出页面内容
+	 * @param myTemplate $tpl
+	 * @return mixed|string
+	 */
+	public function display(myTemplate $tpl) {
+		$args = func_get_args();
+		array_shift($args);
+		$paras = [
+			'path_root' => ROOT_WEB,
+			'path_app' => str_replace(myFile::rootPath(), '/', PATH)
+		];
+		if(is_array($args[0])) {
+			$paras = array_merge($paras, array_shift($args));
+		}
+		foreach($paras as $k => $v) {
+			$tpl->assign($k, $v);
+		}
+		return call_user_func_array([$tpl, 'display'], $args);
+	}
 
 	/**
 	 * 框架终止，销毁相关变量
@@ -298,6 +309,65 @@ class myStep extends myController {
 	}
 
 	/**
+	 * 添加页面CSS文件
+	 * @param $file
+	 * @return $this|myController
+	 */
+	public function addCSS($file) {
+		if(is_file($file)) {
+			$time = filemtime($file);
+			if($time>$this->time_css) $this->time_css = $time;
+			$this->css[md5_file($file)] = $file;
+		}
+		return $this;
+	}
+
+	/**
+	 * 生成整合CSS文件
+	 * @param string $cache
+	 * @param string $dummy
+	 * @return string|void
+	 */
+	public function CSS($cache='', $dummy='') {
+		if(!is_file($cache) || filemtime($cache)<$this->time_css) {
+			foreach($this->css as $k => $v) {
+				$this->css[$k] = myFile::getLocal($v);
+			}
+			$code = parent::CSS(false);
+			myFile::saveFile($cache, $code);
+		}
+	}
+
+	/**
+	 * 添加页面脚本文件
+	 * @param $file
+	 * @return $this|myController
+	 */
+	public function addJS($file) {
+		if(is_file($file)) {
+			$time = filemtime($file);
+			if($time>$this->time_js) $this->time_js = $time;
+			$this->js[md5_file($file)] = $file;
+		}
+		return $this;
+	}
+
+	/**整合页面脚本文件
+	 * @param string $cache
+	 * @param string $dummy
+	 * @return string|void
+	 */
+	public function JS($cache='', $dummy='') {
+		if(!is_file($cache) || filemtime($cache)<$this->time_js) {
+			foreach($this->js as $k => $v) {
+				$this->js[$k] = myFile::getLocal($v);
+			}
+			$code = parent::JS(false);
+			myFile::saveFile($cache, $code);
+		}
+	}
+
+	/**
 	 * 信息提示，需先声明mystep类
 	 * @param $msg
 	 * @param string $url
@@ -394,7 +464,7 @@ class myStep extends myController {
 				'keyword' => $setting['setting']['web']['keyword'],
 				'description' => $setting['setting']['web']['description'],
 				'update' => $setting['setting']['web']['update'],
-                'path_layer' => count(explode('/',trim(ROOT_WEB, '/'))),
+				'path_layer' => count(explode('/',trim(ROOT_WEB, '/'))),
 				'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
 				'path_app' => str_replace(myFile::rootPath(),'/',APP.$module),
 				'js' => $setting['setting']['js'] ?? array(),
@@ -414,7 +484,7 @@ class myStep extends myController {
 	 * 框架API执行接口
 	 * @param $para
 	 */
-	public static function getApi($para) {
+	public static function api($para) {
 		global $s;
 		$para = preg_replace('#&.+$#', '', $para);
 		$para = explode('/', trim($para, '/'));
@@ -455,72 +525,9 @@ class myStep extends myController {
 		$module = array_shift($path);
 		if(isset(self::$modules[$module])) {
 			global $mystep, $db, $cache;
-			foreach($path as $k) {
-				if(strpos($k, '=')) break;
-				global $$k;
-			}
 			include(self::$modules[$module]);
 		} else {
 			self::$goto_url = '/';
-		}
-	}
-
-	/**
-	 * 添加页面CSS文件
-	 * @param $file
-	 * @return $this|myController
-	 */
-	public function addCSS($file) {
-		if(is_file($file)) {
-			$time = filemtime($file);
-			if($time>$this->time_css) $this->time_css = $time;
-			$this->css[md5_file($file)] = $file;
-		}
-		return $this;
-	}
-
-	/**
-	 * 生成整合CSS文件
-	 * @param string $cache
-	 * @param string $dummy
-	 * @return string|void
-	 */
-	public function CSS($cache='', $dummy='') {
-		if(!is_file($cache) || filemtime($cache)<$this->time_css) {
-			foreach($this->css as $k => $v) {
-				$this->css[$k] = myFile::getLocal($v);
-			}
-			$code = parent::CSS(false);
-			myFile::saveFile($cache, $code);
-		}
-	}
-
-	/**
-	 * 添加页面脚本文件
-	 * @param $file
-	 * @return $this|myController
-	 */
-	public function addJS($file) {
-		if(is_file($file)) {
-			$time = filemtime($file);
-			if($time>$this->time_js) $this->time_js = $time;
-			$this->js[md5_file($file)] = $file;
-		}
-		return $this;
-	}
-
-	/**整合页面脚本文件
-	 * @param string $cache
-	 * @param string $dummy
-	 * @return string|void
-	 */
-	public function JS($cache='', $dummy='') {
-		if(!is_file($cache) || filemtime($cache)<$this->time_js) {
-			foreach($this->js as $k => $v) {
-				$this->js[$k] = myFile::getLocal($v);
-			}
-			$code = parent::JS(false);
-			myFile::saveFile($cache, $code);
 		}
 	}
 
@@ -579,32 +586,234 @@ class myStep extends myController {
 		exit;
 	}
 
+	/**
+	 * 删除上传文件
+	 */
+	public static function remove_ul($idx) {
+		global $s;
+		$result = '{"statusCode": 0}';
+		if($s->upload->free_dl || myReq::cookie('sign_local')!='') {
+			$idx = explode('.', $idx);
+			$path = FILE.date($s->upload->path_mode, $idx[0]);
+			$log = FILE.date($s->upload->path_mode).'/log.txt';
+			$list = file($log);
+			for($i=0,$m=count($list);$i<$m;$i++) {
+				if(strpos($list[$i],implode('.', $idx))===0) {
+					$list[$i] = explode('::', $list[$i]);
+					$file = $path.'/'.$list[$i][0];
+					if(file_exists($file.'.upload')) $file = $file.'.upload';
+					if(myFile::del($file)) $result = '{"statusCode": 1}';
+					break;
+				}
+			}
+			$content = myFile::getLocal($log);
+			$content = str_replace(implode('::', $list[$i]), '', $content);
+			myFile::saveFile($log, $content);
+		}
+		echo $result;
+		exit;
+	}
 
-    /**
-     * 删除上传文件
-     */
-    public static function remove_ul($idx) {
-        global $s;
-        $result = '{"statusCode": 0}';
-        if($s->upload->free_dl || myReq::cookie('sign_local')!='') {
-            $idx = explode('.', $idx);
-            $path = FILE.date($s->upload->path_mode, $idx[0]);
-            $log = FILE.date($s->upload->path_mode).'/log.txt';
-            $list = file($log);
-            for($i=0,$m=count($list);$i<$m;$i++) {
-                if(strpos($list[$i],implode('.', $idx))===0) {
-                    $list[$i] = explode('::', $list[$i]);
-                    $file = $path.'/'.$list[$i][0];
-                    if(file_exists($file.'.upload')) $file = $file.'.upload';
-                    if(myFile::del($file)) $result = '{"statusCode": 1}';
-                    break;
-                }
-            }
-            $content = myFile::getLocal($log);
-            $content = str_replace(implode('::', $list[$i]), '', $content);
-            myFile::saveFile($log, $content);
-        }
-        echo $result;
-        exit;
-    }
+	/**
+	 * 框架变量初始化
+	 */
+	public static function init() {
+		$class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
+		if(empty($class) || !is_dir($class[0]['path'])) {
+			$old_root = preg_replace('#lib/$#', '', $class[0]['path']);
+			$class[0] = array(
+				'path' => ROOT . 'lib/',
+				'ext' => '.php,.class.php',
+				'idx' => array(
+						'jsMin' => 'myMinify.class.php',
+						'cssMin' => 'myMinify.class.php',
+						'JavaScriptPacker' => 'myMinify.class.php',
+					),
+			);
+			for($i=1,$m=count($class);$i<$m;$i++) {
+				$class[$i]['path'] = preg_replace('#^'.$old_root.'#', ROOT, $class[$i]['path']);
+			}
+			@unlink(CONFIG.'class.php');
+			file_put_contents(CONFIG.'class.php', '<?php'.chr(10).'return '.var_export($class, true).';');
+
+			$setting_class = include(CONFIG.'class.php');
+			self::regClass($setting_class);
+
+			myFile::del(CONFIG.'route.php');
+			$dirs = myFile::find('',APP,false, myFile::DIR);
+			$dirs = array_map(function($v){return basename($v);} ,$dirs);
+			foreach($dirs as $k) {
+				if(is_file(APP.$k.'/route.php')) {
+					myRouter::checkRoute(CONFIG.'route.php', APP.$k.'/route.php', $k);
+				}
+			}
+			myFile::del(CACHE.'template');
+			myFile::del(CACHE.'session');
+		} else {
+			$setting_class = include(CONFIG.'class.php');
+			self::regClass($setting_class);
+		}
+		myException::init(array(
+			'log_mode' => 0,
+			'log_type' => E_ALL ^ E_NOTICE,
+			'log_file' => ROOT.'/error.log',
+			'callback_type' => E_ALL,
+			'exit_on_error' =>  false
+		));
+
+		if(is_file(CONFIG.'config.php')) {
+			self::go();
+		} else {
+			$qstr = trim(myReq::svr('QUERY_STRING'));
+			$the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
+			if(strpos($qstr,'static')===0) {
+				myController::file($the_file);
+			} else {
+				require(APP.'myStep/module/config.php');
+			}
+		}
+		return;
+	}
+
+	/**
+	 * 执行框架
+	 */
+	public static function go() {
+		global $s, $p, $q;
+		$s = new myConfig(CONFIG.'config.php');
+		$qstr = trim(myReq::svr('QUERY_STRING'));
+		$the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
+		$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
+		$ext_list = explode(',', $s->gen->static);
+		if(strpos($qstr,'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
+
+		if(($s->cookie->domain = strstr(myReq::server('HTTP_HOST'), ':', true))===false) {
+			$s->cookie->domain = myReq::server('HTTP_HOST');
+		}
+		$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
+		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
+		array_shift($_GET);
+		preg_match('#^(.+?)(&(.+))?$#', $qstr, $match);
+		$p = $match[1];
+		$q = $match[3] ?? '';
+
+		global $lib_list, $info_app, $s, $router, $setting_tpl, $mystep;
+		$router = new myRouter((array)$s->router);
+		$router->setRules(CONFIG.'route.php');
+		if(!$router->check($lib_list)) {
+			$info_app = $router->parse();
+			if(!empty($info_app)) {
+				if(!is_dir(APP.$info_app['app'])) {
+					array_unshift($info_app['path'], $info_app['app']);
+					$info_app['app'] = $s->router->default_app;
+				}
+				if(is_file(APP.$info_app['app'].'/config.php')) {
+					$s->merge(APP.$info_app['app'].'/config.php');
+				}
+				require(APP.$info_app['app'].'/index.php');
+			} else {
+				myController::redirect('/');
+			}
+		}
+	}
+
+	/**
+	 * 应用模块初始化参数设置
+	 */
+	public static function setPara() {
+		global $mystep, $info_app, $setting_tpl, $setPlugin;
+		if($mystep!=null) return;
+		if(!defined('PATH')) {
+			define('PATH', APP.$info_app['app'].'/');
+			define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
+		}
+		if(is_file(PATH.$info_app['app'].'.class.php')) {
+			require_once(PATH.$info_app['app'].'.class.php');
+			$mystep = new $info_app['app']();
+		} else {
+			$class = __CLASS__;
+			$mystep = new $class();
+		}
+
+		if(is_callable(array($mystep, 'preload'))) $mystep->preload();
+
+		if(is_null($setPlugin)) $setPlugin = true;
+		$mystep->start($setPlugin);
+
+		if(is_file(PATH.'config.php')) $mystep->setting->merge(PATH.'config.php');
+
+		$mystep->addCSS(STATICS.'css/bootstrap.css');
+		$mystep->addCSS(STATICS.'css/font-awesome.css');
+		$mystep->addCSS(STATICS.'css/glyphicons.css');
+		$mystep->addCSS(STATICS.'css/global.css');
+		$mystep->addCSS(PATH.'asset/style.css');
+		$mystep->addCSS(PATH.'asset/'.$mystep->setting->template->style.'/style.css');
+		$mystep->setting->css = CACHE.'script/'.$info_app['app'].'.css';
+
+		$mystep->addJS(STATICS.'js/jquery.js');
+		$mystep->addJS(STATICS.'js/jquery-ui.js');
+		$mystep->addJS(STATICS.'js/jquery.addon.js');
+		$mystep->addJS(STATICS.'js/bootstrap.bundle.js');
+		$mystep->addJS(STATICS.'js/global.js');
+		$mystep->addJS(PATH.'asset/function.js');
+		$mystep->addJS(PATH.'asset'.$mystep->setting->template->style.'/function.js');
+		$mystep->setting->js = CACHE.'script/'.$info_app['app'].'.js';
+
+		$setting_tpl = array(
+			'name' => $mystep->setting->template->name,
+			'path' => PATH.$mystep->setting->template->path,
+			'style' => $mystep->setting->template->style,
+			'path_compile' => CACHE.'template/'.$info_app['app'].'/'
+		);
+	}
+
+	/**
+	 * 应用模块调用
+	 */
+	public static function getModule($m) {
+		global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $q, $p, $db, $cache;
+		$m = preg_replace('#/.*$#', '', $m);
+		$style = $setting_tpl['style'];
+		$files = [
+			PATH.'module/'.$style.'/'.$m.'.php',
+			PATH.'module/'.$style.'/'.($info_app['path'][1]??'').'.php',
+			PATH.'module/'.$m.'.php',
+			PATH.'module/'.($info_app['path'][1]??'').'.php',
+			PATH.'module/'.$style.'/index.php',
+			PATH.'module/index.php',
+			''
+		];
+		foreach($files as $f) {
+			if(file_exists($f)) break;
+			if(empty($f))  myStep::info($mystep->getLanguage('module_missing'));
+		}
+		$tpl = new myTemplate($setting_tpl, $setting_cache);
+		if(count($info_app['path'])==1) $info_app['path'][1]='';
+		$tpl->assign('path', implode('/', $info_app['path']));
+		include($f);
+		if(isset($content)) $tpl->assign('main', $content);
+		$mystep->show($tpl);
+		$mystep->end();
+	}
+
+	/**
+	 * 调用第三放组件
+	 * @return mixed
+	 */
+	public static function vendor() {
+		$args = func_get_args();
+		$name = array_shift($args);
+		$file = VENDOR.$name.'/'.$name.'.php';
+		if(!file_exists($file)) $file = $file = VENDOR.$name.'/'.$name.'.class.php';
+		if(!file_exists($file)) {
+			global $mystep;
+			myStep::info($mystep->getLanguage('module_missing'));
+		}
+		require_once($file);
+		$instance = new $name();
+		if(count($args) && is_callable([$instance, '__construct'])) {
+			call_user_func_array([$instance, '__construct'], $args);
+		}
+		return $instance;
+	}
 }

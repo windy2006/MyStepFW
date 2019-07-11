@@ -1,4 +1,4 @@
-<?php
+<?PHP
 return array (
   0 => 
   array (

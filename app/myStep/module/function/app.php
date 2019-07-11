@@ -5,7 +5,6 @@ if(myReq::check('post')) {
     $route = myReq::p('route');
     $plugin = myReq::p('plugin');
     myFile::del(CONFIG.'route.php');
-    debug($route);
     for($i=0,$m=count($name);$i<$m;$i++) {
         myFile::saveFile(APP.$name[$i].'/route.php', $route[$i]);
         myFile::saveFile(APP.$name[$i].'/plugin.php', '<?PHP'.chr(10).'return '.var_export(explode(',', $plugin[$i]), true).';');

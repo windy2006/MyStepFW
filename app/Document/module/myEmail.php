@@ -14,7 +14,7 @@ $server_1 = [
     'host'=>'smtpx.sina.net',
     'port'=>25,
     'user'=>$email,
-    'password'=>'mygod2000'
+    'password'=>'Mygod1978'
 ];
 
 // https://www.google.com/settings/security/lesssecureapps

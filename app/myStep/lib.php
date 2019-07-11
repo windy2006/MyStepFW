@@ -10,12 +10,12 @@ if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(dirname
 $func = preg_replace('#^/?(\w+).*$#', '\1', $q);
 $setPlugin = !in_array($func, ['language', 'captcha']);
 
-initPara();
+\myStep::setPara();
 
 function logCheck($show = true) {
     $user = \r::s('ms_user');
     if(empty($user)) {
-        if($show) getModule('login');
+        if($show) myStep::getModle('login');
         return false;
     }
     return true;

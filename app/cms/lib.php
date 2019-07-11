@@ -1,6 +1,6 @@
 <?php
 namespace app\cms;
-initPara();
+\myStep::setPara();
 global $mystep, $info_app, $s, $p, $q, $setting_tpl;
 if(strpos($p, 'admin_cms/')===0) {
     $s->template->style = 'admin';
@@ -24,7 +24,7 @@ $setting_tpl = array(
 function logCheck($show = true) {
     $user = \r::s('ms_user');
     if(empty($user)) {
-        if($show) getModule('login');
+        if($show) myStep::getModule('login');
         return false;
     }
     return true;

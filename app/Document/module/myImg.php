@@ -1,5 +1,5 @@
 <?PHP
-setOp('reset');
+myStep::setOp('reset');
 
 /*
 //picture functions test

@@ -12,45 +12,50 @@
  ********************************************/
 
 /**
- * 控制器基础类，含单实例控制
- * $this->setSingleton($singleton)                     // 设置单实例模式
- * $this->getInstance($calledClass)                    // 取得类实例
- * $this->setAddedContent($position, $content)         // 设置页面附加内容
- * $this->pushAddedContent(myTemplate $tpl)            // 插入页面附加内容
- * $this->setLanguage($language)                       // 设置语言
- * $this->setLanguagePack($dir, $lng)                  // 设置语言包
- * $this->getLanguage($idx)                            // 获取语言项目
- * $this->regApi($name, $method)                       // 设置应用接口（用于数据传输）
- * $this->api($name)                                   // 调用应用接口
- * $this->regModule($module, $page)                    // 设置模块脚本（用于功能页面）
- * $this->module($module, $global_vars)                // 调用模块
- * $this->regTag($tag_name, $tag_func)                 // 添加模版标签解析方法
- * $this->regUrl($mode, $func)                         // 添加URL生成规则
- * $this->url($mode)                                   // 生成URL
- * $this->regLog($login, $logout, $chg_psw)            // 设置用户登录接口
- * $this->login($user_name, $user_pwd)                 // 用户登录
- * $this->logout()                                     // 用户退出
- * $this->chg_psw($id, $psw_old, $psw_new)             // 变更密码
- * $this->addCSS($code)                                // 添加样式表（代码或文件）
- * $this->removeCSS($idx)                              // 去除样式表
- * $this->clearCSS()                                   // 清空现有样式表
- * $this->CSS($show, $expires)                         // 获取样式表
- * $this->addJS($code)                                 // 添加JS脚本（代码或文件）
- * $this->removeJS($idx)                               // 去除JS脚本
- * $this->clearJS()                                    // 清空现有JS脚本
- * $this->JS($show, $expires)                          // 获取JS脚本
- * $this->etag($etag)                                  // 通过过期标签显示内容
- * $this->file($file)                                  // 显示文件
- * $this->guid($para)                                  // 生成唯一ID
- * $this->regPlugin($plugin)                           // 注册插件
- * $this->plugin()                                     // 执行现有插件
- * $this->setFunction($func, $position)                // 添加钩子程序
- * $this->run($position, $desc)                        // 执行钩子代码
- * $this->start($charset)                              // 页面脚本执行初始化
- * $this->show(myTemplate $tpl)                        // 显示页面
- * $this->end()                                        // 页面脚本执行结束
- * $this->redirect($url, $code)                        // 链接跳转
- */
+控制器基础类，含单实例控制
+	$this->setSingleton($singleton)                     // 设置单实例模式
+	$this->getInstance($calledClass)                    // 取得类实例
+	$this->setAddedContent($position, $content)         // 设置页面附加内容
+	$this->pushAddedContent(myTemplate $tpl)            // 插入页面附加内容
+	$this->setLanguage($language)                       // 设置语言
+	$this->setLanguagePack($dir, $lng)                  // 设置语言包
+	$this->getLanguage($idx)                            // 获取语言项目
+	$this->regApi($name, $method)                       // 设置应用接口（用于数据传输）
+	$this->runApi($name)                                // 调用应用接口
+	$this->regModule($module, $page)                    // 设置模块脚本（用于功能页面）
+	self::module($module, $global_vars)                 // 调用模块
+	$this->regTag($tag_name, $tag_func)                 // 添加模版标签解析方法
+	$this->regUrl($mode, $func)                         // 添加URL生成规则
+	$this->url($mode)                                   // 生成URL
+	$this->regLog($login, $logout, $chg_psw)            // 设置用户登录接口
+	$this->login($user_name, $user_pwd)                 // 用户登录
+	$this->logout()                                     // 用户退出
+	$this->chg_psw($id, $psw_old, $psw_new)             // 变更密码
+	$this->addCSS($code)                                // 添加样式表（代码或文件）
+	$this->removeCSS($idx)                              // 去除样式表
+	$this->clearCSS()                                   // 清空现有样式表
+	$this->CSS($show, $expires)                         // 获取样式表
+	$this->addJS($code)                                 // 添加JS脚本（代码或文件）
+	$this->removeJS($idx)                               // 去除JS脚本
+	$this->clearJS()                                    // 清空现有JS脚本
+	$this->JS($show, $expires)                          // 获取JS脚本
+	self::etag($etag)                                   // 通过过期标签显示内容
+	self::file($file)                                   // 显示文件
+	self::guid($para)                                   // 生成唯一ID
+	$this->regPlugin($plugin)                           // 注册插件
+	$this->plugin()                                     // 执行现有插件
+	$this->setFunction($func, $position)                // 添加钩子程序
+	$this->run($position, $desc)                        // 执行钩子代码
+	$this->start($charset)                              // 页面脚本执行初始化
+	$this->show(myTemplate $tpl)                        // 显示页面
+	$this->end()                                        // 页面脚本执行结束
+	self::redirect($url, $code)                         // 链接跳转
+	self::setOp($setting)                               // opCache 设置
+	self::regClass($setting)                            // 设置类载入规则
+	self::setAlias($list)      
+                         // 设置类别名
+*/
+require_once('myBase.class.php');
 class myController extends myBase {
 	public static
 		$modules = array(),
@@ -93,8 +98,7 @@ class myController extends myBase {
 	 * 单实例模式设置
 	 * @param bool $singleton
 	 */
-	public function setSingleton($singleton = false)
-	{
+	public function setSingleton($singleton = false) {
 		$this->singleton = $singleton;
 	}
 
@@ -103,8 +107,7 @@ class myController extends myBase {
 	 * @param string $calledClass
 	 * @return mixed
 	 */
-	public function getInstance($calledClass = '')
-	{
+	public function getInstance($calledClass = '') {
 		if (empty($calledClass)) $calledClass = get_class($this);
 		$argList = func_get_args();
 		array_shift($argList);
@@ -144,8 +147,7 @@ class myController extends myBase {
 	 * @param $content
 	 * @return $this
 	 */
-	public function setAddedContent($position, $content)
-	{
+	public function setAddedContent($position, $content) {
 		$this->page_content[$position][] = $content;
 		return $this;
 	}
@@ -154,8 +156,7 @@ class myController extends myBase {
 	 * 将内容添加到指定位置
 	 * @param myTemplate $tpl
 	 */
-	public function pushAddedContent(myTemplate $tpl)
-	{
+	public function pushAddedContent(myTemplate $tpl) {
 		$argList = func_get_args();
 		$m = count($argList);
 		if ($m == 1) {
@@ -178,8 +179,7 @@ class myController extends myBase {
 	 * @param $charset
 	 * @return $this
 	 */
-	public function setLanguage($language, $charset = 'utf-8')
-	{
+	public function setLanguage($language, $charset = 'utf-8') {
 		if (is_array($language)) {
 			$this->language = array_merge($this->language, myString::setCharset($language, $charset));
 		}
@@ -193,8 +193,7 @@ class myController extends myBase {
 	 * @param string $charset
 	 * @return $this
 	 */
-	public function setLanguagePack($dir, $lng = 'default', $charset = 'utf-8')
-	{
+	public function setLanguagePack($dir, $lng = 'default', $charset = 'utf-8') {
 		$dir = myFile::realPath($dir);
 		if (is_file($dir . '/' . $lng . '.php')) {
 			$language = include($dir . '/' . $lng . '.php');
@@ -209,8 +208,7 @@ class myController extends myBase {
 	 * @param $idx
 	 * @return mixed|string
 	 */
-	public function getLanguage($idx)
-	{
+	public function getLanguage($idx) {
 		return isset($this->language[$idx]) ? $this->language[$idx] : $idx;
 	}
 
@@ -220,8 +218,7 @@ class myController extends myBase {
 	 * @param string $method
 	 * @return $this
 	 */
-	public function regApi($name, $method = '')
-	{
+	public function regApi($name, $method = '') {
 		if (empty($method) && is_callable($name)) {
 			$this->func_api[$name] = $name;
 		} elseif (is_callable($method)) {
@@ -237,8 +234,7 @@ class myController extends myBase {
 	 * @param string $return
 	 * @return mixed|string
 	 */
-	public function api($name, $para = array(), $return = 'json')
-	{
+	public function runApi($name, $para = array(), $return = 'json') {
 		$result = '';
 		if (isset($this->func_api[$name])) {
 			$api = new myApi();
@@ -254,13 +250,11 @@ class myController extends myBase {
 	 * @param $page
 	 * @return $this
 	 */
-	public function regModule($module, $page)
-	{
+	public static function regModule($module, $page) {
 		$page = myFile::realPath($page);
 		if (is_file($page)) {
 			self::$modules[$module] = $page;
 		}
-		return $this;
 	}
 
 	/**
@@ -268,8 +262,7 @@ class myController extends myBase {
 	 * @param $module
 	 * @param string $global_vars
 	 */
-	public static function module($module, $global_vars = '')
-	{
+	public static function module($module, $global_vars = '') {
 		if (isset(self::$modules[$module])) {
 			if (!empty($global_vars)) {
 				if (is_string($global_vars)) $global_vars = explode(',', $global_vars);
@@ -290,8 +283,7 @@ class myController extends myBase {
 	 * @param $tag_func
 	 * @return $this
 	 */
-	public function regTag($tag_name, $tag_func)
-	{
+	public function regTag($tag_name, $tag_func) {
 		$this->func_tag[$tag_name] = $tag_func;
 		return $this;
 	}
@@ -302,8 +294,7 @@ class myController extends myBase {
 	 * @param $func
 	 * @return $this
 	 */
-	public function regUrl($mode, $func)
-	{
+	public function regUrl($mode, $func) {
 		if (is_callable($func)) {
 			$this->url[$mode] = $func;
 		}
@@ -315,8 +306,7 @@ class myController extends myBase {
 	 * @param $mode
 	 * @return mixed|string
 	 */
-	public function url($mode)
-	{
+	public function url($mode) {
 		$url = '#';
 		if (isset($this->url[$mode])) {
 			$argList = func_get_args();
@@ -333,8 +323,7 @@ class myController extends myBase {
 	 * @param string $chg_psw
 	 * @return $this
 	 */
-	public function regLog($login, $logout = '', $chg_psw = '')
-	{
+	public function regLog($login, $logout = '', $chg_psw = '') {
 		$this->func_log = array();
 		if (is_callable($login)) $this->func_log['login'] = $login;
 		if (is_callable($logout)) $this->func_log['logout'] = $logout;
@@ -348,8 +337,7 @@ class myController extends myBase {
 	 * @param $user_pwd
 	 * @return bool
 	 */
-	public function login($user_name, $user_pwd)
-	{
+	public function login($user_name, $user_pwd) {
 		$result = false;
 		if (isset($this->func_log['login'])) {
 			$result = call_user_func($this->func_log['login'], $user_name, $user_pwd);
@@ -361,8 +349,7 @@ class myController extends myBase {
 	 * 用户退出
 	 * @return bool
 	 */
-	public function logout()
-	{
+	public function logout() {
 		$result = false;
 		if (isset($this->func_log['logout'])) {
 			$result = call_user_func($this->func_log['logout']);
@@ -377,8 +364,7 @@ class myController extends myBase {
 	 * @param $psw_new
 	 * @return bool
 	 */
-	public function chg_psw($id, $psw_old, $psw_new)
-	{
+	public function chg_psw($id, $psw_old, $psw_new) {
 		$result = false;
 		if (isset($this->func_log['chg_psw'])) {
 			$result = call_user_func($this->func_log['chg_psw'], $id, $psw_old, $psw_new);
@@ -391,8 +377,7 @@ class myController extends myBase {
 	 * @param $code
 	 * @return $this
 	 */
-	public function addCSS($code)
-	{
+	public function addCSS($code) {
 		if (is_file($code)) {
 			$md5 = md5_file($code);
 			$code = myFile::getLocal($code);
@@ -408,8 +393,7 @@ class myController extends myBase {
 	 * @param $idx
 	 * @return $this
 	 */
-	public function removeCSS($idx)
-	{
+	public function removeCSS($idx) {
 		if (is_file($idx)) {
 			$idx = md5_file($idx);
 		}
@@ -421,8 +405,7 @@ class myController extends myBase {
 	 * 清空已添加样式
 	 * @return $this
 	 */
-	public function clearCSS()
-	{
+	public function clearCSS() {
 		$this->css = array();
 		return $this;
 	}
@@ -433,8 +416,7 @@ class myController extends myBase {
 	 * @param int $expires
 	 * @return string
 	 */
-	public function CSS($show = true, $expires = 604800)
-	{
+	public function CSS($show = true, $expires = 604800) {
 		$css = implode(chr(10), $this->css);
 		if (!$show) return cssMin::minify($css);
 		$md5 = md5($css);
@@ -452,8 +434,7 @@ class myController extends myBase {
 	 * @param $code
 	 * @return $this
 	 */
-	public function addJS($code)
-	{
+	public function addJS($code) {
 		if (is_file($code)) {
 			$md5 = md5_file($code);
 			$code = myFile::getLocal($code);
@@ -469,8 +450,7 @@ class myController extends myBase {
 	 * @param $idx
 	 * @return $this
 	 */
-	public function removeJS($idx)
-	{
+	public function removeJS($idx) {
 		if (is_file($idx)) {
 			$idx = md5_file($idx);
 		}
@@ -482,8 +462,7 @@ class myController extends myBase {
 	 * 清空已添加 JS
 	 * @return $this
 	 */
-	public function clearJS()
-	{
+	public function clearJS() {
 		$this->js = array();
 		return $this;
 	}
@@ -494,8 +473,7 @@ class myController extends myBase {
 	 * @param int $expires
 	 * @return string
 	 */
-	public function JS($show = true, $expires = 604800)
-	{
+	public function JS($show = true, $expires = 604800) {
 		$js = implode(chr(10), $this->js);
 		if (!$show) return jsMin::minify($js);
 		$md5 = md5($js);
@@ -513,8 +491,7 @@ class myController extends myBase {
 	 * @param string $etag
 	 * @param int $expires
 	 */
-	public static function etag($etag = '', $expires = 604800)
-	{
+	public static function etag($etag = '', $expires = 604800) {
 		if (empty($etag)) return;
 		header("Pragma: public");
 		header("Cache-Control: private, max-age=" . $expires);
@@ -533,8 +510,7 @@ class myController extends myBase {
 	 * @param $file
 	 * @param string $name
 	 */
-	public static function file($file, $name = '')
-	{
+	public static function file($file, $name = '') {
 		if (is_file($file)) {
 			$name = $name ?? basename($file);
 			self::etag(md5(filemtime($file)));
@@ -558,8 +534,7 @@ class myController extends myBase {
 	 * @param string $para
 	 * @return string
 	 */
-	public static function guid($para = '')
-	{
+	public static function guid($para = '') {
 		$guid = '';
 		$uid = uniqid('', true);
 		$data = $para;
@@ -589,8 +564,7 @@ class myController extends myBase {
 	 * @param $plugin
 	 * @return $this
 	 */
-	public function regPlugin($plugin, &$info = array())
-	{
+	public function regPlugin($plugin, &$info = array()) {
 		$plugin = myFile::realPath($plugin);
 		if (is_dir($plugin) && is_file($plugin . '/index.php')) {
 			$this->plugins[] = $plugin;
@@ -602,8 +576,7 @@ class myController extends myBase {
 	/**
 	 * 设置插件
 	 */
-	public function plugin()
-	{
+	public function plugin() {
 		for ($i = 0, $m = count($this->plugins); $i < $m; $i++) {
 			include($this->plugins[$i] . '/index.php');
 		}
@@ -616,8 +589,7 @@ class myController extends myBase {
 	 * @param $func
 	 * @return $this
 	 */
-	public function setFunction($position, $func)
-	{
+	public function setFunction($position, $func) {
 		if (!isset($this->functions[$position])) $this->functions[$position] = array();
 		if (is_array($func)) {
 			for ($i = 0, $m = count($func); $i < $m; $i++) {
@@ -636,8 +608,7 @@ class myController extends myBase {
 	 * @param string $para
 	 * @return mixed|string
 	 */
-	public function run($position, $desc = false, $para = '')
-	{
+	public function run($position, $desc = false, $para = '') {
 		if (isset($this->functions[$position])) {
 			$m = count($this->functions[$position]);
 			for ($i = 0; $i < $m; $i++) {
@@ -657,8 +628,7 @@ class myController extends myBase {
 	 * @param string $charset
 	 * @param bool $setPlugin
 	 */
-	public function start($charset = 'UTF-8', $setPlugin = true)
-	{
+	public function start($charset = 'UTF-8', $setPlugin = true) {
 		ob_start();
 		ob_implicit_flush(false);
 		header('Powered-by: MyStep Framework');
@@ -669,7 +639,7 @@ class myController extends myBase {
 		mb_regex_encoding($charset);
 		header('Content-Type: text/html; charset=' . $charset);
 
-		setOp(array(
+		self::setOp(array(
 			'enable_cli' => 1,
 			'memory_consumption' => 128,
 			'interned_strings_buffer' => 8,
@@ -689,8 +659,7 @@ class myController extends myBase {
 	 * 显示页面
 	 * @param myTemplate $tpl
 	 */
-	public function show(myTemplate $tpl, $minify = false)
-	{
+	public function show(myTemplate $tpl, $minify = false) {
 		$this->pushAddedContent($tpl);
 		$tpl->assign('lng', $this->language);
 		$tpl->regTag($this->func_tag);
@@ -703,8 +672,7 @@ class myController extends myBase {
 	/**
 	 * 页面结束
 	 */
-	public function end()
-	{
+	public function end() {
 		$this->run('end', true);
 		if (!empty(self::$goto_url) && ob_get_length() == 0) {
 			$this->redirect(self::$goto_url);
@@ -716,8 +684,7 @@ class myController extends myBase {
 	 * @param $url
 	 * @param string $code
 	 */
-	public static function redirect($url = '', $code = '302')
-	{
+	public static function redirect($url = '', $code = '302') {
 		if (empty($url)) {
 			$url = myReq::server('HTTP_REFERER');
 			if (is_null($url)) $url = '/';
@@ -725,5 +692,74 @@ class myController extends myBase {
 		}
 		header('location: ' . $url, true, $code);
 		exit;
+	}
+
+	/**
+	 * opCache 设置
+	 * @param string $setting
+	 * @return array|bool
+	 */
+	public static function setOp($setting='check') {
+		if($result = function_exists('opcache_compile_file')) {
+			if($result = opcache_get_status()) {
+				switch(true) {
+					case is_array($setting):
+						foreach($setting as $k => $v) {
+							@ini_set('opcache.'.$k, $v);
+						}
+						if(isset($setting['file_cache'])) myFile::mkdir($setting['file_cache']);
+					case $setting=='check':
+						opcache_invalidate($_SERVER['SCRIPT_FILENAME'], false);
+						if(($result=opcache_is_script_cached($_SERVER['SCRIPT_FILENAME']))===false)
+							$result=opcache_compile_file($_SERVER['SCRIPT_FILENAME']);
+						break;
+					case $setting=='config':
+						$result = opcache_get_configuration();
+						break;
+					case $setting=='reset':
+						opcache_reset();
+						break;
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * 设置类载入规则
+	 * @param $setting
+	 */
+	public static function regClass($setting) {
+		$idx = array();
+		foreach($setting as $current) {
+			/*
+			set_include_path(get_include_path().PATH_SEPARATOR.$current['path']);
+			spl_autoload_extensions($current['ext']);
+			spl_autoload_register();
+			*/
+			spl_autoload_register(function($class)use($current){
+				$ext = explode(',', $current['ext']);
+				foreach($ext as $e) {
+					if(is_file($current['path'].$class.$e)) require_once($current['path'].$class.$e);
+				}
+			});
+			if(isset($class['idx'])) $idx += $current['idx'];
+		}
+		if(!empty($idx)) {
+			spl_autoload_register(function($class)use($idx){
+				if(array_key_exists($class, $idx)) require_once($idx[$class]);
+			});
+		}
+	}
+
+	/**
+	 * 设置类别名
+	 * @param $list
+	 */
+	public static function setAlias($list) {
+		foreach ($list as $k => $v) {
+			if(class_exists($k)) class_alias($k, $v);
+		}
+		return;
 	}
 }

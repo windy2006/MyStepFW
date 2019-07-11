@@ -15,6 +15,7 @@ if(!isset($_GET['c'])) $_GET['c'] = 'NoSet';
 
 $tpl_test = new myTemplate($setting_tpl, $setting_cache);
 
+global $test, $test1, $test2, $test_if, $test_switch;
 $test = rand();
 $test1 = 'test1';
 $test2 = array('a'=>'test2-a');
