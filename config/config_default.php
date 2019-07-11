@@ -18,11 +18,12 @@ $setting['web'] = array();
 $setting['web']['title'] = '迈思框架 MyStep Framework';
 $setting['web']['keyword'] = 'mystep,framework,free';
 $setting['web']['description'] = '开源PHP框架系统';
-$setting['web']['gzip_level'] = true;
+$setting['web']['gzip_level'] = 0;
 $setting['web']['minify'] = false;
 $setting['web']['etag'] = 'etag_20190109';
 $setting['web']['update'] = 'http://www.mysteps.cn/update/';
 
+$setting['upload'] = array();
 $setting['upload']['path_mode'] = 'Y/m/';
 $setting['upload']['ban_ext'] = 'php,exe,com,bat,pif';
 $setting['upload']['free_dl'] = false;
