@@ -201,6 +201,11 @@ $setting_detail['cookie'] = array(
 $setting_detail['router'] = array(
     'name' => 'Router Setting',
     'list' => [
+        'mode' => array(
+            'name' => 'Parse Mode',
+            'describe' => 'The way to parse the router path',
+            'type' => array('rewrite', 'path_info', 'query_string'),
+        ),
         'default_app' => array(
             'name' => 'Default APP',
             'describe' => 'If no parameter has been given, which app which be run',

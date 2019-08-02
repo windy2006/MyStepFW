@@ -15,7 +15,7 @@ $setPlugin = !in_array($func, ['language', 'captcha']);
 function logCheck($show = true) {
     $user = \r::s('ms_user');
     if(empty($user)) {
-        if($show) myStep::getModle('login');
+        if($show) \myStep::getModule('login');
         return false;
     }
     return true;

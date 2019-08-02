@@ -201,6 +201,11 @@ $setting_detail['cookie'] = array(
 $setting_detail['router'] = array(
     'name' => '路由设置',
     'list' => [
+        'mode' => array(
+            'name' => '解析模式',
+            'describe' => '在无参数情况下运行的APP',
+            'type' => array('rewrite', 'path_info', 'query_string'),
+        ),
         'default_app' => array(
             'name' => '默认APP',
             'describe' => '在无参数情况下运行的APP',

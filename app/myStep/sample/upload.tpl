@@ -45,7 +45,7 @@
         $("#"+the_id).powerUpload({
             maxfiles: limit_count,
             maxfilesize: limit_size,
-            url: setting.path_root+'upload',
+            url: setting.path_root+'index.php?upload',
 
             error: function(err, file, index) {
                 switch(err) {
@@ -100,7 +100,7 @@
 					obj.appendTo('#list_file');
 					obj.find('span').click(function(e){
 						e.preventDefault();
-						$.get('remove_ul/'+result.new_name.split('.').slice(0,2).join('.'), function(data){
+						$.get(setting.path_root+'index.php?remove_ul/'+result.new_name.split('.').slice(0,2).join('.'), function(data){
 							if(data.statusCode==1) {
                                 alert('文件已删除！');
                                 if(obj.parent().find('a').length==1) obj.parent().addClass('d-none');

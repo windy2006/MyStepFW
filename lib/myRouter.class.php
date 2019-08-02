@@ -22,6 +22,9 @@
 class myRouter extends myBase {
 	use myTrait;
 
+	public
+        $route = array();
+
 	protected
 		$formats = array(
 			'any' => '(.*?)',
@@ -33,18 +36,36 @@ class myRouter extends myBase {
 		$rules = array(),
 		$info = array('app'=>'','path'=>'','para'=>array());
 
-	/**
-	 * 参数初始化
-	 * @param array $setting
-	 */
+    /**
+     * 参数初始化
+     * @param array $setting
+     * @param string $p
+     * @param string $q
+     */
 	public function init($setting=array()) {
+        if(!isset($setting['mode'])) $setting['mode'] = 'rewrite';
 		if(!isset($setting['default_app'])) $setting['default_app'] = 'myStep';
 		if(!isset($setting['delimiter_path'])) $setting['delimiter_path'] = '/';
 		if(!isset($setting['delimiter_para'])) $setting['delimiter_para'] = '&';
 
-		$this->query = myReq::server('QUERY_STRING');
-		if(empty($this->query)) $this->query = myReq::server('PATH_INFO');
-		if(strpos($this->query, '/')!==0) $this->query = '/'.$this->query;
+        $qstr = trim(myReq::svr('QUERY_STRING'));
+        $path_info = myReq::server('PATH_INFO');
+        if(empty($qstr)) {
+            $qstr = $path_info;
+        } else {
+            $qstr = $path_info.'?'.$qstr;
+        }
+        $qstr = trim($qstr, '?');
+        if(strpos($qstr, '/')!==0) $qstr = '/'.$qstr;
+
+        array_shift($_GET);
+        preg_match('#^(.+?)((&|\?)(.+))?$#', $qstr, $match);
+        $p = $match[1] ?? '';
+        $q = $match[4] ?? '';
+        parse_str($q, $_GET);
+
+        $this->route = compact('qstr','p', 'q');
+        $this->query = $qstr;
 		$this->setting = $setting;
 	}
 

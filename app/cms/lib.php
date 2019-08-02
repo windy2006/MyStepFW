@@ -24,7 +24,7 @@ $setting_tpl = array(
 function logCheck($show = true) {
     $user = \r::s('ms_user');
     if(empty($user)) {
-        if($show) myStep::getModule('login');
+        if($show) \myStep::getModule('login');
         return false;
     }
     return true;

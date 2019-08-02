@@ -35,6 +35,8 @@
 	self::upload()                                   // 文件上传接口
 	self::download($idx)                             // 文件下载接口
 	self::remove_ul($idx)                            // 删除文件下载接口
+	self::setURL()                                   // 链接处理
+	self::redirect()                                 // 链接跳转
 	self::init()                                     // 框架变量初始化
 	self::go()                                       // 执行框架
 	self::setPara()                                  // 应用模块初始化参数设置
@@ -175,6 +177,7 @@ class myStep extends myController {
 			$this->JS($this->setting->js);
 			$this->setAddedContent('start', '<script language="JavaScript" src="cache/script/'.basename($this->setting->js).'"></script>');
 		}
+		$this->setFunction('page', 'myStep::setLink');
 		parent::show($tpl, $this->setting->web->minify);
 	}
 
@@ -198,6 +201,31 @@ class myStep extends myController {
 		}
 		return call_user_func_array([$tpl, 'display'], $args);
 	}
+
+    /**
+     * 设置链接模式
+     * @param $content
+     * @return mixed
+     */
+	static public function setLink($content) {
+	    global $s;
+	    $seperator = '';
+	    switch($s->router->mode) {
+            case 'path_info':
+                $seperator = '?';
+                break;
+            case 'query_string':
+                $seperator = '/';
+                break;
+            default:
+                break;
+        }
+        if(!empty($seperator)) {
+	        $content = preg_replace('@(href|src|action)\s*\=\s*(\'|")(.+?)\2@i', '\1=\2index.php'.$seperator.'\3\2', $content);
+	        $content = preg_replace('@(\'|")index.php'.preg_quote($seperator).'(#|http|//|static|data\:)@', '\1\2', $content);
+        }
+	    return $content;
+    }
 
 	/**
 	 * 框架终止，销毁相关变量
@@ -285,7 +313,7 @@ class myStep extends myController {
 
 			if(is_bool($this->setting->show)) {
 				$rate = ceil(strlen(gzcompress($content,$level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
-				$content = str_replace('</body>', '
+				$content = str_ireplace('</body>', '
 <div class="text-right text-secondary my-2 pr-3" style="font-size:12px;">
 '.$this->getLanguage('info_compressmode').$rate.' &nbsp; | &nbsp;
 '.$this->getLanguage('info_querycount').$query.' &nbsp; | &nbsp;
@@ -386,7 +414,7 @@ class myStep extends myController {
 			if(is_null($url)) $url = '/';
 		}
 		$t->assign('msg', $msg);
-		$t->assign('url', $url);
+		$t->assign('url', self::setURL($url));
 		$mystep->show($t);
 		$mystep->end();
 	}
@@ -459,6 +487,7 @@ class myStep extends myController {
 				'language' => $setting['setting']['gen']['language'],
 				'charset' => $setting['setting']['gen']['charset'],
 				'timezone' => $setting['setting']['gen']['timezone'],
+				'router' => $setting['router']['mode'],
 				'debug' => $setting['setting']['gen']['debug'],
 				'title' => $setting['setting']['web']['title'],
 				'keyword' => $setting['setting']['web']['keyword'],
@@ -614,6 +643,44 @@ class myStep extends myController {
 		exit;
 	}
 
+    /**
+     * 链接处理
+     * @param $url
+     * @return string
+     */
+    public static function setURL($url) {
+        global $s;
+        switch($s->router->mode) {
+            case 'path_info':
+                $url = 'index.php'.$url;
+                break;
+            case 'query_string':
+                $url = 'index.php?'.$url;
+                break;
+            default:
+                break;
+        }
+        $url = preg_replace('@^index.php.(http)@', '\1', $url);
+        return $url;
+    }
+
+    /**
+     * 链接跳转
+     * @param string $url
+     * @param string $code
+     */
+	public static function redirect($url = '', $code = '302') {
+        if (empty($url)) {
+            $url = myReq::server('HTTP_REFERER');
+            if (is_null($url)) $url = '/';
+            $code = '302';
+        } else {
+            $url = ROOT_WEB.self::setURL($url);
+        }
+        header('location: ' . $url, true, $code);
+        exit;
+    }
+
 	/**
 	 * 框架变量初始化
 	 */
@@ -679,26 +746,23 @@ class myStep extends myController {
 	 * 执行框架
 	 */
 	public static function go() {
-		global $s, $p, $q;
+		global $s, $p, $q, $router;
 		$s = new myConfig(CONFIG.'config.php');
-		$qstr = trim(myReq::svr('QUERY_STRING'));
-		$the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
+        $router = new myRouter((array)$s->router);
+        extract($router->route);
+
+		$the_file = ROOT.preg_replace('#&.+$#', '', $p);
 		$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
 		$ext_list = explode(',', $s->gen->static);
-		if(strpos($qstr,'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
+		if(strpos(trim($qstr,'/'),'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
 		if(($s->cookie->domain = strstr(myReq::server('HTTP_HOST'), ':', true))===false) {
 			$s->cookie->domain = myReq::server('HTTP_HOST');
 		}
 		$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
 		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
-		array_shift($_GET);
-		preg_match('#^(.+?)(&(.+))?$#', $qstr, $match);
-		$p = $match[1];
-		$q = $match[3] ?? '';
 
 		global $lib_list, $info_app, $s, $router, $setting_tpl, $mystep;
-		$router = new myRouter((array)$s->router);
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check($lib_list)) {
 			$info_app = $router->parse();

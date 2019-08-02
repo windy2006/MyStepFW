@@ -52,8 +52,7 @@
 	self::redirect($url, $code)                         // 链接跳转
 	self::setOp($setting)                               // opCache 设置
 	self::regClass($setting)                            // 设置类载入规则
-	self::setAlias($list)      
-                         // 设置类别名
+	self::setAlias($list)                               // 设置类别名
 */
 require_once('myBase.class.php');
 class myController extends myBase {
@@ -512,7 +511,7 @@ class myController extends myBase {
 	 */
 	public static function file($file, $name = '') {
 		if (is_file($file)) {
-			$name = $name ?? basename($file);
+			if(empty($name)) $name = basename($file);
 			self::etag(md5(filemtime($file)));
 			$content = myFile::getLocal($file);
 			$type = myFile::getMime($file);

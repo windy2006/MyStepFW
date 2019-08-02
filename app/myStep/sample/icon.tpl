@@ -1,4 +1,14 @@
 ﻿<style>
+	@font-face {
+		font-family: 'FontAwesome1';
+		src: url('/static/fonts/fontawesome-webfont.eot?v=4.7.0');
+		src: url('/static/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'), url('/static/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'), url('/static/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'), url('/static/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'), url('/static/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
+	}
+	@font-face {
+		font-family: 'Glyphicons Halflings1';
+		src: url('/static/fonts/glyphicons-halflings-regular.eot');
+		src: url('/static/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/static/fonts/glyphicons-halflings-regular.woff2') format('woff2'), url('/static/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/static/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/static/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+	}
 	.glyphicons {
 		padding-left: 0;
 		padding-bottom: 1px;

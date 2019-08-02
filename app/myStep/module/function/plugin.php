@@ -13,7 +13,6 @@ if(!$mydb->check()) {
         array('intro',200),
     ));
 }
-
 $idx = myReq::get('idx');
 if(!empty($idx)) {
     include_once(PLUGIN.'/interface_plugin.class.php');
