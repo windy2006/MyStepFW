@@ -26,6 +26,7 @@
 	$this->CSS($cache)                               // 生成整合CSS文件
 	$this->addJS($file)                              // 添加页面脚本文件
 	$this->JS($cache)                                // 整合页面脚本文件
+	self::setLink()                                  // 处理页面链接
 	self::info($msg, $url)                           // 信息提示，需先声明mystep类
 	self::captcha($len, $scope)                      // 生成验证码
 	self::language($module, $type)                   // JS语言包接口
@@ -46,7 +47,6 @@
 
 require_once('function.php');
 require_once('myController.class.php');
-
 class myStep extends myController {
 	public $setting;
 	protected
@@ -212,10 +212,10 @@ class myStep extends myController {
 	    $seperator = '';
 	    switch($s->router->mode) {
             case 'path_info':
-                $seperator = '?';
+                $seperator = '/';
                 break;
             case 'query_string':
-                $seperator = '/';
+                $seperator = '?';
                 break;
             default:
                 break;
@@ -487,7 +487,7 @@ class myStep extends myController {
 				'language' => $setting['setting']['gen']['language'],
 				'charset' => $setting['setting']['gen']['charset'],
 				'timezone' => $setting['setting']['gen']['timezone'],
-				'router' => $setting['router']['mode'],
+				'router' => $setting['setting']['router']['mode'],
 				'debug' => $setting['setting']['gen']['debug'],
 				'title' => $setting['setting']['web']['title'],
 				'keyword' => $setting['setting']['web']['keyword'],
@@ -670,7 +670,7 @@ class myStep extends myController {
      * @param string $code
      */
 	public static function redirect($url = '', $code = '302') {
-        if (empty($url)) {
+        if(empty($url)) {
             $url = myReq::server('HTTP_REFERER');
             if (is_null($url)) $url = '/';
             $code = '302';
@@ -746,7 +746,7 @@ class myStep extends myController {
 	 * 执行框架
 	 */
 	public static function go() {
-		global $s, $p, $q, $router;
+		global $s, $p, $router;
 		$s = new myConfig(CONFIG.'config.php');
         $router = new myRouter((array)$s->router);
         extract($router->route);
@@ -766,18 +766,17 @@ class myStep extends myController {
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check($lib_list)) {
 			$info_app = $router->parse();
-			if(!empty($info_app)) {
-				if(!is_dir(APP.$info_app['app'])) {
-					array_unshift($info_app['path'], $info_app['app']);
-					$info_app['app'] = $s->router->default_app;
-				}
-				if(is_file(APP.$info_app['app'].'/config.php')) {
-					$s->merge(APP.$info_app['app'].'/config.php');
-				}
-				require(APP.$info_app['app'].'/index.php');
-			} else {
-				myController::redirect('/');
-			}
+            $info_app['route'] = $router->route['p'];
+            if(!is_dir(APP.$info_app['app'])) {
+                $info_app['app'] = $s->router->default_app;
+                array_unshift($info_app['path'], $info_app['app']);
+            }
+            if(is_file(APP.$info_app['app'].'/config.php')) {
+                $s->merge(APP.$info_app['app'].'/config.php');
+            }
+            define('PATH', APP.$info_app['app'].'/');
+            define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
+            require(APP.$info_app['app'].'/index.php');
 		}
 	}
 

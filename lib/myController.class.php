@@ -53,6 +53,7 @@
 	self::setOp($setting)                               // opCache 设置
 	self::regClass($setting)                            // 设置类载入规则
 	self::setAlias($list)                               // 设置类别名
+	self::header($idx, $para, $exit)					// 发送信息头
 */
 require_once('myBase.class.php');
 class myController extends myBase {
@@ -522,6 +523,9 @@ class myController extends myBase {
 				header("Accept-Ranges: bytes");
 				header("Accept-Length: " . strlen($content));
 				header("Content-Disposition: attachment; filename=" . $name);
+                header('Content-Transfer-Encoding: binary');
+                header('Cache-Control: must-revalidate');
+                header('Pragma: public');
 			}
 			echo $content;
 			exit;
@@ -761,4 +765,94 @@ class myController extends myBase {
 		}
 		return;
 	}
+
+    /**
+     * 发送信息头
+     * @param $idx
+     * @param string $para
+     * @param bool $exit
+     */
+	public static function header($idx, $para = '', $exit = true) {
+	    //http_response_code()
+	    $headers = [
+            '100' => 'HTTP/1.1 100 Continue',
+            '101' => 'HTTP/1.1 101 Switching Protocols',
+            '200' => 'HTTP/1.1 200 OK',
+            '201' => 'HTTP/1.1 201 Created',
+            '202' => 'HTTP/1.1 202 Accepted',
+            '203' => 'HTTP/1.1 203 Non-Authoritative Information',
+            '204' => 'HTTP/1.1 204 No Content',
+            '205' => 'HTTP/1.1 205 Reset Content',
+            '206' => 'HTTP/1.1 206 Partial Content',
+            '300' => 'HTTP/1.1 300 Multiple Choices',
+            '301' => 'HTTP/1.1 301 Moved Permanently',
+            '302' => 'HTTP/1.1 302 Moved Temporarily',
+            '303' => 'HTTP/1.1 303 See Other',
+            '304' => 'HTTP/1.1 304 Not Modified',
+            '305' => 'HTTP/1.1 305 Use Proxy',
+            '400' => 'HTTP/1.1 400 Bad Request',
+            '401' => 'HTTP/1.1 401 Unauthorized',
+            '402' => 'HTTP/1.1 402 Payment Required',
+            '403' => 'HTTP/1.1 403 Forbidden',
+            '404' => 'HTTP/1.1 404 Not Found',
+            '405' => 'HTTP/1.1 405 Method Not Allowed',
+            '406' => 'HTTP/1.1 406 Not Acceptable',
+            '407' => 'HTTP/1.1 407 Proxy Authentication Required',
+            '408' => 'HTTP/1.1 408 Request Time-out',
+            '409' => 'HTTP/1.1 409 Conflict',
+            '410' => 'HTTP/1.1 410 Gone',
+            '411' => 'HTTP/1.1 411 Length Required',
+            '412' => 'HTTP/1.1 412 Precondition Failed',
+            '413' => 'HTTP/1.1 413 Request Entity Too Large',
+            '414' => 'HTTP/1.1 414 Request-URI Too Large',
+            '415' => 'HTTP/1.1 415 Unsupported Media Type',
+            '500' => 'HTTP/1.1 500 Internal Server Error',
+            '501' => 'HTTP/1.1 501 Not Implemented',
+            '502' => 'HTTP/1.1 502 Bad Gateway',
+            '503' => 'HTTP/1.1 503 Service Unavailable',
+            '504' => 'HTTP/1.1 504 Gateway Time-out',
+            '505' => 'HTTP/1.1 505 HTTP Version not supported',
+            'charset' => 'Content-Type:text/html;charset=$charset',
+            'atom' => 'Content-type: application/atom+xml',
+            'rss' => 'Content-Type: application/rss+xml; charset=ISO-8859-1',
+            'type' => 'Content-Type: $type',
+            'url' => 'Location: $url',
+            'refresh' => 'Refresh: $refresh_0; url=$refresh_1',
+            'powered' => 'X-Powered-By: $powered',
+            'mod' => 'Last-Modified: $mod GMT', //gmdate('D, d M Y H:i:s', $time)
+            'no_cache' => [
+                'Cache-Control: no-cache, no-store, max-age=0, must-revalidate',
+                'Expires: Thu, 01 Jan 1970 00:00:00 GMT',
+                'Pragma: no-cache',
+            ],
+            'auth' => [
+                'HTTP/1.1 401 Unauthorized',
+                'WWW-Authenticate: Basic realm="Top Secret"',
+            ]
+        ];
+	    $set_para = function($str, $idx, $para='') {
+            if(!empty($para)) {
+                if(is_array($para)) {
+                    foreach($para as $k => $v) {
+                        $str = str_replace('$'.$idx.'_'.$k, $v, $str);
+                    }
+                } else {
+                    $str = str_replace('$'.$idx, $para, $str);
+                }
+            }
+	        return $str;
+        };
+	    if(isset($headers[$idx])) {
+            if(is_array($headers[$idx])) {
+                foreach($headers[$idx] as $h) {
+                    header($set_para($h, $idx, $para));
+                }
+            } else {
+                header($set_para($headers[$idx], $idx, $para));
+            }
+        } else {
+	        trigger_error('Unknown header - '.$idx);
+        }
+        if($exit) exit;
+    }
 }

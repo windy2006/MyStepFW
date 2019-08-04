@@ -47,7 +47,7 @@ $setting['cookie']['path'] = '/';
 $setting['cookie']['prefix'] = 'ms_';
 
 $setting['router'] = array();
-$setting['router']['mode'] = 'path_info';
+$setting['router']['mode'] = 'query_string';
 $setting['router']['default_app'] = 'myStep';
 $setting['router']['delimiter_path'] = '/';
 $setting['router']['delimiter_para'] = '&';

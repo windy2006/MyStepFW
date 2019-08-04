@@ -157,6 +157,8 @@ class myRouter extends myBase {
 			if(preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)) {
 				array_shift($match);
 				$info_app = include(APP.$rule['idx'].'/info.php');
+				$info_app['path'] = explode('/', trim($this->route['p'],'/'));
+				$info_app['route'] = $this->route['p'];
 				myReq::globals('info_app', $info_app);
 				if(isset($lib_list[$rule['idx']]) && is_file($lib_list[$rule['idx']])) require_once($lib_list[$rule['idx']]);
 				if(is_array($rule['method'])) {
@@ -213,16 +215,23 @@ class myRouter extends myBase {
 		if(end($q) && (strpos(end($q), $setting['delimiter_para'])!==false || strpos(end($q), '=')!==false)) {
 			$para = explode($setting['delimiter_para'], array_pop($q));
 			foreach($para as $k => $v) {
-				if(strpos($v, '=')) {list($k,$v) = explode('=', $v);
+				if(strpos($v, '=')) {
+				    list($k,$v) = explode('=', $v);
+				    $k = trim($k, '?&');
 					$this->info['para'][$k] = $v;
 				} else {
-					$path[] = $v;
+				    if(!empty($v)) $path[] = $v;
 				}
 			}
 		}
 		if(empty(reset($q))) array_shift($q);
 		$this->info['app'] = (count($q)>0) ? array_shift($q) : $setting['default_app'];
-		$this->info['path'] = array_merge($q, $path);
+		$this->info['path'] = array_merge([$this->info['app']], $q, $path);
+        $info = array();
+        if(is_file(APP.$this->info['app'].'/info.php')) {
+            $info = include(APP.$this->info['app'].'/info.php');
+        }
+        $this->info = array_merge($info, $this->info);
 		return $this->info;
 	}
 

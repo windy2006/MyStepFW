@@ -204,7 +204,7 @@ $setting_detail['router'] = array(
         'mode' => array(
             'name' => 'Parse Mode',
             'describe' => 'The way to parse the router path',
-            'type' => array('rewrite', 'path_info', 'query_string'),
+            'type' => array("select", array("QueryString"=>"query_string", "PathInfo"=>"path_info", "Rewrite"=>"rewrite"))
         ),
         'default_app' => array(
             'name' => 'Default APP',

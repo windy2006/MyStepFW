@@ -1,7 +1,7 @@
 <?php
 myStep::setPara();
-$module = array_shift($info_app['path']);
-$mode = array_shift($info_app['path']);
+$module = $info_app['path'][1] ?? null;
+$mode = $info_app['path'][2] ?? null;
 if (is_null($mode)) $mode = 'show';
 $sp_module = ['myExcel', 'myImg'];
 $setting_tpl['name'] = 'main';

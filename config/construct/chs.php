@@ -203,8 +203,8 @@ $setting_detail['router'] = array(
     'list' => [
         'mode' => array(
             'name' => '解析模式',
-            'describe' => '在无参数情况下运行的APP',
-            'type' => array('rewrite', 'path_info', 'query_string'),
+            'describe' => '路径解析模式',
+            'type' => array("select", array("QueryString"=>"query_string", "PathInfo"=>"path_info", "Rewrite"=>"rewrite"))
         ),
         'default_app' => array(
             'name' => '默认APP',

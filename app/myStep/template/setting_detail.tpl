@@ -26,7 +26,13 @@
                     </tr>
                 </table>
 
-                <div class="card-body">
+                <div class="p-3 border-0 text-right">
+                    <button class="btn btn-primary btn-sm mr-3" type="submit"> 提 交 </button>
+                    <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
+                    <button class="btn btn-primary btn-sm" type="reset" onclick="history.go(-1)"> 返 回 </button>
+                </div>
+
+                <div class="card-body border-top">
                     <pre class="card-text"><!--doc--></pre>
                 </div>
             </div>
@@ -41,11 +47,6 @@
                 <!--loop:end-->
                 </tbody>
             </table>
-            <div class="p-3 border-0 text-right">
-                <button class="btn btn-primary btn-sm mr-3" type="submit"> 提 交 </button>
-                <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
-                <button class="btn btn-primary btn-sm" type="reset" onclick="history.go(-1)"> 返 回 </button>
-            </div>
         </form>
     </div>
 </div>
