@@ -50,6 +50,10 @@ class myRouter extends myBase {
 
         $qstr = trim(myReq::svr('QUERY_STRING'));
         $path_info = myReq::server('PATH_INFO');
+        if(empty($path_info)) {
+            $path_info = myReq::server('ORIG_PATH_INFO');
+            $path_info = str_replace(myReq::server('SCRIPT_NAME'), '', $path_info);
+        }
         if(empty($qstr)) {
             $qstr = $path_info;
         } else {

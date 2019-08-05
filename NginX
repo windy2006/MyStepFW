@@ -1,0 +1,5 @@
+server {
+    listen      CHANGE_TO_YOUR_PORT_NUMBER;
+    server_name CHANGE_TO_YOUR_HOSTNAME;
+    rewrite     ^((?!index\.php).+)$	/index.php?$1;
+}
