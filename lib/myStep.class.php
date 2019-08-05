@@ -677,6 +677,7 @@ class myStep extends myController {
         } else {
             $url = ROOT_WEB.self::setURL($url);
         }
+        $url = preg_replace('#/+#', '/', $url);
         header('location: ' . $url, true, $code);
         exit;
     }
@@ -767,7 +768,8 @@ class myStep extends myController {
 		if(!$router->check($lib_list)) {
 			$info_app = $router->parse();
             $info_app['route'] = $router->route['p'];
-            if(!is_dir(APP.$info_app['app'])) {
+            $info_app['app'] = trim($info_app['app'],'.');
+            if(empty($info_app['app']) || !is_dir(APP.$info_app['app'])) {
                 $info_app['app'] = $s->router->default_app;
                 array_unshift($info_app['path'], $info_app['app']);
             }
