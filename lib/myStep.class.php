@@ -836,14 +836,14 @@ class myStep extends myController {
 	 * 应用模块调用
 	 */
 	public static function getModule($m) {
-		global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $q, $p, $db, $cache;
+		global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $db, $cache;
 		$m = preg_replace('#/.*$#', '', $m);
 		$style = $setting_tpl['style'];
 		$files = [
 			PATH.'module/'.$style.'/'.$m.'.php',
-			PATH.'module/'.$style.'/'.($info_app['path'][1]??'').'.php',
+			PATH.'module/'.$style.'/'.($info_app['path'][0]??'').'.php',
 			PATH.'module/'.$m.'.php',
-			PATH.'module/'.($info_app['path'][1]??'').'.php',
+			PATH.'module/'.($info_app['path'][0]??'').'.php',
 			PATH.'module/'.$style.'/index.php',
 			PATH.'module/index.php',
 			''

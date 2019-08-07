@@ -47,13 +47,15 @@ PHP常量：
 - VENDOR - 第三方应用库存放路径
 - FILE - 文件上传目录
 
-PHP变量：
+全局变量：
 --------
 - $s - 框架配置，通过对象模式调用，如$s->web-title
 - $info_app - 当前调用应用的基本信息，除对应APP信息外（APP目录下info.php定义），还包括path（数组）和route（字符串）项目
 - $mystep - 应用入口类，如应用路径下不存在以应用路径名命名的类（如test/test.class.php里面的test类，且此类应该是mystep类的扩展），则调用默认mystep类，并会预载类下的 preload 方法，在页面结束时会调用类下 shutdown 方法
 - $db - 数据库操作类，在函数初始化时根据设置连接，采用代理模式，可扩展
 - $cache - 数据缓存类，在函数初始化时根据设置连接，采用代理模式，可扩展
+- $setting_tpl - 模版参数，从 app 设置中调用，并继承于全局变量
+- $setting_cache - 模版缓存参数，从 app 设置中调用，并继承于全局变量
 
 JS变量：
 --------
@@ -90,6 +92,16 @@ JS变量：
             'error' => 'app\myStep\getError'
         );
         ```
+- 可以通过自定义方法处理自定义路由，框架也提供'myStep::getModule'方法处理路由，机制如下：
+   - 输入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，此参数可直接在对应的处理脚本内调用（如需在下级函数中调用，需要先进行global处理）
+   - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $setting_tpl 中）
+   - 本方法将按照如下顺序调用处理脚本（发现可用脚本后将立即调用并停止试探）
+      - app路径/module/模版样式/$m.php（$m 为输入参数）
+      - app路径/module/模版样式/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
+      - app路径/module/$m.php（$m 为输入参数）
+      - app路径/module/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
+      - app路径/module/模版样式/index.php（模版样式为设置中对应的内容）
+      - app路径/module/index.php
 
 接口：
 --------

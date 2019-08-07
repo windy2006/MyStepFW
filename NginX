@@ -1,5 +1,6 @@
 server {
-    listen      CHANGE_TO_YOUR_PORT_NUMBER;
-    server_name CHANGE_TO_YOUR_HOSTNAME;
-    rewrite     ^((?!index\.php).+)$	/index.php?$1;
+    // Add the code below to server section
+    if($request_uri !～* "\.(jpg|png|gif|ico|css|js|html|htm|woff|woff2|eot|svg|ttf|map)$") {
+        rewrite ^((?!index\.php).+)$    /index.php?$1;
+    }
 }

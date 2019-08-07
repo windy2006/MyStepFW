@@ -1,8 +1,8 @@
 <?php
 namespace app\cms;
 \myStep::setPara();
-global $mystep, $info_app, $s, $p, $q, $setting_tpl;
-if(strpos($p, 'admin_cms/')===0) {
+global $mystep, $info_app, $s, $setting_tpl;
+if(strpos(trim($info_app['route'],'/'), 'admin_cms')===0) {
     $s->template->style = 'admin';
     $mystep->addCSS(PATH.'asset/'.$s->template->style.'/style.css');
     $mystep->setting->css = CACHE.'script/'.$info_app['app'].'_admin.css';
@@ -10,8 +10,7 @@ if(strpos($p, 'admin_cms/')===0) {
     $mystep->setting->js = CACHE.'script/'.$info_app['app'].'_admin.js';
 }
 if(!is_array($info_app)) $info_app = array();
-if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($p, '/'));
-if(!isset($info_app['para'])) parse_str($q, $info_app['para']);
+if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($info_app['route'], '/'));
 if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(dirname(__FILE__).'/info.php'));
 
 $setting_tpl = array(
