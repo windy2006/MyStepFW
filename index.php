@@ -2,6 +2,7 @@
 if(version_compare(PHP_VERSION,'7.0.0','<'))
     die('MyStep Framework can only run under PHP 7.0 or upper version!');
 
+define('VER', '1.0.3');
 define('ROOT', str_replace('\\','/',dirname(__FILE__)).'/');
 define('LIB', ROOT.'lib/');
 define('APP', ROOT.'app/');

@@ -50,6 +50,7 @@ require_once('myController.class.php');
 class myStep extends myController {
 	public $setting;
 	protected
+        $mem_start = 0,
 		$time_start = 0,
 		$time_css = 0,
 		$time_js = 0;
@@ -87,6 +88,7 @@ class myStep extends myController {
 	 * @param string $dummy
 	 */
 	public function start($setPlugin = false, $dummy = '') {
+        $this->mem_start = memory_get_usage();
 		$this->time_start = getMicrotime();
 		$alias = include(CONFIG.'class_alias.php');
 		self::setAlias($alias);
@@ -234,7 +236,8 @@ class myStep extends myController {
 		parent::end();
 		$query_count = $GLOBALS['db']->close();
 		$time_exec = getTimeDiff($this->time_start);
-		$this->gzOut($this->setting->web->gzip_level, $query_count, $time_exec);
+		$mem_peak = memory_get_peak_usage();
+		$this->gzOut($this->setting->web->gzip_level, $query_count, $time_exec, $mem_peak);
 		unset($GLOBALS['db'],$GLOBALS['cache']);
 		if(is_callable(array($this, 'shutdown'))) $this->shutdown();
 		exit();
@@ -301,7 +304,7 @@ class myStep extends myController {
 	 * @param int $query
 	 * @param int $time
 	 */
-	public function gzOut($level = 3, $query = 0, $time = 0) {
+	public function gzOut($level = 3, $query = 0, $time = 0, $mem = 0) {
 		$encoding = myReq::server('HTTP_ACCEPT_ENCODING');
 		if($level<1 || empty($encoding) || headers_sent() || connection_aborted()) {
 			if(!empty($content)) ob_end_flush();
@@ -315,6 +318,7 @@ class myStep extends myController {
 				$rate = ceil(strlen(gzcompress($content,$level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
 				$content = str_ireplace('</body>', '
 <div class="text-right text-secondary my-2 pr-3" style="font-size:12px;">
+Memory Usage : '.$mem.' &nbsp; | &nbsp;
 '.$this->getLanguage('info_compressmode').$rate.' &nbsp; | &nbsp;
 '.$this->getLanguage('info_querycount').$query.' &nbsp; | &nbsp;
 '.$this->getLanguage('info_exectime').$time.'ms &nbsp; | &nbsp;
@@ -678,6 +682,7 @@ class myStep extends myController {
             $url = ROOT_WEB.self::setURL($url);
         }
         $url = preg_replace('#/+#', '/', $url);
+        $url = str_replace(':/', '://', $url);
         header('location: ' . $url, true, $code);
         exit;
     }

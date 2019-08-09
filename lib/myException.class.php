@@ -17,7 +17,7 @@
 class myException extends ErrorException {
 	public static
 		$err_all = array(),
-		$err_last = '',
+		$err_last = array(),
 		$callback = array('myException','show'),
 		$callback_type = E_ERROR|E_CORE_ERROR|E_CORE_WARNING|E_USER_ERROR,
 		$log_type = E_ALL ^ E_NOTICE,
@@ -104,6 +104,7 @@ class myException extends ErrorException {
 	 */
 	public static function errorHandle($err_no, $err_msg, $err_file, $err_line) {
 		if(($err_no & self::$log_type) == 0) return;
+		$root = dirname(dirname(__FILE__));
 		if(is_file($err_file)) {
 			$the_line = file($err_file);
 			$the_line = preg_replace('/(^\s+|[\r\n]+)/', '', $the_line[$err_line-1]);
@@ -136,29 +137,27 @@ class myException extends ErrorException {
 			E_USER_DEPRECATED => 'User-generated Deprecated',
 			E_ALL =>	'All errors and warnings',
 		);
-		if(!isset($err_type[$err_no])) {
-			$cur_err = 'Unkown error';
-		} else {
-			$cur_err = $err_type[$err_no];
-		}
 		if(is_array($err_msg)) $err_msg = implode(chr(10),$err_msg);
-		$err_str	= 'MyStep Error'.chr(10);
-		$err_str .= 'Time: '.date('Y-m-d H:i:s').chr(10);
-		$err_str .= 'Type: '.$err_no.' - '.$cur_err.chr(10);
-		$err_str .= 'File: '.$err_file.' (Line: '.$err_line.')'.chr(10);
-		$err_str .= 'Code: '.$the_line.chr(10);
-		$err_str .= 'Info: '.$err_msg.chr(10);
-		$err_str .= 'URL: http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on')?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].chr(10);
-		$err_str .= 'Debug: '.chr(10);
-		$debug_info = debug_backtrace();
+		$cur_err = array();
+        $cur_err['Type'] = $err_no.' - '.($err_type[$err_no] ?? 'Unkown error');
+        $cur_err['Info'] = $err_msg;
+        $cur_err['Time'] = date('Y-m-d H:i:s');
+        $cur_err['URL'] = 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on')?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];;
+        $cur_err['File'] = str_replace($root, '', $err_file);
+        $cur_err['Line'] = $err_line;
+        //$cur_err['Code'] = $the_line;
+        $cur_err['Code'] = self::getLines($err_file, $err_line);
+        $cur_err['Trace'] = array();
+		$trace_info = debug_backtrace();
 		$n=0;
-		for($i=count($debug_info)-1; $i>=0; $i--) {
-			if(empty($debug_info[$i]['file'])) continue;
-			$err_str .= (++$n).' - '.$debug_info[$i]['file'].' (line:'.$debug_info[$i]['line'].', function:'.$debug_info[$i]['function'].')'.chr(10);
+		for($i=count($trace_info)-1; $i>=0; $i--) {
+			if(empty($trace_info[$i]['file'])) continue;
+            $cur_err['Trace'][$n]['file'] = str_replace($root, '', $trace_info[$i]['file']);
+            $cur_err['Trace'][$n]['line'] = $trace_info[$i]['line'];
+            $cur_err['Trace'][$n]['function'] = $trace_info[$i]['function'];
+            $n++;
 		}
-		$err_str .= '-------------------------------------'.chr(10);
-		$err_str = str_replace(chr(13), '', $err_str);
-		self::$err_last = $err_str;
+		self::$err_last = $cur_err;
 		self::log();
 		error_clear_last();
 		if((self::$callback_type & $err_no) && !empty(self::$callback) && is_callable(self::$callback)) {
@@ -213,7 +212,27 @@ class myException extends ErrorException {
 	public static function log() {
 		if(self::$log_mode===1 || empty(self::$log_file) || empty(self::$err_last)) return;
 		if($fp = fopen(self::$log_file, 'ab')) {
-			fwrite($fp, self::$err_last);
+            $err_str = 'MyStep Error'.chr(10);
+		    foreach(self::$err_last as $k => $v) {
+		        if($k == 'Trace') {
+                    $cur_item = array();
+                    for($i=0,$m=count($v);$i<$m;$i++) {
+                        $cur_item[] = chr(9).($i+1).'. '.$v[$i]['file'].' (line:'.$v[$i]['line'].', function:'.$v[$i]['function'].')';
+                    }
+                    $v = chr(10).implode(chr(10),$cur_item);
+                } elseif(is_array($v)) {
+                    $cur_item = array();
+                    foreach($v as $k1 => $v1) {
+                        $cur_item[] = chr(9).$k1.'.'.trim($v1, "\r\n");
+                    }
+                    $v = chr(10).implode(chr(10),$cur_item);
+                } elseif(strpos($v, chr(10))) {
+		            $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), $v);
+                }
+                $err_str .= $k.': '.$v.chr(10);
+            }
+            $err_str .= '-------------------------------------'.chr(10);
+			fwrite($fp, $err_str);
 			fclose($fp);	
 			unset($fp);
 		}
@@ -224,7 +243,7 @@ class myException extends ErrorException {
 	 * 错误清除
 	 */
 	public static function clear() {
-		self::$err_last = '';
+		self::$err_last = array();
 		self::$err_all = array();
 		error_clear_last();
 		return;
@@ -244,26 +263,72 @@ class myException extends ErrorException {
 	 */
 	public static function show() {
 		if(empty(self::$err_last)) return false;
-		$lines = explode(chr(10), self::$err_last);
+		$title = 'MyStep Error: '.self::$err_last['Type'];
+		unset(self::$err_last['Type']);
 		echo <<<mystep
-<div style='line-height:24px;border:#999 1px solid;'>
-<div style='background-color:#999;color:#FFF'>&nbsp;<strong>{$lines[0]}</strong></div>
+<link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css">
+<link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css">
+<div style='line-height:24px;border:#999 1px solid;white-space:nowrap;overflow:hidden;'>
+<div style='background-color:#999;color:#FFF'>&nbsp;<strong>{$title}</strong></div>
 
 mystep;
 		$color='#fff';
-		for($i=1,$m=count($lines); $i<$m; $i++) {
-			if(preg_match('/[\-]{10,}/',$lines[$i])) break;
-			if(empty($lines[$i])) {
-				break;
-			} elseif(preg_match('/^([\w\s]+\:)(.*)$/', $lines[$i], $matches)) {
-				$color = ($color=='#fff')?'#eee':'#fff';
-				echo '<div style="background-color:'.$color.'">&nbsp;<strong>'.$matches[1].'</strong>'.htmlspecialchars($matches[2]).'</div>'.chr(10);
-			} else {
-				echo '<div style="background-color:'.$color.'">&nbsp; &nbsp; '.htmlspecialchars($lines[$i]).'</div>'.chr(10);
-			}
-		}
+		foreach(self::$err_last as $k => $v) {
+            $color = ($color=='#fff')?'#eee':'#fff';
+            if($k == 'Trace') {
+                $cur_item = array();
+                $cur_item[] = '<pre>';
+                for($i=0,$m=count($v);$i<$m;$i++) {
+                    $cur_item[] = chr(9).($i+1).'. '.$v[$i]['file'].' (line:'.$v[$i]['line'].', function:'.$v[$i]['function'].')';
+                }
+                $cur_item[] = '</pre>';
+                $v = chr(10).implode(chr(10),$cur_item);
+            } elseif(is_array($v)) {
+                $cur_item = array();
+                $keys = array_keys($v);
+                if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].'">';
+                foreach($v as $k1 => $v1) {
+                    $cur_item[] = trim(htmlspecialchars($v1), "\r\n");
+                }
+                if($k=='Code') $cur_item[] = '</pre>';
+                $v = chr(10).implode(chr(10),$cur_item);
+            } elseif(strpos($v, chr(10))) {
+                $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), $v);
+                $v = nl2br($v);
+            }
+            echo '<div style="background-color:'.$color.'">&nbsp;<strong>'.$k.': </strong>'.str_replace(chr(9), ' &nbsp; &nbsp;', $v).'</div>'.chr(10);
+        }
 		echo '</div>'.chr(10);
 		echo '<div>&nbsp;</div>'.chr(10);
+        echo <<<mystep
+<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js" type="text/javascript"></script>
+<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushPhp.js" type="text/javascript"></script>
+<script type="text/javascript">SyntaxHighlighter.all();console.log(111)</script>
+
+
+mystep;
 		return true;
 	}
+
+    /**
+     * 获取某段程序代码
+     * @param $file
+     * @param $line
+     * @param int $scope
+     * @return array
+     */
+	public static function getLines($file, $line, $scope = 3) {
+	    $code = array();
+	    if(file_exists($file)) {
+            $rows = file($file);
+            array_unshift($rows, '');
+            $cnt = count($rows);
+            $start = $line - $scope;
+            $end = $line + $scope;
+            if($start<1) $start = 1;
+            if($end>$cnt) $end = $cnt;
+            $code = array_slice($rows, $start, ($end-$start+1), true);
+        }
+	    return $code;
+    }
 }
