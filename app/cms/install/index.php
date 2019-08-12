@@ -1,20 +1,21 @@
 <?php
+global $mystep, $s, $router, $info_app;
 $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
 $tpl = new myTemplate($setting_tpl, $setting_cache);
-$info_app['path'][0] = 'install';
-if(!isset($info_app['path'][1])) $info_app['path'][1] = 0;
+$info_app['path'][1] = 'install';
+if(!isset($info_app['path'][2])) $info_app['path'][2] = 0;
 reset:
-$setting_tpl['name'] = implode('_', $info_app['path']);
+$setting_tpl['name'] = implode('_', array_slice($info_app['path'],1));
 $t = new myTemplate($setting_tpl, false);
 $t->allow_script = true;
-switch ($info_app['path'][1]) {
+switch ($info_app['path'][2]) {
     case 0:
         break;
     case 1:
         break;
     case 2:
-        $config->merge(PATH.'config_default.php');
-        $list = $config->build(PATH.'config/'.$config->gen->language.'.php');
+        $s->merge(PATH.'config_default.php');
+        $list = $s->build(PATH.'config/'.$s->gen->language.'.php');
         foreach($list as $v) {
             if(isset($v['idx'])) {
                 $t->setLoop('setting', ['content'=> '</tbody>

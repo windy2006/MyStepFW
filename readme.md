@@ -129,6 +129,26 @@ JS变量：
 - plugin.php - 插件引用记录（自动生成）
 - route.php - 路由信息，格式详见路由章节
 
+
+脚本调用：
+--------
+每个应用将自动生成 cache/script/[appName].js 和 cache/script/[appName].css（[appName]表示应用名称），供页面调用，这两个文件经压缩处理，可根据相关文件内容改变自动更新。载入规则如下（如文件不存在将自动忽略，其中[TemplateStyle]为模版样式名称）：
+- [appName].css 将自动载入以下文件：
+   - static/css/bootstrap.css
+   - static/css/font-awesome.css
+   - static/css/glyphicons.css
+   - static/css/global.css
+   - static/asset/style.css
+   - static/asset/[TemplateStyle]/style.css 
+- [appName].js 将自动载入以下文件：
+   - static/js/jquery.js
+   - static/js/jquery-ui.js
+   - static/js/jquery.addon.js
+   - static/js/bootstrap.bundle.js
+   - static/js/global.js
+   - static/asset/function.js
+   - static/asset/[TemplateStyle]/function.js
+
 插件：
 -------- 
 插件为为应用添加某一组功能，可通过框架后台插件管理设置参数，并在应用管理的插件选项中设置对应应用都调用那些插件，推荐结构如下：

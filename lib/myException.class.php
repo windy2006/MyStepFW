@@ -145,7 +145,6 @@ class myException extends ErrorException {
         $cur_err['URL'] = 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on')?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];;
         $cur_err['File'] = str_replace($root, '', $err_file);
         $cur_err['Line'] = $err_line;
-        //$cur_err['Code'] = $the_line;
         $cur_err['Code'] = self::getLines($err_file, $err_line);
         $cur_err['Trace'] = array();
 		$trace_info = debug_backtrace();
@@ -157,6 +156,12 @@ class myException extends ErrorException {
             $cur_err['Trace'][$n]['function'] = $trace_info[$i]['function'];
             $n++;
 		}
+		if($err_no == E_USER_ERROR) {
+		    $the_file = $cur_err['Trace'][$n-3];
+            $err_file = $cur_err['File'] = $the_file['file'];
+            $err_line = $cur_err['Line'] = $the_file['line'];
+            $cur_err['Code'] = self::getLines($root.$the_file['file'], $cur_err['Line']);
+        }
 		self::$err_last = $cur_err;
 		self::log();
 		error_clear_last();
@@ -223,11 +228,12 @@ class myException extends ErrorException {
                 } elseif(is_array($v)) {
                     $cur_item = array();
                     foreach($v as $k1 => $v1) {
+                        if($v1 == '//') continue;
                         $cur_item[] = chr(9).$k1.'.'.trim($v1, "\r\n");
                     }
                     $v = chr(10).implode(chr(10),$cur_item);
-                } elseif(strpos($v, chr(10))) {
-		            $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), $v);
+                } elseif(strpos($v, chr(10))!==false) {
+		            $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), trim($v, chr(10)));
                 }
                 $err_str .= $k.': '.$v.chr(10);
             }
@@ -288,12 +294,13 @@ mystep;
                 $keys = array_keys($v);
                 if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].'">';
                 foreach($v as $k1 => $v1) {
+                    if($v1=='//') $v1='//Blank Line';
                     $cur_item[] = trim(htmlspecialchars($v1), "\r\n");
                 }
                 if($k=='Code') $cur_item[] = '</pre>';
                 $v = chr(10).implode(chr(10),$cur_item);
-            } elseif(strpos($v, chr(10))) {
-                $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), $v);
+            } elseif(strpos($v, chr(10))!==false) {
+                $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), trim($v, chr(10)));
                 $v = nl2br($v);
             }
             echo '<div style="background-color:'.$color.'">&nbsp;<strong>'.$k.': </strong>'.str_replace(chr(9), ' &nbsp; &nbsp;', $v).'</div>'.chr(10);
@@ -303,7 +310,7 @@ mystep;
         echo <<<mystep
 <script src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js" type="text/javascript"></script>
 <script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushPhp.js" type="text/javascript"></script>
-<script type="text/javascript">SyntaxHighlighter.all();console.log(111)</script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
 
 
 mystep;
@@ -328,6 +335,9 @@ mystep;
             if($start<1) $start = 1;
             if($end>$cnt) $end = $cnt;
             $code = array_slice($rows, $start, ($end-$start+1), true);
+            foreach($code as $k => $v) {
+                if(trim($v)=='') $code[$k] = '//';
+            }
         }
 	    return $code;
     }

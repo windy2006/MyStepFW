@@ -20,6 +20,17 @@ $setting_tpl = array(
     'path_compile' => CACHE.'template/'.$info_app['app'].'/'
 );
 
+function installCheck($module) {
+    global $setting_tpl, $setting_cache;
+    if(!is_file(PATH.'config.php') || $module=='install') {
+        $setting_tpl['path'] = PATH.'install/template';
+        $setting_tpl['style'] = '';
+        $setting_cache = false;
+        include(dirname(__FILE__).'/install/index.php');
+        exit;
+    }
+}
+
 function logCheck($show = true) {
     $user = \r::s('ms_user');
     if(empty($user)) {
