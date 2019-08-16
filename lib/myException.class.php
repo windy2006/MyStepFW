@@ -104,6 +104,10 @@ class myException extends ErrorException {
 	 */
 	public static function errorHandle($err_no, $err_msg, $err_file, $err_line) {
 		if(($err_no & self::$log_type) == 0) return;
+        if(preg_match('#^(.+) on line (\d+)#', $err_file, $match)) {
+            $err_file = $match[1];
+            $err_line = $match[2];
+        }
 		$root = dirname(dirname(__FILE__));
 		if(is_file($err_file)) {
 			$the_line = file($err_file);

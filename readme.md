@@ -29,11 +29,6 @@
 - 自定义路径模式 - index.php（调用myStep::init()） -> app/[name]/lib.php（应用目录下的预载文件，调用myStep::setPara()，可在此函数调用后，对部分参数做相关修正）-> myStep::getModule()（可以添加其他前置检验函数）
 - 程序路径模式 - index.php（调用myStep::init()） -> app/[name]/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
 
-自动载入：
---------
-- 静态文件 - 将自动载入应用路径下的'asset/style.css'和'asset/模版样式/style.css'，以及'asset/function.js'和'asset/模版样式/function.js'（自动判断是否存在）
-- 模块入口 - 将按如下次序，载入应用目录下'module'子目录总首先出现的'模版样式/模块名称.php'，'模块名称.php'，'模版样式/index.php'，'index.php'
-
 PHP常量：
 --------
 - PATH - 当前应用路径
@@ -93,7 +88,7 @@ JS变量：
         );
         ```
 - 可以通过自定义方法处理自定义路由，框架也提供'myStep::getModule'方法处理路由，机制如下：
-   - 输入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，此参数可直接在对应的处理脚本内调用（如需在下级函数中调用，需要先进行global处理）
+   - 传入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，即[any]部分，但需要注意的是在 myStep::getModule 方法中，$m 被截取为 path1。此参数可直接在自定义的路由处理脚本内调用，但如需在下级函数中调用，需要先进行global处理。
    - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $setting_tpl 中）
    - 本方法将按照如下顺序调用处理脚本（发现可用脚本后将立即调用并停止试探）
       - app路径/module/模版样式/$m.php（$m 为输入参数）
@@ -111,6 +106,7 @@ JS变量：
 - /captcha/[any] - 验证码图像接口，[any]为随机数，保证新码生成，验证参数为$_SESSION['captcha']
 - /upload - 文件上传接口，上传文件保存在常量FILE目录
 - /download/[any] - 文件下载接口，[any]为文件索引
+- /remove_ul/[any] - 上传文件删除接口，[any]为文件索引
 
 应用：
 --------
@@ -129,25 +125,24 @@ JS变量：
 - plugin.php - 插件引用记录（自动生成）
 - route.php - 路由信息，格式详见路由章节
 
-
 脚本调用：
 --------
 每个应用将自动生成 cache/script/[appName].js 和 cache/script/[appName].css（[appName]表示应用名称），供页面调用，这两个文件经压缩处理，可根据相关文件内容改变自动更新。载入规则如下（如文件不存在将自动忽略，其中[TemplateStyle]为模版样式名称）：
-- [appName].css 将自动载入以下文件：
+- cache/script/[appName].css - 将自动载入以下文件：
    - static/css/bootstrap.css
    - static/css/font-awesome.css
    - static/css/glyphicons.css
    - static/css/global.css
-   - static/asset/style.css
-   - static/asset/[TemplateStyle]/style.css 
-- [appName].js 将自动载入以下文件：
+   - [appName]/asset/style.css
+   - [appName]/asset/[TemplateStyle]/style.css
+- cache/script/[appName].js - 将自动载入以下文件：
    - static/js/jquery.js
    - static/js/jquery-ui.js
    - static/js/jquery.addon.js
    - static/js/bootstrap.bundle.js
    - static/js/global.js
-   - static/asset/function.js
-   - static/asset/[TemplateStyle]/function.js
+   - [appName]/asset/function.js
+   - [appName]/asset/[TemplateStyle]/function.js
 
 插件：
 -------- 

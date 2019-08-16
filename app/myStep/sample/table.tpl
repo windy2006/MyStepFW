@@ -117,7 +117,8 @@
 						"vendor/bootstrap-table/extensions/resizable/jquery.resizableColumns.css",
 						"vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.css"
 					]);
-                    setTbl('#tb_list');
+                    checkNrun('setTbl', ['#tb_list']);
+                    //setTbl('#tb_list');
 				});
             }
         });

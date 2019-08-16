@@ -47,6 +47,7 @@ if($module=='phpinfo') {
                 $err_lst[$i] = preg_replace("/\n+/", "\n", $err_lst[$i]);
                 $err_lst[$i] = str_replace("\n", "\n<br />\n", $err_lst[$i]);
                 $err_lst[$i] = str_replace("\t", " &nbsp; &nbsp;", $err_lst[$i]);
+                $err_lst[$i] = str_replace("  ", " &nbsp;", $err_lst[$i]);
                 $err_lst[$i] = preg_replace("/^([\w \.]+:)/m", '<b>\1</b>', $err_lst[$i]);
                 $t->setLoop('err', array('content'=>$err_lst[$i]));
             }

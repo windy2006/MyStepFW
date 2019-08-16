@@ -11,7 +11,7 @@ for($i=0,$m=count($guide);$i<$m;$i++) {
     $detail[$i] = array();
     $guide[$i] = preg_replace('#\n[\-]{5,}#', '', $guide[$i]);
     $lines = explode(chr(10), $guide[$i]);
-    $line = array();
+    $the_line = array();
     $detail[$i]['section'] = str_replace('：', '', $lines[0]);
     $detail[$i]['detail'] = array();
     for($j=1,$n=count($lines);$j<$n;$j++) {
@@ -19,18 +19,18 @@ for($i=0,$m=count($guide);$i<$m;$i++) {
         if($j==1 && strpos($lines[$j],' - ')===false) {
             $detail[$i]['describe'] = $lines[$j];
         } elseif(preg_match('#[\s]{3,}#', $lines[$j])) {
-            $line[1] .= chr(10).$lines[$j];
+            $the_line[1] .= chr(10).$lines[$j];
         } elseif(strpos($lines[$j],' - ')) {
-            if(!empty($line)) {
-                //$detail[$i]['detail'][$line[0]] = str_replace('  ', '&nbsp; ', nl2br($line[1]));
-                $detail[$i]['detail'][$line[0]] = $md->text($line[1]);
+            if(!empty($the_line)) {
+                //$detail[$i]['detail'][$the_line[0]] = str_replace('  ', '&nbsp; ', nl2br($the_line[1]));
+                $detail[$i]['detail'][$the_line[0]] = str_replace('<p>', '<p class="m-0">', $md->text($the_line[1]));
             }
-            $line = explode(' - ', $lines[$j]);
+            $the_line = explode(' - ', $lines[$j]);
         }
     }
-    if(!empty($line)) {
-        //$detail[$i]['detail'][$line[0]] = str_replace('  ', '&nbsp; ', nl2br($line[1]));
-        $detail[$i]['detail'][$line[0]] = $md->text($line[1]);
+    if(!empty($the_line)) {
+        //$detail[$i]['detail'][$the_line[0]] = str_replace('  ', '&nbsp; ', nl2br($the_line[1]));
+        $detail[$i]['detail'][$the_line[0]] = str_replace('<p>', '<p class="m-0">', $md->text($the_line[1]));
     }
 }
 $setting_tpl['name'] = 'guide';

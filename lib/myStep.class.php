@@ -114,11 +114,8 @@ class myStep extends myController {
 		$this->setting->cookie->prefix .= substr(md5(myReq::server('USERNAME').myReq::server('COMPUTERNAME').myReq::server('OS')), 0, 4).'_';
 		if($this->setting->session->mode=='sess_file') $this->setting->session->path = CACHE.'/session/'.date('Ymd').'/';
 
-		global $db, $cache;
-		$db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
-		$db->connect($this->setting->db->pconnect, $this->setting->db->name);
-
-		switch($this->setting->gen->cache_mode) {
+		global $db, $cache, $no_db;
+        switch($this->setting->gen->cache_mode) {
 			case 'memoryCache':
 				$cache_setting = myCache::o2a($this->setting->memcached);
 				break;
@@ -128,11 +125,15 @@ class myStep extends myController {
 			default:
 				$cache_setting = CACHE.'data';
 		}
-
 		$cache = $this->getInstance('myCache', $this->setting->gen->cache_mode, $cache_setting);
-		$db->setCache($cache, 600);
 
-		$this->setting->info = new stdClass();
+        $db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
+        if(empty($no_db)) {
+            $db->connect($this->setting->db->pconnect, $this->setting->db->name);
+            $db->setCache($cache, 600);
+        }
+
+        $this->setting->info = new stdClass();
 		$this->setting->info->time = myReq::server('REQUEST_TIME');
 		$this->setting->info->host = myReq::server('HTTP_HOST');
 
@@ -843,13 +844,12 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	public static function getModule($m) {
 		global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $db, $cache;
 		$m = preg_replace('#/.*$#', '', $m);
-		$style = $setting_tpl['style'];
 		$files = [
-			PATH.'module/'.$style.'/'.$m.'.php',
-			PATH.'module/'.$style.'/'.($info_app['path'][0]??'').'.php',
+			PATH.'module/'.$setting_tpl['style'].'/'.$m.'.php',
+			PATH.'module/'.$setting_tpl['style'].'/'.($info_app['path'][0]??'').'.php',
 			PATH.'module/'.$m.'.php',
 			PATH.'module/'.($info_app['path'][0]??'').'.php',
-			PATH.'module/'.$style.'/index.php',
+			PATH.'module/'.$setting_tpl['style'].'/index.php',
 			PATH.'module/index.php',
 			''
 		];

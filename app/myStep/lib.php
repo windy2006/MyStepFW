@@ -1,6 +1,6 @@
 <?php
 namespace app\myStep;
-global $info_app, $p, $q, $setPlugin;
+global $info_app, $no_db, $p, $q, $setPlugin;
 
 if(!is_array($info_app)) $info_app = array();
 if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($p, '/'));
@@ -9,6 +9,7 @@ if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(dirname
 
 $func = preg_replace('#^/?(\w+).*$#', '\1', $q);
 $setPlugin = !in_array($func, ['language', 'captcha']);
+$no_db = 'y';
 
 \myStep::setPara();
 
@@ -23,7 +24,8 @@ function logCheck($show = true) {
 
 function getData($tbl_name) {
     if(!logCheck(false)) return [];
-    global $db;
+    global $db, $s;
+    if(!$db->check()) $db->connect(0, $s->db->name);
     $db->build($tbl_name);
     $request = file_get_contents('php://input');
     if(!empty($request)) {
