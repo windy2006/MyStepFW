@@ -3,12 +3,12 @@ class plugin_test2 implements interface_plugin {
     public static function check(&$result = ''){
         $result = "";
         $theList = array(
-            "dir1/",
-            "dir2/",
+            "dir3/",
+            "dir4/",
         );
         $flag = true;
         foreach($theList as $cur) {
-            if(is_writeable(dirname(__FILE__).'/'.$cur)) {
+            if(myFile::rewritable(dirname(__FILE__).'/'.$cur)) {
                 $result .= $cur . ' - <span style="color:green">Writable</span><br />';
             } else {
                 $result .= $cur . ' - <span style="color:red">Readonly</span><br />';

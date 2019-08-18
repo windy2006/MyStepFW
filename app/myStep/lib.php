@@ -1,6 +1,6 @@
 <?php
 namespace app\myStep;
-global $info_app, $no_db, $p, $q, $setPlugin;
+global $info_app, $no_db, $s, $p, $q, $setPlugin, $path_admin;
 
 if(!is_array($info_app)) $info_app = array();
 if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($p, '/'));
@@ -12,6 +12,18 @@ $setPlugin = !in_array($func, ['language', 'captcha']);
 $no_db = 'y';
 
 \myStep::setPara();
+
+switch($s->router->mode) {
+    case 'rewrite':
+        $path_admin = ROOT_WEB.'manager/';
+        break;
+    case 'path_info':
+        $path_admin = ROOT_WEB.'index.php/manager/';
+        break;
+    default:
+        $path_admin = ROOT_WEB.'index.php?/manager/';
+        break;
+}
 
 function logCheck($show = true) {
     $user = \r::s('ms_user');

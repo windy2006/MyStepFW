@@ -25,6 +25,8 @@ return array (
     'plugin_delete_done' => 'The plugin has been deleted.',
     'plugin_upload_done' => 'The plugin has been uploaded.',
     'plugin_upload_fail' => 'The plugin uploading failed.',
+    'plugin_installed' => 'The plugin has been installed。',
+    'plugin_uninstalled' => 'The plugin has been uninstalled。',
     'plugin_check_ok' => '<span style="color:green">The plugin check passed, you may install it any time.</span>',
     'plugin_check_fail' => '<span style="color:red">The plugin checking failed, the plugin cannot be install, please corrent the problem and click the "Recheck" button</span>',
 

@@ -239,7 +239,7 @@ class myStep extends myController {
 		$time_exec = getTimeDiff($this->time_start);
 		$mem_peak = memory_get_peak_usage();
 		$this->gzOut($this->setting->web->gzip_level, $query_count, $time_exec, $mem_peak);
-		unset($GLOBALS['db'],$GLOBALS['cache']);
+		unset($GLOBALS['db'], $GLOBALS['cache']);
 		if(is_callable(array($this, 'shutdown'))) $this->shutdown();
 		exit();
 	}
@@ -559,7 +559,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$module = array_shift($path);
 		if(isset(self::$modules[$module])) {
 			global $mystep, $db, $cache;
-			include(self::$modules[$module]);
+			require(self::$modules[$module]);
+			exit();
 		} else {
 			self::$goto_url = '/';
 		}
@@ -807,11 +808,9 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		}
 
 		if(is_callable(array($mystep, 'preload'))) $mystep->preload();
-
 		if(is_null($setPlugin)) $setPlugin = true;
-		$mystep->start($setPlugin);
-
 		if(is_file(PATH.'config.php')) $mystep->setting->merge(PATH.'config.php');
+        $mystep->start($setPlugin);
 
 		$mystep->addCSS(STATICS.'css/bootstrap.css');
 		$mystep->addCSS(STATICS.'css/font-awesome.css');
@@ -843,7 +842,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 */
 	public static function getModule($m) {
 		global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $db, $cache;
-		$m = preg_replace('#/.*$#', '', $m);
+		$m = preg_replace('#(/|&|\?).*$#', '', $m);
 		$files = [
 			PATH.'module/'.$setting_tpl['style'].'/'.$m.'.php',
 			PATH.'module/'.$setting_tpl['style'].'/'.($info_app['path'][0]??'').'.php',

@@ -8,7 +8,7 @@ class plugin_test implements interface_plugin {
         );
         $flag = true;
         foreach($theList as $cur) {
-            if(is_writeable(dirname(__FILE__).'/'.$cur)) {
+            if(myFile::rewritable(dirname(__FILE__).'/'.$cur)) {
                 $result .= $cur . ' - <span style="color:green">Writable</span><br />';
             } else {
                 $result .= $cur . ' - <span style="color:red">Readonly</span><br />';
@@ -18,11 +18,11 @@ class plugin_test implements interface_plugin {
         return $flag;
     }
     public static function install(){
-        myFile::mkdir(PLUGIN.'test/dir3');
-        myFile::mkdir(PLUGIN.'test/dir4');
+        myFile::mkdir(PLUGIN.'test/dir1');
+        myFile::mkdir(PLUGIN.'test/dir2');
     }
     public static function uninstall(){
-        myFile::del(PLUGIN.'test/dir3');
-        myFile::del(PLUGIN.'test/dir4');
+        myFile::del(PLUGIN.'test/dir1');
+        myFile::del(PLUGIN.'test/dir2');
     }
 }

@@ -13,32 +13,33 @@
 
 /**
   文件处理
-		$this->__get                                                // return the value of any public variant or from the info variant
-		$this->__toString                                           // return the value of content
-		self::rootPath($mode = false)                               // return the real path of document root
-		self::realPath($file, $mode = false)                        // return the real and safe path of some file
-		self::mkdir($dir)                                           // make a new directory with recursive feature
-		self::getMime($file)                                        // return the mime type of the file
-		self::getAttrib($file, $show_txt = false)                   // return the attrib of the file
-		self::setAttrib($file, $attrib)                             // set the attrib of the file
-		self::getHeader($url, $mode = true)                         // return the headers of any remote connection
-		self::getSize($file, $format = ture)                        // return the size of the file
-		self::formatSize($size, $precision=2)                       // return the formatted size like 12.34MB
-		self::getByte($size)                                        // return the byte of any formatted size
-		self::copy($source, $dest, $overwrite = false)              // copy any file or directory to another path
-		self::del($file)                                            // delete any file or directory
-		self::rename($file, $newname)                               // rename file or directory
-		$this->save()                                               // save current content to the current file
-		self::saveFile($file, $content='', $mode='wb')              // save some content to some file
-		$this->get()                                                // get the content from current file
-		self::getLocal($file, $length=0, $offset=0)                 // get the content from the local file
-		self::getRemote($url, $header, $method, $data, $timeout)    // get the content from the remote file
-		self::getRemote_curl($url, $data='', $header=array())       // get the content from the remote file
-		self::find($filter='', $dir='./', $recursive=false)         // return a list of the specified files for specified directory
-		self::getRemoteFile($remote_file, $local_file)              // get remote file to local
-		self::judgeChild($dir, $only_dir = true)                    // To judge is there any file or subdirectory in a diretory
-		self::getTree($dir='./')                                    // Get the info of the files in some directory
-		self::removeBom($str)                                       // remove the bom of utf-8 file content
+    $this->__get                                                // return the value of any public variant or from the info variant
+    $this->__toString                                           // return the value of content
+    self::rootPath($mode = false)                               // return the real path of document root
+    self::realPath($file, $mode = false)                        // return the real and safe path of some file
+    self::mkdir($dir)                                           // make a new directory with recursive feature
+    self::getMime($file)                                        // return the mime type of the file
+    self::getAttrib($file, $show_txt = false)                   // return the attrib of the file
+    self::setAttrib($file, $attrib)                             // set the attrib of the file
+    self::getHeader($url, $mode = true)                         // return the headers of any remote connection
+    self::getSize($file, $format = ture)                        // return the size of the file
+    self::formatSize($size, $precision=2)                       // return the formatted size like 12.34MB
+    self::getByte($size)                                        // return the byte of any formatted size
+    self::copy($source, $dest, $overwrite = false)              // copy any file or directory to another path
+    self::del($file)                                            // delete any file or directory
+    self::rename($file, $newname)                               // rename file or directory
+    $this->save()                                               // save current content to the current file
+    self::saveFile($file, $content='', $mode='wb')              // save some content to some file
+    $this->get()                                                // get the content from current file
+    self::getLocal($file, $length=0, $offset=0)                 // get the content from the local file
+    self::getRemote($url, $header, $method, $data, $timeout)    // get the content from the remote file
+    self::getRemote_curl($url, $data='', $header=array())       // get the content from the remote file
+    self::find($filter='', $dir='./', $recursive=false)         // return a list of the specified files for specified directory
+    self::getRemoteFile($remote_file, $local_file)              // get remote file to local
+    self::judgeChild($dir, $only_dir = true)                    // To judge is there any file or subdirectory in a diretory
+    self::getTree($dir='./')                                    // Get the info of the files in some directory
+    self::removeBom($str)                                       // remove the bom of utf-8 file content
+    self::rewritable($file)                                     // Check if a file or directory is rewritable
 */
 class myFile {
 	const
@@ -906,4 +907,33 @@ class myFile {
 		//return preg_replace('/^\xEF\xBB\xBF/', '',$str);
 		return ltrim((STRING)$str,"\XEF\XBB\XBF");
 	}
+
+    /**
+     * 检测某文件或目录是否可写
+     * @param $file
+     * @return bool
+     */
+	public static function rewritable($file) {
+	    $flag = false;
+	    if(is_file($file)) {
+            $flag = is_writable($file);
+        } else {
+	        if(is_dir($file)) {
+	            $dir = $file;
+            } else {
+                $dir = dirname($file);
+                $n = 10;
+                while(!is_dir($dir) && --$n>0) {
+                    $dir = dirname($dir);
+                }
+            }
+            $tmpfname = tempnam($dir, 'chk');
+            if($fp = @fopen($tmpfname, "w")) {
+                $flag = true;
+                fclose($fp);
+                unlink($tmpfname);
+            }
+        }
+        return $flag;
+    }
 }

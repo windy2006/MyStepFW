@@ -1,4 +1,5 @@
 <?php
+global $path_admin;
 $method = '';
 if(isset($info_app['path'][3])) $method = $info_app['path'][3];
 
@@ -48,7 +49,7 @@ switch($method) {
                 'name' => $info['name'],
                 'intro' => $info['intro'],
             ), true);
-            myStep::redirect(ROOT_WEB.'manager/function/plugin/');
+            myStep::info($mystep->getLanguage('plugin_installed'), $path_admin.'function/plugin/');
         }
         $check = $class::check($check_info);
         $t->assign('check', $check_info);
@@ -58,7 +59,7 @@ switch($method) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
-            myStep::redirect(ROOT_WEB.'manager/function/plugin/');
+            myStep::redirect($path_admin.'function/plugin/');
         }
         $t->assign('', $info);
         if(!is_file(PLUGIN.$idx.'/config.php')) {
@@ -88,7 +89,7 @@ switch($method) {
     case 'active':
         $active = $mydb->result('idx='.$idx, 'active');
         $mydb->update('idx='.$idx, array('active' => 1 - (int)$active));
-        myStep::redirect(ROOT_WEB.'manager/function/plugin/');
+        myStep::redirect($path_admin.'function/plugin/');
         break;
     case 'delete':
         myFile::del(PLUGIN.$idx);
@@ -97,7 +98,7 @@ switch($method) {
     case 'uninstall':
         $mydb->delete('idx='.$idx);
         call_user_func(array($class, 'uninstall'));
-        myStep::redirect(ROOT_WEB.'manager/function/plugin/');
+        myStep::info($mystep->getLanguage('plugin_uninstalled'), $path_admin.'function/plugin/');
         break;
     case 'pack':
         if(!empty($idx) || is_dir(PLUGIN.$idx)) {

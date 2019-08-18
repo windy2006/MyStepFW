@@ -23,6 +23,7 @@ class myRouter extends myBase {
 	use myTrait;
 
 	public
+        $query = '',
         $route = array();
 
 	protected
@@ -31,7 +32,6 @@ class myRouter extends myBase {
 			'int' => '(\d+)',
 			'str' => '(\w+)'
 		),
-		$query = '',
 		$setting = array(),
 		$rules = array(),
 		$info = array('app'=>'','path'=>'','para'=>array());
@@ -49,7 +49,7 @@ class myRouter extends myBase {
 		if(!isset($setting['delimiter_para'])) $setting['delimiter_para'] = '&';
 
         $qstr = trim(myReq::svr('QUERY_STRING'));
-        $path_info = myReq::server('PATH_INFO');
+        $path_info = myReq::svr('PATH_INFO');
         if(empty($path_info)) {
             $path_info = myReq::server('ORIG_PATH_INFO');
             $path_info = str_replace(myReq::server('SCRIPT_NAME'), '', $path_info);
@@ -68,6 +68,7 @@ class myRouter extends myBase {
         $q = $match[4] ?? '';
         parse_str($q, $_GET);
 
+        $_SERVER["QUERY_STRING"] = preg_replace('#^.+(\?|&)(.+)$#', '\2', $qstr);
         $this->route = compact('qstr','p', 'q');
         $this->query = $qstr;
 		$this->setting = $setting;

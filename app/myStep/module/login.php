@@ -1,12 +1,12 @@
 <?php
-$path_admin = '/manager/';
-if(isset($_GET['out'])) {
+global $path_admin;
+if(r::svr('QUERY_STRING')=='out') {
     r::removeCookie('ms_user');
     r::sessionEnd();
     myStep::info($mystep->getLanguage('login_logout'), $path_admin);
 } elseif(r::s('ms_user')!='') {
     myStep::redirect($path_admin);
-} elseif(myReq::check('post')) {
+} elseif(r::check('post')) {
     $captcha = strtolower(r::p('captcha'));
     $err_no = 0;
     if(!empty($captcha) && $captcha == strtolower(r::s('captcha'))) {

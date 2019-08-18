@@ -57,11 +57,11 @@
                 <td><!--list_2_name--></td>
                 <td><!--list_2_ver--></td>
                 <td><!--list_2_intro--></td>
-                <td align="center">
-                    <a href="manager/function/plugin/view/?idx=<!--list_2_idx-->">安装</a>
-                    <a href="manager/function/plugin/uninstall/?idx=<!--list_2_idx-->" onclick="return confirm('本功能主要用于清除安装未成功的插件残留，可能会造成一些错误记录！ 请按确定继续。')">清除</a>
-                    <a href="manager/function/plugin/delete/?idx=<!--list_2_idx-->" onclick="return confirm('是否确认删除当前插件？')">删除</a>
-                    <a href="manager/function/plugin/pack/?idx=<!--list_2_idx-->">打包</a>
+                <td class="btn-group">
+                    <a class="btn btn-sm btn-info" href="manager/function/plugin/view/?idx=<!--list_2_idx-->">安装</a>
+                    <a class="btn btn-sm btn-info" href="manager/function/plugin/uninstall/?idx=<!--list_2_idx-->" onclick="return confirm('本功能主要用于清除安装未成功的插件残留，可能会造成一些错误记录！ 请按确定继续。')">清除</a>
+                    <a class="btn btn-sm btn-info" href="manager/function/plugin/delete/?idx=<!--list_2_idx-->" onclick="return confirm('是否确认删除当前插件？')">删除</a>
+                    <a class="btn btn-sm btn-info" href="manager/function/plugin/pack/?idx=<!--list_2_idx-->">打包</a>
                 </td>
             </tr>
 <!--loop:end-->

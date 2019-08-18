@@ -25,6 +25,8 @@ return array (
     'plugin_delete_done' => '插件已删除！',
     'plugin_upload_done' => '插件上传成功！',
     'plugin_upload_fail' => '插件上传失败！',
+    'plugin_installed' => '插件安装成功！',
+    'plugin_uninstalled' => '插件卸载成功！',
     'plugin_check_ok' => '<span style="color:green">插件检测通过，可以正常安装！</span>',
     'plugin_check_fail' => '<span style="color:red">由于未能完全通过检测，当前插件有可能无法正确安装，请根据检测信息提示修正相关问题后，点击“复查”按钮！！</span>',
 
