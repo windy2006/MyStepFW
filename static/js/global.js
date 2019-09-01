@@ -50,9 +50,9 @@ function $tag(name, theOLE) {
 }
 
 //获取某样式元素集合
-function $class(name, theOLE) {
-    if(typeof(theOLE)!="object") theOLE = document;
-    return theOLE.getElementsByClassName(name);
+function $class(name, context) {
+    if(typeof(context)!="object") context = document;
+    return context.getElementsByClassName(name);
 }
 
 //判断变量是否为数组
@@ -69,6 +69,18 @@ String.prototype.blen = function() {
 //去除字符串首尾空字符
 String.prototype.trim= function(){
     return this.replace(/^\s+|\s+$/g, "");
+}
+
+//字符串赋值
+String.prototype.printf = function() {
+    var num = arguments.length;
+    var str = this;
+    for (var i = 0; i < num; i++) {
+        var pattern = "%" + (i+1);
+        var re = new RegExp(pattern, "g");
+        str = str.replace(re, arguments[i]);
+    }
+    return str;
 }
 
 //格式化日期
@@ -103,18 +115,6 @@ Array.prototype.append = function(newArray) {
         this[this.length] = newArray;
     }
     return;
-}
-
-//字符串赋值
-String.prototype.printf = function() {
-    var num = arguments.length;
-    var str = this;
-    for (var i = 0; i < num; i++) {
-        var pattern = "%" + (i+1);
-        var re = new RegExp(pattern, "g");
-        str = str.replace(re, arguments[i]);
-    }
-    return str;
 }
 
 // 格式化金额
@@ -184,7 +184,7 @@ function openDialog(url, width, height, mode) {
             win = window.showModelessDialog(url, window, sOrnaments);
         }
     } catch(e) {
-        win = OpenWindow(url, width, height);
+        win = openWindow(url, width, height);
     }
     return win;
 }
@@ -195,6 +195,7 @@ function openWindow(url,width,height) {
     return win;
 }
 
+//程序终端指定时间
 function sleep(the_time) {
     var over_time = new Date(new Date().getTime() + the_time);
     while(over_time > new Date()) {}
@@ -455,10 +456,10 @@ function reportError(msg, url, line) {
     return true;
 }
 
-//检测setting后运行
+//检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
 function checkNrun(func, params) {
     global.timer = setInterval(function(){
-        if(typeof(setting)!='undefined') {
+        if(typeof(language)!='undefined' && typeof(setting)!='undefined') {
             window[func].apply(func, params);
             clearInterval(global.timer);
         }

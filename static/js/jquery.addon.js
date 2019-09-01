@@ -178,25 +178,6 @@
 })(jQuery);
 
 /**
- * serialize form data for the use of json
- */
-$.fn.serializeObject = function() {
-    var o = {};
-    var a = this.serializeArray();
-    $.each(a, function() {
-        if (o[this.name]) {
-            if (!o[this.name].push) {
-                o[this.name] = [ o[this.name] ];
-            }
-            o[this.name].push(this.value || '');
-        } else {
-            o[this.name] = this.value || '';
-        }
-    });
-    return o;
-};
-
-/**
  * load JS in batch
  */
 jQuery.setJS = function(list, callback) {
@@ -305,6 +286,25 @@ jQuery.cookie = function(name, value, options) {
         }
         return cookieValue;
     }
+};
+
+/**
+ * serialize form data for the use of json
+ */
+$.fn.serializeObject = function() {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name]) {
+            if (!o[this.name].push) {
+                o[this.name] = [ o[this.name] ];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
 };
 
 jQuery.fn.outerHTML = function(s) {

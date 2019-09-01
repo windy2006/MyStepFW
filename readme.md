@@ -79,8 +79,46 @@ PHP常量：
 
 JS变量：
 --------
+相关变量是通过脚本在页面被调取时动态生成，在调用时建议在onload事件或jQuery的$(function(){<!--code-->})中调用
 - language - 调用系统语言设置（可自动扩展app语言包）
 - setting - 调用系统设置 （app可通过$setting['js']扩充）
+
+JS函数：
+--------
+- getPath(lvl) - 获取相对于网站根的到调用函数页面所在路径的lvl级路径
+- $id(id) - 获取对应id的页面元素
+- $name(name, idx) - 获取对应name的页面元素（组），idx可为first，last，数字索引，否则返回全部符合的元素组
+- $tag(name, context) - 依照context（默认为document）获取对应tag的页面元素组
+- isArray(para) - 判断变量是否为数组
+- loadingShow(info) - 显示锁屏信息
+- openDialog(url, width, height, mode) - 开启模态窗口
+- openWindow(url,width,height) - 新开窗口
+- sleep(the_time) - 程序终端指定时间
+- rndNum(min,max) - 生成指定范围内的随机数字
+- rndStr(len, t_lst, c_lst) - 生成随机字符串（可自定义采样内容）
+- watermark(obj, rate, copyright, char_c, jam_tag) - 添加字符串水印
+- md5(str) - 生成str的md5编码
+- debug(para, mode) - 检测指定变量para的内容
+- checkObj(obj, func_show) - 查看对象属性
+- reportError(msg, url, line) - 错误信息处理  
+- checkNrun(func, params) - 检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
+- 对象方法扩展 - 针对 String，Data，Number，Array 等对象
+   - string.blen - 返回某字符串的二进制长度
+   - string.trim - 去除字符串首尾空字符
+   - string.printf - 字符串赋值
+   - data.format - 格式化日期（YYYY-MM-dd hh:mm:ss）
+   - array.append - 扩展数组
+   - number.formatMoney - 格式化金额
+- jQuery扩展 - 包括功能扩展（$.xxxx）和对象方法扩展（$obj.xxx）两类
+   - $.toJSON - 将指定对象转换为json
+   - $.evalJSON - 将json字符串转换为对象或数组
+   - $.setJs - 批量顺序加载js脚本
+   - $.setCss - 批量加载css样式表
+   - $.vendor(name, option) - 加载vender目录下名称为name的第三方js扩展，可根据option判断是否同时加载样式表并调用回调函数
+   - $.cookie(name, value, options) - cookie管理（读取、添加、修改、删除）
+   - $obj.serializeObject - 将jQuery对象序列化（如form）
+   - $obj.outerHTML - 返回jQuery对象的外部超文本代码
+   - $obj.cssText - 为jQuery对象批量添加CSS
 
 路由：
 --------
