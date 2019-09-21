@@ -164,6 +164,10 @@ class myRouter extends myBase {
                 if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
                     $rule['idx'] = array_shift($match);
                 }
+                if(!is_dir(APP.$rule['idx'])) {
+                    myStep::info('The specified APP cannot be found!');
+                    //$this->error('The specified APP cannot be found!', true);
+                }
 				$info_app = include(APP.$rule['idx'].'/info.php');
 				$info_app['path'] = explode('/', trim($this->route['p'],'/'));
 				$info_app['route'] = $this->route['p'];

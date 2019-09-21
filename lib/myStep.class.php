@@ -406,9 +406,21 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 * @param string $url
 	 */
 	public static function info($msg, $url = '') {
-		global $mystep;
+		global $mystep, $s;
 		ob_end_clean();
-		if($mystep==null) $mystep = new myController();
+		if($mystep==null) {
+		    $mystep = new myController();
+            $paras = [
+                'web_title' => $s->web->title,
+                'web_url' => $s->web->url,
+                'charset' => $s->gen->charset,
+                'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
+                'lng_page_info' => 'Message',
+                'lng_page_info_refresh' => 'The page will be redirected within <span id="countdown">X</span> Seconds, <a id="url" href="#">Redirect Now</a>',
+            ];
+        } else {
+            $paras = [];
+        }
 		$t = new myTemplate(array(
 			'name' => 'info',
 			'path' => APP.'myStep/template/',
@@ -418,10 +430,14 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			$url = myReq::server('HTTP_REFERER');
 			if(is_null($url)) $url = '/';
 		}
+        foreach($paras as $k => $v) {
+            $t->assign($k, $v);
+        }
 		$t->assign('msg', $msg);
 		$t->assign('url', self::setURL($url));
 		$mystep->show($t);
 		$mystep->end();
+		exit;
 	}
 
 	/**
