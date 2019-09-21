@@ -16,7 +16,7 @@
 	$this->getInstance($calledClass)                 // 取得类实例
 	$this->start($setPlugin)                         // 框架执行入口，初始化所有变量
 	$this->show(myTemplate $tpl)                     // 通过模板类显示页面
-	$this->display(myTemplate $tpl)                  // 通过模板类输出页面内容
+	$this->parseTpl(myTemplate $tpl)                 // 通过模板类输出页面内容
 	$this->end()                                     // 框架终止，销毁相关变量
 	$this->login($user_id, $user_pwd)                // 登录接口
 	$this->logout()                                  // 退出登录接口
@@ -189,7 +189,7 @@ class myStep extends myController {
 	 * @param myTemplate $tpl
 	 * @return mixed|string
 	 */
-	public function display(myTemplate $tpl) {
+	public function parseTpl(myTemplate $tpl) {
 		$args = func_get_args();
 		array_shift($args);
 		$paras = [
@@ -501,10 +501,10 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 				'path_layer' => count(explode('/',trim(ROOT_WEB, '/'))),
 				'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
 				'path_app' => str_replace(myFile::rootPath(),'/',APP.$module),
-				'js' => $setting['setting']['js'] ?? array(),
 			);
+			if(isset($setting['setting']['js'])) $setting_js = array_merge($setting_js, $setting['setting']['js']);
 
-			$result = 'var setting = '.myString::toJson($setting_js).';';
+            $result = 'var setting = '.myString::toJson($setting_js).';';
 			myFile::saveFile($cache, $result, 'wb');
 			unset($setting, $setting_js);
 		}
@@ -549,11 +549,11 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		exit;
 	}
 
-	/**
-	 * 框架模块调用接口
-	 * @param $m
-	 * @param string $dummy
-	 */
+    /**
+     * 框架模块调用接口
+     * @param $m
+     * @param string $dummy
+     */
 	public static function module($m, $dummy = '') {
 		$path = explode('/', trim($m, '/'));
 		$module = array_shift($path);
@@ -562,7 +562,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			require(self::$modules[$module]);
 			exit();
 		} else {
-			self::$goto_url = '/';
+		    self::redirect('/');
 		}
 	}
 

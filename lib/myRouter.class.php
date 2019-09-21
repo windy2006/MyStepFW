@@ -160,7 +160,10 @@ class myRouter extends myBase {
 	public function check($lib_list = array()) {
 		foreach($this->rules as $rule) {
 			if(preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)) {
-				array_shift($match);
+                array_shift($match);
+                if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
+                    $rule['idx'] = array_shift($match);
+                }
 				$info_app = include(APP.$rule['idx'].'/info.php');
 				$info_app['path'] = explode('/', trim($this->route['p'],'/'));
 				$info_app['route'] = $this->route['p'];

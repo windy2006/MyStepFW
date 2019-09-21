@@ -29,31 +29,6 @@
 - 自定义路径模式 - index.php（调用myStep::init()） -> app/[name]/lib.php（应用目录下的预载文件，调用myStep::setPara()，可在此函数调用后，对部分参数做相关修正）-> myStep::getModule()（可以添加其他前置检验函数）
 - 程序路径模式 - index.php（调用myStep::init()） -> app/[name]/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
 
-重要方法：
---------
-在 myStep 类中除常用控制器方法外，还有几个重要方法需要特别说明（未提及的方法可参见功能类文档）
-- start($setPlugin) - 执行于脚本主程序开始之前，用于设置框架类及其方法的调用别名，设定错误报告模式，加载应用对应插件，初始化cookie和session，声明数据库和缓存实例（$db, $cache），以及为状态变量赋值
-- show(myTemplate $tpl) - 用于加载网站基本参数至模版实例，并将结果直接显示（在此可添加针对显示内容的预处理方法）；同时也检测并按需更新应用脚本文件（[appName].js 和 [appName].css，详情见相关专题）
-- display(myTemplate $tpl) - 与 show 方法类似，但是返回通过模版实例所生成的页面内容，而不是直接显示
-- setLink($content) - 针对所生成页面的链接，根据设定的链接模式（rewrite，pathinfo或querystring）进行处理，页面模版中只要按照rewrite模式书写，在页面显示时将自动通过本预处理方法调整为对应设置的链接。
-- end() - 脚本结束时所用的方法，搜集并对比运行结束时的信息，结束并清空变量，并智能调用用户扩展类中自定义的shutdown()方法
-- info($msg, $url) - 执行结果或提示信息显示，并在5秒后自动跳转到对应的链接
-- redirect($url, $code) - 脚本内链接跳转，如$url为空则退回来路链接；$code默认是302临时跳转，可根据需要改变。
-- init() - 静态方法，预初始化基本设置信息（如发现有错误将自动调整），声明类加载模式，如为首次执行框架的话，将自动跳转到初始设置页面
-- go() - 框架执行入口，加载设置信息，判断静态文件并直接显示，否则根据路由规则调用相关脚本
-- setPara() - 声明框架实例，默认直接调用myStep类，也可在对应APP中扩展，框架会自动调用APP目录下"[appName].class.php"中与APP同名的类，如存在preload方法，则优先调用。将APP配置覆盖全局配置，然后再调用start方法，同时声明预加载的css和js脚本文件以及模版的初始设置。
-- vendor() - 调用位于VENDOR目录下的第三方功能类。
-- getModule($m) - 自定义路由处理函数（也可以通过自定义方法处理自定义路由，详情参见"自定义路由"专题），机制如下：
-   - 传入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，即[any]部分，但需要注意的是在本方法中，$m 被截取为 path1。此参数可直接在自定义的路由处理脚本内调用，但如需在下级函数中调用，需要先进行global处理。
-   - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $setting_tpl 中）
-   - 本方法将按照如下顺序调用处理脚本（发现可用脚本后将立即调用并停止试探）
-      - app路径/module/模版样式/$m.php（$m 为输入参数）
-      - app路径/module/模版样式/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
-      - app路径/module/$m.php（$m 为输入参数）
-      - app路径/module/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
-      - app路径/module/模版样式/index.php（模版样式为设置中对应的内容）
-      - app路径/module/index.php
-
 PHP常量：
 --------
 - PATH - 当前应用路径
@@ -76,6 +51,66 @@ PHP常量：
 - $cache - 数据缓存类，在函数初始化时根据设置连接，采用代理模式，可扩展
 - $setting_tpl - 模版参数，从 app 设置中调用，并继承于全局变量
 - $setting_cache - 模版缓存参数，从 app 设置中调用，并继承于全局变量
+
+基础类：
+--------
+myBase为抽象类，可为所有其他子类提供统一的构建方法和错误处理；myTrait为扩展类，可为所调用的类提供一整套魔术方法
+- myBase->__construct - 将构造函数引导至init方法
+- myBase->setErrHandler - 设置错误处理函数
+- myBase->error - 通过异常处理类处理代码错误
+- myTrait->__set - 添加类动态变量，即没有在类中声明过的变量
+- myTrait->__get - 调用类动态变量，如变量名为instatnce，则直接返回新的当前类实例
+- myTrait->__destruct - unset类时，注销所有类内部变量
+- myTrait->__call - 智能判断并调用方法别名，动态方法或类外部函数
+- myTrait->addMethod - 动态添加类方法
+- myTrait->regAlias - 注册类内方法别名
+
+控制类：
+--------
+myController类为核心控制类，具体用法请参加功能类文档，其中几个重要方法说明如下：
+- 页面附加内容设置 - 包括 setAddedContent 和 pushAddedContent 两个方法，可设置指定关键字的内容，并将相关内容插入到模版中"page_关键字"的位置
+- 语言文件管理 - 包括 setLanguage，setLanguagePack 和 getLanguage 三个方法，可设置语言、语言包或调用指定语言、指定索引的文字
+- 应用接口设置 - 包括 regApi 和 runApi 两个方法，可通过路由的 /api/[any] 调用
+- 模块设置 - 包括 regModule 和 module 两个方法，可通过路由的 /module/[any] 调用
+- 模版标签设置 - 包括 regTag 一个方法，将在调用show方法时加载给模版类
+- 链接设置 - 包括 regUrl 和 url 两个方法，通过指定方法和相关参数生成对应链接
+- 插件设置 - 包括 regPlugin 和 plugin 两个方法，每个插件是应用接口，模块，标签和链接的组合
+- 代码钩子设置 - 包括 setFunction 和 run 两个方法，将在指定的位置（start，end，page等，也可自定义）依次（顺序或倒序）执行指定的方法
+- 用户账户管理 - 包括 regLog，login，logout 和 chg_psw 四个方法，用于与第三方用户系统对接
+- 脚本管理 - 包括 addCSS，removeCSS，clearCSS，CSS，addJS，removeJS，clearJS 和 JS 八个方法，用于动态加载js和css脚本
+- 页面控制 - 包括 start，show 和 end 三个方法，用于页面起始、显示和结束
+- etag方法 - 用于赋予或调用指定标识的浏览器缓存
+- file方法 - 直接显示指定文件
+- guid方法 - 生成唯一ID
+- setOp方法 - OPcache设置与调用
+- regClass方法 - 设置类自动载入规则
+- setAlias方法 - 设置类调用别名
+- header方法 - 返回指定的相应头
+
+核心类：
+--------
+myStep类扩展自myController类，具体用法请参加功能类文档，其中几个重要方法说明如下：
+- start($setPlugin) - 执行于脚本主程序开始之前，用于设置框架类及其方法的调用别名，设定错误报告模式，加载应用对应插件，初始化cookie和session，声明数据库和缓存实例（$db, $cache），以及为状态变量赋值
+- show(myTemplate $tpl) - 用于加载网站基本参数至模版实例，并将结果直接显示（在此可添加针对显示内容的预处理方法）；同时也检测并按需更新应用脚本文件（[appName].js 和 [appName].css，详情见相关专题）
+- parseTpl(myTemplate $tpl) - 与 show 方法类似，但是返回通过模版实例所生成的页面内容，而不是直接显示
+- setLink($content) - 针对所生成页面的链接，根据设定的链接模式（rewrite，pathinfo或querystring）进行处理，页面模版中只要按照rewrite模式书写，在页面显示时将自动通过本预处理方法调整为对应设置的链接。
+- end() - 脚本结束时所用的方法，搜集并对比运行结束时的信息，结束并清空变量，并智能调用用户扩展类中自定义的shutdown()方法
+- info($msg, $url) - 执行结果或提示信息显示，并在5秒后自动跳转到对应的链接
+- redirect($url, $code) - 脚本内链接跳转，如$url为空则退回来路链接；$code默认是302临时跳转，可根据需要改变。
+- init() - 静态方法，预初始化基本设置信息（如发现有错误将自动调整），声明类加载模式，如为首次执行框架的话，将自动跳转到初始设置页面
+- go() - 框架执行入口，加载设置信息，判断静态文件并直接显示，否则根据路由规则调用相关脚本
+- setPara() - 声明框架实例，默认直接调用myStep类，也可在对应APP中扩展，框架会自动调用APP目录下"[appName].class.php"中与APP同名的类，如存在preload方法，则优先调用。将APP配置覆盖全局配置，然后再调用start方法，同时声明预加载的css和js脚本文件以及模版的初始设置。
+- vendor() - 调用位于VENDOR目录下的第三方PHP功能类。
+- getModule($m) - 自定义路由处理函数（也可以通过自定义方法处理自定义路由，详情参见"自定义路由"专题），机制如下：
+   - 传入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，即[any]部分，但需要注意的是在本方法中，$m 被截取为 path1。此参数可直接在自定义的路由处理脚本内调用，但如需在下级函数中调用，需要先进行global处理。
+   - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $setting_tpl 中）
+   - 本方法将按照如下顺序调用处理脚本（发现可用脚本后将立即调用并停止试探）
+      - app路径/module/模版样式/$m.php（$m 为输入参数）
+      - app路径/module/模版样式/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
+      - app路径/module/$m.php（$m 为输入参数）
+      - app路径/module/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
+      - app路径/module/模版样式/index.php（模版样式为设置中对应的内容）
+      - app路径/module/index.php
 
 JS变量：
 --------
@@ -153,8 +188,9 @@ JS函数：
 
 接口：
 --------
+如果接口规则是以"/[str]/"开头，则直接将该规则视为"[str]"所对应APP向下的接口（参见模块接口）。
 - /api/[any] - 自定义应用接口，[any]为接口名及参数，可通过_GET或_POST接收参数
-- /module/[any] - 模块接口，[any]为模块名及参数
+- /[str]/module/[any] - 模块接口，[str]为app名称，[any]为模块名及参数
 - /setting/[any] - 设置接口，[any]为应用名称，获取该应用json格式的设置
 - /captcha/[any] - 验证码图像接口，[any]为随机数，保证新码生成，验证参数为$_SESSION['captcha']
 - /upload - 文件上传接口，上传文件保存在常量FILE目录

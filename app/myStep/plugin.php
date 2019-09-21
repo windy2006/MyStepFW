@@ -1,4 +1,4 @@
 <?PHP
 return array (
-  0 => 'test',
+  0 => '',
 );

@@ -5,7 +5,7 @@ $content = '';
 if(is_file($setting_tpl['path'].$setting_tpl['name'].'.tpl')) {
     $t = new myTemplate($setting_tpl, false, true);
     r::s('sign_upload', 'y');
-    $content = $mystep->display($t, 's', false);
+    $content = $mystep->parseTpl($t, 's', false);
     unset($t);
 }
 $list = include(PATH.'sample/idx.php');

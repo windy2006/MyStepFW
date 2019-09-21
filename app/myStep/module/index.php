@@ -56,4 +56,4 @@ if($module=='phpinfo') {
     $t->assign('err_msg', $err_msg);
     $t->assign('err_output', $err_output);
 }
-$content = $mystep->display($t, 'db,s', false);
+$content = $mystep->parseTpl($t, 'db,s', false);

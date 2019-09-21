@@ -12,7 +12,7 @@ if(is_file($script)) {
 } else {
     myStep::info($mystep->getLanguage('page_error_module'));
 }
-$content = $mystep->display($t, 's', false);
+$content = $mystep->parseTpl($t, 's', false);
 $mystep->setAddedContent('end', '
 <script language="JavaScript" src="static/js/checkForm.js"></script>
 ');

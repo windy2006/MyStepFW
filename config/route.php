@@ -34,7 +34,7 @@ $rule_list = array (
     ),
     1 => 
     array (
-      0 => '/module/[any]',
+      0 => '/[str]/module/[any]',
       1 => 'myStep::module',
     ),
     2 => 
