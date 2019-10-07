@@ -7,13 +7,13 @@ if(myReq::check('post')) {
     $config->save('php');
     myController::redirect();
 }
-$setting_tpl = array(
+$tpl_setting = array(
     'name' => 'config',
     'path' => APP.'myStep/template',
     'style' => '',
     'path_compile' => CACHE.'template/myStep/'
 );
-$t = new myTemplate($setting_tpl, $setting_cache);
+$t = new myTemplate($tpl_setting, $tpl_cache);
 
 $file = CONFIG.'config_default.php';
 $builder = CONFIG.'construct/default.php';

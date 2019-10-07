@@ -33,7 +33,7 @@ for($i=0,$m=count($guide);$i<$m;$i++) {
         $detail[$i]['detail'][$the_line[0]] = str_replace('<p>', '<p class="m-0">', $md->text($the_line[1]));
     }
 }
-$setting_tpl['name'] = 'guide';
-$t = new myTemplate($setting_tpl, false, true);
+$tpl_setting['name'] = 'guide';
+$t = new myTemplate($tpl_setting, false, true);
 $t->assign('detail', myString::toJson($detail, $s->gen->charset));
 $content = $mystep->parseTpl($t, 's', false);

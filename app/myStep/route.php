@@ -1,7 +1,7 @@
 <?php
 $preload = 'lib.php';
 $rule = array(
-    array('/api/[any]', 'myStep::api'),
+    array('/[str]/api/[any]', 'myStep::api'),
     array('/[str]/module/[any]', 'myStep::module'),
     array('/language/[str]/[any]', 'myStep::language'),
     array('/setting/[any]', 'myStep::setting'),

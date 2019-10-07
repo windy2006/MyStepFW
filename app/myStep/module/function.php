@@ -9,8 +9,8 @@ if(isset($info_app['path'][3])) $module .= '_'.$info_app['path'][3];
 if(!is_file(PATH.'template/function_'.$module.'.tpl')) {
     myStep::info($mystep->getLanguage('page_error_module'));
 }
-$setting_tpl['name'] = 'function_'.$module;
-$t = new myTemplate($setting_tpl, false, true);
+$tpl_setting['name'] = 'function_'.$module;
+$t = new myTemplate($tpl_setting, false, true);
 include($script);
 $content = $mystep->parseTpl($t, 's', false);
 $mystep->setAddedContent('end', '

@@ -19,7 +19,7 @@
 		$mycache->remove($key)                           // 删除缓存
 		$mycache->clean()                                // 清除缓存
 		$mycache->change($module, $setting)              // 变更缓存模块
-		$mycache->getData($query, $mode, $ttl)        // 数据库查询缓存
+		$mycache->getData($query, $mode, $ttl)           // 数据库查询缓存
 		$mycache->getData_func($func, $args, $ttl)       // 函数结果缓存
 */
 class myCache extends myProxy {

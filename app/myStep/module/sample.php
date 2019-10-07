@@ -1,18 +1,18 @@
 <?php
-$setting_tpl['path'] = PATH.'sample/';
-$setting_tpl['name'] = $info_app['path'][2] ?? '';
+$tpl_setting['path'] = PATH.'sample/';
+$tpl_setting['name'] = $info_app['path'][2] ?? '';
 $content = '';
-if(is_file($setting_tpl['path'].$setting_tpl['name'].'.tpl')) {
-    $t = new myTemplate($setting_tpl, false, true);
+if(is_file($tpl_setting['path'].$tpl_setting['name'].'.tpl')) {
+    $t = new myTemplate($tpl_setting, false, true);
     r::s('sign_upload', 'y');
     $content = $mystep->parseTpl($t, 's', false);
     unset($t);
 }
 $list = include(PATH.'sample/idx.php');
-$title = $list[$setting_tpl['name']] ?? 'Samples';
+$title = $list[$tpl_setting['name']] ?? 'Samples';
 
-$setting_tpl['name'] = 'index';
-$t = new myTemplate($setting_tpl, false, true);
+$tpl_setting['name'] = 'index';
+$t = new myTemplate($tpl_setting, false, true);
 foreach($list as $k => $v) {
     $t->setLoop('idx', array($k,$v));
 }

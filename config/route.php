@@ -3,12 +3,13 @@ $preload_list = array (
   'Document' => '/Users/sunkai/MyStepFW/app/Document/lib.php',
   'cms' => '/Users/sunkai/MyStepFW/app/cms/lib.php',
   'myStep' => '/Users/sunkai/MyStepFW/app/myStep/lib.php',
+  'sample' => '/Users/sunkai/MyStepFW/app/sample/lib.php',
 );
 
 $format_list = array (
-  'Document' => 
+  'sample' => 
   array (
-    'test' => '([A-Z][a-z]+)+',
+    'camel' => '[a-z]+([A-Z][a-z]+)+',
   ),
 );
 
@@ -25,11 +26,33 @@ $rule_list = array (
       ),
     ),
   ),
+  'sample' => 
+  array (
+    0 => 
+    array (
+      0 => '/mySample/[any]',
+      1 => 'app\\sample\\route',
+    ),
+    1 => 
+    array (
+      0 => '/mySample2/[any]',
+      1 => 'mystep::getModule',
+    ),
+    2 => 
+    array (
+      0 => '/[camel]',
+      1 => 
+      array (
+        0 => 'app\\sample\\perCheck,3',
+        1 => 'app\\sample\\routeTest',
+      ),
+    ),
+  ),
   'myStep' => 
   array (
     0 => 
     array (
-      0 => '/api/[any]',
+      0 => '/[str]/api/[any]',
       1 => 'myStep::api',
     ),
     1 => 
@@ -90,6 +113,10 @@ $api_list = array (
     'error' => 'app\\myStep\\getError',
     'data' => 'app\\myStep\\getData',
     'autoComplete' => 'app\\myStep\\autoComplete',
+  ),
+  'sample' => 
+  array (
+    'sample' => 'app\\sample\\api',
   ),
 );
 

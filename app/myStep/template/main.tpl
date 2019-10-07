@@ -52,6 +52,7 @@
                 <div class="dropdown-menu dropdown-menu-left">
                     <a class="dropdown-item" href="manager/guide">框架指南</a>
                     <a class="dropdown-item" href="manager/sample">功能示例</a>
+                    <a class="dropdown-item" href="sample/" target="_blank">应用示例</a>
                     <a class="dropdown-item" href="Document/" target="_blank">功能类说明</a>
                 </div>
             </li>
@@ -83,6 +84,7 @@
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="manager/guide"><span class="glyphicon glyphicon-book"></span> 框架指南</a>
                 <a class="dropdown-item" href="manager/sample"><span class="glyphicon glyphicon-book"></span> 功能示例</a>
+                <a class="dropdown-item" href="sample/" target="_blank"><span class="glyphicon glyphicon-book"></span> 应用示例</a>
                 <a class="dropdown-item" href="Document/" target="_blank"><span class="glyphicon glyphicon-book"></span> 功能类说明</a>
             </div>
         </div>
@@ -108,7 +110,7 @@ function resizeMain() {
 $(function(){
     $('[data-toggle="tooltip"]').tooltip();
     $("a[href='<!--path-->']").addClass('active');
-    $.get('index.php?api/myStep/error/'+Math.random(), function(data, status){
+    $.get('index.php?myStep/api/error/'+Math.random(), function(data, status){
         if(typeof data == 'object' && data.count > 0) {
             var badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);
             $("a[href='manager/error']").append(badge);

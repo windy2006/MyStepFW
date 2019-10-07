@@ -13,7 +13,7 @@
 
 /**
 模版解析:
-	$tpl->init($setting_tpl, $setting_cache, $allow_script)     // Set the Template Class
+	$tpl->init($setting, $cache, $allow_script)                 // Set the Template Class
 	$tpl->setLoop($key, $value, $fullset)                       // Set values for loop-blocks (in turn or batch)
 	$tpl->setIf($key, $value)                                   // Set the judging conditions for if-blocks
 	$tpl->setSwitch($key, $value)                               // Set the switch conditions for switch-blocks
@@ -39,7 +39,7 @@ class myTemplate extends myBase {
 
 	protected
 		$hash = '',
-		$setting_tpl = array('name'=>'', 'style'=>'', 'path'=>'','path_compile'=>'','file'=>'','content'=>''),
+		$setting = array('name'=>'', 'style'=>'', 'path'=>'','path_compile'=>'','file'=>'','content'=>''),
 		$tags = array(),
 		$cache = array(
 			'use' => false,
@@ -49,24 +49,24 @@ class myTemplate extends myBase {
 
 	/**
 	 * 变量初始化
-	 * @param $setting_tpl
-	 * @param bool $setting_cache
+	 * @param $setting
+	 * @param bool $cache
 	 * @param bool $allow_script
 	 */
-	public function init($setting_tpl, $setting_cache = false, $allow_script = false){
+	public function init($setting, $cache = false, $allow_script = false){
 		$this->allow_script = $allow_script;
-		if(!isset($setting_tpl['name'])) $setting_tpl['name'] = '';
-		if(!isset($setting_tpl['style'])) $setting_tpl['style'] = '';
-		if(!isset($setting_tpl['path'])) $setting_tpl['path'] = './';
-		if(!isset($setting_tpl['path_compile'])) $setting_tpl['path_compile'] = './complied';
-		if(!isset($setting_tpl['ext'])) $setting_tpl['ext'] = 'tpl';
-		$this->setting_tpl = $setting_tpl;
-		$this->setting_tpl['file'] = $setting_tpl['path'].'/'.$setting_tpl['style'].'/'.$setting_tpl['name'].'.'.$setting_tpl['ext'];
-		$this->setting_tpl['path'] = myFile::realPath($this->setting_tpl['path']);
-		$this->setting_tpl['file'] = myFile::realPath($this->setting_tpl['file']);
-		$this->setting_tpl['content'] = $this->getTemplate($this->setting_tpl['file']);
+		if(!isset($setting['name'])) $setting['name'] = '';
+		if(!isset($setting['style'])) $setting['style'] = '';
+		if(!isset($setting['path'])) $setting['path'] = './';
+		if(!isset($setting['path_compile'])) $setting['path_compile'] = './complied';
+		if(!isset($setting['ext'])) $setting['ext'] = 'tpl';
+		$this->setting = $setting;
+		$this->setting['file'] = $setting['path'].'/'.$setting['style'].'/'.$setting['name'].'.'.$setting['ext'];
+		$this->setting['path'] = myFile::realPath($this->setting['path']);
+		$this->setting['file'] = myFile::realPath($this->setting['file']);
+		$this->setting['content'] = $this->getTemplate($this->setting['file']);
 
-		$this->hash = 't'.substr(md5($this->setting_tpl['file']), 0, 10);
+		$this->hash = 't'.substr(md5($this->setting['file']), 0, 10);
 		if(!isset(self::$tpl_para[$this->hash])) {
 			self::$tpl_para[$this->hash] = array();
 			self::$tpl_para[$this->hash]['para'] = array();
@@ -74,14 +74,14 @@ class myTemplate extends myBase {
 			self::$tpl_para[$this->hash]['if'] = array();
 		}
 
-		if($setting_cache) {
+		if($cache) {
 			$this->cache['use'] = true;
-			if(!isset($setting_cache['name'])) $setting_cache['name'] = $setting_tpl['name'];
-			if(!isset($setting_cache['path'])) $setting_cache['path'] = $setting_tpl['path'].'/cache/'.$setting_tpl['style'];
-			if(!isset($setting_cache['ext'])) $setting_cache['ext'] = 'html';
-			if(!isset($setting_cache['expire'])) $setting_cache['expire'] = 300;
-			$this->cache['file'] = myFile::realPath($setting_cache['path'].'/'.$setting_cache['name'].'.'.$setting_cache['ext']);
-			$this->cache['expire'] = $setting_cache['expire'];
+			if(!isset($cache['name'])) $cache['name'] = $setting['name'];
+			if(!isset($cache['path'])) $cache['path'] = $setting['path'].'/cache/'.$setting['style'];
+			if(!isset($cache['ext'])) $cache['ext'] = 'html';
+			if(!isset($cache['expire'])) $cache['expire'] = 300;
+			$this->cache['file'] = myFile::realPath($cache['path'].'/'.$cache['name'].'.'.$cache['ext']);
+			$this->cache['expire'] = $cache['expire'];
 		}
 	}
 
@@ -198,12 +198,12 @@ class myTemplate extends myBase {
 		} elseif(!empty($file2) && is_file($file2)) {
 			return myFile::getLocal($file2);
 		} else {
-			$file1 = $this->setting_tpl['path'].'/default/'.basename($file1);
+			$file1 = $this->setting['path'].'/default/'.basename($file1);
 			if(is_file($file1)) {
 				return myFile::getLocal($file1);
 			} else {
 				if(!empty($file2)) {
-					$file2 = $this->setting_tpl['path'].'/default/'.basename($file2);
+					$file2 = $this->setting['path'].'/default/'.basename($file2);
 					if(is_file($file2)) {
 						return myFile::getLocal($file2);
 					}
@@ -219,18 +219,18 @@ class myTemplate extends myBase {
 	 * @return bool|mixed|null|string|string[]
 	 */
 	protected function compileTemplate() {
-		$cache_file = $this->setting_tpl['path_compile'].str_replace('../', '', $this->setting_tpl['style']).'/'.$this->setting_tpl['name'].'.php';
+		$cache_file = $this->setting['path_compile'].str_replace('../', '', $this->setting['style']).'/'.$this->setting['name'].'.php';
 		$cache_file = myFile::realPath($cache_file);
 		if(is_file($cache_file)) {
 			$tpl_time = preg_replace('/^.+?(\d+).+$/', '\1', myFile::getLocal($cache_file, 18));
-			if($tpl_time==filemtime($this->setting_tpl['file'])) {
+			if($tpl_time==filemtime($this->setting['file'])) {
 				return $cache_file;
 			} else {
 				myFile::del($cache_file);
 			}
 		}
 
-		$tpl_cache = $this->setting_tpl['content'];
+		$tpl_cache = $this->setting['content'];
 
 		if(!$this->allow_script) {
 			$tpl_cache = preg_replace('/<\?php.+?\?>/is', '', $tpl_cache);
@@ -368,7 +368,7 @@ mytpl;
 		$tpl_cache = $this->parseTag($tpl_cache);
 		$tpl_cache = preg_replace('/'.preg_quote($this->delimiter_l).'(\w+)'.preg_quote($this->delimiter_r).'/', '<?=$tpl_para[\'para\'][\'\1\']?>', $tpl_cache);
 		$tpl_cache = preg_replace('/[\r\n]+/', chr(10), $tpl_cache);
-		$tpl_cache = '<!--'.filemtime($this->setting_tpl['file']).'-->'.$tpl_cache;
+		$tpl_cache = '<!--'.filemtime($this->setting['file']).'-->'.$tpl_cache;
 		myFile::saveFile($cache_file, $tpl_cache, 'wb');
 		return $cache_file;
 	}
@@ -378,7 +378,7 @@ mytpl;
 	 * @return mixed
 	 */
 	public function removeCache() {
-		$cache_file = $this->setting_tpl['path'].'/cache/'.str_replace('../', '', $this->setting_tpl['style']).'/'.$this->setting_tpl['name'].'.php';
+		$cache_file = $this->setting['path'].'/cache/'.str_replace('../', '', $this->setting['style']).'/'.$this->setting['name'].'.php';
 		myFile::del($cache_file);
 		return $this;
 	}

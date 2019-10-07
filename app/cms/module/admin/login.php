@@ -25,7 +25,7 @@ if(isset($_GET['out'])) {
     myStep::info($mystep->getLanguage('login_error').'(Error No: '.$err_no.')', $path_admin.'login');
 }
 
-$setting_tpl['name'] = 'login';
-$t = new myTemplate($setting_tpl, false);
+$tpl_setting['name'] = 'login';
+$t = new myTemplate($tpl_setting, false);
 $mystep->show($t);
 $mystep->end();

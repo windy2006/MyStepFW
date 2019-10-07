@@ -746,7 +746,11 @@ class myController extends myBase {
 					if(is_file($current['path'].$class.$e)) require_once($current['path'].$class.$e);
 				}
 			});
-			if(isset($class['idx'])) $idx += $current['idx'];
+			if(isset($current['idx'])) {
+                $idx += array_map(function($str)use($current){
+                    return $current['path'].$str;
+                }, $current['idx']);
+            }
 		}
 		if(!empty($idx)) {
 			spl_autoload_register(function($class)use($idx){

@@ -5,8 +5,8 @@ if(!is_file($script)) {
     $module = 'main';
     $script = dirname(__FILE__).'/setting/main.php';
 }
-$setting_tpl['name'] = 'setting_'.$module;
-$t = new myTemplate($setting_tpl, false, true);
+$tpl_setting['name'] = 'setting_'.$module;
+$t = new myTemplate($tpl_setting, false, true);
 if(is_file($script)) {
     include($script);
 } else {

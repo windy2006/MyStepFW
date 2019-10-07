@@ -1,5 +1,4 @@
 ﻿<?PHP
-echo '预定义规则测试：<a href="'.str_replace(myFile::rootPath(),'/',ROOT).'test/CamelCase" target="_blank">点击测试</a><br />';
 $router = new myRouter();
 $router->format('hex','[a-fA-F0-9]+')
        ->rule('/test/[any]/[str]/[hex]/[yyy]/[int]', function(){

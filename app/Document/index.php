@@ -1,11 +1,10 @@
 <?php
-myStep::setPara();
 $module = $info_app['path'][1] ?? null;
 $mode = $info_app['path'][2] ?? null;
 if (is_null($mode)) $mode = 'show';
 $sp_module = ['myExcel', 'myImg'];
-$setting_tpl['name'] = 'main';
-$tpl = new myTemplate($setting_tpl, false);
+$tpl_setting['name'] = 'main';
+$tpl = new myTemplate($tpl_setting, false);
 
 if (is_null($module)) {
     set_include_path(get_include_path() . PATH_SEPARATOR . './lib/database/' . PATH_SEPARATOR . './lib/cache/');
@@ -13,8 +12,8 @@ if (is_null($module)) {
     spl_autoload_register();
     $list = f::find('*.php', PATH . 'module');
 
-    $setting_tpl['name'] = 'list';
-    $sub_tpl = new myTemplate($setting_tpl, false);
+    $tpl_setting['name'] = 'list';
+    $sub_tpl = new myTemplate($tpl_setting, false);
 
     $t = new myReflection('stdClass');
     $n = 1;
@@ -39,8 +38,8 @@ if (is_null($module)) {
                 include(PATH . 'module/' . $module . '.php');
                 $mystep->end();
             } elseif (is_file(PATH . 'module/' . $module . '.php')) {
-                $setting_tpl['name'] = 'sample';
-                $sub_tpl = new myTemplate($setting_tpl, false);
+                $tpl_setting['name'] = 'sample';
+                $sub_tpl = new myTemplate($tpl_setting, false);
                 $mystep->setAddedContent('start', '
 <link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css">
 <link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css">
@@ -66,8 +65,8 @@ if (is_null($module)) {
             }
             break;
         default:
-            $setting_tpl['name'] = 'detail';
-            $sub_tpl = new myTemplate($setting_tpl, false);
+            $tpl_setting['name'] = 'detail';
+            $sub_tpl = new myTemplate($tpl_setting, false);
             $detail = new myReflection($module);
             $methods = $detail->getFunc();
             $sub_tpl->assign('name', $module);

@@ -25,4 +25,7 @@ class plugin_test implements interface_plugin {
         myFile::del(PLUGIN.'test/dir1');
         myFile::del(PLUGIN.'test/dir2');
     }
+    public static function setPage($content){
+        return str_replace('<title>', '<title>插件调整(可关闭) - ', $content);
+    }
 }

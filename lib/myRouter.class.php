@@ -72,6 +72,8 @@ class myRouter extends myBase {
         $this->route = compact('qstr','p', 'q');
         $this->query = $qstr;
 		$this->setting = $setting;
+
+        $this->parse();
 	}
 
 	/**
@@ -166,14 +168,15 @@ class myRouter extends myBase {
                 }
                 if(!is_dir(APP.$rule['idx'])) {
                     myStep::info('The specified APP cannot be found!');
-                    //$this->error('The specified APP cannot be found!', true);
                 }
 				$info_app = include(APP.$rule['idx'].'/info.php');
 				$info_app['path'] = explode('/', trim($this->route['p'],'/'));
+                $info_app['para'] = $this->info['para'];
 				$info_app['route'] = $this->route['p'];
 				myReq::globals('info_app', $info_app);
 				if(isset($lib_list[$rule['idx']]) && is_file($lib_list[$rule['idx']])) require_once($lib_list[$rule['idx']]);
 				if(is_array($rule['method'])) {
+                    $match = array_slice($match,0,1);
 					$last = array_pop($rule['method']);
 					$flag = true;
 					foreach($rule['method'] as $each) {

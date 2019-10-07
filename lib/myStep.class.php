@@ -307,14 +307,13 @@ class myStep extends myController {
 	 */
 	public function gzOut($level = 3, $query = 0, $time = 0, $mem = 0) {
 		$encoding = myReq::server('HTTP_ACCEPT_ENCODING');
-		if($level<1 || empty($encoding) || headers_sent() || connection_aborted()) {
+		if($level<0 || empty($encoding) || headers_sent() || connection_aborted()) {
 			if(!empty($content)) ob_end_flush();
 		} else {
 			if (strpos($encoding, 'x-gzip')!==false) $encoding = 'x-gzip';
 			if (strpos($encoding, 'gzip')!==false) $encoding = 'gzip';
 			$content  = ob_get_contents();
 			if(count(ob_list_handlers())>0) ob_end_clean();
-
 			if(is_bool($this->setting->show)) {
 				$rate = ceil(strlen(gzcompress($content,$level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
 				$content = str_ireplace('</body>', '
@@ -535,10 +534,10 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 * @param $para
 	 */
 	public static function api($para) {
-		global $s;
+		global $s, $info_app;
 		$para = preg_replace('#&.+$#', '', $para);
 		$para = explode('/', trim($para, '/'));
-		$module = array_shift($para);
+		$module = $info_app['app'];
 		include(CONFIG.'route.php');
 		$result = '{"err":"Module is Missing!"}';
 		if(isset($api_list)) {
@@ -697,7 +696,9 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
             if (is_null($url)) $url = '/';
             $code = '302';
         } else {
-            $url = ROOT_WEB.self::setURL($url);
+            if(strpos(trim($url, '/'), 'index.php')!==false) {
+                $url = ROOT_WEB.self::setURL($url);
+            }
         }
         $url = preg_replace('#/+#', '/', $url);
         $url = str_replace(':/', '://', $url);
@@ -786,21 +787,21 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
 		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
 
-		global $lib_list, $info_app, $s, $router, $setting_tpl, $mystep;
+		global $lib_list, $info_app, $s, $router, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
+        define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check($lib_list)) {
 			$info_app = $router->parse();
             $info_app['route'] = $router->route['p'];
             $info_app['app'] = trim($info_app['app'],'.');
             if(empty($info_app['app']) || !is_dir(APP.$info_app['app'])) {
-                $info_app['app'] = $s->router->default_app;
-                array_unshift($info_app['path'], $info_app['app']);
+                myStep::info('The specified APP cannot be found!', ROOT_WEB);
             }
             if(is_file(APP.$info_app['app'].'/config.php')) {
                 $s->merge(APP.$info_app['app'].'/config.php');
             }
             define('PATH', APP.$info_app['app'].'/');
-            define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
+            myStep::setPara();
             require(APP.$info_app['app'].'/index.php');
 		}
 	}
@@ -809,12 +810,10 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 * 应用模块初始化参数设置
 	 */
 	public static function setPara() {
-		global $mystep, $info_app, $setting_tpl, $setPlugin;
+		global $mystep, $info_app, $tpl_setting, $tpl_cache, $setPlugin;
 		if($mystep!=null) return;
-		if(!defined('PATH')) {
-			define('PATH', APP.$info_app['app'].'/');
-			define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
-		}
+		if(!defined('PATH')) define('PATH', APP.$info_app['app'].'/');
+        if(!defined('ROOT_WEB')) define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		if(is_file(PATH.$info_app['app'].'.class.php')) {
 			require_once(PATH.$info_app['app'].'.class.php');
 			$mystep = new $info_app['app']();
@@ -845,26 +844,31 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$mystep->addJS(PATH.'asset'.$mystep->setting->template->style.'/function.js');
 		$mystep->setting->js = CACHE.'script/'.$info_app['app'].'.js';
 
-		$setting_tpl = array(
+		$tpl_setting = array(
 			'name' => $mystep->setting->template->name,
 			'path' => PATH.$mystep->setting->template->path,
 			'style' => $mystep->setting->template->style,
 			'path_compile' => CACHE.'template/'.$info_app['app'].'/'
 		);
+
+        $tpl_cache = $mystep->setting->gen->debug ? false : array(
+            'path' => CACHE.'app/'.$info_app['app'].'/html/',
+            'expire' => 60*60*24
+        );
 	}
 
 	/**
 	 * 应用模块调用
 	 */
 	public static function getModule($m) {
-		global $mystep, $setting_tpl, $setting_cache, $info_app, $s, $db, $cache;
-		$m = preg_replace('#(/|&|\?).*$#', '', $m);
+		global $mystep, $tpl_setting, $tpl_cache, $info_app, $s, $db, $cache, $router;
+		$idx = preg_replace('#(/|&|\?).*$#', '', $m);
 		$files = [
-			PATH.'module/'.$setting_tpl['style'].'/'.$m.'.php',
-			PATH.'module/'.$setting_tpl['style'].'/'.($info_app['path'][0]??'').'.php',
-			PATH.'module/'.$m.'.php',
+			PATH.'module/'.$tpl_setting['style'].'/'.$idx.'.php',
+			PATH.'module/'.$tpl_setting['style'].'/'.($info_app['path'][0]??'').'.php',
+			PATH.'module/'.$idx.'.php',
 			PATH.'module/'.($info_app['path'][0]??'').'.php',
-			PATH.'module/'.$setting_tpl['style'].'/index.php',
+			PATH.'module/'.$tpl_setting['style'].'/index.php',
 			PATH.'module/index.php',
 			''
 		];
@@ -872,7 +876,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			if(file_exists($f)) break;
 			if(empty($f))  myStep::info($mystep->getLanguage('module_missing'));
 		}
-		$tpl = new myTemplate($setting_tpl, $setting_cache);
+		$tpl = new myTemplate($tpl_setting, $tpl_cache);
 		if(count($info_app['path'])==1) $info_app['path'][1]='';
 		$tpl->assign('path', implode('/', $info_app['path']));
 		include($f);

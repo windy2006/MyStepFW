@@ -1,12 +1,12 @@
 <?php
 global $mystep, $s, $router, $info_app;
 $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
-$tpl = new myTemplate($setting_tpl, $setting_cache);
+$tpl = new myTemplate($tpl_setting, $tpl_cache);
 $info_app['path'][1] = 'install';
 if(!isset($info_app['path'][2])) $info_app['path'][2] = 0;
 reset:
-$setting_tpl['name'] = implode('_', array_slice($info_app['path'],1));
-$t = new myTemplate($setting_tpl, false);
+$tpl_setting['name'] = implode('_', array_slice($info_app['path'],1));
+$t = new myTemplate($tpl_setting, false);
 $t->allow_script = true;
 switch ($info_app['path'][2]) {
     case 0:

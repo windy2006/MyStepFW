@@ -1,8 +1,8 @@
 <?php
 $module = array_pop($info_app['path']);
 if(empty($module) || !is_file(PATH.'template/info_'.$module.'.tpl')) $module = 'index';
-$setting_tpl['name'] = 'info_'.$module;
-$t = new myTemplate($setting_tpl, false, true);
+$tpl_setting['name'] = 'info_'.$module;
+$t = new myTemplate($tpl_setting, false, true);
 if($module=='phpinfo') {
     phpinfo();
     $content = ob_get_contents();

@@ -1,19 +1,19 @@
 <?PHP
-$setting_tpl = array(
+$tpl_setting = array(
     "name" => 'test',
     "path" => PATH.'data/template/',
     'path_compile' => CACHE.'/template/'.$info_app['app'].'/test/'
 );
 
-$setting_cache = array(
+$tpl_cache = array(
     'path' => CACHE.'/app/'.$info_app['app'].'/html/',
     'expire' => 5
 );
-//$setting_cache = false;
+//$tpl_cache = false;
 
 if(!isset($_GET['c'])) $_GET['c'] = 'NoSet';
 
-$tpl_test = new myTemplate($setting_tpl, $setting_cache);
+$tpl_test = new myTemplate($tpl_setting, $tpl_cache);
 
 global $test, $test1, $test2, $test_if, $test_switch;
 $test = rand();

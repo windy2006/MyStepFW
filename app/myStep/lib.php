@@ -1,7 +1,6 @@
 <?php
 namespace app\myStep;
-global $info_app, $no_db, $s, $p, $q, $setPlugin, $path_admin;
-
+global $info_app, $no_db, $s, $p, $q, $setPlugin, $path_admin, $tpl_cache;
 if(!is_array($info_app)) $info_app = array();
 if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($p, '/'));
 if(!isset($info_app['para'])) parse_str($q, $info_app['para']);
@@ -12,6 +11,7 @@ $setPlugin = !in_array($func, ['language', 'captcha']);
 $no_db = 'y';
 
 \myStep::setPara();
+$tpl_cache = false;
 
 switch($s->router->mode) {
     case 'rewrite':

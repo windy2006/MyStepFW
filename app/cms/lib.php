@@ -1,7 +1,7 @@
 <?php
 namespace app\cms;
 \myStep::setPara();
-global $mystep, $info_app, $s, $setting_tpl;
+global $mystep, $info_app, $s, $tpl_setting;
 if(strpos(trim($info_app['route'],'/'), 'admin_cms')===0) {
     $s->template->style = 'admin';
     $mystep->addCSS(PATH.'asset/'.$s->template->style.'/style.css');
@@ -13,7 +13,7 @@ if(!is_array($info_app)) $info_app = array();
 if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($info_app['route'], '/'));
 if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(dirname(__FILE__).'/info.php'));
 
-$setting_tpl = array(
+$tpl_setting = array(
     'name' => $s->template->name,
     'path' => PATH.$s->template->path,
     'style' => $s->template->style,
@@ -21,11 +21,11 @@ $setting_tpl = array(
 );
 
 function installCheck($module) {
-    global $setting_tpl, $setting_cache;
+    global $tpl_setting, $tpl_cache;
     if(!is_file(PATH.'config.php') || $module=='install') {
-        $setting_tpl['path'] = PATH.'install/template';
-        $setting_tpl['style'] = '';
-        $setting_cache = false;
+        $tpl_setting['path'] = PATH.'install/template';
+        $tpl_setting['style'] = '';
+        $tpl_cache = false;
         include(dirname(__FILE__).'/install/index.php');
         exit;
     }
@@ -73,7 +73,6 @@ function checkCache($idx) {
 
 function getCache($idx) {
     if(!checkCache($idx)) buildList($idx);
-    debug_set();
     if(checkCache($idx)) {
         return include(CACHE.'/app/cms/'.$idx.'.php');
     } else {
