@@ -32,7 +32,7 @@ $(function() {
     var sec = 5;
     var url = '<!--url-->';
     $('#countdown').html(sec--);
-    url = url.replace(/^\//, '<!--path_root-->');
+    //url = url.replace(/^\//, '<!--path_root-->');
     $('#url').attr('href', url);
     setInterval(function(){
         if(sec<=0) {

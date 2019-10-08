@@ -41,15 +41,14 @@ if (is_null($module)) {
                 $tpl_setting['name'] = 'sample';
                 $sub_tpl = new myTemplate($tpl_setting, false);
                 $mystep->setAddedContent('start', '
-<link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css">
-<link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css">
+<link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
+<link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
                 ');
                 $mystep->setAddedContent('end', '
-<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js" type="text/javascript"></script>
-<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushPhp.js" type="text/javascript"></script>
+<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
+<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
                 ');
-
                 ob_clean();
                 include(PATH . 'module/' . $module . '.php');
                 $content = ob_get_contents();

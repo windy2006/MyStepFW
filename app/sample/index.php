@@ -11,6 +11,7 @@ $sub_tpl = new myTemplate($tpl_setting, false);
 $sub_tpl->allow_script = true;
 //为子模版变量赋值
 $sub_tpl->assign('code', htmlentities(myFile::getLocal(__FILE__)));
+$sub_tpl->assign('root', ROOT_WEB);
 //参数列表及模版循环赋值
 foreach ([
     'info_app' => '当前app基本信息',

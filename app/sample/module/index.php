@@ -8,6 +8,7 @@ $sub_tpl = new \myTemplate($tpl_setting, false);
 //开启模版PHP代码执行权限（默认关闭，视需要，不建议开启）
 $sub_tpl->allow_script = true;
 //为子模版变量赋值
+$sub_tpl->assign('root', ROOT_WEB);
 $sub_tpl->assign('code', htmlentities(\myFile::getLocal(__FILE__)));
 $sub_tpl->assign('code2', htmlentities(\myFile::getLocal(PATH.'route.php')));
 $sub_tpl->assign('m', htmlentities($m));

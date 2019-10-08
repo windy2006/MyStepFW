@@ -35,8 +35,8 @@
     jQuery.vendor('jquery.powerupload', {
 		add_css:true,
 		callback:function(){
-            //checkNrun('powerUpload_init', ['receiver', 5, 10]);
-            powerUpload_init('receiver', 5, 10);
+            checkNrun('powerUpload_init', ['receiver', 5, 10]);
+            //powerUpload_init('receiver', 5, 10);
     	}
     });
     function powerUpload_init(the_id, limit_count, limit_size){
