@@ -167,7 +167,7 @@ class myRouter extends myBase {
                     $rule['idx'] = array_shift($match);
                 }
                 if(!is_dir(APP.$rule['idx'])) {
-                    myStep::info('The specified APP cannot be found!');
+                    myStep::info('app_missing');
                 }
 				$info_app = include(APP.$rule['idx'].'/info.php');
 				$info_app['path'] = explode('/', trim($this->route['p'],'/'));

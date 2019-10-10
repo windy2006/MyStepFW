@@ -2,7 +2,7 @@
 $app = $info_app['path'][2] ?? '';
 if(!empty($app)) {
     $builder = APP.$app.'/config/'.$s->gen->language.'.php';
-    if(!is_file($builder)) myStep::info($mystep->getLanguage('page_error_setting'));
+    if(!is_file($builder)) myStep::info('page_error_setting');
     $file = APP.$app.'/config.php';
     if(!is_file($file)) myFile::copy(CONFIG.'config.php', $file);
 } else {

@@ -5,6 +5,7 @@ return array (
     'etc' => 'Etc',
     'sending' => 'Data Sending...',
     'unknown' => 'Unknown',
+    'app_missing' => 'The specified APP cannot be found!',
 
     'page_main' => 'Main',
     'page_info' => 'Message',

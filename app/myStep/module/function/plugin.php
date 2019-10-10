@@ -31,7 +31,7 @@ if(!empty($idx)) {
             }
         }
     }
-    if($flag) myStep::info($mystep->getLanguage('page_error_plugin'));
+    if($flag) myStep::info('page_error_plugin');
 }
 
 switch($method) {
@@ -49,7 +49,7 @@ switch($method) {
                 'name' => $info['name'],
                 'intro' => $info['intro'],
             ), true);
-            myStep::info($mystep->getLanguage('plugin_installed'), $path_admin.'function/plugin/');
+            myStep::info('plugin_installed', $path_admin.'function/plugin/');
         }
         $check = $class::check($check_info);
         $t->assign('check', $check_info);
@@ -93,12 +93,12 @@ switch($method) {
         break;
     case 'delete':
         myFile::del(PLUGIN.$idx);
-        myStep::info($mystep->getLanguage('plugin_delete_done'));
+        myStep::info('plugin_delete_done');
         break;
     case 'uninstall':
         $mydb->delete('idx='.$idx);
         call_user_func(array($class, 'uninstall'));
-        myStep::info($mystep->getLanguage('plugin_uninstalled'), $path_admin.'function/plugin/');
+        myStep::info('plugin_uninstalled', $path_admin.'function/plugin/');
         break;
     case 'pack':
         if(!empty($idx) || is_dir(PLUGIN.$idx)) {
@@ -121,7 +121,7 @@ switch($method) {
                 $mypack->unpack();
                 unset($mypack);
                 myFile::del($theFile);
-                myStep::info($mystep->getLanguage('plugin_upload_done'));
+                myStep::info('plugin_upload_done');
             } else {
                 myStep::info($mystep->getLanguage('plugin_upload_fail').'< br />< br />'.$result[0]['message']);
             }

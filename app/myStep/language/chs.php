@@ -5,6 +5,7 @@ return array (
     'etc' => '其他',
     'sending' => '正在发送数据',
     'unknown' => '未知',
+    'app_missing' => '未发现所调用的应用！',
 
     'page_main' => '首页',
     'page_info' => '信息提示',

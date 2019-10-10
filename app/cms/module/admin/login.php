@@ -3,7 +3,7 @@ $path_admin = '/admin_cms/';
 if(isset($_GET['out'])) {
     r::removeCookie('ms_user');
     r::sessionEnd();
-    myStep::info($mystep->getLanguage('login_logout'), $path_admin);
+    myStep::info('login_logout', $path_admin);
 } elseif(r::s('ms_user')!='') {
     myStep::redirect($path_admin);
 } elseif(myReq::check('post')) {
@@ -15,7 +15,7 @@ if(isset($_GET['out'])) {
         if($s->gen->s_usr==r::p('username') && $s->gen->s_pwd==$pwd) {
             r::setCookie('ms_user', $usr.chr(9).$pwd, 60*60*24);
             r::s('ms_user', $usr);
-            myStep::info($mystep->getLanguage('login_ok'), $path_admin);
+            myStep::info('login_ok', $path_admin);
         } else {
         	$err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
         }

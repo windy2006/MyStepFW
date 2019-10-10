@@ -10,7 +10,7 @@ $t = new myTemplate($tpl_setting, false, true);
 if(is_file($script)) {
     include($script);
 } else {
-    myStep::info($mystep->getLanguage('page_error_module'));
+    myStep::info('page_error_module');
 }
 $content = $mystep->parseTpl($t, 's', false);
 $mystep->setAddedContent('end', '

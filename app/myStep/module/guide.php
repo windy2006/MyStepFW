@@ -1,6 +1,6 @@
 <?php
 if(!file_exists(ROOT.'readme.md')) {
-    myStep::info($mystep->getLanguage('page_error_module'));
+    myStep::info('page_error_module');
 }
 $md = myStep::vendor('Parsedown');
 $guide = myFile::getLocal(ROOT.'readme.md');

@@ -409,13 +409,14 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		ob_end_clean();
 		if($mystep==null) {
 		    $mystep = new myController();
+		    $mystep->setLanguagePack(APP.'myStep/language/', $s->gen->language);
             $paras = [
                 'web_title' => $s->web->title,
                 'web_url' => $s->web->url,
                 'charset' => $s->gen->charset,
                 'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
-                'lng_page_info' => 'Message',
-                'lng_page_info_refresh' => 'The page will be redirected within <span id="countdown">X</span> Seconds, <a id="url" href="#">Redirect Now</a>',
+                'lng_page_info' => $mystep->getLanguage('page_info'),
+                'lng_page_info_refresh' => $mystep->getLanguage('page_info_refresh'),
             ];
         } else {
             $paras = [];
@@ -429,6 +430,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			$url = myReq::server('HTTP_REFERER');
 			if(is_null($url)) $url = '/';
 		}
+        $msg = $mystep->getLanguage($msg);
         foreach($paras as $k => $v) {
             $t->assign($k, $v);
         }
@@ -795,7 +797,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
             $info_app['route'] = $router->route['p'];
             $info_app['app'] = trim($info_app['app'],'.');
             if(empty($info_app['app']) || !is_dir(APP.$info_app['app'])) {
-                myStep::info('The specified APP cannot be found!', ROOT_WEB);
+                myStep::info('app_missing', ROOT_WEB);
             }
             if(is_file(APP.$info_app['app'].'/config.php')) {
                 $s->merge(APP.$info_app['app'].'/config.php');
@@ -874,7 +876,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		];
 		foreach($files as $f) {
 			if(file_exists($f)) break;
-			if(empty($f))  myStep::info($mystep->getLanguage('module_missing'));
+			if(empty($f))  myStep::info('module_missing');
 		}
 		$tpl = new myTemplate($tpl_setting, $tpl_cache);
 		if(count($info_app['path'])==1) $info_app['path'][1]='';
@@ -896,7 +898,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(!file_exists($file)) $file = $file = VENDOR.$name.'/'.$name.'.class.php';
 		if(!file_exists($file)) {
 			global $mystep;
-			myStep::info($mystep->getLanguage('module_missing'));
+			myStep::info('module_missing');
 		}
 		require_once($file);
 		$instance = new $name();

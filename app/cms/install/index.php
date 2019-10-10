@@ -49,7 +49,7 @@ switch ($info_app['path'][2]) {
             ));
             $db = new myDb($c->db->type, $c->db->host, $c->db->user, $c->db->password, $c->db->charset);
             if($db->connect($c->db->pconnect)===false) {
-                myStep::info($mystep->getLanguage('db_connect_error'));
+                myStep::info('db_connect_error');
             }
             $c->save('php', PATH.'/config.php');
 

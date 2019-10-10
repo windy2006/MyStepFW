@@ -9,7 +9,7 @@ $tpl = new myTemplate($tpl_setting, $tpl_cache);
 $tpl_setting['name'] = implode('_', $info_app['path']);
 $t = new myTemplate($tpl_setting, false);
 
-if(!is_file(PATH.'module/'.$module.'.php')) myStep::info($mystep->getLanguage('module_missing'), '/');
+if(!is_file(PATH.'module/'.$module.'.php')) myStep::info('module_missing', '/');
 require(PATH.'module/'.$module.'.php');
 $tpl->assign('main', $t->display('', false));
 
