@@ -50,7 +50,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="item" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -109,18 +108,25 @@ $('#item').on('show.bs.modal', function (event) {
     modal.find('button[type="submit"]').unbind().click(function(){
         var idx = modal.find('input[name="idx"]').val();
         var lng = modal.find('input[name="lng"]').val();
-        var obj = $('#item_list').find('tr:last');
-        var no = parseInt(obj.find('td:first').text()) + 1;
-        $('                <tr>\n' +
-            '                    <td>'+no+'</td>\n' +
-            '                    <td>'+idx+'</td>\n' +
-            '                    <td>\n' +
-            '                        <input class="w-100" name="language['+idx+']" type="text" value="'+lng+'" />\n' +
-            '                    </td>\n' +
-            '                    <td class="text-center">\n' +
-            '                        <input class="btn-default" type="button" onclick="del(this)" style="width:50px;" value="删除" />\n' +
-            '                    </td>\n' +
-            '                </tr>').insertAfter(obj);
+        var obj = $('input[name="language['+idx+']"]');
+        if(obj.length>0) {
+            if(confirm("索引 " + idx + " 已存在，表述内容为：" + obj.val() + "\n\n是否需要替换为：" + lng)) {
+                obj.val(lng);
+            }
+        } else {
+            obj = $('#item_list').find('tr:last');
+            var no = parseInt(obj.find('td:first').text()) + 1;
+            $('<tr>\n' +
+              '    <td>'+no+'</td>\n' +
+              '    <td>'+idx+'</td>\n' +
+              '    <td>\n' +
+              '        <input class="w-100" name="language['+idx+']" type="text" value="'+lng+'" />\n' +
+              '    </td>\n' +
+              '    <td class="text-center">\n' +
+              '        <input class="btn-default" type="button" onclick="del(this)" style="width:50px;" value="删除" />\n' +
+              '    </td>\n' +
+              '</tr>').insertAfter(obj);
+        }
         modal.modal('hide');
     });
 })
