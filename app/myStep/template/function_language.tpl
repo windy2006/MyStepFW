@@ -10,9 +10,16 @@
 <!--loop:start key="type"-->
                     <option value="<!--type_name-->" <!--type_selected-->><!--type_name--></option>
 <!--loop:end-->
-                </select>
+                </select> &nbsp; | &nbsp;
+                <button class="btn btn-info btn-sm mr-3" type="button" data-toggle="modal" data-target="#item"> 添加语言项 </button>
+                <span class="font-weight-bold nowrap">
+                （设定为新的语言包：
+                <input name="lng_new_idx" type="text" size="10" maxlength="200" value="" />
+                生成所填写索引的语言包，如仅修改，请留空！）
+                </span>
+                &nbsp; &nbsp;
             </div>
-            <table class="table table-sm table-striped table-hover mb-4 border-bottom">
+            <table id="item_list" class="table table-sm table-striped table-hover mb-4 border-bottom">
                 <thead>
                 <tr class="font-weight-bold bg-secondary text-white">
                     <td width="40">序号</td>
@@ -35,15 +42,43 @@
 <!--loop:end-->
             </table>
             <div id="footer" class="position-fixed bg-white border-top text-right py-3" style="z-index: 5;">
-                <span class="font-weight-bold">
-                添加语言包：
-                <input name="lng_new_idx" type="text" size="10" maxlength="200" value="" />
-                （会依据现有设置生成新的语言包，仅仅修改时，请留空！）
-                </span>
                 <button class="btn btn-primary btn-sm mr-3" type="submit"> 提 交 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
+                <button class="btn btn-primary btn-sm mr-3" type="button" onclick="history.go(-1)"> 返 回 </button>
             </div>
         </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="item" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">语言项添加</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">项目索引</span>
+                    </div>
+                    <input type="text" class="form-control" name="idx" value="" />
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">对应表述</span>
+                    </div>
+                    <input type="text" class="form-control" name="lng" value="" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"> 关闭 </button>
+                <button type="submit" class="btn btn-primary"> 确认 </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -68,4 +103,25 @@ function goto(type) {
 function del(obj) {
     $(obj).parent().parent().remove();
 }
+$('#item').on('show.bs.modal', function (event) {
+    var modal = $(this);
+    modal.find('input').val('');
+    modal.find('button[type="submit"]').unbind().click(function(){
+        var idx = modal.find('input[name="idx"]').val();
+        var lng = modal.find('input[name="lng"]').val();
+        var obj = $('#item_list').find('tr:last');
+        var no = parseInt(obj.find('td:first').text()) + 1;
+        $('                <tr>\n' +
+            '                    <td>'+no+'</td>\n' +
+            '                    <td>'+idx+'</td>\n' +
+            '                    <td>\n' +
+            '                        <input class="w-100" name="language['+idx+']" type="text" value="'+lng+'" />\n' +
+            '                    </td>\n' +
+            '                    <td class="text-center">\n' +
+            '                        <input class="btn-default" type="button" onclick="del(this)" style="width:50px;" value="删除" />\n' +
+            '                    </td>\n' +
+            '                </tr>').insertAfter(obj);
+        modal.modal('hide');
+    });
+})
 </script>

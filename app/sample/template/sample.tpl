@@ -17,7 +17,7 @@ global $info_app;
 <ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
     <li>执行接口指向自定义函数：<a href="<!--root-->mySample/" target="_blank"><!--root-->mySample/</a> （路由规则为：/mySample/[any]）</li>
     <li>通过mystep::getModule()执行（推荐）：<a href="<!--root-->mySample2/" target="_blank"><!--root-->mySample2/</a> （路由规则为：/mySample2/[any]）</li>
-    <li>多函数链接调用：<a href="<!--root-->anyCamelCase" target="_blank"><!--root-->anyCamelCase</a> （路由规则为：/[camel]，其中camel正则为：[a-z]+([A-Z][a-z]+)+，
+    <li>多函数链接调用：<a href="<!--root-->sample/anyCamelCase" target="_blank"><!--root-->sample/anyCamelCase</a> （路由规则为：/[camel]，其中camel正则为：[a-z]+([A-Z][a-z]+)+，
         响应规则为：array('app\sample\perCheck,3', 'app\sample\routeTest')，表示先执行'app\sample\perCheck'，且输入参数为'3'，
         如果结果为false则终止执行，否则将返回值传递至'app\sample\routeTest'并执行。还可以根据需要设置更多的链接函数。）</li>
 </ul>

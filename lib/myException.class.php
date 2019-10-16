@@ -275,9 +275,11 @@ class myException extends ErrorException {
 		if(empty(self::$err_last)) return false;
 		$title = 'MyStep Error: '.self::$err_last['Type'];
 		unset(self::$err_last['Type']);
+		$root = ROOT_WEB;
 		echo <<<mystep
-<link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css">
-<link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css">
+<base href="{$root}" />
+<link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
+<link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
 <div style='line-height:24px;border:#999 1px solid;white-space:nowrap;overflow:hidden;'>
 <div style='background-color:#999;color:#FFF'>&nbsp;<strong>{$title}</strong></div>
 
@@ -312,8 +314,8 @@ mystep;
 		echo '</div>'.chr(10);
 		echo '<div>&nbsp;</div>'.chr(10);
         echo <<<mystep
-<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js" type="text/javascript"></script>
-<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushPhp.js" type="text/javascript"></script>
+<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
+<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
 
 

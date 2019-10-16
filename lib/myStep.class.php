@@ -722,6 +722,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 						'jsMin' => 'myMinify.class.php',
 						'cssMin' => 'myMinify.class.php',
 						'JavaScriptPacker' => 'myMinify.class.php',
+                        'interface_plugin' => '../plugin/interface_plugin.class.php'
 					),
 			);
 			for($i=1,$m=count($class);$i<$m;$i++) {

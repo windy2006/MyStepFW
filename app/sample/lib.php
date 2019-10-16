@@ -52,7 +52,7 @@ function perCheck($times = 5) {
         exit;
     } else {
         \myReq::setCookie('counter', ++$counter, 60);
-        return 'perCheck的返回值';
+        return '我是perCheck的返回值';
     }
 }
 
@@ -63,10 +63,10 @@ function routeTest() {
     $last = end($paras);
     $counter = \myReq::c('counter');
     if(!empty($counter)) {
-        echo '一分钟内已访问 '.$counter.' 次<br />';
+        echo '一分钟内已访问 '.$counter.' 次<br /><br />';
     } else {
-        echo '请尝试连续刷新<br />';
+        echo '请尝试连续刷新，超过3次后将会报错<br /><br />';
     }
-    echo '当前URL路径 - '.$first.'<br />';
-    echo '上一个函数的返回值 - '.$last.'<br />';
+    echo '当前URL路径 ： '.$first.'<br /><br />';
+    echo '上一个函数的返回值 ： '.$last.'<br />';
 }

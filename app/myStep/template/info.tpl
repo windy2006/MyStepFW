@@ -4,7 +4,7 @@
     <title><!--lng_page_info--></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta http-equiv="windows-Target" content="_top" />
-    <base href="<!--web_url--><!--path_root-->" />
+    <base href="<!--path_root-->" />
     <link rel="Shortcut Icon" href="favicon.ico" />
     <link rel="stylesheet" media="screen" type="text/css" href="static/css/bootstrap.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="static/css/glyphicons.css" />

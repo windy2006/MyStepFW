@@ -13,6 +13,7 @@
                         <a href="manager/setting/<!--app_app-->">【设置】</a>
                         <a href="manager/function/language?app=<!--app_app-->">【语言】</a>
                         <a href="#" data-toggle="modal" data-target="#plugin" data-app="<!--app_app-->">【插件】</a>
+                        <a href="<!--app_app-->" target="_blank">【查看】</a>
                         <input type="hidden" name="plugin[]" id="<!--app_app-->" value="<!--app_plugin-->" />
                         <input type="hidden" name="name[]" value="<!--app_app-->" />
                     </td>

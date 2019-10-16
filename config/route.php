@@ -40,7 +40,7 @@ $rule_list = array (
     ),
     2 => 
     array (
-      0 => '/[camel]',
+      0 => '/sample/[camel]',
       1 => 
       array (
         0 => 'app\\sample\\perCheck,3',
