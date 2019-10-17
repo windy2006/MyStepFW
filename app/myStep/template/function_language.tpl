@@ -14,7 +14,7 @@
                 <button class="btn btn-info btn-sm mr-3" type="button" data-toggle="modal" data-target="#item"> 添加语言项 </button>
                 <span class="font-weight-bold nowrap">
                 （设定为新的语言包：
-                <input name="lng_new_idx" type="text" size="10" maxlength="200" value="" />
+                <input name="lng_new_idx" class="small" type="text" size="10" maxlength="20" value="" />
                 生成所填写索引的语言包，如仅修改，请留空！）
                 </span>
                 &nbsp; &nbsp;

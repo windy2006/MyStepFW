@@ -20,10 +20,10 @@ global $info_app;
 ?>
 <h5 class="mt-4">路径引用测试：</h5>
 <ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
-    <li>自定义路由：<a href="<!--root-->mySample/"><!--root-->mySample/</a> </li>
-    <li>带路径：<a href="<!--root-->mySample/dir1/dir2/"><!--root-->mySample/dir1/dir2/</a> </li>
-    <li>带查询字串：<a href="<!--root-->mySample/?para1=aaa&para2=bbb"><!--root-->mySample/?para1=aaa&amp;para2=bbb</a> </li>
-    <li>带路径和查询字串：<a href="<!--root-->mySample/dir1/dir2/?para1=aaa&para2=bbb"><!--root-->mySample/dir1/dir2/?para1=aaa&amp;para2=bbb</a> </li>
+    <li>自定义路由：<a href="<!--root-->mySample2/"><!--root-->mySample/</a> </li>
+    <li>带路径：<a href="<!--root-->mySample2/dir1/dir2/"><!--root-->mySample/dir1/dir2/</a> </li>
+    <li>带查询字串：<a href="<!--root-->mySample2/?para1=aaa&para2=bbb"><!--root-->mySample/?para1=aaa&amp;para2=bbb</a> </li>
+    <li>带路径和查询字串：<a href="<!--root-->mySample2/dir1/dir2/?para1=aaa&para2=bbb"><!--root-->mySample/dir1/dir2/?para1=aaa&amp;para2=bbb</a> </li>
 </ul>
 
 <h5 class="mt-4">URL信息解析：</h5>
