@@ -91,6 +91,16 @@ $setting_detail['web'] = array(
             'describe' => 'Append to Etag with which to avoid non-modification HTML pages transfer',
             'type' => array('text', '', '10')
         ),
+        'css' => array(
+            'name' => 'CSS Files',
+            'describe' => 'Split with common in order, and the files in static folder will be load to all the pages',
+            'type' => array("text", "", "150")
+        ),
+        'js' => array(
+            'name' => 'JS Files',
+            'describe' => 'Split with common in order, and the files in static folder will be load to all the pages',
+            'type' => array("text", "", "150")
+        ),
         'update' => array(
             'name' => 'Update URL',
             'describe' => 'From the URL your can get the newest update of the Framework',

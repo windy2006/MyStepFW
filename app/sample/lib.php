@@ -1,11 +1,10 @@
 <?php
 //本文件为当前应用的预加载脚本，在route.php中声明
 namespace app\sample;
+
 //设置无需尝试数据库连接
 global $no_db;
 $no_db = 'y';
-//初始化框架参数（如无特殊情况，必须）
-\myStep::setPara();
 
 //以下为各类接口的执行函数
 
@@ -43,7 +42,7 @@ function route($para) {
 }
 
 //预检测函数
-function perCheck($times = 5) {
+function preCheck($times = 5) {
     $counter = \myReq::c('counter');
     if(empty($counter)) $counter = 0;
     if($counter>$times) {
@@ -52,7 +51,7 @@ function perCheck($times = 5) {
         exit;
     } else {
         \myReq::setCookie('counter', ++$counter, 60);
-        return '我是perCheck的返回值';
+        return '我是preCheck的返回值';
     }
 }
 

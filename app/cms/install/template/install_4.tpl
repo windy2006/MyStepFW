@@ -1,4 +1,4 @@
-<DIV id="main" class="border rounded p-4 mb-5">
+<DIV class="border rounded p-4 mb-5">
 	<H2 class="mb-4">安装成功</H2>
 	<h4 class="title">请协助完善 MyStep 内容管理系统</h4>
 	<DIV class="mt-3">

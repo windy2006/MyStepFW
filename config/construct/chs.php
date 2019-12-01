@@ -91,6 +91,16 @@ $setting_detail['web'] = array(
             'describe' => '用于 Etag 标识，减少未更改页面的传输',
             'type' => array("text", "", "10")
         ),
+        'css' => array(
+            'name' => '样式表文件',
+            'describe' => '以半角单引号分割，依次加载static目录下的对应文件，所有页面都将自动加载',
+            'type' => array("text", "", "150")
+        ),
+        'js' => array(
+            'name' => '脚本文件',
+            'describe' => '以半角单引号分割，依次加载static目录下的对应文件，所有页面都将自动加载',
+            'type' => array("text", "", "150")
+        ),
         'update' => array(
             'name' => '更新网址',
             'describe' => '获取内容系统程序更新的网址',

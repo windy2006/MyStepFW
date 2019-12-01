@@ -1,4 +1,7 @@
 <?php
+if(is_file(PATH.'config.php')) {
+    myStep::redirect('/cms/');
+}
 global $mystep, $s, $router, $info_app;
 $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
 $tpl = new myTemplate($tpl_setting, $tpl_cache);

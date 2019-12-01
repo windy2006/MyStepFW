@@ -18,7 +18,7 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body>
+<body style="overflow-y:auto;">
 <div class="p-3 text-center">
     <img src="static/images/logo.png" />
 </div>

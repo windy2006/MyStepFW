@@ -8,7 +8,6 @@
 <base href="<!--path_root-->" />
 <link rel="Shortcut Icon" href="favicon.ico" />
 <!--page_start-->
-<link rel="stylesheet" media="screen" type="text/css" href="app/cms/asset/theme/default.css" id="theme_css" />
 </head>
 <body>
 <!--main-->

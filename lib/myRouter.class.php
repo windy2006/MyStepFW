@@ -142,8 +142,6 @@ class myRouter extends myBase {
 			}
 		} elseif(is_file($rules)) {
 			include($rules);
-			if(!isset($preload_list)) $preload_list = array();
-			myReq::globals('lib_list', $preload_list);
 			if(isset($format_list)) {
 				$this->setFormats($format_list);
 			}
@@ -156,10 +154,9 @@ class myRouter extends myBase {
 
 	/**
 	 * 路由规则检测
-	 * @param array $lib_list
 	 * @return bool
 	 */
-	public function check($lib_list = array()) {
+	public function check() {
 		foreach($this->rules as $rule) {
 			if(preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)) {
                 array_shift($match);
@@ -174,7 +171,8 @@ class myRouter extends myBase {
                 $info_app['para'] = $this->info['para'];
 				$info_app['route'] = $this->route['p'];
 				myReq::globals('info_app', $info_app);
-				if(isset($lib_list[$rule['idx']]) && is_file($lib_list[$rule['idx']])) require_once($lib_list[$rule['idx']]);
+				if(is_file(APP.$rule['idx'].'/lib.php')) require_once(APP.$rule['idx'].'/lib.php');
+                myStep::setPara();
 				if(is_array($rule['method'])) {
                     $match = array_slice($match,0,1);
 					$last = array_pop($rule['method']);
@@ -260,18 +258,11 @@ class myRouter extends myBase {
 	public static function checkRoute($path_main, $path_this, $idx) {
 		if($check = is_file($path_this)) {
 			if(is_file($path_main)) include($path_main);
-			if(!isset($preload_list)) $preload_list = array();
 			if(!isset($format_list)) $format_list = array();
 			if(!isset($rule_list)) $rule_list = array();
 			if(!isset($api_list)) $rule_list = array();
 			include($path_this);
 			$flag = false;
-			if(isset($preload)) {
-				if(!isset($preload_list[$idx])) {
-					$preload_list[$idx] = dirname($path_this).'/'.$preload;
-					$flag = true;
-				}
-			}
 			if(isset($format)) {
 				if(!isset($format_list[$idx])) {
 					$format_list[$idx] = $format;
@@ -292,10 +283,6 @@ class myRouter extends myBase {
 			}
 			if($flag) {
 				$result = '<?PHP' . chr(10);
-				if (isset($preload_list)) {
-					//$result .= myString::toScript($preload_list, 'preload_list').chr(10).chr(10);
-					$result .= '$preload_list = ' . var_export($preload_list, true) . ';' . chr(10) . chr(10);
-				}
 				if (isset($format_list)) {
 					//$result .= myString::toScript($format_list, 'format_list').chr(10).chr(10);
 					$result .= '$format_list = ' . var_export($format_list, true) . ';' . chr(10) . chr(10);

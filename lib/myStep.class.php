@@ -552,7 +552,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			if(isset($api_list[$module][$name])) {
 				$s->merge(APP.$module.'/config.php');
 				$method = $api_list[$module][$name];
-				if(isset($preload_list[$module]) && is_file($preload_list[$module])) require_once($preload_list[$module]);
+				if(is_file(APP.$module.'/lib.php')) require_once(APP.$module.'/lib.php');
 				$type = end($para);
 				$para = array_merge(myReq::getValue(count($_GET)>0?'get':'post', '[ALL]'), $para);
 				if(is_callable($method)) {
@@ -774,7 +774,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 * 执行框架
 	 */
 	public static function go() {
-		global $s, $p, $router;
+		global $s, $router;
 		$s = new myConfig(CONFIG.'config.php');
         $router = new myRouter((array)$s->router);
         extract($router->route);
@@ -790,10 +790,10 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
 		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
 
-		global $lib_list, $info_app, $s, $router, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
+		global $info_app, $s, $router, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
         define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		$router->setRules(CONFIG.'route.php');
-		if(!$router->check($lib_list)) {
+		if(!$router->check()) {
 			$info_app = $router->parse();
             $info_app['route'] = $router->route['p'];
             $info_app['app'] = trim($info_app['app'],'.');
@@ -804,6 +804,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
                 $s->merge(APP.$info_app['app'].'/config.php');
             }
             define('PATH', APP.$info_app['app'].'/');
+            if(is_file(PATH.'/lib.php')) require_once(PATH.'/lib.php');
             myStep::setPara();
             require(APP.$info_app['app'].'/index.php');
 		}
@@ -816,7 +817,6 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		global $mystep, $info_app, $tpl_setting, $tpl_cache, $setPlugin;
 		if($mystep!=null) return;
 		if(!defined('PATH')) define('PATH', APP.$info_app['app'].'/');
-        if(!defined('ROOT_WEB')) define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		if(is_file(PATH.$info_app['app'].'.class.php')) {
 			require_once(PATH.$info_app['app'].'.class.php');
 			$mystep = new $info_app['app']();
@@ -830,18 +830,19 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(is_file(PATH.'config.php')) $mystep->setting->merge(PATH.'config.php');
         $mystep->start($setPlugin);
 
-		$mystep->addCSS(STATICS.'css/bootstrap.css');
-		$mystep->addCSS(STATICS.'css/font-awesome.css');
-		$mystep->addCSS(STATICS.'css/glyphicons.css');
+        $mystep->setting->web->css = explode(',', $mystep->setting->web->css);
+        foreach($mystep->setting->web->css as $k) {
+            $mystep->addCSS(STATICS.'css/'.$k.'.css');
+        }
 		$mystep->addCSS(STATICS.'css/global.css');
 		$mystep->addCSS(PATH.'asset/style.css');
 		$mystep->addCSS(PATH.'asset/'.$mystep->setting->template->style.'/style.css');
 		$mystep->setting->css = CACHE.'script/'.$info_app['app'].'.css';
 
-		$mystep->addJS(STATICS.'js/jquery.js');
-		$mystep->addJS(STATICS.'js/jquery-ui.js');
-		$mystep->addJS(STATICS.'js/jquery.addon.js');
-		$mystep->addJS(STATICS.'js/bootstrap.bundle.js');
+        $mystep->setting->web->js = explode(',', $mystep->setting->web->js);
+        foreach($mystep->setting->web->js as $k) {
+            $mystep->addCSS(STATICS.'js/'.$k.'.js');
+        }
 		$mystep->addJS(STATICS.'js/global.js');
 		$mystep->addJS(PATH.'asset/function.js');
 		$mystep->addJS(PATH.'asset'.$mystep->setting->template->style.'/function.js');

@@ -222,7 +222,7 @@
                         obj.find('a').addClass("nav-item dropdown-toggle").attr({'href':'#', 'path':list[i].path,'data-toggle':'dropdown'});
                         obj_sub = obj.find('div');
                         for(j=0,n=list[i].sub.length;j<n;j++) {
-                            obj_sub.append('<a class="dropdown-item" href="'+list[i].sub[j].path+'">'+list[i].sub[j].name+'</a>');
+                            obj_sub.append('<a class="dropdown-item" href="admin_cms/'+list[i].sub[j].path+'">'+list[i].sub[j].name+'</a>');
                         }
                     }
                     obj.prependTo('#nav > ul');

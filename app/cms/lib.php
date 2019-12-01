@@ -29,6 +29,7 @@ function installCheck($module) {
         include(dirname(__FILE__).'/install/index.php');
         exit;
     }
+    return true;
 }
 
 function logCheck($show = true) {
@@ -193,15 +194,6 @@ function buildList($idx) {
                 ->order($theIdx.'web_id', 0);
             $db->select();
             while($record=$db->GetRS()) {
-                $cache_para[] = $record;
-            }
-            break;
-        case 'plugin':
-            $db->build($s->db->pre.'plugin')
-                ->order('order', 0)->order('id', 0);
-            $db->select();
-            while($record=$db->GetRS()) {
-                $record['url'] = $record['path'].$record['file'];
                 $cache_para[] = $record;
             }
             break;

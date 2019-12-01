@@ -1,5 +1,4 @@
 <?php
-$preload = 'lib.php';
 $rule = array(
     array('/[str]/api/[any]', 'myStep::api'),
     array('/[str]/module/[any]', 'myStep::module'),

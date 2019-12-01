@@ -26,8 +26,12 @@
 
 执行顺序：
 --------
-- 自定义路径模式 - index.php（调用myStep::init()） -> app/[name]/lib.php（应用目录下的预载文件，调用myStep::setPara()，可在此函数调用后，对部分参数做相关修正）-> myStep::getModule()（可以添加其他前置检验函数）
-- 程序路径模式 - index.php（调用myStep::init()） -> app/[name]/index.php（程序目录下的控制文件，建议在此调用预载文件做相关参数初始化）
+所有响应网址均通过rewrite模块反馈给根目录下的index.php脚本统一处理，虽然框架也支持QueryString和PathInfo两种模式，但是为了更好的网址优化和安全性，建议采用rewrite的方式，主要执行流程如下：
+- 初始化框架 - 通过框架根目录index.php，调用myStep::init()
+- 路由模式判断 - 通过 $router->check() 判断是否存在自定义路由
+   - 当前响应路径符合已设定的自定义路由规则，按规则调用指定的响应方法，可由多方法依次执行构成多级响应。框架默认处理方法是myStep::getModule()（具体处理流程详见核心类对应方法讲解），也可以根据需要替换为自定义方法。
+   - 如未发现何时规则，则分析响应路径，将一级路径或默认app指定为响应app，并调用该app路径下的index.php处理
+- 框架变量设置 - 在调用第二部处理方法或脚本之前会调用应用预加载脚本（app/[name]/lib.php），并执行框架变量设置方法为 myStep::setPara()。如需调整框架变量，可直接在lib.php中预先执行 myStep::setPara() 方法，并做响应调整，此方法不会二次执行。
 
 PHP常量：
 --------
@@ -103,7 +107,7 @@ myStep类扩展自myController类，具体用法请参加功能类文档，其�
 - vendor() - 调用位于VENDOR目录下的第三方PHP功能类。
 - getModule($m) - 自定义路由处理函数（也可以通过自定义方法处理自定义路由，详情参见"自定义路由"专题），机制如下：
    - 传入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，即[any]部分，但需要注意的是在本方法中，$m 被截取为 path1。此参数可直接在自定义的路由处理脚本内调用，但如需在下级函数中调用，需要先进行global处理。
-   - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $setting_tpl 中）
+   - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $tpl_setting 中）
    - 本方法将按照如下顺序调用处理脚本（发现可用脚本后将立即调用并停止试探）
       - app路径/module/模版样式/$m.php（$m 为输入参数）
       - app路径/module/模版样式/路由名称.php （如路由为 /manager/[any]，路由名称为 manager）
@@ -160,7 +164,6 @@ JS函数：
 路由分为路径调用和自定义路由两种
 - 路径调用 - 相关路径信息将直接传递给应用目录下的index.php处理，格式为：网址/应用目录名/路径信息
 - 自定义路由 - 可在框架的应用设置中载入应用路由配置，格式如下：
-   - $preload - 预载文件，即应用通用函数库
    - $format - 路径辨别格式，含如下默认格式：
       - [any] - 任意非路径字符
       - [str] - 字母、数字及下划线
@@ -217,14 +220,14 @@ JS函数：
 脚本调用：
 --------
 每个应用可通过myStep::setPara()自动生成 cache/script/[appName].js 和 cache/script/[appName].css（[appName]表示应用名称），供页面调用，这两个文件经压缩处理，可根据相关文件内容改变自动更新。载入规则如下（如文件不存在将自动忽略，其中[TemplateStyle]为模版样式名称）：
-- cache/script/[appName].css - 将自动载入以下文件：
+- cache/script/[appName].css - 将自动载入以下文件（其中部分static目录下的文件可在设置中调整）：
    - static/css/bootstrap.css
    - static/css/font-awesome.css
    - static/css/glyphicons.css
    - static/css/global.css
    - [appName]/asset/style.css
    - [appName]/asset/[TemplateStyle]/style.css
-- cache/script/[appName].js - 将自动载入以下文件：
+- cache/script/[appName].js - 将自动载入以下文件（其中前四个文件可在设置中调整）：
    - static/js/jquery.js
    - static/js/jquery-ui.js
    - static/js/jquery.addon.js

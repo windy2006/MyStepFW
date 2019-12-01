@@ -1,2 +1,2 @@
 <?php
-$preload = 'lib.php';
+//nothing to set

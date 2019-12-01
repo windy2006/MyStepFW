@@ -1,4 +1,4 @@
-<DIV id="main" class="border rounded p-4 mb-5">
+<DIV id="main_frm" class="border rounded p-4 mb-5">
 	<H2 class="mb-4">步骤二 ： 环境设置</H2>
 	<h4 class="title">检测服务器环境以及设置基本网站参数</h4>
 	<form method="post" action="cms/install/3" onsubmit="return myChecker(this)">
@@ -33,7 +33,7 @@
         }
     }
     function setPosition() {
-        $("#main").css('padding-bottom', 200);
+        $("#main_frm").css('padding-bottom', 200);
         $("tfoot").find("td").width($(window).width());
         $("tfoot").css({'right':0, 'bottom':40});
         $("tfoot").width($(window).width());

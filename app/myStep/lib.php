@@ -1,18 +1,9 @@
 <?php
 namespace app\myStep;
-global $info_app, $no_db, $s, $p, $q, $setPlugin, $path_admin, $tpl_cache;
-if(!is_array($info_app)) $info_app = array();
-if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($p, '/'));
-if(!isset($info_app['para'])) parse_str($q, $info_app['para']);
-if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(dirname(__FILE__).'/info.php'));
-
-$func = preg_replace('#^/?(\w+).*$#', '\1', $q);
+global $info_app, $no_db, $s, $setPlugin, $path_admin, $tpl_cache;
+$func = preg_replace('#^/(\w+).*$#', '\1', $info_app['route']);
 $setPlugin = !in_array($func, ['language', 'captcha']);
 $no_db = 'y';
-
-\myStep::setPara();
-$tpl_cache = false;
-
 switch($s->router->mode) {
     case 'rewrite':
         $path_admin = ROOT_WEB.'manager/';
@@ -24,6 +15,8 @@ switch($s->router->mode) {
         $path_admin = ROOT_WEB.'index.php?/manager/';
         break;
 }
+\myStep::setPara();
+$tpl_cache = false;
 
 function logCheck($show = true) {
     $user = \r::s('ms_user');
