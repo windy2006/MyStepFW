@@ -1,4 +1,4 @@
-﻿<style>
+<style>
 	@font-face {
 		font-family: 'FontAwesome1';
 		src: url('/static/fonts/fontawesome-webfont.eot?v=4.7.0');

@@ -253,6 +253,7 @@ class myReq extends myBase {
 		if(empty($para)) return "";
 		$para = strtoupper($para);
 		$return = self::getValue("server", $para, $format);
+		if(empty($return)) $return = self::getValue("server", 'HTTP_'.$para, $format);
 		if(empty($return)) $return = self::getValue("env", $para, $format);
 		return $return;
 	}

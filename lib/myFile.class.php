@@ -499,6 +499,8 @@ class myFile {
 		if(!isset($dest_info['extension'])) {
 			self::mkdir($dest);
 			$dest .= '/';
+		} else {
+			self::mkdir(dirname($dest));
 		}
 		if(is_file($source)) {
 			if(substr($dest, -1)=='/') {
@@ -506,28 +508,30 @@ class myFile {
 			}
 			if(is_file($dest)) {
 				if($overwrite) {
-					unlink($dest);
+					self::del($dest);
 					copy($source, $dest);
 					return true;
 				} else {
-					trigger_error('The same-name-file is existed at the destination directory! ('.$dest.')');
+					trigger_error('The same-name-file exists at the destination directory! ('.$dest.')');
 					return false;
 				}
 			} else {
-			copy($source, $dest);
+				copy($source, $dest);
 			}
 		} else {
 			$d=dir($source);
 			while(false !== ($file=$d->read())) {
-			if($file=='.' || $file=='..') continue;
-			if(is_dir($source.'/'.$file)) {
-				self::copy($source.'/'.$file.'/', $dest.'/'.$file.'/', $overwrite);
-			} else {
-				if(file_exists($dest.'/'.$file) && !$overwrite) {
-					rename($dest.'/'.$file, $dest.'/'.$file.'.'.time());
+				if($file=='.' || $file=='..') continue;
+				if(is_dir($source.'/'.$file)) {
+					self::copy($source.'/'.$file.'/', $dest.'/'.basename($source).'/', $overwrite);
+				} else {
+					$dest_file = $dest.'/'.basename($source).'/'.$file;
+					if(is_file($dest_file) && !$overwrite) {
+						rename($dest_file, $dest_file.'.'.time());
+					}
+					self::mkdir(dirname($dest_file));
+					copy($source.'/'.$file, $dest_file);
 				}
-				copy($source.'/'.$file, $dest.'/'.$file);
-			}
 			}
 			$d->close();
 		}
@@ -686,7 +690,7 @@ class myFile {
 		if(isset($query)) $path .= '?'.$query;
 		if(!isset($port)) $port = 80;
 		if(false === ($fp = @fsockopen($scheme.$host, $port, $errno, $errmsg, $timeout))) {
-			trigger_error('Error occurs when remote file getting'.$errno.' - '.$errmsg);
+			trigger_error('Error occurs when remote file getting: '.$errno.' - '.$errmsg);
 			return false;
 		}
 		stream_set_blocking($fp, true);
@@ -700,7 +704,7 @@ class myFile {
 		}
 		if($method=='POST') $header['Content-Type'] = 'application/x-www-form-urlencoded';
 	
-		$output = sprintf("%s /%s HTTP/1.1\r\n", $method, $path);
+		$output = sprintf("%s %s HTTP/1.1\r\n", $method, $path);
 		$output .= sprintf("Host:%s\r\n", $host);
 		$output .= "Accept: */*\r\n";
 		$output .= "Accept-Encoding: gzip, deflate\r\n";
@@ -732,6 +736,10 @@ class myFile {
 		$header = self::getHeader($url);
 		$content = stream_get_contents($fp);
 		$content = preg_replace('/^[\w\W]+?\r\n\r\n/', '', $content);
+		$content = preg_replace('#^\d+\r\n#', '', $content);
+		$content = preg_replace('#[\r\n]+0[\r\n]+$#', '', $content);
+		$content = preg_replace('#\r\n\d+\r\n#', '', $content);
+		debug($content);
 		fclose($fp);
 		if(isset($header['Content-Encoding']) && $header['Content-Encoding']=='gzip') {
 			//$content = preg_replace("/(^|[\r\n]+)(\w{3})([\r\n]+|$)/", "", $content);
@@ -778,7 +786,7 @@ class myFile {
 		} else {
 			curl_setopt($curl, CURLOPT_HTTPGET, true);
 		}
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 0);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		$result = curl_exec($curl);
 		$return_header = curl_getinfo($curl, CURLINFO_HEADER_OUT);
 		if(curl_errno($curl)) {
@@ -908,32 +916,32 @@ class myFile {
 		return ltrim((STRING)$str,"\XEF\XBB\XBF");
 	}
 
-    /**
-     * 检测某文件或目录是否可写
-     * @param $file
-     * @return bool
-     */
+	/**
+	 * 检测某文件或目录是否可写
+	 * @param $file
+	 * @return bool
+	 */
 	public static function rewritable($file) {
-	    $flag = false;
-	    if(is_file($file)) {
-            $flag = is_writable($file);
-        } else {
-	        if(is_dir($file)) {
-	            $dir = $file;
-            } else {
-                $dir = dirname($file);
-                $n = 10;
-                while(!is_dir($dir) && --$n>0) {
-                    $dir = dirname($dir);
-                }
-            }
-            $tmpfname = tempnam($dir, 'chk');
-            if($fp = @fopen($tmpfname, "w")) {
-                $flag = true;
-                fclose($fp);
-                unlink($tmpfname);
-            }
-        }
-        return $flag;
-    }
+		$flag = false;
+		if(is_file($file)) {
+			$flag = is_writable($file);
+		} else {
+			if(is_dir($file)) {
+				$dir = $file;
+			} else {
+				$dir = dirname($file);
+				$n = 10;
+				while(!is_dir($dir) && --$n>0) {
+					$dir = dirname($dir);
+				}
+			}
+			$tmpfname = tempnam($dir, 'chk');
+			if($fp = @fopen($tmpfname, "w")) {
+				$flag = true;
+				fclose($fp);
+				unlink($tmpfname);
+			}
+		}
+		return $flag;
+	}
 }

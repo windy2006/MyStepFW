@@ -18,14 +18,15 @@
   $zip->unzip($dir);
  */
 class myZip extends ZipArchive {
-	protected $file;
+	protected $file, $root_fix;
 
 	/**
 	 * 构造函数
 	 * @param string $zip_file
 	 */
-	public function __construct($zip_file = '') {
+	public function __construct($zip_file = '', $root_fix = '') {
 		$this->file = $zip_file;
+		$this->root_fix = $root_fix;
 	}
 
 	/**
@@ -34,7 +35,7 @@ class myZip extends ZipArchive {
 	 */
 	public function addDir($path) {
 		if(!is_dir($path)) return;
-		$root = myFile::rootPath();
+		$root = empty($this->root_fix) ? myFile::rootPath() : $this->root_fix;
 		$this->addEmptyDir(str_replace($root, '', $path));
 		$files = glob($path . '/*');
 		foreach($files as $file) {
@@ -61,7 +62,7 @@ class myZip extends ZipArchive {
 		if(is_array($file)) {
 			if(empty($this->file)) $this->file = tempnam(dirname($_SERVER['PHP_SELF']), '').'.zip';
 			if($res = $this->open($this->file, ZIPARCHIVE::CREATE)) {
-				$root = myFile::rootPath();
+				$root = empty($this->root_fix) ? myFile::rootPath() : $this->root_fix;
 				foreach($file as $cur_file) {
 					$cur_file = myFile::realPath($cur_file);
 					if(is_dir($cur_file)) {

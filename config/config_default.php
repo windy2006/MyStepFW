@@ -10,9 +10,9 @@ $setting['gen']['cache_mode'] = 'file';
 $setting['gen']['cache_page'] = false;
 $setting['gen']['s_usr'] = 'mystep';
 $setting['gen']['s_pwd'] = 'e10adc3949ba59abbe56e057f20f883e';
-$setting['gen']['close'] = '/closed.html';
-$setting['gen']['static'] = 'jpg,png,gif,ico,css,js,html,htm,woff,woff2,eot,svg,ttf,map';
-$setting['gen']['debug'] = true;
+$setting['gen']['close'] = '';
+$setting['gen']['static'] = 'jpg,png,gif,ico,css,js,json,html,htm,woff,woff2,eot,svg,ttf,map,zip';
+$setting['gen']['debug'] = false;
 
 $setting['web'] = array();
 $setting['web']['title'] = '迈思框架 MyStep Framework';

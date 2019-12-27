@@ -18,16 +18,14 @@ $idx = myReq::get('idx');
 if(!empty($idx)) {
     include_once(PLUGIN.'/interface_plugin.class.php');
     $flag = true;
-    if(is_file(PLUGIN.$idx.'/class.php')) {
-        include(PLUGIN.$idx.'/class.php');
-        $class = 'plugin_'.$idx;
-        if(class_exists($class)) {
-            $reflect = new myReflection($class);
-            if($reflect->implementsInterface('interface_plugin')) {
-                if(is_file(PLUGIN.$idx.'/info.php')) {
-                    $info = include(PLUGIN.$idx.'/info.php');
-                    $flag = false;
-                }
+    $class = 'plugin_'.$idx;
+    if(!class_exists($class) && is_file(PLUGIN.$idx.'/class.php')) include(PLUGIN.$idx.'/class.php');
+    if(class_exists($class)) {
+        $reflect = new myReflection($class);
+        if($reflect->implementsInterface('interface_plugin')) {
+            if(is_file(PLUGIN.$idx.'/info.php')) {
+                $info = include(PLUGIN.$idx.'/info.php');
+                $flag = false;
             }
         }
     }
@@ -37,9 +35,11 @@ if(!empty($idx)) {
 switch($method) {
     case 'view':
         if(myReq::check('post')) {
-            $config = new myConfig(PLUGIN.$idx.'/config.php');
-            $config->set($_POST['setting']);
-            $config->save('php');
+            if(isset($_POST['setting'])) {
+                $config = new myConfig(PLUGIN.$idx.'/config.php');
+                $config->set($_POST['setting']);
+                $config->save('php');
+            }
             call_user_func(array($class, 'install'));
             $mydb->insert(array(
                 'order' => 1,

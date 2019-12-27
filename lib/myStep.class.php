@@ -50,7 +50,7 @@ require_once('myController.class.php');
 class myStep extends myController {
 	public $setting;
 	protected
-        $mem_start = 0,
+		$mem_start = 0,
 		$time_start = 0,
 		$time_css = 0,
 		$time_js = 0;
@@ -88,7 +88,7 @@ class myStep extends myController {
 	 * @param string $dummy
 	 */
 	public function start($setPlugin = false, $dummy = '') {
-        $this->mem_start = memory_get_usage();
+		$this->mem_start = memory_get_usage();
 		$this->time_start = getMicrotime();
 		$alias = include(CONFIG.'class_alias.php');
 		self::setAlias($alias);
@@ -115,7 +115,7 @@ class myStep extends myController {
 		if($this->setting->session->mode=='sess_file') $this->setting->session->path = CACHE.'/session/'.date('Ymd').'/';
 
 		global $db, $cache, $no_db;
-        switch($this->setting->gen->cache_mode) {
+		switch($this->setting->gen->cache_mode) {
 			case 'memoryCache':
 				$cache_setting = myCache::o2a($this->setting->memcached);
 				break;
@@ -127,13 +127,13 @@ class myStep extends myController {
 		}
 		$cache = $this->getInstance('myCache', $this->setting->gen->cache_mode, $cache_setting);
 
-        $db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
-        if(empty($no_db)) {
-            $db->connect($this->setting->db->pconnect, $this->setting->db->name);
-            $db->setCache($cache, 600);
-        }
+		$db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
+		if(empty($no_db)) {
+			$db->connect($this->setting->db->pconnect, $this->setting->db->name);
+			$db->setCache($cache, 600);
+		}
 
-        $this->setting->info = new stdClass();
+		$this->setting->info = new stdClass();
 		$this->setting->info->time = myReq::server('REQUEST_TIME');
 		$this->setting->info->host = myReq::server('HTTP_HOST');
 
@@ -205,30 +205,30 @@ class myStep extends myController {
 		return call_user_func_array([$tpl, 'display'], $args);
 	}
 
-    /**
-     * 设置链接模式
-     * @param $content
-     * @return mixed
-     */
+	/**
+	 * 设置链接模式
+	 * @param $content
+	 * @return mixed
+	 */
 	static public function setLink($content) {
-	    global $s;
-	    $seperator = '';
-	    switch($s->router->mode) {
-            case 'path_info':
-                $seperator = '/';
-                break;
-            case 'query_string':
-                $seperator = '?';
-                break;
-            default:
-                break;
-        }
-        if(!empty($seperator)) {
-	        $content = preg_replace('@(href|src|action)\s*\=\s*(\'|")(.+?)\2@i', '\1=\2index.php'.$seperator.'\3\2', $content);
-	        $content = preg_replace('@(\'|")index.php'.preg_quote($seperator).'(#|http|//|static|data\:)@', '\1\2', $content);
-        }
-	    return $content;
-    }
+		global $s;
+		$seperator = '';
+		switch($s->router->mode) {
+			case 'path_info':
+				$seperator = '/';
+				break;
+			case 'query_string':
+				$seperator = '?';
+				break;
+			default:
+				break;
+		}
+		if(!empty($seperator)) {
+			$content = preg_replace('@(href|src|action)\s*\=\s*(\'|")(.+?)\2@i', '\1=\2index.php'.$seperator.'\3\2', $content);
+			$content = preg_replace('@(\'|")index.php'.preg_quote($seperator).'(#|http|//|static|data\:)@', '\1\2', $content);
+		}
+		return $content;
+	}
 
 	/**
 	 * 框架终止，销毁相关变量
@@ -408,19 +408,19 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		global $mystep, $s;
 		ob_end_clean();
 		if($mystep==null) {
-		    $mystep = new myController();
-		    $mystep->setLanguagePack(APP.'myStep/language/', $s->gen->language);
-            $paras = [
-                'web_title' => $s->web->title,
-                'web_url' => $s->web->url,
-                'charset' => $s->gen->charset,
-                'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
-                'lng_page_info' => $mystep->getLanguage('page_info'),
-                'lng_page_info_refresh' => $mystep->getLanguage('page_info_refresh'),
-            ];
-        } else {
-            $paras = [];
-        }
+			$mystep = new myController();
+			$mystep->setLanguagePack(APP.'myStep/language/', $s->gen->language);
+			$paras = [
+				'web_title' => $s->web->title,
+				'web_url' => $s->web->url,
+				'charset' => $s->gen->charset,
+				'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
+				'lng_page_info' => $mystep->getLanguage('page_info'),
+				'lng_page_info_refresh' => $mystep->getLanguage('page_info_refresh'),
+			];
+		} else {
+			$paras = [];
+		}
 		$t = new myTemplate(array(
 			'name' => 'info',
 			'path' => APP.'myStep/template/',
@@ -430,10 +430,10 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			$url = myReq::server('HTTP_REFERER');
 			if(is_null($url)) $url = '/';
 		}
-        $msg = $mystep->getLanguage($msg);
-        foreach($paras as $k => $v) {
-            $t->assign($k, $v);
-        }
+		$msg = $mystep->getLanguage($msg);
+		foreach($paras as $k => $v) {
+			$t->assign($k, $v);
+		}
 		$t->assign('msg', $msg);
 		$t->assign('url', self::setURL($url));
 		$mystep->show($t);
@@ -521,7 +521,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			);
 			if(isset($setting['setting']['js'])) $setting_js = array_merge($setting_js, $setting['setting']['js']);
 
-            $result = 'var setting = '.myString::toJson($setting_js).';';
+			$result = 'var setting = '.myString::toJson($setting_js).';';
 			myFile::saveFile($cache, $result, 'wb');
 			unset($setting, $setting_js);
 		}
@@ -544,12 +544,28 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$result = '{"err":"Module is Missing!"}';
 		if(isset($api_list)) {
 			if(isset($api_list[$module])){
-				$name = array_shift($para);
+				if(strpos($para[0],'plugin_')!==0) {
+					$name = array_shift($para);
+				} else {
+					$plugin = array_shift($para);
+					$name = array_shift($para);
+				}
 			} else {
 				$name = $module;
 				$module = 'myStep';
 			}
-			if(isset($api_list[$module][$name])) {
+			if(isset($plugin) && isset($api_list[$plugin][$name])) {
+				$s->merge(APP.$module.'/config.php');
+				$method = $api_list[$plugin][$name];
+				if(is_file(APP.$module.'/lib.php')) require_once(APP.$module.'/lib.php');
+				$type = end($para);
+				$para = array_merge(myReq::getValue(myReq::check('get')?'get':'post', '[ALL]'), $para);
+				if(is_callable($method)) {
+					$api = new myApi();
+					$api->regMethod($name, $method);
+					$result = call_user_func([$api, 'run'], $name, $para, $type, $s->gen->charset);
+				}
+			} elseif(isset($api_list[$module][$name])) {
 				$s->merge(APP.$module.'/config.php');
 				$method = $api_list[$module][$name];
 				if(is_file(APP.$module.'/lib.php')) require_once(APP.$module.'/lib.php');
@@ -566,11 +582,11 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		exit;
 	}
 
-    /**
-     * 框架模块调用接口
-     * @param $m
-     * @param string $dummy
-     */
+	/**
+	 * 框架模块调用接口
+	 * @param $m
+	 * @param string $dummy
+	 */
 	public static function module($m, $dummy = '') {
 		$path = explode('/', trim($m, '/'));
 		$module = array_shift($path);
@@ -579,7 +595,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			require(self::$modules[$module]);
 			exit();
 		} else {
-		    self::redirect('/');
+			self::redirect('/');
 		}
 	}
 
@@ -666,47 +682,47 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		exit;
 	}
 
-    /**
-     * 链接处理
-     * @param $url
-     * @return string
-     */
-    public static function setURL($url) {
-        global $s;
-        switch($s->router->mode) {
-            case 'path_info':
-                $url = 'index.php'.$url;
-                break;
-            case 'query_string':
-                $url = 'index.php?'.$url;
-                break;
-            default:
-                break;
-        }
-        $url = preg_replace('@^index.php.(http)@', '\1', $url);
-        return $url;
-    }
+	/**
+	 * 链接处理
+	 * @param $url
+	 * @return string
+	 */
+	public static function setURL($url) {
+		global $s;
+		switch($s->router->mode) {
+			case 'path_info':
+				$url = 'index.php'.$url;
+				break;
+			case 'query_string':
+				$url = 'index.php?'.$url;
+				break;
+			default:
+				break;
+		}
+		$url = preg_replace('@^index.php.(http)@', '\1', $url);
+		return $url;
+	}
 
-    /**
-     * 链接跳转
-     * @param string $url
-     * @param string $code
-     */
+	/**
+	 * 链接跳转
+	 * @param string $url
+	 * @param string $code
+	 */
 	public static function redirect($url = '', $code = '302') {
-        if(empty($url)) {
-            $url = myReq::server('HTTP_REFERER');
-            if (is_null($url)) $url = '/';
-            $code = '302';
-        } else {
-            if(strpos(trim($url, '/'), 'index.php')!==false) {
-                $url = ROOT_WEB.self::setURL($url);
-            }
-        }
-        $url = preg_replace('#/+#', '/', $url);
-        $url = str_replace(':/', '://', $url);
-        header('location: ' . $url, true, $code);
-        exit;
-    }
+		if(empty($url)) {
+			$url = myReq::server('HTTP_REFERER');
+			if (is_null($url)) $url = '/';
+			$code = '302';
+		} else {
+			if(strpos(trim($url, '/'), 'index.php')!==false) {
+				$url = ROOT_WEB.self::setURL($url);
+			}
+		}
+		$url = preg_replace('#/+#', '/', $url);
+		$url = str_replace(':/', '://', $url);
+		header('location: ' . $url, true, $code);
+		exit;
+	}
 
 	/**
 	 * 框架变量初始化
@@ -722,7 +738,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 						'jsMin' => 'myMinify.class.php',
 						'cssMin' => 'myMinify.class.php',
 						'JavaScriptPacker' => 'myMinify.class.php',
-                        'interface_plugin' => '../plugin/interface_plugin.class.php'
+						'interface_plugin' => '../plugin/interface_plugin.class.php'
 					),
 			);
 			for($i=1,$m=count($class);$i<$m;$i++) {
@@ -776,8 +792,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	public static function go() {
 		global $s, $router;
 		$s = new myConfig(CONFIG.'config.php');
-        $router = new myRouter((array)$s->router);
-        extract($router->route);
+		$router = new myRouter((array)$s->router);
+		extract($router->route);
 
 		$the_file = ROOT.preg_replace('#&.+$#', '', $p);
 		$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
@@ -791,22 +807,22 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
 
 		global $info_app, $s, $router, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
-        define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
+		define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check()) {
 			$info_app = $router->parse();
-            $info_app['route'] = $router->route['p'];
-            $info_app['app'] = trim($info_app['app'],'.');
-            if(empty($info_app['app']) || !is_dir(APP.$info_app['app'])) {
-                myStep::info('app_missing', ROOT_WEB);
-            }
-            if(is_file(APP.$info_app['app'].'/config.php')) {
-                $s->merge(APP.$info_app['app'].'/config.php');
-            }
-            define('PATH', APP.$info_app['app'].'/');
-            if(is_file(PATH.'/lib.php')) require_once(PATH.'/lib.php');
-            myStep::setPara();
-            require(APP.$info_app['app'].'/index.php');
+			$info_app['route'] = $router->route['p'];
+			$info_app['app'] = trim($info_app['app'],'.');
+			if(empty($info_app['app']) || !is_dir(APP.$info_app['app'])) {
+				myStep::info('app_missing', ROOT_WEB);
+			}
+			if(is_file(APP.$info_app['app'].'/config.php')) {
+				$s->merge(APP.$info_app['app'].'/config.php');
+			}
+			define('PATH', APP.$info_app['app'].'/');
+			if(is_file(PATH.'/lib.php')) require_once(PATH.'/lib.php');
+			myStep::setPara();
+			require(APP.$info_app['app'].'/index.php');
 		}
 	}
 
@@ -828,21 +844,22 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(is_callable(array($mystep, 'preload'))) $mystep->preload();
 		if(is_null($setPlugin)) $setPlugin = true;
 		if(is_file(PATH.'config.php')) $mystep->setting->merge(PATH.'config.php');
-        $mystep->start($setPlugin);
+		if(!$mystep->setting->gen->debug && !empty($mystep->setting->gen->close)) self::redirect($mystep->setting->gen->close);
+		$mystep->start($setPlugin);
 
-        $mystep->setting->web->css = explode(',', $mystep->setting->web->css);
-        foreach($mystep->setting->web->css as $k) {
-            $mystep->addCSS(STATICS.'css/'.$k.'.css');
-        }
+		$mystep->setting->web->css = explode(',', $mystep->setting->web->css);
+		foreach($mystep->setting->web->css as $k) {
+			$mystep->addCSS(STATICS.'css/'.$k.'.css');
+		}
 		$mystep->addCSS(STATICS.'css/global.css');
 		$mystep->addCSS(PATH.'asset/style.css');
 		$mystep->addCSS(PATH.'asset/'.$mystep->setting->template->style.'/style.css');
 		$mystep->setting->css = CACHE.'script/'.$info_app['app'].'.css';
 
-        $mystep->setting->web->js = explode(',', $mystep->setting->web->js);
-        foreach($mystep->setting->web->js as $k) {
-            $mystep->addCSS(STATICS.'js/'.$k.'.js');
-        }
+		$mystep->setting->web->js = explode(',', $mystep->setting->web->js);
+		foreach($mystep->setting->web->js as $k) {
+			$mystep->addJS(STATICS.'js/'.$k.'.js');
+		}
 		$mystep->addJS(STATICS.'js/global.js');
 		$mystep->addJS(PATH.'asset/function.js');
 		$mystep->addJS(PATH.'asset'.$mystep->setting->template->style.'/function.js');
@@ -855,10 +872,10 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			'path_compile' => CACHE.'template/'.$info_app['app'].'/'
 		);
 
-        $tpl_cache = $mystep->setting->gen->debug ? false : array(
-            'path' => CACHE.'app/'.$info_app['app'].'/html/',
-            'expire' => 60*60*24
-        );
+		$tpl_cache = $mystep->setting->gen->debug ? false : array(
+			'path' => CACHE.'app/'.$info_app['app'].'/html/',
+			'expire' => 60*60*24
+		);
 	}
 
 	/**

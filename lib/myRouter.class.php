@@ -14,7 +14,7 @@
 /**
 网站路由处理
     $router = new myRouter();
-    $router->$router->format('hex','[a-fA-F0-9]+');
+    $router->format('hex','[a-fA-F0-9]+');
     $router->rule('/test/[any]/[str]/[hex]/[yyy]/[int]', function(){var_dump(func_get_args());});
     $router->check('/test/哈哈/string/aB123f/yyy/123456');
     $router->parse()
@@ -23,8 +23,8 @@ class myRouter extends myBase {
 	use myTrait;
 
 	public
-        $query = '',
-        $route = array();
+		$query = '',
+		$route = array();
 
 	protected
 		$formats = array(
@@ -36,44 +36,44 @@ class myRouter extends myBase {
 		$rules = array(),
 		$info = array('app'=>'','path'=>'','para'=>array());
 
-    /**
-     * 参数初始化
-     * @param array $setting
-     * @param string $p
-     * @param string $q
-     */
+	/**
+	 * 参数初始化
+	 * @param array $setting
+	 * @param string $p
+	 * @param string $q
+	 */
 	public function init($setting=array()) {
-        if(!isset($setting['mode'])) $setting['mode'] = 'rewrite';
+		if(!isset($setting['mode'])) $setting['mode'] = 'rewrite';
 		if(!isset($setting['default_app'])) $setting['default_app'] = 'myStep';
 		if(!isset($setting['delimiter_path'])) $setting['delimiter_path'] = '/';
 		if(!isset($setting['delimiter_para'])) $setting['delimiter_para'] = '&';
 
-        $qstr = trim(myReq::svr('QUERY_STRING'));
-        $path_info = myReq::svr('PATH_INFO');
-        if(empty($path_info)) {
-            $path_info = myReq::server('ORIG_PATH_INFO');
-            $path_info = str_replace(myReq::server('SCRIPT_NAME'), '', $path_info);
-        }
-        if(empty($qstr)) {
-            $qstr = $path_info;
-        } else {
-            $qstr = $path_info.'?'.$qstr;
-        }
-        $qstr = trim($qstr, '?');
-        if(strpos($qstr, '/')!==0) $qstr = '/'.$qstr;
+		$qstr = trim(myReq::svr('QUERY_STRING'));
+		$path_info = myReq::svr('PATH_INFO');
+		if(empty($path_info)) {
+			$path_info = myReq::server('ORIG_PATH_INFO');
+			$path_info = str_replace(myReq::server('SCRIPT_NAME'), '', $path_info);
+		}
+		if(empty($qstr)) {
+			$qstr = $path_info;
+		} else {
+			$qstr = $path_info.'?'.$qstr;
+		}
+		$qstr = trim($qstr, '?');
+		if(strpos($qstr, '/')!==0) $qstr = '/'.$qstr;
 
-        array_shift($_GET);
-        preg_match('#^(.+?)((&|\?)(.+))?$#', $qstr, $match);
-        $p = $match[1] ?? '';
-        $q = $match[4] ?? '';
-        parse_str($q, $_GET);
+		array_shift($_GET);
+		preg_match('#^(.+?)((&|\?)(.+))?$#', $qstr, $match);
+		$p = $match[1] ?? '';
+		$q = $match[4] ?? '';
+		parse_str($q, $_GET);
 
-        $_SERVER["QUERY_STRING"] = preg_replace('#^.+(\?|&)(.+)$#', '\2', $qstr);
-        $this->route = compact('qstr','p', 'q');
-        $this->query = $qstr;
+		$_SERVER["QUERY_STRING"] = preg_replace('#^.+(\?|&)(.+)$#', '\2', $qstr);
+		$this->route = compact('qstr','p', 'q');
+		$this->query = $qstr;
 		$this->setting = $setting;
 
-        $this->parse();
+		$this->parse();
 	}
 
 	/**
@@ -159,22 +159,23 @@ class myRouter extends myBase {
 	public function check() {
 		foreach($this->rules as $rule) {
 			if(preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)) {
-                array_shift($match);
-                if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
-                    $rule['idx'] = array_shift($match);
-                }
-                if(!is_dir(APP.$rule['idx'])) {
-                    myStep::info('app_missing');
-                }
+				array_shift($match);
+				if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
+					$rule['idx'] = array_shift($match);
+				}
+				if(strpos($rule['idx'], 'plugin_')===0) $rule['idx'] = 'myStep';
+				if(!is_dir(APP.$rule['idx'])) {
+					myStep::info('app_missing');
+				}
 				$info_app = include(APP.$rule['idx'].'/info.php');
 				$info_app['path'] = explode('/', trim($this->route['p'],'/'));
-                $info_app['para'] = $this->info['para'];
+				$info_app['para'] = $this->info['para'];
 				$info_app['route'] = $this->route['p'];
 				myReq::globals('info_app', $info_app);
 				if(is_file(APP.$rule['idx'].'/lib.php')) require_once(APP.$rule['idx'].'/lib.php');
-                myStep::setPara();
+				myStep::setPara();
 				if(is_array($rule['method'])) {
-                    $match = array_slice($match,0,1);
+					$match = array_slice($match,0,1);
 					$last = array_pop($rule['method']);
 					$flag = true;
 					foreach($rule['method'] as $each) {
@@ -229,23 +230,65 @@ class myRouter extends myBase {
 			$para = explode($setting['delimiter_para'], array_pop($q));
 			foreach($para as $k => $v) {
 				if(strpos($v, '=')) {
-				    list($k,$v) = explode('=', $v);
-				    $k = trim($k, '?&');
+					list($k,$v) = explode('=', $v);
+					$k = trim($k, '?&');
 					$this->info['para'][$k] = $v;
 				} else {
-				    if(!empty($v)) $path[] = $v;
+					if(!empty($v)) $path[] = $v;
 				}
 			}
 		}
 		if(empty(reset($q))) array_shift($q);
 		$this->info['app'] = (count($q)>0) ? array_shift($q) : $setting['default_app'];
 		$this->info['path'] = array_merge([$this->info['app']], $q, $path);
-        $info = array();
-        if(is_file(APP.$this->info['app'].'/info.php')) {
-            $info = include(APP.$this->info['app'].'/info.php');
-        }
-        $this->info = array_merge($info, $this->info);
+		$info = array();
+		if(is_file(APP.$this->info['app'].'/info.php')) {
+			$info = include(APP.$this->info['app'].'/info.php');
+		}
+		$this->info = array_merge($info, $this->info);
 		return $this->info;
+	}
+
+	/**
+	 * 移除某条规则
+	 * @param $file
+	 * @param $idx
+	 * @return bool
+	 */
+	public function remove($file, $idx) {
+		$flag = false;
+		if(is_file($file)) {
+			include($file);
+			if(isset($format_list[$idx])) {
+				unset($format_list[$idx]);
+				$flag = true;
+			}
+			if(isset($rule_list[$idx])) {
+				unset($rule_list[$idx]);
+				$flag = true;
+			}
+			if(isset($api_list[$idx])) {
+				unset($api_list[$idx]);
+				$flag = true;
+			}
+			if($flag) {
+				$result = '<?PHP' . chr(10);
+				if (isset($format_list)) {
+					$result .= '$format_list = ' . var_export($format_list, true) . ';' . chr(10) . chr(10);
+				}
+				if (isset($rule_list)) {
+					$result .= '$rule_list = ' . var_export($rule_list, true) . ';' . chr(10) . chr(10);
+				}
+				if (isset($api_list)) {
+					$result .= '$api_list = ' . var_export($api_list, true) . ';' . chr(10) . chr(10);
+				}
+				while (preg_match('/\'(function\(.+\})\'/sm', $result, $match)) {
+					$result = str_replace($match[0], stripcslashes($match[1]), $result);
+				}
+				myFile::saveFile($file, $result);
+			}
+		}
+		return $flag;
 	}
 
 	/**

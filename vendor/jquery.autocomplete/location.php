@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $location = array(
 	array("北京市", "Beijing", "BJ"),
 	array("北京市东城区", "BeijingDongchengQu", "BJDCQ"),

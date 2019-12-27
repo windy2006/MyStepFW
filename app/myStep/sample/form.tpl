@@ -164,6 +164,20 @@
 				<td>
 					<div class="input-group">
 						<div class="input-group-prepend">
+							<span class="input-group-text">对 话 框</span>
+						</div>
+						<div class="form-control pl-0" style="padding-top:3px;">
+							<button class="ml-2" onClick="alert('这是一个信息框示例。\n\n原始函数可通过 alert_org 调用。')">alert</button>
+							<button class="ml-2" onClick="confirm('这是一个确认框示例。\n\n原始函数可通过 confirm_org 调用。', 'alert_org', ['确 定','取 消'], '我是标题')">confirm</button>
+							<button class="ml-2" onClick="prompt('这是一个文本录入示例。\n\n原始函数可通过 prompt_org 调用。', 'alert_org', '随便写点什么？', '我是标题', ['确 定','取 消','重 填'])">prompt</button>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div class="input-group">
+						<div class="input-group-prepend">
 							<span class="input-group-text">模态窗口</span>
 						</div>
 						<div class="form-control pl-0" style="padding-top:3px;">

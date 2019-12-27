@@ -154,6 +154,43 @@ function myEval($code) {
 }
 
 /**
+ * 递归合并数组
+ * @param $arr_1
+ * @param $arr_2
+ * @return array|bool
+ */
+function arrayMerge($arr_1, $arr_2) {
+	if(!is_array($arr_1)) return false;
+	if(!is_array($arr_2)) {
+		$arr_1[] = $arr_2;
+	} else {
+		foreach($arr_1 as $key => $value) {
+			if(isset($arr_2[$key])) {
+				if(is_array($arr_1[$key])) {
+					if(is_array($arr_2[$key])) {
+						$arr_1[$key] = arrayMerge($arr_1[$key], $arr_2[$key]);
+					} else {
+						$arr_1[$key][] = $arr_2[$key];
+					}
+				} else {
+					if(is_array($arr_2[$key])) {
+						$arr_1[$key] = arrayMerge(array($arr_1[$key]), $arr_2[$key]);
+					} else {
+						$arr_1[$key] = $arr_2[$key];
+					}
+				}
+			}
+		}
+		foreach($arr_2 as $key => $value) {
+			if(!isset($arr_1[$key])) {
+				$arr_1[$key] = $arr_2[$key];
+			}
+		}
+	}
+	return $arr_1;
+}
+
+/**
  * 递归执行某一函数
  * @param $func
  * @param $para

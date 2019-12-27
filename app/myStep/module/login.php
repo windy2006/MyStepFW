@@ -15,7 +15,13 @@ if(r::svr('QUERY_STRING')=='out') {
         if($s->gen->s_usr==r::p('username') && $s->gen->s_pwd==$pwd) {
             r::setCookie('ms_user', $usr.chr(9).$pwd, 60*60*24);
             r::s('ms_user', $usr);
-            myStep::info('login_ok', $path_admin);
+            $url = r::s('url');
+            if(empty($url)) {
+                $url = $path_admin;
+            } else {
+                r::s('url', null);
+            }
+            myStep::info('login_ok', $url);
         } else {
         	$err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
         }

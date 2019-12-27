@@ -216,7 +216,7 @@ class myString {
 	 * @param bool $assoc
 	 * @return mixed
 	 */
-	public static function fromJson($json, $assoc = false) {
+	public static function fromJson($json, $assoc = true) {
 		$json = str_replace(array(chr(10),chr(13)),'',$json);
 		$json = preg_replace('/([{,])(\s*)([^"]+?)\s*:/','$1"$3":',$json);
 		$json = str_replace('\\"',"&#34;",$json);

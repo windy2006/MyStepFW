@@ -342,6 +342,79 @@ function showPop(name, title, type, content, width, height, no_close) {
 	});
 }
 
+window.alert_org = window.alert;
+window.alert = function(info, nl) {
+    if(info.length==0) return;
+    if($("#info_show").length==0) {
+        alert_org(info);
+        return;
+    }
+    var func = "void";
+    var btn = [language.close];
+    if(nl!=false) nl = true;
+    confirm(info, func, btn, "MyStep - Alert", nl);
+}
+
+window.confirm_org = window.confirm;
+window.confirm = function(info, func, btn, title, nl) {
+    if(typeof(info)!="string") info = info.toString();
+    if(info.length==0) return;
+    if(func==null || $("#info_show").length==0) return confirm_org(info);
+    if(title==null) title = "MyStep - Confirm";
+    if(btn==null) btn = [" Yes ", " No "];
+    if(nl!=false) nl = true;
+    if(nl==true) info = info.replace(/[\r\n]+/g,"<br />");
+    $("#info_show > .info").html(info);
+    $("#info_show > .button").html("");
+    for(var i=0,m=btn.length;i<m;i++) {
+        $("#info_show > .button").append($("<button>").html(btn[i]).attr("onclick", "$.closePopupLayer_now();"+func+"("+i+");"));
+    }
+    var theSize = setDialog();
+    showPop('info_show', title, 'id', 'info_show', theSize[0], theSize[1]);
+    $("#popupLayer_info_show_content").addClass("info_show");
+}
+
+window.prompt_org = window.prompt;
+window.prompt = function(info, func, value, title, btn, nl) {
+    if(typeof(info)!="string") info = info.toString();
+    if(info.length==0) return;
+    if(func==null || $("#info_show").length==0) return prompt_org(info, value);
+    if(nl!=false) nl = true;
+    if(nl==true) info = info.replace(/[\r\n]+/g,"<br />");
+    if(value==null) value = "";
+    if(title==null) title = "MyStep";
+    if(btn==null) btn = [" Confirm ", " Cancel ", " Reset "];
+    info += '<br /><br /><input type="text" style="width:95%;" value="' + value + '" /><br /><br />';
+    $("#info_show > .info").html(info);
+    $("#info_show > .button").html("");
+    $("#info_show > .button").append($("<button>").html(btn[0]).attr("onclick", "var theValue=$('#popupLayer_info_show_content').find('input').first().val();$.closePopupLayer_now();"+func+"(theValue);"));
+    $("#info_show > .button").append($("<button>").html(btn[1]).attr("onclick", "$.closePopupLayer();"));
+    $("#info_show > .button").append($("<button>").html(btn[2]).attr("onclick", "$('#popupLayer_info_show_content').find('input').val($('#popupLayer_info_show_content').find('input').get(0).defaultValue);$('#popupLayer_info_show_content').find('input').get(0).select()"));
+    var theSize = setDialog();
+    showPop('info_show', title, 'id', 'info_show', theSize[0], theSize[1]);
+    $("#popupLayer_info_show_content").addClass("info_show");
+}
+
+function setDialog() {
+    $("#info_show").show();
+    $("#info_show > .info").css({"overflow-x":"auto","overflow-y":"auto","width":"auto","height":"auto"});
+    var the_width = $("#info_show").width();
+    var the_height = $("#info_show").height();
+    if(the_width<300) the_width = 300;
+    if(the_height<50) the_height = 50;
+    if(the_width>600) {
+        the_width = 600;
+        $("#info_show > .info").css({"overflow-x":"scroll","width":the_width});
+    }
+    if(the_height>400) {
+        the_height = 400;
+        the_width += 24;
+        $("#info_show > .info").css({"overflow-y":"scroll","width":the_width+10,"height":(the_height-40)});
+    }
+    $("#info_show").hide();
+    return [the_width+20, the_height]
+}
+
 $(function(){
 	$.setupJMPopups({
 		screenLockerBackground: "#000",

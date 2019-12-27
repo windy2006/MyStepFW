@@ -26,7 +26,7 @@
     function setPosition() {
         $("#main").css('padding-bottom', 80);
         $("tfoot").css({'right':0, 'bottom':40});
-        $("tfoot").width($("#main").width()+36);
+        $("tfoot").width($("#main").width()+20);
         $("tfoot").height($(window).width()>530?60:80);
     }
     $(window).resize(setPosition);

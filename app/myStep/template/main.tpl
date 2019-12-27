@@ -18,43 +18,9 @@
     </button>
     <div class="navbar-collapse collapse" id="nav">
         <a class="btn navbar-brand d-none d-sm-inline-block mr-3" href="#" onclick="return false;"><b>迈思框架</b></a>
-        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+        <ul id="top_nav" class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li class="nav-item">
                 <a class="nav-link" href="./"><span class="glyphicon glyphicon-home"></span> <!--lng_page_main--></a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><span class="glyphicon glyphicon-info-sign"></span> 信息</a>
-                <div class="dropdown-menu dropdown-menu-left">
-                    <a class="dropdown-item" href="manager/">基本信息</a>
-                    <a class="dropdown-item" href="manager/db">数据库信息</a>
-                    <a class="dropdown-item" href="manager/php">PHP信息</a>
-                    <a class="dropdown-item" href="manager/phpinfo">phpinfo()</a>
-                    <a class="dropdown-item" href="manager/error">错误日志 </a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><span class="glyphicon glyphicon-wrench"></span> 设置</a>
-                <div class="dropdown-menu dropdown-menu-left">
-                    <a class="dropdown-item" href="manager/setting/">参数设置</a>
-                    <a class="dropdown-item" href="manager/setting/class">类模块设置</a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><span class="glyphicon glyphicon-cog"></span> 功能</a>
-                <div class="dropdown-menu dropdown-menu-left">
-                    <a class="dropdown-item" href="manager/function/app">应用管理</a>
-                    <a class="dropdown-item" href="manager/function/cache">缓存管理</a>
-                    <a class="dropdown-item" href="manager/function/plugin">插件管理</a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><span class="glyphicon glyphicon-book"></span> 文档</a>
-                <div class="dropdown-menu dropdown-menu-left">
-                    <a class="dropdown-item" href="manager/guide">框架指南</a>
-                    <a class="dropdown-item" href="manager/sample">功能示例</a>
-                    <a class="dropdown-item" href="sample/" target="_blank">应用示例</a>
-                    <a class="dropdown-item" href="Document/" target="_blank">功能类说明</a>
-                </div>
             </li>
         </ul>
     </div>
@@ -68,25 +34,7 @@
 <div class="container-fluid">
     <div class="row">
         <div id="list">
-            <div class="position-sticky" style="top:60px;">
-                <a class="dropdown-item" href="manager/"><span class="glyphicon glyphicon-info-sign"></span> 基本信息</a>
-                <a class="dropdown-item" href="manager/db"><span class="glyphicon glyphicon-info-sign"></span> 数据库信息</a>
-                <a class="dropdown-item" href="manager/php"><span class="glyphicon glyphicon-info-sign"></span> PHP信息</a>
-                <a class="dropdown-item" href="manager/phpinfo"><span class="glyphicon glyphicon-info-sign"></span> phpinfo()</a>
-                <a class="dropdown-item" href="manager/error"><span class="glyphicon glyphicon-info-sign"></span> 错误日志 </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="manager/setting/"><span class="glyphicon glyphicon-wrench"></span> 参数设置</a>
-                <a class="dropdown-item" href="manager/setting/class"><span class="glyphicon glyphicon-wrench"></span> 类模块设置</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="manager/function/app"><span class="glyphicon glyphicon-cog"></span> 应用管理</a>
-                <a class="dropdown-item" href="manager/function/cache"><span class="glyphicon glyphicon-cog"></span> 缓存管理</a>
-                <a class="dropdown-item" href="manager/function/plugin"><span class="glyphicon glyphicon-cog"></span> 插件管理</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="manager/guide"><span class="glyphicon glyphicon-book"></span> 框架指南</a>
-                <a class="dropdown-item" href="manager/sample"><span class="glyphicon glyphicon-book"></span> 功能示例</a>
-                <a class="dropdown-item" href="sample/" target="_blank"><span class="glyphicon glyphicon-book"></span> 应用示例</a>
-                <a class="dropdown-item" href="Document/" target="_blank"><span class="glyphicon glyphicon-book"></span> 功能类说明</a>
-            </div>
+            <div class="position-sticky" style="top:60px;"></div>
         </div>
         <div id="main" class="border-left">
             <!--main-->
@@ -103,26 +51,58 @@ function resizeMain() {
     $('#main').css('min-height', 0);
     $('#main').css('min-height', $(document).height()-80);
     if(navigator.userAgent.indexOf(".NET") != -1) {
-        var top = ($('#list').css('display')=='none') ? '0px' : '65px';
+        let top = ($('#list').css('display')=='none') ? '0px' : '65px';
         $('#main').parent().css('padding-top', top);
     }
 }
 $(function(){
-    $('[data-toggle="tooltip"]').tooltip();
-    $("a[href='<!--path-->']").addClass('active');
-    $.get('index.php?myStep/api/error/'+Math.random(), function(data, status){
-        if(typeof data == 'object' && data.count > 0) {
-            var badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);
-            $("a[href='manager/error']").append(badge);
+    $.get('app/myStep/menu.json?'+(new Date()).getTime(), function(data) {
+        let obj_top = $("#top_nav");
+        let obj_side = $("#list > div:first");
+        let obj = {}, obj_sub = {};
+        for(let i=0, m=data.length; i<m; i++) {
+            if(typeof data[i].link == 'undefined') data[i].link = "#";
+            if(typeof data[i].icon == 'undefined') data[i].icon = "glyphicon glyphicon-asterisk";
+            obj = $('<li class="nav-item dropdown"></li>');
+            obj.append($('<a class="nav-link" href="'+data[i].link+'"><span class="'+data[i].icon+'"></span> '+data[i].name+'</a>'));
+            if(data[i].items.length==0) {
+                obj_top.append(obj);
+                continue;
+            } else {
+                obj.addClass('dropdown');
+                obj.find('a:first').addClass("dropdown-toggle").attr("data-toggle", "dropdown");
+                obj_sub = $('<div class="dropdown-menu dropdown-menu-left"></div>');
+                for(let x=0, n=data[i].items.length;x<n;x++) {
+                    $('<a>').addClass("dropdown-item").attr("href", data[i].items[x].link).text(data[i].items[x].name).appendTo(obj_sub);
+                }
+                obj_sub.appendTo(obj);
+            }
+            obj_top.append(obj);
+            for(let x=0, n=data[i].items.length;x<n;x++) {
+                obj = $('<a>').addClass("dropdown-item").attr("href", data[i].items[x].link).text(" " + data[i].items[x].name);
+                if(typeof data[i].items[x].addon != 'undefined') obj.attr(data[i].items[x].addon);
+                if(typeof data[i].items[x].icon == 'undefined') data[i].items[x].icon = data[i].icon;
+                obj.prepend($('<span>').addClass(data[i].items[x].icon)).appendTo(obj_side);
+            }
+            obj_side.append($('<div class="dropdown-divider"></div>'));
         }
-    },'json');
-    resizeMain();
-    $('input[type=file]').change(function(){
-        $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
-    });
-    $('body').click(function(e){
-        if(!$(e.target).hasClass('dropdown-toggle')) $('#nav').collapse('hide');
-    });
+
+        $('[data-toggle="tooltip"]').tooltip();
+        $("a[href='<!--path-->']").addClass('active');
+        $.get('index.php?myStep/api/error/'+Math.random(), function(data, status){
+            if(typeof data == 'object' && data.count > 0) {
+                let badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);
+                $("a[href='manager/error']").append(badge);
+            }
+        },'json');
+        resizeMain();
+        $('input[type=file]').change(function(){
+            $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
+        });
+        $('body').click(function(e){
+            if(!$(e.target).hasClass('dropdown-toggle')) $('#nav').collapse('hide');
+        });
+    }, "json");
 });
 $(window).resize(resizeMain);
 </script>

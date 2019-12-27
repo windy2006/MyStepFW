@@ -112,9 +112,10 @@ class myPacker extends myBase {
 			}
 			closedir($mydir);
 		} elseif(is_file($dir)) {
-			$content  =  'file'.$this->separator.str_replace($this->pack_dir, '', $dir).$this->separator.filesize($dir).$this->separator.filemtime($dir).chr(10);
+			$file_content = myFile::getLocal($dir);
+			if(substr($file_content,0,3) == pack("CCC",0xef,0xbb,0xbf)) $file_content = myFile::removeBom($file_content);
+			$content = 'file'.$this->separator.str_replace($this->pack_dir, '', $dir).$this->separator.strlen($file_content).$this->separator.filemtime($dir).chr(10);
 			if(isset($this->charset['file_ext'])) {
-				$file_content = myFile::getLocal($dir);
 				$path_parts = pathinfo($dir);
 				if(strpos($this->charset['file_ext'], $path_parts['extension'])!==false) {
 					if(!empty($this->charset['lng_type'])) {
@@ -128,10 +129,8 @@ class myPacker extends myBase {
 					$content  =  'file'.$this->separator.str_replace($this->pack_dir, '', $dir).$this->separator.strlen($result).$this->separator.filemtime($dir).chr(10);
 					$file_content = $result;
 				}
-				$content .= $file_content;
-			} else {
-				$content .= myFile::getLocal($dir);
 			}
+			$content .= $file_content;
 			fwrite($this->pack_fp, $content);
 			$this->file_count++;
 			array_push($this->pack_result, '<b>Packing File</b> - <i>"'.str_replace($root, '/', $dir).'"</i> &nbsp; ('.myFile::getSize($dir).')');
@@ -162,7 +161,7 @@ class myPacker extends myBase {
 				$the_file = $outdir.$data[1];
 				myFile::mkdir(dirname($the_file));
 				if($fp_w = fopen($the_file,'wb')) {
-					if($data[2]>0) $flag = fwrite($fp_w, fread($this->pack_fp,$data[2]));
+					$flag = fwrite($fp_w, $data[2]==0?'':fread($this->pack_fp,$data[2]));
 					$this->file_count++;
 				}
 				array_push($this->pack_result, '<b>Unpacking File</b> - <i>"'.str_replace($root, '/', $outdir.$data[1]).'"</i> &nbsp; '.($flag?'<span style="color:green">Successfully!</span> ('.myFile::getSize($this->pack_dir.'/'.$data[1]).')':'<span style="color:red">failed!</span>'));

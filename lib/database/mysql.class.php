@@ -60,8 +60,8 @@ class MySQL extends myBase implements interface_db, interface_sql {
 		$err = false,
 		$err_info = '',
 		$count = 0,
-        $cache = null,
-        $cache_ttl = 600;
+		$cache = null,
+		$cache_ttl = 600;
 
 	/**
 	 * 构造函数
@@ -86,22 +86,22 @@ class MySQL extends myBase implements interface_db, interface_sql {
 		return;
 	}
 
-    /**
-     * 设置外部缓存
-     * @param myCache $cache
-     * @param int $ttl
-     */
+	/**
+	 * 设置外部缓存
+	 * @param myCache $cache
+	 * @param int $ttl
+	 */
 	public function setCache(myCache $cache, $ttl = 600) {
-	    $this->cache = $cache;
-        $this->cache_ttl = $ttl;
-    }
+		$this->cache = $cache;
+		$this->cache_ttl = $ttl;
+	}
 
-    /**
-     * 连接数据库服务器
-     * @param bool $pconnect
-     * @param null $the_db
-     * @return bool
-     */
+	/**
+	 * 连接数据库服务器
+	 * @param bool $pconnect
+	 * @param null $the_db
+	 * @return bool
+	 */
 	public function connect($pconnect = false, $the_db = null) {
 		if($pconnect) {
 			$this->connect = mysqli_connect('p:'.$this->host, $this->user, $this->pwd);
@@ -192,7 +192,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
 		$this->result = mysqli_query($this->connect, $sql);
 		$this->sql = $sql;
 		if(strpos('selec|show |descr|expla|repai|check|optim', strtolower(substr(trim($sql), 0, 5)))!==false && $this->check('result')) {
-		    $num_rows = mysqli_num_rows($this->result);
+			$num_rows = mysqli_num_rows($this->result);
 		} elseif($this->check()) {
 			$num_rows = mysqli_affected_rows($this->connect);
 			$this->free();
@@ -238,17 +238,17 @@ class MySQL extends myBase implements interface_db, interface_sql {
 	 * @return array|bool|null
 	 */
 	public function record($sql='', $mode = 1) {
-        if(empty($sql)) $sql = $this->select(1);
+		if(empty($sql)) $sql = $this->select(1);
 		if(stripos($sql, 'select')===0 && stripos($sql, 'limit ')==false) $sql .= ' limit 1';
 
 		if($this->cache!=null) {
-            $key = md5($sql);
-            if($result = $this->cache->get($key)) return $result;
-        }
+			$key = md5($sql);
+			if($result = $this->cache->get($key)) return $result;
+		}
 		$row_num = $this->query($sql);
 		if($row_num>0) {
 			$result = $this->getRS($mode);
-            if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
+			if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
 		} else {
 			$result = false;
 		}
@@ -265,19 +265,19 @@ class MySQL extends myBase implements interface_db, interface_sql {
 	public function records($sql='', $mode = 1){
 		$result = array();
 		if(!empty($sql) && strpos($sql, ' ')==false) {
-		    $this->build('[reset]');
-            $this->build($sql);
-            $sql = '';
-        }
+			$this->build('[reset]');
+			$this->build($sql);
+			$sql = '';
+		}
 		if(empty($sql)) $sql = $this->select(1);
-        if($this->cache!=null) {
-            $key = md5($sql);
-            if($result = $this->cache->get($key)) return $result;
-        }
+		if($this->cache!=null) {
+			$key = md5($sql);
+			if($result = $this->cache->get($key)) return $result;
+		}
 		$this->query($sql);
 		while($result[] = $this->getRS($mode)) {}
 		array_pop($result);
-        if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
+		if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
 		$this->free();
 		return $result;
 	}
@@ -288,26 +288,26 @@ class MySQL extends myBase implements interface_db, interface_sql {
 	 * @return array|bool|mixed|null
 	 */
 	public function result($sql=''){
-        if(empty($sql)) $sql = $this->select(1);
-        if($this->cache!=null) {
-            $key = md5($sql);
-            if($result = $this->cache->get($key)) return $result;
-        }
+		if(empty($sql)) $sql = $this->select(1);
+		if($this->cache!=null) {
+			$key = md5($sql);
+			if($result = $this->cache->get($key)) return $result;
+		}
 		if($result = $this->record($sql,2)) {
 			$result = $result[0];
-            if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
+			if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
 		}
 		return $result;
 	}
 
-    /**
-     * 返回当前查询的结果数
-     */
-    public function count(){
-        $sql = $this->select(1);
-        $sql = preg_replace('#limit[\s\d,]+$#', '', $sql);
-        return $this->result('select count(*) from ('.$sql.') as cnt');
-    }
+	/**
+	 * 返回当前查询的结果数
+	 */
+	public function count(){
+		$sql = $this->select(1);
+		$sql = preg_replace('#limit[\s\d,]+$#', '', $sql);
+		return $this->result('select count(*) from ('.$sql.') as cnt');
+	}
 
 	/**
 	 * 获取结果集某一行某一列
@@ -774,13 +774,13 @@ class MySQL extends myBase implements interface_db, interface_sql {
 		return $result;
 	}
 
-    /**
-     * 执行数据查询文件
-     * @param $file
-     * @param array $find
-     * @param array $replace
-     * @return array|bool
-     */
+	/**
+	 * 执行数据查询文件
+	 * @param $file
+	 * @param array $find
+	 * @param array $replace
+	 * @return array|bool
+	 */
 	public function file($file, $find = array(), $replace = array()) {
 		if(!$this->check()) return false;
 		if(is_file($file)) {
@@ -791,7 +791,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
 				$theSQL = strtolower($theSQL);
 				$theSQL = str_replace('if not exists', '', $theSQL);
 				$theSQL = str_replace('if exists', '', $theSQL);
-                $theSQL = str_replace('`', '', $theSQL);
+				$theSQL = str_replace('`', '', $theSQL);
 				$result = $this->query($SQLs[$i]);
 				switch(true) {
 					case strpos($theSQL, 'select')===0:
@@ -836,7 +836,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
 					case strpos($theSQL, 'use')===0:
 						break;
 					default:
-                        preg_match("/^(\w+)\s+.+$/", $theSQL, $match);
+						preg_match("/^(\w+)\s+.+$/", $theSQL, $match);
 						$results[] = array('other', $match[1], 'unknow', $theSQL);
 						continue;
 				}
