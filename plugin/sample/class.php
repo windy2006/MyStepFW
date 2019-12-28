@@ -1,5 +1,5 @@
 <?php
-class plugin_test implements interface_plugin {
+class plugin_sample implements interface_plugin {
     public static function check(&$result = ''){
         $result = "";
         $theList = array(

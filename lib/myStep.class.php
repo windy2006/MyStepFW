@@ -650,8 +650,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 				}
 			}
 		}
-		header('HTTP/1.1 404 Not Found');
-		exit;
+        self::header('404');
 	}
 
 	/**

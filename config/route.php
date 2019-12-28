@@ -47,11 +47,11 @@ $rule_list = array (
     0 => 
     array (
       0 => '/update/[any]',
-      1 =>
-          array (
-              0 => 'app\\myStep\\logCheck',
-              1 => 'plugin_update::update',
-          ),
+      1 => 
+      array (
+        0 => 'app\\myStep\\logCheck',
+        1 => 'plugin_update::update',
+      ),
     ),
     1 => 
     array (

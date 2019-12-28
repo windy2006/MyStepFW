@@ -28,10 +28,7 @@ if (is_null($module)) {
     }
     $tpl->assign('main', $sub_tpl->display('', false));
 } else {
-    if (!class_exists($module)) {
-        header('HTTP/1.1 404 Not Found');
-        exit;
-    }
+    if (!class_exists($module)) myStep::header('404');
     switch ($mode) {
         case 'show':
             if (array_search($module, $sp_module) !== false) {

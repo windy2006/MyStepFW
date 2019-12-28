@@ -4,4 +4,4 @@ require_once(dirname(__FILE__)."/class.php");
 $this->regModule("test1", dirname(__FILE__)."/show.php");
 $this->regTag('test_tag', function(){return 'Plugin tag test.';});
 $this->setLanguage(['test_lng'=>'模版语言测试']);
-$this->setFunction('page', 'plugin_test::setPage');
+$this->setFunction('page', 'plugin_sample::setPage');

@@ -61,7 +61,7 @@ switch($method) {
             $config->save('php');
             myStep::redirect($path_admin.'function/plugin/');
         }
-        $t->assign('', $info);
+        $t->assign($info);
         if(!is_file(PLUGIN.$idx.'/config.php')) {
             $result = '<h4 class="text-center">'.$mystep->getLanguage('plugin_no_setting').'</h4>';
         } else {

@@ -1,6 +1,6 @@
 <?php
 class plugin_update implements interface_plugin {
-    public static function check(&$result = ''){
+    public static function check(&$result = '') {
         $result = '';
         $theList = array(
             'version.php',
@@ -21,21 +21,21 @@ class plugin_update implements interface_plugin {
         }
         return $flag;
     }
-    public static function install(){
+    public static function install() {
         global $router;
         $router->checkRoute(CONFIG.'route.php', dirname(__FILE__).'/route.php', 'plugin_update');
         myFile::mkdir(dirname(__FILE__).'/update');
         myFile::mkdir(dirname(__FILE__).'/pack');
         addPluginLink('在线更新', 'update/');
     }
-    public static function uninstall(){
+    public static function uninstall() {
         global $router;
         $router->remove(CONFIG.'route.php', 'plugin_update');
         myFile::del(dirname(__FILE__).'/update');
         myFile::del(dirname(__FILE__).'/pack');
         removePluginLink('update/');
     }
-    public static function update(){
+    public static function update() {
         global $mystep, $info_app, $s;
         if(!isset($info_app['path'][1])) $info_app['path'][1] = '';
         $header = array();
@@ -111,7 +111,7 @@ class plugin_update implements interface_plugin {
                 }
                 break;
             case 'upload':
-                if(myReq::check('post')){
+                if(myReq::check('post')) {
                     $path_upload = CACHE.'tmp/';
                     $upload = new myUploader($path_upload, true);
                     $upload->do(false);
@@ -258,13 +258,11 @@ class plugin_update implements interface_plugin {
         }
         $mystep->end();
     }
-    public static function remote(){
+    public static function remote() {
         global $s,$info_app;
         $sign = myReq::server('MS_SIGN');
-        if(!$s->gen->debug && empty($sign)) {
-            header('HTTP/1.0 404 Not Found');
-            exit;
-        }
+        $setting = new myConfig(dirname(__FILE__).'/config.php');
+        if((empty($sign) || !$setting->update) && !$s->gen->debug) myStep::header('404');
         $method = end($info_app['path']);
         switch($method) {
             case 'version':
@@ -348,7 +346,10 @@ class plugin_update implements interface_plugin {
                 }
         }
     }
-    public static function pack(){
+    public static function pack() {
+        global $s;
+        $setting = new myConfig(dirname(__FILE__).'/config.php');
+        if(!$setting->pack && !$s->gen->debug) myStep::header('404');
         $ver = require(CONFIG.'version.php');
         $idx = 'mystep_v'.$ver;
         $dir = dirname(__FILE__).'/pack/';
@@ -362,7 +363,6 @@ class plugin_update implements interface_plugin {
             myStep::header('404','', true);
         }
         myFile::saveFile($log_file, implode(',', $log).chr(10), 'ab');
-
         if(!is_file($dir.$idx.'.zip')) {
             myFile::del($dir.$idx);
             myFile::mkdir($dir.$idx);
@@ -370,7 +370,7 @@ class plugin_update implements interface_plugin {
             set_time_limit(0);
             ini_set('memory_limit', '512M');
             $mypacker = new myPacker(ROOT, $dir.$idx.'/mystep.pack');
-            $mypacker->addIgnore('plugin/update/', '.svn/', '.log/', '.idea/', 'cache/', 'aspnet_client/', 'Thumbs.db', '_bak/', '.DS_Store');
+            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'cache/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak');
             $mypacker->pack();
             myFile::copy($dir.'../install.php', $dir.$idx.'/install.php');
             myFile::copy(ROOT.'readme.md', $dir.$idx.'/readme.md');

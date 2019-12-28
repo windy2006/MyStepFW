@@ -91,7 +91,6 @@ class myPacker extends myBase {
 	protected function packFile($dir='.') {
 		$root = myFile::rootPath();
 		$dir = myFile::realPath($dir);
-
 		for($i=0,$m=count($this->file_ignore);$i<$m;$i++) {
 			if(substr($dir, -(strlen($this->file_ignore[$i])))==$this->file_ignore[$i]) return;
 		}
@@ -103,11 +102,20 @@ class myPacker extends myBase {
 				$ignore = str_replace(chr(13), '', $ignore);
 				$ignore = explode(chr(10), $ignore);
 			}
+			$allow = array();
+			if(is_file($dir.'/allow')) {
+				$allow = file_get_contents($dir.'/allow');
+				if(strlen($allow)==0) return;
+				$allow = str_replace(chr(13), '', $allow);
+				$allow = explode(chr(10), $allow);
+			}
 			$content = 'dir'.$this->separator.str_replace($this->pack_dir, '', $dir).$this->separator.filemtime($dir).chr(10);
 			fwrite($this->pack_fp, $content);
 			$mydir = opendir($dir);
 			while($file = readdir($mydir)){
-				if(trim($file, '.') == '' || $file == 'ignore' || array_search($file, $ignore)!==false) continue;
+				if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow') continue;
+				if(!empty($allow) && !array_search($file, $allow)!==false) continue;
+				if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
 				$this->packFile($dir.'/'.$file);
 			}
 			closedir($mydir);
