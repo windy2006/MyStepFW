@@ -458,10 +458,29 @@ function reportError(msg, url, line) {
 
 //检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
 function checkNrun(func, params) {
-    global.timer = setInterval(function(){
+    var idx = md5(func);
+    if(typeof global.timer == 'undefined') global.timer = new Object();
+    global.timer[idx] = setInterval(function(){
         if(typeof(language)!='undefined' && typeof(setting)!='undefined') {
             window[func].apply(func, params);
-            clearInterval(global.timer);
+            clearInterval(global.timer[idx]);
         }
     }, 500);
+}
+
+//处理页面URL为对应的链接模式
+function setURL() {
+    if(typeof(setting) == 'undefined') return;
+    $('a[href]').each(function(){
+        let url = $(this).attr('href');
+        if(url.indexOf(setting.url_prefix)!=0 && url.indexOf("#")!=0) {
+            this.href = setting.url_prefix + url;
+        }
+    });
+    $('form[action]').each(function(){
+        let url = $(this).attr('action');
+        if(url.indexOf(setting.url_prefix)!=0) {
+            this.action = setting.url_prefix + url;
+        }
+    });
 }

@@ -110,6 +110,9 @@ class myConfig extends myBase {
 			case is_int($v):
 				$v = (INT)$v;
 				break;
+			case is_array($v):
+				$v = implode(',', $v);
+				break;
 			case strtolower($v) == 'true':
 				$v = true;
 				break;

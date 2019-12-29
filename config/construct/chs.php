@@ -43,7 +43,7 @@ $setting_detail['gen'] = array(
         'close' => array(
             'name' => '关闭页面',
             'describe' => '网站关闭并显示的设置页面',
-            'type' => array("text", "", "80")
+            'type' => array("text", "_", "80")
         ),
         'static' => array(
             'name' => '静态文件',
@@ -104,7 +104,7 @@ $setting_detail['web'] = array(
         'update' => array(
             'name' => '更新网址',
             'describe' => '获取内容系统程序更新的网址',
-            'type' => array("text", "url", "200")
+            'type' => array("text", "_", "200")
         ),
     ]
 );

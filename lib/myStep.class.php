@@ -180,7 +180,7 @@ class myStep extends myController {
 			$this->JS($this->setting->js);
 			$this->setAddedContent('start', '<script language="JavaScript" src="cache/script/'.basename($this->setting->js).'"></script>');
 		}
-		$this->setFunction('page', 'myStep::setLink');
+		//$this->setFunction('page', 'myStep::setLink');
 		parent::show($tpl, $this->setting->web->minify);
 	}
 
@@ -224,8 +224,17 @@ class myStep extends myController {
 				break;
 		}
 		if(!empty($seperator)) {
+			/*
+			if(preg_match('@<head>[\s\S]*(<base\s+href=(\'|")(.+)\2.*>)[\s\S]*</head>@im', $content,$match)) {
+				$content = str_replace($match[1], '<base href="index.php'.$seperator.$match[3].'" />', $content);
+			} else {
+				$content = str_replace('<head>', '<head><base href="index.php'.$seperator.'" />', $content);
+			}
+			*/
+			$content = preg_replace('@<base\s+href@i', '<base xxx', $content);
 			$content = preg_replace('@(href|src|action)\s*\=\s*(\'|")(.+?)\2@i', '\1=\2index.php'.$seperator.'\3\2', $content);
 			$content = preg_replace('@(\'|")index.php'.preg_quote($seperator).'(#|http|//|static|data\:)@', '\1\2', $content);
+			$content = str_replace('<base xxx', '<base href', $content);
 		}
 		return $content;
 	}
@@ -504,6 +513,17 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			if($module!='myStep') {
 				$setting->merge(APP.$module.'/config.php');
 			}
+			$url_prefix = '';
+			switch($setting->router->mode) {
+				case 'path_info':
+					$url_prefix = 'index.php/';
+					break;
+				case 'query_string':
+					$url_prefix  = 'index.php?';
+					break;
+				default:
+					break;
+			}
 			$setting = myConfig::o2a($setting);
 			$setting_js = array(
 				'language' => $setting['setting']['gen']['language'],
@@ -518,6 +538,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 				'path_layer' => count(explode('/',trim(ROOT_WEB, '/'))),
 				'path_root' => str_replace(myFile::rootPath(),'/',ROOT),
 				'path_app' => str_replace(myFile::rootPath(),'/',APP.$module),
+				'url_prefix' => $url_prefix,
 			);
 			if(isset($setting['setting']['js'])) $setting_js = array_merge($setting_js, $setting['setting']['js']);
 
@@ -642,15 +663,15 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 					$list[$i] = explode('::', $list[$i]);
 					$file = $path.'/'.$list[$i][0];
 					$name = $list[$i][1];
-					if(file_exists($file.'.upload')) $file = $file.'.upload';
-					if(file_exists($file)) {
+					if(is_file($file.'.upload')) $file = $file.'.upload';
+					if(is_file($file)) {
 						myController::file($file, $name);
 						exit;
 					}
 				}
 			}
 		}
-        self::header('404');
+		self::header('404');
 	}
 
 	/**
@@ -688,17 +709,21 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 */
 	public static function setURL($url) {
 		global $s;
-		switch($s->router->mode) {
-			case 'path_info':
-				$url = 'index.php'.$url;
-				break;
-			case 'query_string':
-				$url = 'index.php?'.$url;
-				break;
-			default:
-				break;
+		$url = preg_replace('@^'.preg_quote(ROOT_WEB).'@', '/', $url);
+		if(strpos($url, 'index.php')===false && strpos($url, 'http://')!==0) {
+			switch($s->router->mode) {
+				case 'path_info':
+					$url = 'index.php'.$url;
+					break;
+				case 'query_string':
+					$url = 'index.php?'.$url;
+					break;
+				default:
+					break;
+			}
 		}
-		$url = preg_replace('@^index.php.(http)@', '\1', $url);
+		$url = preg_replace('#/+#', '/', $url);
+		$url = str_replace(':/', '://', $url);
 		return $url;
 	}
 
@@ -713,12 +738,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			if (is_null($url)) $url = '/';
 			$code = '302';
 		} else {
-			if(strpos(trim($url, '/'), 'index.php')!==false) {
-				$url = ROOT_WEB.self::setURL($url);
-			}
+			$url = self::setURL($url);
 		}
-		$url = preg_replace('#/+#', '/', $url);
-		$url = str_replace(':/', '://', $url);
 		header('location: ' . $url, true, $code);
 		exit;
 	}
@@ -729,7 +750,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	public static function init() {
 		$class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
 		if(empty($class) || !is_dir($class[0]['path'])) {
-			$old_root = preg_replace('#lib/$#', '', $class[0]['path']);
+			$old_root = empty($class) ? '' : preg_replace('#lib/$#', '', $class[0]['path']);
 			$class[0] = array(
 				'path' => ROOT . 'lib/',
 				'ext' => '.php,.class.php',
@@ -893,7 +914,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			''
 		];
 		foreach($files as $f) {
-			if(file_exists($f)) break;
+			if(is_file($f)) break;
 			if(empty($f))  myStep::info('module_missing');
 		}
 		$tpl = new myTemplate($tpl_setting, $tpl_cache);
@@ -913,8 +934,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$args = func_get_args();
 		$name = array_shift($args);
 		$file = VENDOR.$name.'/'.$name.'.php';
-		if(!file_exists($file)) $file = $file = VENDOR.$name.'/'.$name.'.class.php';
-		if(!file_exists($file)) {
+		if(!is_file($file)) $file = VENDOR.$name.'/'.$name.'.class.php';
+		if(!is_file($file)) {
 			global $mystep;
 			myStep::info('module_missing');
 		}

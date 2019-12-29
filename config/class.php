@@ -1,4 +1,4 @@
-<?php
+<?PHP
 return array (
   0 => 
   array (
@@ -6,10 +6,10 @@ return array (
     'ext' => '.php,.class.php',
     'idx' => 
     array (
-        'jsMin' => 'myMinify.class.php',
-        'cssMin' => 'myMinify.class.php',
-        'JavaScriptPacker' => 'myMinify.class.php',
-        'interface_plugin' => '../plugin/interface_plugin.class.php'
+      'jsMin' => 'myMinify.class.php',
+      'cssMin' => 'myMinify.class.php',
+      'JavaScriptPacker' => 'myMinify.class.php',
+      'interface_plugin' => '../plugin/interface_plugin.class.php',
     ),
   ),
   1 => 

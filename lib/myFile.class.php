@@ -94,7 +94,7 @@ class myFile {
 		} else {
 			$file = $this->realPath($file);
 			$this->file = $file;
-			if(file_exists($file)) {
+			if(is_file($file)) {
 				clearstatcache(true, $file);
 				$this->info['type'] = filetype($file);
 				$this->info['is_writable'] = is_writable($file);
@@ -289,7 +289,7 @@ class myFile {
 	 * @return bool|mixed|string
 	 */
 	public static function getMime($file='', $use_finfo = false) {
-		if(!file_exists($file)) return false;
+		if(!is_file($file)) return false;
 		if(is_dir($file)) return 'DIR';
 		$ext = 'application/octet-stream';
 		if($use_finfo && function_exists('finfo_open')) {

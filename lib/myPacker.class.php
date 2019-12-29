@@ -114,7 +114,7 @@ class myPacker extends myBase {
 			$mydir = opendir($dir);
 			while($file = readdir($mydir)){
 				if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow') continue;
-				if(!empty($allow) && !array_search($file, $allow)!==false) continue;
+				if(!empty($allow) && array_search($file, $allow)===false) continue;
 				if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
 				$this->packFile($dir.'/'.$file);
 			}

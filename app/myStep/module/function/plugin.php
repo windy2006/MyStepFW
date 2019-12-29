@@ -16,7 +16,7 @@ if(!$mydb->check()) {
 }
 $idx = myReq::get('idx');
 if(!empty($idx)) {
-    include_once(PLUGIN.'/interface_plugin.class.php');
+    if(!interface_exists('interface_plugin')) require_once(PLUGIN.'/interface_plugin.class.php');
     $flag = true;
     $class = 'plugin_'.$idx;
     if(!class_exists($class) && is_file(PLUGIN.$idx.'/class.php')) include(PLUGIN.$idx.'/class.php');
@@ -84,7 +84,6 @@ switch($method) {
             }
         }
         $t->assign('setting', $result);
-        $mystep->setAddedContent('end', '<script language="JavaScript" src="static/js/checkForm.js"></script>');
         break;
     case 'active':
         $active = $mydb->result('idx='.$idx, 'active');

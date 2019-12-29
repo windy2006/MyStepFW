@@ -336,7 +336,7 @@ mystep;
 	 */
 	public static function getLines($file, $line, $scope = 3) {
 		$code = array();
-		if(file_exists($file)) {
+		if(is_file($file)) {
 			$rows = file($file);
 			array_unshift($rows, '');
 			$cnt = count($rows);

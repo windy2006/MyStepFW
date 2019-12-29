@@ -108,8 +108,13 @@ class myPack {
                 }
             }elseif($data[0]=="file") {
                 MakeDir(dirname($outdir."/".$data[1]));
-                $fp_w = fopen($outdir."/".$data[1],"wb");
-                $flag = fwrite($fp_w, $data[2]==0?'':fread($this->pack_fp,$data[2]));
+                if($data[2]==0) {
+                    $flag = touch($outdir."/".$data[1]);
+                } else {
+                    $fp_w = fopen($outdir."/".$data[1],"wb");
+                    $flag = fwrite($fp_w, fread($this->pack_fp,$data[2]));
+                }
+
                 $this->file_count++;
                 array_push($this->pack_result, "<b>Unpacking File</b> $outdir/$data[1] ".($flag?"<span style='color:green'>Successfully!</span>(".GetFileSize($this->pack_dir."/".$data[1]).")":"<span style='color:red'>failed!</span>"));
             }
@@ -287,8 +292,8 @@ $mypack->DoIt("unpack");
 echo $mypack->GetResult();
 unset($mypack);
 @unlink($pack_file);
-@unlink(__FILE__);
 ?>
 <script language="JavaScript">
-location.href = "./";
+alert("All files are unpacked and ready to be installed.");
+setTimeout(function(){location.href = "./";}, 2000);
 </script>

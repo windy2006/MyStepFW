@@ -43,7 +43,7 @@ $setting_detail['gen'] = array(
         'close' => array(
             'name' => 'Close Page',
             'describe' => 'If set, all of the request will be redirect to this page',
-            'type' => array('text', '', '80')
+            'type' => array('text', '_', '80')
         ),
         'static' => array(
             'name' => 'Static File',
@@ -104,7 +104,7 @@ $setting_detail['web'] = array(
         'update' => array(
             'name' => 'Update URL',
             'describe' => 'From the URL your can get the newest update of the Framework',
-            'type' => array('text', 'url', '200')
+            'type' => array('text', '_', '200')
         ),
     ]
 );

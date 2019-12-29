@@ -146,7 +146,7 @@ class myImg extends myBase {
 			if(is_array($background)) {
 				$this->setColor('background', $background[0], $background[1], $background[2]);
 				$this->fill(array(0,0),'background');
-			} elseif(file_exists($background)) {
+			} elseif(is_file($background)) {
 				$this->setTile($background);
 			} else {
 				$this->fill(array(0,0),$background);
@@ -213,7 +213,7 @@ class myImg extends myBase {
 	 * @return bool|resource
 	 */
 	public function load($image, &$data = array()) {
-		if(!file_exists($image)) return false;
+		if(!is_file($image)) return false;
 		$info = array();
 		$data = getimagesize($image, $info);
 		if(!$data) return false;
@@ -719,7 +719,7 @@ class myImg extends myBase {
 	 * @return $this
 	 */
 	public function setFont($font) {
-		if(file_exists($font)) {
+		if(is_file($font)) {
 			$this->font = realpath($font);
 		}
 		return $this;
@@ -930,7 +930,7 @@ class myImg extends myBase {
 	 * @return $this|bool|myImg|void
 	 */
 	public function watermark($watermark, $position=1, $img_dst='', $para=array()) {
-		if(file_exists($img_dst)) return $this->init($img_dst);
+		if(is_file($img_dst)) return $this->init($img_dst);
 		$this->dst_type = 'jpg';
 		if(!empty($img_dst)) {
 			if(!file_exists(dirname($img_dst))) mkdir(dirname($img_dst), 0777, true);
@@ -998,7 +998,7 @@ class myImg extends myBase {
 		} else {
 			$alpha = isset($para['alpha']) ? $para['alpha'] : 100;
 			$font = isset($para['font']) ? $para['font'] : 'font.ttc';
-			if(!file_exists($font)) $font = false;
+			if(!is_file($font)) $font = false;
 			$fontsize = isset($para['fontsize']) ? $para['fontsize'] : (($position==5 || $position==6) ? $this->height/80 : $this->width/80);
 			if($fontsize<12) $fontsize = 12;
 			$fontcolor = isset($para['fontcolor']) ? $para['fontcolor'] : 'white';
@@ -1108,7 +1108,7 @@ class myImg extends myBase {
 	 * @return $this|bool|myImg|void
 	 */
 	public function thumb($dstW, $dstH, $img_dst='') {
-		if(file_exists($img_dst)) return $this->init($img_dst);
+		if(is_file($img_dst)) return $this->init($img_dst);
 		$this->dst_type = 'jpg';
 		if(!empty($img_dst)) {
 			if(!file_exists(dirname($img_dst))) mkdir(dirname($img_dst), 0777, true);

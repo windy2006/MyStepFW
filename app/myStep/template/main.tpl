@@ -55,7 +55,8 @@ function resizeMain() {
         $('#main').parent().css('padding-top', top);
     }
 }
-$(function(){
+$(window).resize(resizeMain);
+function pageInit(){
     $.get('app/myStep/menu.json?'+(new Date()).getTime(), function(data) {
         let obj_top = $("#top_nav");
         let obj_side = $("#list > div:first");
@@ -88,11 +89,11 @@ $(function(){
         }
 
         $('[data-toggle="tooltip"]').tooltip();
-        $("a[href='<!--path-->']").addClass('active');
+        $("a[href$='<!--path-->']").addClass('active');
         $.get('index.php?myStep/api/error/'+Math.random(), function(data, status){
             if(typeof data == 'object' && data.count > 0) {
                 let badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);
-                $("a[href='manager/error']").append(badge);
+                $("a[href$='manager/error']").append(badge);
             }
         },'json');
         resizeMain();
@@ -102,9 +103,10 @@ $(function(){
         $('body').click(function(e){
             if(!$(e.target).hasClass('dropdown-toggle')) $('#nav').collapse('hide');
         });
+        setURL();
     }, "json");
-});
-$(window).resize(resizeMain);
+}
+checkNrun('pageInit');
 </script>
 </body>
 </html>

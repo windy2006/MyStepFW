@@ -63,7 +63,7 @@ class myEncrypt {
 	 * @param $key
 	 */
 	public static function encFile($file, $key) {
-		if(!file_exists($file) || filesize($file)==0) {
+		if(!is_file($file) || filesize($file)==0) {
 			trigger_error("File $file Needn't Encrypt !");
 			return;
 		}
@@ -109,7 +109,7 @@ class myEncrypt {
 	 * @param $key
 	 */
 	public static function decFile($file, $key) {
-		if(!file_exists($file) || filesize($file)==0) {
+		if(!is_file($file) || filesize($file)==0) {
 			trigger_error("File $file Needn't Decrypt !");
 			return;
 		}

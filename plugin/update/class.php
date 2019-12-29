@@ -369,10 +369,14 @@ class plugin_update implements interface_plugin {
             error_reporting(0);
             set_time_limit(0);
             ini_set('memory_limit', '512M');
+            myFile::move(APP.'myStep/menu.json', $dir);
+            myFile::copy($dir.'../menu.json', APP.'myStep/menu.json');
             $mypacker = new myPacker(ROOT, $dir.$idx.'/mystep.pack');
             $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'cache/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak');
             $mypacker->pack();
-            myFile::copy($dir.'../install.php', $dir.$idx.'/install.php');
+            myFile::del(APP.'myStep/menu.json');
+            myFile::move($dir.'menu.json', APP.'myStep/menu.json');
+            myFile::copy($dir.'../install.php', $dir.$idx.'/index.php');
             myFile::copy(ROOT.'readme.md', $dir.$idx.'/readme.md');
             $zip = new myZip($dir.$idx.'.zip', $dir);
             $zip->zip($dir.$idx);

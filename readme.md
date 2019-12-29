@@ -141,6 +141,7 @@ JS函数：
 - checkObj(obj, func_show) - 查看对象属性
 - reportError(msg, url, line) - 错误信息处理  
 - checkNrun(func, params) - 检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
+- setURL() - 配合checkNrun函数（需用到setting设置），处理页面内链接，以符合设置的链接模式
 - 对象方法扩展 - 针对 String，Data，Number，Array 等对象
    - string.blen - 返回某字符串的二进制长度
    - string.trim - 去除字符串首尾空字符
