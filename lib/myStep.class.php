@@ -784,19 +784,20 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			$setting_class = include(CONFIG.'class.php');
 			self::regClass($setting_class);
 		}
+		define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		myException::init(array(
 			'log_mode' => 0,
 			'log_type' => E_ALL ^ E_NOTICE,
 			'log_file' => ROOT.'/error.log',
-			'callback_type' => E_ALL,
+			'callback_type' => E_ALL & ~(E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_NOTICE),
 			'exit_on_error' =>  false
 		));
-
+		
 		if(is_file(CONFIG.'config.php')) {
 			self::go();
 		} else {
-			$qstr = trim(myReq::svr('QUERY_STRING'));
-			$the_file = ROOT.preg_replace('#&.+$#', '', $qstr);
+			$qstr = trim(myReq::svr('REQUEST_URI'), '/');
+			$the_file = ROOT.preg_replace('#(&|\?).+$#', '', $qstr);
 			if(strpos($qstr,'static')===0) {
 				myController::file($the_file);
 			} else {
@@ -818,7 +819,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$the_file = ROOT.preg_replace('#&.+$#', '', $p);
 		$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
 		$ext_list = explode(',', $s->gen->static);
-		if(strpos(trim($qstr,'/'),'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
+		if(strpos(trim($the_file,'/'),'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
 		if(($s->cookie->domain = strstr(myReq::server('HTTP_HOST'), ':', true))===false) {
 			$s->cookie->domain = myReq::server('HTTP_HOST');
@@ -827,7 +828,6 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
 
 		global $info_app, $s, $router, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
-		define('ROOT_WEB', str_replace(myFile::rootPath(),'/',ROOT));
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check()) {
 			$info_app = $router->parse();

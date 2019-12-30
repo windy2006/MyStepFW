@@ -141,7 +141,7 @@ class myPacker extends myBase {
 			$content .= $file_content;
 			fwrite($this->pack_fp, $content);
 			$this->file_count++;
-			array_push($this->pack_result, '<b>Packing File</b> - <i>"'.str_replace($root, '/', $dir).'"</i> &nbsp; ('.myFile::getSize($dir).')');
+			$this->pack_result[] = ['Packing File', str_replace($root, '/', $dir), myFile::getSize($dir)];
 		}
 		return;
 	}
@@ -157,35 +157,34 @@ class myPacker extends myBase {
 		if(!is_dir($outdir)) myFile::mkdir($outdir);
 		$n = 0;
 		while(!feof($this->pack_fp)) {
-			$data = explode($this->separator, fgets($this->pack_fp, 1024));
+			$data = explode($this->separator, trim(fgets($this->pack_fp, 1024),"\r\n"));
 			$n++;
 			if($data[0]=='dir') {
 				if(trim($data[1], '.') != '') {
 					$flag = myFile::mkdir($outdir.$data[1]);
-					array_push($this->pack_result, '<b>Build Directory</b> - <i>"'.str_replace($root, '/', $outdir.$data[1]).'"</i> &nbsp; '.($flag?'<span style="color:green">Successfully!</span>':'<span style="color:red">failed!</span>'));
+					$this->pack_result[] = ['Build Directory', str_replace($root, '/', $outdir.$data[1]),($flag?'Successfully':'failed')];
 				}
 			}elseif($data[0]=='file') {
-				$flag = false;
 				$the_file = $outdir.$data[1];
 				myFile::mkdir(dirname($the_file));
-				if($fp_w = fopen($the_file,'wb')) {
-					$flag = fwrite($fp_w, $data[2]==0?'':fread($this->pack_fp,$data[2]));
-					$this->file_count++;
+				if($data[2]==0) {
+					$flag = touch($the_file);
+				} else {
+					$fp_w = fopen($the_file,"wb");
+					$content = fread($this->pack_fp,$data[2]);
+					if(in_array(substr($content, -3),array('dir','fil'))) {
+						$content = substr($content, 0, -3);
+						fseek($this->pack_fp,-3,SEEK_CUR);
+					}
+					$flag = fwrite($fp_w, $content);
 				}
-				array_push($this->pack_result, '<b>Unpacking File</b> - <i>"'.str_replace($root, '/', $outdir.$data[1]).'"</i> &nbsp; '.($flag?'<span style="color:green">Successfully!</span> ('.myFile::getSize($this->pack_dir.'/'.$data[1]).')':'<span style="color:red">failed!</span>'));
+				$this->file_count++;
+				$this->pack_result[] = ['Unpacking File', str_replace($root, '/', $outdir.$data[1]), ($flag?'Successfully':'failed')];
 			} else {
 				$n--;
 			}
 		}
 		return $n-1;
-	}
-
-	/**
-	 * 返回操作结果
-	 * @return string
-	 */
-	public function getResult() {
-		return join('<br />'.chr(10), $this->pack_result);
 	}
 
 	/**
@@ -212,8 +211,7 @@ class myPacker extends myBase {
 		myFile::saveFile($this->pack_file, gzcompress(myFile::getLocal($this->pack_file), 9));
 		$filename = $this->pack_file;
 		$filesize = myFile::getSize($filename);
-		array_push($this->pack_result,'Count: '.$this->file_count.' File(s)');
-		array_push($this->pack_result,'Packed File: <a href="'.$filename.'">'.basename($filename).'</a> ('.$filesize.')');
+		$this->pack_result[] = ['pack', $this->file_count, $filename, $filesize];
 		return true;
 	}
 
@@ -232,7 +230,28 @@ class myPacker extends myBase {
 		$n = $this->unpackFile($this->pack_dir);
 		fclose($this->pack_fp);
 		unlink($this->pack_file);
-		array_push($this->pack_result,'Extract: '.$this->file_count.' File(s) & '.($n-$this->file_count).' Dir(s).');
+		$this->pack_result[] = ['unpack', $this->file_count, $n-$this->file_count];
 		return true;
+	}
+
+	/**
+	 * 返回操作结果
+	 * @param int $mode
+	 * @return array|string
+	 */
+	public function getResult($mode = 0) {
+		if($mode) return $this->pack_result;
+		$result = '';
+		for($i=0,$m=count($this->pack_result)-1;$i<$m;$i++) {
+			$result .= '<b>'.$this->pack_result[$i][0].'</b> - <i>'.$this->pack_result[$i][1].'</i> &nbsp; '.$this->pack_result[$i][2].'<br />'.chr(10);
+		}
+		if($this->pack_result[$i][0]=='pack') {
+			$result .= 'Count: '.$this->pack_result[$i][1].' File(s).<br />'.chr(10);
+			$result .= 'Packed File: <a href="'.$this->pack_result[$i][2].'">'.basename($this->pack_result[$i][2]).'</a> ('.$this->pack_result[$i][3].')';
+		} else {
+			array_push($this->pack_result,'Extract: '.$this->file_count.' File(s) & '.($n-$this->file_count).' Dir(s).');
+			$result .= 'Extract: '.$this->pack_result[$i][1].' File(s) & '.$this->pack_result[$i][2].' Dir(s).';
+		}
+		return $result;
 	}
 }

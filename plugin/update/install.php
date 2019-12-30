@@ -100,21 +100,26 @@ class myPack {
     protected function UnpackFile($outdir=".", $separator="|") {
         if(!is_dir($outdir)) mkdir($outdir, 0777);
         while(!feof($this->pack_fp)) {
-            $data = explode($separator, fgets($this->pack_fp, 1024));
+            $data = explode($separator, trim(fgets($this->pack_fp, 1024),"\r\n"));
             if($data[0]=="dir") {
                 if(trim($data[1], ".") != "") {
                     $flag = mkdir($outdir."/".$data[1],0777);
                     array_push($this->pack_result, "<b>Build Directory</b> $outdir/$data[1] ".($flag?"<span style='color:green'>Successfully!</span>":"<span style='color:red'>failed!</span>"));
                 }
             }elseif($data[0]=="file") {
-                MakeDir(dirname($outdir."/".$data[1]));
+                $the_file = $outdir.$data[1];
+                MakeDir(dirname($the_file));
                 if($data[2]==0) {
-                    $flag = touch($outdir."/".$data[1]);
+                    $flag = touch($the_file);
                 } else {
-                    $fp_w = fopen($outdir."/".$data[1],"wb");
-                    $flag = fwrite($fp_w, fread($this->pack_fp,$data[2]));
+                    $fp_w = fopen($the_file,"wb");
+                    $content = fread($this->pack_fp,$data[2]);
+                    if(in_array(substr($content, -3),array('dir','fil'))) {
+                        $content = substr($content, 0, -3);
+                        fseek($this->pack_fp,-3,SEEK_CUR);
+                    }
+                    $flag = fwrite($fp_w, $content);
                 }
-
                 $this->file_count++;
                 array_push($this->pack_result, "<b>Unpacking File</b> $outdir/$data[1] ".($flag?"<span style='color:green'>Successfully!</span>(".GetFileSize($this->pack_dir."/".$data[1]).")":"<span style='color:red'>failed!</span>"));
             }

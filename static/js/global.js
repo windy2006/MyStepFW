@@ -471,6 +471,7 @@ function checkNrun(func, params) {
 //处理页面URL为对应的链接模式
 function setURL() {
     if(typeof(setting) == 'undefined') return;
+    console.log(setting);
     $('a[href]').each(function(){
         let url = $(this).attr('href');
         if(url.indexOf(setting.url_prefix)!=0 && url.indexOf("#")!=0) {
