@@ -31,7 +31,7 @@
                     <h5 class="text-white card-title m-0"><span class="glyphicon glyphicon-blackboard"></span> <!--lng_page_login--></h5>
                 </div>
                 <div class="card-body">
-                    <form action="manager/login" method="post" onsubmit="return checkForm(this)">
+                    <form action="index.php?manager/login" method="post" onsubmit="return checkForm(this)">
                         <div class="input-group mb-2">
                             <div class="input-group-prepend">
                                 <div class="input-group-text"><span class="glyphicon glyphicon-user"></span> &nbsp; <!--lng_login_username--></div>
@@ -50,7 +50,7 @@
                             </div>
                             <input name="captcha" type="text" class="form-control" placeholder="<!--lng_login_captcha_msg-->" need="" />
                             <div class="input-group-append">
-                                <img id="captcha" src="captcha/" height="33" />
+                                <img id="captcha" src="index.php?captcha/" height="33" />
                             </div>
                             <div class="input-group-append">
                                 <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src='captcha/'+Math.random();return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>

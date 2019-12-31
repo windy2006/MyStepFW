@@ -796,9 +796,9 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(is_file(CONFIG.'config.php')) {
 			self::go();
 		} else {
-			$qstr = trim(myReq::svr('REQUEST_URI'), '/');
-			$the_file = ROOT.preg_replace('#(&|\?).+$#', '', $qstr);
-			if(strpos($qstr,'static')===0) {
+			$path = trim(myReq::svr('REQUEST_URI'), '/');
+			$the_file = myFile::rootPath().preg_replace('#(&|\?).+$#', '', $path);
+			if(strpos($path,'static')===0) {
 				myController::file($the_file);
 			} else {
 				require(APP.'myStep/module/config.php');

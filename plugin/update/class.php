@@ -372,7 +372,7 @@ class plugin_update implements interface_plugin {
             myFile::move(APP.'myStep/menu.json', $dir);
             myFile::copy($dir.'../menu.json', APP.'myStep/menu.json');
             $mypacker = new myPacker(ROOT, $dir.$idx.'/mystep.pack');
-            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'cache/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak');
+            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak');
             $mypacker->pack();
             myFile::del(APP.'myStep/menu.json');
             myFile::move($dir.'menu.json', APP.'myStep/menu.json');
