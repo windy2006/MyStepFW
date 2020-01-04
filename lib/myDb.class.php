@@ -31,7 +31,7 @@ class myDb extends myProxy {
 
 	public function __construct() {
 		spl_autoload_register(function($class) {
-			$file = dirname(__FILE__).'/database/'.$class.'.class.php';
+			$file = __DIR__.'/database/'.$class.'.class.php';
 			if(is_file($file)) require_once($file);
 		});
 		if(!empty(func_get_args())) call_user_func_array('parent::init', func_get_args());

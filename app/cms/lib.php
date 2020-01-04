@@ -11,7 +11,7 @@ if(strpos(trim($info_app['route'],'/'), 'admin_cms')===0) {
 }
 if(!is_array($info_app)) $info_app = array();
 if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($info_app['route'], '/'));
-if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(dirname(__FILE__).'/info.php'));
+if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(__DIR__.'/info.php'));
 
 $tpl_setting = array(
     'name' => $s->template->name,
@@ -26,7 +26,7 @@ function installCheck($module) {
         $tpl_setting['path'] = PATH.'install/template';
         $tpl_setting['style'] = '';
         $tpl_cache = false;
-        include(dirname(__FILE__).'/install/index.php');
+        include(__DIR__.'/install/index.php');
         exit;
     }
     return true;

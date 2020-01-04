@@ -1,9 +1,9 @@
 <?php
 $module = $info_app['path'][2] ?? 'main';
-$script = dirname(__FILE__).'/setting/'.$module.'.php';
+$script = __DIR__.'/setting/'.$module.'.php';
 if(!is_file($script)) {
     $module = 'main';
-    $script = dirname(__FILE__).'/setting/main.php';
+    $script = __DIR__.'/setting/main.php';
 }
 $tpl_setting['name'] = 'setting_'.$module;
 $t = new myTemplate($tpl_setting, false, true);

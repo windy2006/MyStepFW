@@ -32,7 +32,7 @@ function route($para) {
     $tpl_setting['name'] = 'route';
     $sub_tpl = new \myTemplate($tpl_setting, false);
     $sub_tpl->allow_script = true;
-    $sub_tpl->assign('code', htmlentities(\myFile::getLocal(dirname(__FILE__).'/lib.php')));
+    $sub_tpl->assign('code', htmlentities(\myFile::getLocal(__DIR__.'/lib.php')));
     $sub_tpl->assign('code2', htmlentities(\myFile::getLocal(PATH.'route.php')));
     $sub_tpl->assign('root', ROOT_WEB);
     $tpl->assign('main', $sub_tpl->display('', false));

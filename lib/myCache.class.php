@@ -40,7 +40,7 @@ class myCache extends myProxy {
 	 */
 	public function init($module = '', $setting = null){
 		spl_autoload_register(function($class) {
-			$file = dirname(__FILE__).'/cache/'.$class.'.class.php';
+			$file = __DIR__.'/cache/'.$class.'.class.php';
 			if(is_file($file)) require_once($file);
 		});
 		if(class_exists($module)) {

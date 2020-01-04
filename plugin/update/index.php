@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__)."/class.php");
+require_once(__DIR__."/class.php");
 $this->setLanguage([
     'plugin_update_error'=>'请下载升级包，并手动更新！',
     'plugin_update_file'=>'成功更新 %d 个文件',

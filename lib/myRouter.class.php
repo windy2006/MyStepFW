@@ -24,16 +24,16 @@ class myRouter extends myBase {
 
 	public
 		$query = '',
+		$rules = array(),
 		$route = array();
 
 	protected
+		$setting = array(),
 		$formats = array(
 			'any' => '(.*?)',
 			'int' => '(\d+)',
 			'str' => '(\w+)'
 		),
-		$setting = array(),
-		$rules = array(),
 		$info = array('app'=>'','path'=>'','para'=>array());
 
 	/**
@@ -43,7 +43,6 @@ class myRouter extends myBase {
 	 * @param string $q
 	 */
 	public function init($setting=array()) {
-		if(!isset($setting['mode'])) $setting['mode'] = 'rewrite';
 		if(!isset($setting['default_app'])) $setting['default_app'] = 'myStep';
 		if(!isset($setting['delimiter_path'])) $setting['delimiter_path'] = '/';
 		if(!isset($setting['delimiter_para'])) $setting['delimiter_para'] = '&';
@@ -59,7 +58,7 @@ class myRouter extends myBase {
 		} else {
 			$qstr = $path_info.'?'.$qstr;
 		}
-		$qstr = trim($qstr, '?');
+		$qstr = str_replace('?','&',trim($qstr, '?'));
 		if(strpos($qstr, '/')!==0) $qstr = '/'.$qstr;
 
 		array_shift($_GET);
@@ -72,7 +71,6 @@ class myRouter extends myBase {
 		$this->route = compact('qstr','p', 'q');
 		$this->query = $qstr;
 		$this->setting = $setting;
-
 		$this->parse();
 	}
 
@@ -157,8 +155,14 @@ class myRouter extends myBase {
 	 * @return bool
 	 */
 	public function check() {
+        if(preg_match('@^/[A-Z]@', $this->query)) return false;
+	    $url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
 		foreach($this->rules as $rule) {
-			if(preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)) {
+			if(
+			    preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)
+                ||
+                preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query,$match)
+            ) {
 				array_shift($match);
 				if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
 					$rule['idx'] = array_shift($match);

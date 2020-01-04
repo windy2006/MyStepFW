@@ -7,7 +7,7 @@ class plugin_sample implements interface_plugin {
             "dir2/",
         );
         $flag = true;
-        $dir = dirname(__FILE__);
+        $dir = __DIR__;
         foreach($theList as $cur) {
             if(myFile::rewritable($dir.'/'.$cur)) {
                 $result .= $cur . ' - <span style="color:green">Writable</span><br />';
@@ -19,12 +19,12 @@ class plugin_sample implements interface_plugin {
         return $flag;
     }
     public static function install(){
-        $dir = dirname(__FILE__);
+        $dir = __DIR__;
         myFile::mkdir($dir.'/dir1');
         myFile::mkdir($dir.'/dir2');
     }
     public static function uninstall(){
-        $dir = dirname(__FILE__);
+        $dir = __DIR__;
         myFile::del($dir.'/dir1');
         myFile::del($dir.'/dir2');
     }

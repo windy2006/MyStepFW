@@ -287,7 +287,7 @@ $setting_detail['db'] = array(
             'name' => '数据库密码',
             'name2' => '重复密码',
             'describe' => '对应数据库用户的密码',
-            'type' => array("password", "", "40")
+            'type' => array("password", "_", "40")
         ),
         'pconnect' => array(
             'name' => '持久连接',

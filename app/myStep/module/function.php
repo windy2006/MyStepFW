@@ -1,9 +1,9 @@
 <?php
 $module = $info_app['path'][2];
-$script = dirname(__FILE__).'/function/'.$module.'.php';
+$script = __DIR__.'/function/'.$module.'.php';
 if(!is_file($script)) {
     $module = 'app';
-    $script = dirname(__FILE__).'/function/app.php';
+    $script = __DIR__.'/function/app.php';
 }
 if(isset($info_app['path'][3])) $module .= '_'.$info_app['path'][3];
 if(!is_file(PATH.'template/function_'.$module.'.tpl')) {

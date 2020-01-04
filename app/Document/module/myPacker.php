@@ -5,7 +5,7 @@ ini_set('memory_limit', '512M');
 
 //pack
 $mypacker = new myPacker('./', PATH.'data/unpack/test.pkg');
-$mypacker->addIgnore(basename(dirname(__FILE__)).'/', '.svn/', '.log/', '.idea/', 'cache/', 'web.config', 'aspnet_client/', 'Thumbs.db', '_bak/');
+$mypacker->addIgnore(basename(__DIR__).'/', '.svn/', '.log/', '.idea/', 'cache/', 'web.config', 'aspnet_client/', 'Thumbs.db', '_bak/');
 $mypacker->pack();
 echo '<b>Pack Files:</b><br />'.chr(10);
 echo $mypacker->getResult();

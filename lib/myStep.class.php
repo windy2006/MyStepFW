@@ -236,6 +236,9 @@ class myStep extends myController {
 			$content = preg_replace('@(\'|")index.php'.preg_quote($seperator).'(#|http|//|static|data\:)@', '\1\2', $content);
 			$content = str_replace('<base xxx', '<base href', $content);
 		}
+        if(defined('URL_FIX')) {
+            $content = preg_replace('@((\'|")/?)'.URL_FIX.'@','\1', $content);
+        }
 		return $content;
 	}
 
@@ -796,8 +799,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(is_file(CONFIG.'config.php')) {
 			self::go();
 		} else {
-			$path = trim(myReq::svr('REQUEST_URI'), '/');
-			$the_file = myFile::rootPath().preg_replace('#(&|\?).+$#', '', $path);
+            $path = trim(str_replace(ROOT_WEB,'/', myReq::svr('REQUEST_URI')), '/');
+            $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
 			if(strpos($path,'static')===0) {
 				myController::file($the_file);
 			} else {
@@ -811,23 +814,35 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 * 执行框架
 	 */
 	public static function go() {
-		global $s, $router;
+		global $s, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
 		$s = new myConfig(CONFIG.'config.php');
+        $host = myReq::server('HTTP_HOST');
+        if(is_file(CONFIG.'domain.php')) {
+            $domain = include(CONFIG.'domain.php');
+            if(isset($domain[$host])) {
+                $rule = $domain[$host];
+                if(preg_match('@^\w+$@', $rule)) {
+                    $s->router->default_app = $rule;
+                    define('URL_FIX', $rule);
+                } else {
+                    $rule = preg_replace('@^/(\w+)/.*$@', '\1', $rule);
+                    define('URL_FIX', $rule);
+                }
+            }
+        }
 		$router = new myRouter((array)$s->router);
 		extract($router->route);
-
 		$the_file = ROOT.preg_replace('#&.+$#', '', $p);
 		$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
 		$ext_list = explode(',', $s->gen->static);
 		if(strpos(trim($the_file,'/'),'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
-		if(($s->cookie->domain = strstr(myReq::server('HTTP_HOST'), ':', true))===false) {
-			$s->cookie->domain = myReq::server('HTTP_HOST');
+		if(($s->cookie->domain = strstr($host, ':', true))===false) {
+			$s->cookie->domain = $host;
 		}
 		$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
-		$s->web->url = 'http://'.myReq::server('HTTP_HOST');
+		$s->web->url = 'http://'.$host;
 
-		global $info_app, $s, $router, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check()) {
 			$info_app = $router->parse();
@@ -917,10 +932,13 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			if(is_file($f)) break;
 			if(empty($f))  myStep::info('module_missing');
 		}
+		if(defined('URL_FIX') && $info_app['path'][0]!=URL_FIX) array_unshift($info_app['path'], URL_FIX);
 		$tpl = new myTemplate($tpl_setting, $tpl_cache);
 		if(count($info_app['path'])==1) $info_app['path'][1]='';
 		$tpl->assign('path', implode('/', $info_app['path']));
+        $tpl->assign('url_fix', defined('URL_FIX') ? URL_FIX : '');
 		include($f);
+		if(is_file(PATH.'global.php')) include(PATH.'global.php');
 		if(isset($content)) $tpl->assign('main', $content);
 		$mystep->show($tpl);
 		$mystep->end();

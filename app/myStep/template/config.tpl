@@ -64,33 +64,41 @@
 <!--page_end-->
 </body>
 <script language="JavaScript">
-    function myChecker(theForm) {
-        if($('#gen_s_pwd').val()=='') {
-            alert('请输入管理员密码！');
+function myChecker(theForm) {
+    if($('#gen_s_pwd').val()=='') {
+        alert('请输入管理员密码！');
+        highlightIt($('#gen_s_pwd').get(0));
+    } else if ($('#gen_s_pwd').val() == $('#gen_s_pwd_r').val() && $('#db_password').val() == $('#db_password_r').val()){
+        return checkForm(theForm);
+    } else {
+        alert('两次输入的密码不一致！');
+        if($('#gen_s_pwd').val() != $('#gen_s_pwd_r').val()) {
             highlightIt($('#gen_s_pwd').get(0));
-        } else if ($('#db_password').val()=='') {
-            alert('请输入数据库密码！');
-            highlightIt($('#db_password').get(0));
-        } else if ($('#gen_s_pwd').val() == $('#gen_s_pwd_r').val() && $('#db_password').val() == $('#db_password_r').val()){
-            return checkForm(theForm);
-        } else {
-            alert('两次输入的密码不一致！');
-            if($('#gen_s_pwd').val() != $('#gen_s_pwd_r').val()) {
-                highlightIt($('#gen_s_pwd').get(0));
-            }
-            if($('#db_password').val() != $('#db_password_r').val()) {
-                highlightIt($('#db_password').get(0));
-            }
         }
-        return false;
+        if($('#db_password').val() != $('#db_password_r').val()) {
+            highlightIt($('#db_password').get(0));
+        }
     }
-    function setPosition() {
-        $("#main").css('padding-bottom', 100);
-        $("tfoot").css({'right':0, 'bottom':40, 'width':'100%'});
-        $("tfoot").height($(window).width()>530?60:80);
+    return false;
+}
+function setPosition() {
+    $("#main").css('padding-bottom', 100);
+    $("tfoot").css({'right':0, 'bottom':40, 'width':'100%'});
+    $("tfoot").height($(window).width()>530?60:80);
+}
+$(window).resize(setPosition);
+$(setPosition);
+$('[data-toggle="tooltip"]').tooltip();
+$(function(){
+    var srv = '<!--server-->';
+    srv = srv.toLowerCase();
+    var obj = document.getElementsByName("setting[router][mode]")[0];
+    console.log(obj);
+    if(srv.indexOf('iis')!=-1 || srv.indexOf('apache')!=-1) {
+        obj.selectedIndex = 2;
+    } else {
+        alert("检测到您的服务系统为'"+svr+"'，路径模式设定为'query_string'模式，建议改为'rewrite'模式。\nNginx可以根据根目录下的对应文件设置，其他系统可以参考对应设置。");
     }
-    $(window).resize(setPosition);
-    $(setPosition);
-    $('[data-toggle="tooltip"]').tooltip();
+});
 </script>
 </html>

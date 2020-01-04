@@ -1,1 +1,68 @@
-[{"name":"\u4fe1\u606f","icon":"glyphicon glyphicon-info-sign","items":[{"name":"\u57fa\u672c\u4fe1\u606f","link":"manager\/"},{"name":"\u6570\u636e\u5e93\u4fe1\u606f","link":"manager\/db"},{"name":"PHP\u4fe1\u606f","link":"manager\/php"},{"name":"phpinfo()","link":"manager\/phpinfo"},{"name":"\u9519\u8bef\u65e5\u5fd7","link":"manager\/error"}]},{"name":"\u8bbe\u7f6e","icon":"glyphicon glyphicon-wrench","items":[{"name":"\u53c2\u6570\u8bbe\u7f6e","link":"manager\/setting\/"},{"name":"\u7c7b\u6a21\u5757\u8bbe\u7f6e","link":"manager\/setting\/class"}]},{"name":"\u529f\u80fd","icon":"glyphicon glyphicon-cog","items":[{"name":"\u5e94\u7528\u7ba1\u7406","link":"manager\/function\/app"},{"name":"\u7f13\u5b58\u7ba1\u7406","link":"manager\/function\/cache"},{"name":"\u63d2\u4ef6\u7ba1\u7406","link":"manager\/function\/plugin"}]},{"name":"\u6587\u6863","icon":"glyphicon glyphicon-book","items":[{"name":"\u6846\u67b6\u6307\u5357","link":"manager\/guide"},{"name":"\u529f\u80fd\u793a\u4f8b","link":"manager\/sample"},{"name":"\u5e94\u7528\u793a\u4f8b","link":"sample\/","addon":{"target":"_blank"}},{"name":"\u529f\u80fd\u7c7b\u8bf4\u660e","link":"Document\/","addon":{"target":"_blank"}}]},{"name":"\u63d2\u4ef6","icon":"fa fa-plug","link":"manager\/function\/plugin","items":[]}]
+[{
+  "name": "信息",
+  "icon": "glyphicon glyphicon-info-sign",
+  "items": [{
+    "name": "基本信息",
+    "link": "manager/"
+  }, {
+    "name": "数据库信息",
+    "link": "manager/db"
+  }, {
+    "name": "PHP信息",
+    "link": "manager/php"
+  }, {
+    "name": "phpinfo()",
+    "link": "manager/phpinfo"
+  }, {
+    "name": "错误日志",
+    "link": "manager/error"
+  }]
+}, {
+  "name": "设置",
+  "icon": "glyphicon glyphicon-wrench",
+  "items": [{
+    "name": "参数设置",
+    "link": "manager/setting/"
+  }, {
+    "name": "类模块设置",
+    "link": "manager/setting/class"
+  }, {
+    "name": "域名绑定",
+    "link": "manager/setting/domain"
+  }]
+}, {
+  "name": "功能",
+  "icon": "glyphicon glyphicon-cog",
+  "items": [{
+    "name": "应用管理",
+    "link": "manager/function/app"
+  }, {
+    "name": "缓存管理",
+    "link": "manager/function/cache"
+  }, {
+    "name": "插件管理",
+    "link": "manager/function/plugin"
+  }]
+}, {
+  "name": "文档",
+  "icon": "glyphicon glyphicon-book",
+  "items": [{
+    "name": "框架指南",
+    "link": "manager/guide"
+  }, {
+    "name": "功能示例",
+    "link": "manager/sample"
+  }, {
+    "name": "应用示例",
+    "link": "Sample/",
+    "addon": {
+      "target": "_blank"
+    }
+  }, {
+    "name": "功能类说明",
+    "link": "Document/",
+    "addon": {
+      "target": "_blank"
+    }
+  }]
+}]

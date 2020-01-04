@@ -47,5 +47,6 @@ foreach($list as $v) {
                 ']);
     }
 }
+$t->assign('server', myReq::server('SERVER_SOFTWARE'));
 $t->assign('path_root', str_replace(myFile::rootPath(), '/', ROOT));
 $t->display();

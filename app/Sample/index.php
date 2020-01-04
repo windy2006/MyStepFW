@@ -4,7 +4,7 @@ $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
 //声明主模版类（直接调用默认模版设置）
 $tpl = new myTemplate($tpl_setting, false);
 //调整模版设置
-$tpl_setting['name'] = 'sample';
+$tpl_setting['name'] = 'Sample';
 //声明子模版类
 $sub_tpl = new myTemplate($tpl_setting, false);
 //开启模版PHP代码执行权限（默认关闭，视需要，不建议开启）

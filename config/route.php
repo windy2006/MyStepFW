@@ -1,5 +1,9 @@
 <?PHP
 $format_list = array (
+  'Sample' => 
+  array (
+    'camel' => '[a-z]+([A-Z][a-z]+)+',
+  ),
   'sample' => 
   array (
     'camel' => '[a-z]+([A-Z][a-z]+)+',
@@ -17,6 +21,45 @@ $rule_list = array (
         0 => 'app\\cms\\installCheck,index',
         1 => 'app\\cms\\logCheck',
         2 => 'myStep::getModule',
+      ),
+    ),
+  ),
+  'plugin_update' => 
+  array (
+    0 => 
+    array (
+      0 => '/update/[any]',
+      1 => 
+      array (
+        0 => 'app\\myStep\\logCheck',
+        1 => 'plugin_update::update',
+      ),
+    ),
+    1 => 
+    array (
+      0 => '/pack/[any]',
+      1 => 'plugin_update::pack',
+    ),
+  ),
+  'Sample' => 
+  array (
+    0 => 
+    array (
+      0 => '/mySample/[any]',
+      1 => 'app\\sample\\route',
+    ),
+    1 => 
+    array (
+      0 => '/mySample2/[any]',
+      1 => 'mystep::getModule',
+    ),
+    2 => 
+    array (
+      0 => '/Sample/[camel]',
+      1 => 
+      array (
+        0 => 'app\\sample\\preCheck,3',
+        1 => 'app\\sample\\routeTest',
       ),
     ),
   ),
@@ -40,23 +83,6 @@ $rule_list = array (
         0 => 'app\\sample\\preCheck,3',
         1 => 'app\\sample\\routeTest',
       ),
-    ),
-  ),
-  'plugin_update' => 
-  array (
-    0 => 
-    array (
-      0 => '/update/[any]',
-      1 => 
-      array (
-        0 => 'app\\myStep\\logCheck',
-        1 => 'plugin_update::update',
-      ),
-    ),
-    1 => 
-    array (
-      0 => '/pack/[any]',
-      1 => 'plugin_update::pack',
     ),
   ),
   'myStep' => 
@@ -88,27 +114,27 @@ $rule_list = array (
     ),
     5 => 
     array (
+      0 => '/upload',
+      1 => 'myStep::upload',
+    ),
+    6 => 
+    array (
+      0 => '/download/[any]',
+      1 => 'myStep::download',
+    ),
+    7 => 
+    array (
+      0 => '/remove_ul/[any]',
+      1 => 'myStep::remove_ul',
+    ),
+    8 => 
+    array (
       0 => '/manager/[any]',
       1 => 
       array (
         0 => 'app\\myStep\\logCheck',
         1 => 'myStep::getModule',
       ),
-    ),
-    6 => 
-    array (
-      0 => '/upload',
-      1 => 'myStep::upload',
-    ),
-    7 => 
-    array (
-      0 => '/download/[any]',
-      1 => 'myStep::download',
-    ),
-    8 => 
-    array (
-      0 => '/remove_ul/[any]',
-      1 => 'myStep::remove_ul',
     ),
   ),
 );
@@ -125,15 +151,19 @@ $api_list = array (
     'data' => 'app\\myStep\\getData',
     'autoComplete' => 'app\\myStep\\autoComplete',
   ),
-  'sample' => 
-  array (
-    'sample' => 'app\\sample\\api',
-  ),
   'plugin_update' => 
   array (
     'check' => 'plugin_update::remote',
     'update' => 'plugin_update::remote',
     'download' => 'plugin_update::remote',
+  ),
+  'Sample' => 
+  array (
+    'sample' => 'app\\sample\\api',
+  ),
+  'sample' => 
+  array (
+    'sample' => 'app\\sample\\api',
   ),
 );
 

@@ -421,7 +421,7 @@ class myController extends myBase {
 		if (!$show) return cssMin::minify($css);
 		$md5 = md5($css);
 		$this->etag($md5 . '.css');
-		$minify = new myMinify('css', dirname(dirname(__FILE__)) . '/cache/' . $md5 . '.css');
+		$minify = new myMinify('css', dirname(__DIR__) . '/cache/' . $md5 . '.css');
 		if (!$minify->check($expires)) {
 			$minify->add($css);
 		}
@@ -478,7 +478,7 @@ class myController extends myBase {
 		if (!$show) return jsMin::minify($js);
 		$md5 = md5($js);
 		$this->etag($md5 . '.js');
-		$minify = new myMinify('js', dirname(dirname(__FILE__)) . '/cache/' . $md5 . '.js');
+		$minify = new myMinify('js', dirname(__DIR__) . '/cache/' . $md5 . '.js');
 		if (!$minify->check($expires)) {
 			$minify->add($js);
 		}
@@ -651,7 +651,7 @@ class myController extends myBase {
 			'validate_timestamps' => 1,
 			'revalidate_freq' => 120,
 			'huge_code_pages' => 1,
-			'file_cache' => dirname(dirname(__FILE__)) . '/cache/op/'
+			'file_cache' => dirname(__DIR__) . '/cache/op/'
 		));
 
 		if ($setPlugin) $this->plugin();

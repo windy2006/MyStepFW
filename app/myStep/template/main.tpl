@@ -89,11 +89,10 @@ function pageInit(){
         }
 
         $('[data-toggle="tooltip"]').tooltip();
-        $("a[href$='<!--path-->']").addClass('active');
         $.get('index.php?myStep/api/error/'+Math.random(), function(data, status){
             if(typeof data == 'object' && data.count > 0) {
                 let badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);
-                $("a[href$='manager/error']").append(badge);
+                $("a[href$='/error']").append(badge);
             }
         },'json');
         resizeMain();
@@ -103,7 +102,27 @@ function pageInit(){
         $('body').click(function(e){
             if(!$(e.target).hasClass('dropdown-toggle')) $('#nav').collapse('hide');
         });
-        setURL();
+        let url_fix = '<!--url_fix-->';
+        let path = '<!--path-->';
+        setURL(url_fix);
+        $("a[href^='/setting']").each(function(){
+            let url = $(this).attr('href');
+            $(this).attr('href', url_fix+url);
+        });
+        if(url_fix.length>0) {
+            path = path.replace(url_fix+'/', '/');
+            if(path=='/') {
+                $("a[href='/']").addClass('active');
+            } else {
+                $("a[href$='"+path+"']").addClass('active');
+            }
+        } else {
+            $("a[href$='"+path+"']").addClass('active');
+        }
+        if('<!--db-->'=='n') {
+            $('a[href$="/db"]').hide();
+        }
+
     }, "json");
 }
 checkNrun('pageInit');

@@ -469,13 +469,16 @@ function checkNrun(func, params) {
 }
 
 //处理页面URL为对应的链接模式
-function setURL() {
+function setURL(url_fix) {
     if(typeof(setting) == 'undefined') return;
-    console.log(setting);
     $('a[href]').each(function(){
         let url = $(this).attr('href');
+        let re = new RegExp("^\/?"+url_fix);
+        url = url.replace(re, '');
         if(url.indexOf(setting.url_prefix)!=0 && url.indexOf("#")!=0) {
             this.href = setting.url_prefix + url;
+        } else {
+            this.href = url;
         }
     });
     $('form[action]').each(function(){

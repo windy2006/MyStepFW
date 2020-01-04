@@ -12,7 +12,7 @@ class plugin_update implements interface_plugin {
         );
         $flag = true;
         foreach($theList as $cur) {
-            if(myFile::rewritable(dirname(__FILE__).'/'.$cur)) {
+            if(myFile::rewritable(__DIR__.'/'.$cur)) {
                 $result .= $cur . ' - <span style="color:green">Writable</span><br />';
             } else {
                 $result .= $cur . ' - <span style="color:red">Readonly</span><br />';
@@ -23,16 +23,16 @@ class plugin_update implements interface_plugin {
     }
     public static function install() {
         global $router;
-        $router->checkRoute(CONFIG.'route.php', dirname(__FILE__).'/route.php', 'plugin_update');
-        myFile::mkdir(dirname(__FILE__).'/update');
-        myFile::mkdir(dirname(__FILE__).'/pack');
+        $router->checkRoute(CONFIG.'route.php', __DIR__.'/route.php', 'plugin_update');
+        myFile::mkdir(__DIR__.'/update');
+        myFile::mkdir(__DIR__.'/pack');
         addPluginLink('在线更新', 'update/');
     }
     public static function uninstall() {
         global $router;
         $router->remove(CONFIG.'route.php', 'plugin_update');
-        myFile::del(dirname(__FILE__).'/update');
-        myFile::del(dirname(__FILE__).'/pack');
+        myFile::del(__DIR__.'/update');
+        myFile::del(__DIR__.'/pack');
         removePluginLink('update/');
     }
     public static function update() {
@@ -42,7 +42,7 @@ class plugin_update implements interface_plugin {
         $header['Referer'] = 'http://'.myReq::server('HTTP_HOST');
         $header['ms_sign'] = time();
         $url = 'http://'.$s->web->update.'/myStep/api/plugin_update/check';
-        $dir = dirname(__FILE__);
+        $dir = __DIR__;
         switch($info_app['path'][1]) {
             case 'build':
                 if(!self::checkFile(ROOT, true)) {
@@ -93,7 +93,7 @@ class plugin_update implements interface_plugin {
                 myFile::mkdir($dir);
                 break;
             case 'export':
-                $mydb = new myDb('simpleDB', 'update', dirname(__FILE__).'/');
+                $mydb = new myDb('simpleDB', 'update', __DIR__.'/');
                 if($mydb->check()) {
                     $data = $mydb->select();
                     $xls = new MyExcel('update', 'info');
@@ -246,28 +246,30 @@ class plugin_update implements interface_plugin {
                 echo myString::toJson($result, $s->gen->charset);
                 break;
             default:
-                list($tpl_main, $tpl_sub) = setPluginTemplate('update');
+                list($tpl, $tpl_sub) = setPluginTemplate('update');
                 $paras = [
                     'version' => include(CONFIG.'version.php'),
                     'link'=> $mystep->setting->web->update
                 ];
                 $tpl_sub->assign($paras);
                 $tpl_sub->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));
-                $tpl_main->assign('main', $mystep->parseTpl($tpl_sub, 's', false));
-                $mystep->show($tpl_main);
+                $tpl->assign('url_fix', defined('URL_FIX') ? URL_FIX : '');
+                $tpl->assign('main', $mystep->parseTpl($tpl_sub, 's', false));
+                include(APP.'myStep/global.php');
+                $mystep->show($tpl);
         }
         $mystep->end();
     }
     public static function remote() {
         global $s,$info_app;
         $sign = myReq::server('MS_SIGN');
-        $setting = new myConfig(dirname(__FILE__).'/config.php');
+        $setting = new myConfig(__DIR__.'/config.php');
         if((empty($sign) || !$setting->update) && !$s->gen->debug) myStep::header('404');
         $method = end($info_app['path']);
         switch($method) {
             case 'version':
                 $ver = $info_app['para']['v'];
-                $detail = require(dirname(__FILE__).'/version.php');
+                $detail = require(__DIR__.'/version.php');
                 $result = ['version'=>'','info'=>[]];
                 foreach($detail as $k => $v) {
                     if(version_compare($k,$ver)>0) {
@@ -280,8 +282,8 @@ class plugin_update implements interface_plugin {
             case 'download':
                 $v = require(CONFIG.'version.php');
                 $v_remote = $info_app['para']['v'];
-                $version = require(dirname(__FILE__).'/version.php');
-                $cache_file = dirname(__FILE__).'/update/'.md5($v.$v_remote);
+                $version = require(__DIR__.'/version.php');
+                $cache_file = __DIR__.'/update/'.md5($v.$v_remote);
                 if(file_exists($cache_file)) {
                     $result = myFile::getLocal($cache_file);
                 } else {
@@ -312,7 +314,7 @@ class plugin_update implements interface_plugin {
                     $result = gzdeflate($result, 9);
                     myFile::saveFile($cache_file, $result);
                 }
-                $mydb = new myDb('simpleDB', 'update', dirname(__FILE__).'/');
+                $mydb = new myDb('simpleDB', 'update', __DIR__.'/');
                 if(!$mydb->check()) {
                     $mydb->create(array(
                         array('date',10),
@@ -336,7 +338,7 @@ class plugin_update implements interface_plugin {
                 echo $result;
                 break;
             default:
-                $the_file = dirname(__FILE__).'/checkfile.php';
+                $the_file = __DIR__.'/checkfile.php';
                 if(file_exists($the_file)) {
                     include($the_file);
                     $check_info['list_file'] = $list_file;
@@ -348,11 +350,11 @@ class plugin_update implements interface_plugin {
     }
     public static function pack() {
         global $s;
-        $setting = new myConfig(dirname(__FILE__).'/config.php');
+        $setting = new myConfig(__DIR__.'/config.php');
         if(!$setting->pack && !$s->gen->debug) myStep::header('404');
         $ver = require(CONFIG.'version.php');
         $idx = 'mystep_v'.$ver;
-        $dir = dirname(__FILE__).'/pack/';
+        $dir = __DIR__.'/pack/';
         $log_file = $dir.'log.txt';
         $log = array(
             'time' => date('Y-m-d H:i:s'),
@@ -378,6 +380,8 @@ class plugin_update implements interface_plugin {
             myFile::move($dir.'menu.json', APP.'myStep/menu.json');
             myFile::copy($dir.'../install.php', $dir.$idx.'/index.php');
             myFile::copy(ROOT.'readme.md', $dir.$idx.'/readme.md');
+            $en = myStep::vendor('enphp', $dir.$idx.'/index.php');
+            $en->run();
             $zip = new myZip($dir.$idx.'.zip', $dir);
             $zip->zip($dir.$idx);
             myFile::del($dir.$idx);
@@ -390,7 +394,7 @@ class plugin_update implements interface_plugin {
             $list_file = array();
             $list_file_md5 = array();
         }
-        $the_dir = dirname(__FILE__).'/';
+        $the_dir = __DIR__.'/';
         $the_file = $the_dir.'checkfile.php';
         if(empty($dir)) $dir = ROOT;
         $dir = myFile::realPath($dir);

@@ -78,7 +78,7 @@ class myReq extends myBase {
 	 */
 	public static function init($cookie_opt = array(), $session_opt = array()) {
 		spl_autoload_register(function($class) {
-			$file = dirname(__FILE__).'/session/'.$class.'.class.php';
+			$file = __DIR__.'/session/'.$class.'.class.php';
 			if(is_file($file)) require_once($file);
 		});
 		self::setCookieOpt($cookie_opt);

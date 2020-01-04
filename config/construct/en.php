@@ -287,7 +287,7 @@ $setting_detail['db'] = array(
             'name' => 'Password',
             'name2' => 'Repeat',
             'describe' => 'Password of DB',
-            'type' => array('password', '', '40')
+            'type' => array('password', '_', '40')
         ),
         'pconnect' => array(
             'name' => 'Persistent Connections',

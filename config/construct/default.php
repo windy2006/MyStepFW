@@ -1,2 +1,2 @@
 <?php
-return include(dirname(__FILE__).'/chs.php');
+return include(__DIR__.'/chs.php');
