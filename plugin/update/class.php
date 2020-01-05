@@ -406,9 +406,18 @@ class plugin_update implements interface_plugin {
             $ignore = str_replace(chr(13), '', $ignore);
             $ignore = explode(chr(10), $ignore);
         }
+        $allow = array();
+        if(is_file($dir.'/allow')) {
+            $allow = file_get_contents($dir.'/allow');
+            if(strlen($allow)==0) return;
+            $allow = str_replace(chr(13), '', $allow);
+            $allow = explode(chr(10), $allow);
+        }
         if($build) {
             while (false !== ($file = readdir($handle))) {
-                if(trim($file, '.') == '' || $file == 'ignore' || array_search($file, $ignore)!==false) continue;
+                if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow') continue;
+                if(!empty($allow) && array_search($file, $allow)===false) continue;
+                if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
                 if(strpos($file,'.bak')!==false || strpos($file,'_bak')!==false) continue;
                 $the_name = $dir.$file;
                 if($the_name==$the_file) continue;
@@ -438,7 +447,10 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 'miss' => array()
             );
             while (false !== ($file = readdir($handle))) {
-                if(trim($file, '.') == '' || $file == 'ignore' || array_search($file, $ignore)!==false) continue;
+                if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow') continue;
+                if(!empty($allow) && array_search($file, $allow)===false) continue;
+                if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
+                if(strpos($file,'.bak')!==false || strpos($file,'_bak')!==false) continue;
                 $the_name = $dir.$file;
                 if($the_name==$the_file) continue;
                 if(is_dir($the_name)) {

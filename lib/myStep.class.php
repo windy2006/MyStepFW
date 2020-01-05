@@ -236,9 +236,9 @@ class myStep extends myController {
 			$content = preg_replace('@(\'|")index.php'.preg_quote($seperator).'(#|http|//|static|data\:)@', '\1\2', $content);
 			$content = str_replace('<base xxx', '<base href', $content);
 		}
-        if(defined('URL_FIX')) {
-            $content = preg_replace('@((\'|")/?)'.URL_FIX.'@','\1', $content);
-        }
+		if(defined('URL_FIX')) {
+			$content = preg_replace('@((\'|")/?)'.URL_FIX.'@','\1', $content);
+		}
 		return $content;
 	}
 
@@ -712,8 +712,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	 */
 	public static function setURL($url) {
 		global $s;
-		$url = preg_replace('@^'.preg_quote(ROOT_WEB).'@', '/', $url);
-		if(strpos($url, 'index.php')===false && strpos($url, 'http://')!==0) {
+		if(strpos($url, '://')===false && strpos($url, 'index.php')===false) {
+			$url = preg_replace('@^'.preg_quote(ROOT_WEB).'@', '/', $url);
 			switch($s->router->mode) {
 				case 'path_info':
 					$url = 'index.php'.$url;
@@ -724,9 +724,9 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 				default:
 					break;
 			}
+			$url = ROOT_WEB.$url;
+			$url = preg_replace('#/+#', '/', $url);
 		}
-		$url = preg_replace('#/+#', '/', $url);
-		$url = str_replace(':/', '://', $url);
 		return $url;
 	}
 
@@ -799,8 +799,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(is_file(CONFIG.'config.php')) {
 			self::go();
 		} else {
-            $path = trim(str_replace(ROOT_WEB,'/', myReq::svr('REQUEST_URI')), '/');
-            $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
+			$path = trim(str_replace(ROOT_WEB,'/', myReq::svr('REQUEST_URI')), '/');
+			$the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
 			if(strpos($path,'static')===0) {
 				myController::file($the_file);
 			} else {
@@ -816,20 +816,20 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 	public static function go() {
 		global $s, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
 		$s = new myConfig(CONFIG.'config.php');
-        $host = myReq::server('HTTP_HOST');
-        if(is_file(CONFIG.'domain.php')) {
-            $domain = include(CONFIG.'domain.php');
-            if(isset($domain[$host])) {
-                $rule = $domain[$host];
-                if(preg_match('@^\w+$@', $rule)) {
-                    $s->router->default_app = $rule;
-                    define('URL_FIX', $rule);
-                } else {
-                    $rule = preg_replace('@^/(\w+)/.*$@', '\1', $rule);
-                    define('URL_FIX', $rule);
-                }
-            }
-        }
+		$host = myReq::server('HTTP_HOST');
+		if(is_file(CONFIG.'domain.php')) {
+			$domain = include(CONFIG.'domain.php');
+			if(isset($domain[$host])) {
+				$rule = $domain[$host];
+				if(preg_match('@^\w+$@', $rule)) {
+					$s->router->default_app = $rule;
+					define('URL_FIX', $rule);
+				} else {
+					$rule = preg_replace('@^/(\w+)/.*$@', '\1', $rule);
+					define('URL_FIX', $rule);
+				}
+			}
+		}
 		$router = new myRouter((array)$s->router);
 		extract($router->route);
 		$the_file = ROOT.preg_replace('#&.+$#', '', $p);
@@ -936,7 +936,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$tpl = new myTemplate($tpl_setting, $tpl_cache);
 		if(count($info_app['path'])==1) $info_app['path'][1]='';
 		$tpl->assign('path', implode('/', $info_app['path']));
-        $tpl->assign('url_fix', defined('URL_FIX') ? URL_FIX : '');
+		$tpl->assign('url_fix', defined('URL_FIX') ? URL_FIX : '');
 		include($f);
 		if(is_file(PATH.'global.php')) include(PATH.'global.php');
 		if(isset($content)) $tpl->assign('main', $content);

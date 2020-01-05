@@ -155,14 +155,14 @@ class myRouter extends myBase {
 	 * @return bool
 	 */
 	public function check() {
-        if(preg_match('@^/[A-Z]@', $this->query)) return false;
-	    $url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
+		if(preg_match('@^/[A-Z]@', $this->query)) return false;
+		$url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
 		foreach($this->rules as $rule) {
 			if(
-			    preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)
-                ||
-                preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query,$match)
-            ) {
+				preg_match('#^'.$rule['pattern'].'$#', $this->query,$match)
+				||
+				preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query,$match)
+			) {
 				array_shift($match);
 				if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
 					$rule['idx'] = array_shift($match);
