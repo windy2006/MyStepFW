@@ -164,14 +164,15 @@ class myRouter extends myBase {
 				preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query,$match)
 			) {
 				array_shift($match);
-				if(preg_match('#^/\(\\\w\+\)/[a-zA-Z]+/\(.+#', $rule['pattern'])) {
-					$rule['idx'] = array_shift($match);
-				}
+                if(preg_match('#^/(api|module)/#', $rule['pattern'])) {
+                    $rule['idx'] = $match[0];
+                    $match = [$match[0].'/'.$match[1]];
+                }
 				if(strpos($rule['idx'], 'plugin_')===0) $rule['idx'] = 'myStep';
 				if(!is_dir(APP.$rule['idx'])) {
 					myStep::info('app_missing');
 				}
-				$info_app = include(APP.$rule['idx'].'/info.php');
+                $info_app = include(APP.$rule['idx'].'/info.php');
 				$info_app['path'] = explode('/', trim($this->route['p'],'/'));
 				$info_app['para'] = $this->info['para'];
 				$info_app['route'] = $this->route['p'];
@@ -243,8 +244,12 @@ class myRouter extends myBase {
 			}
 		}
 		if(empty(reset($q))) array_shift($q);
-		$this->info['app'] = (count($q)>0) ? array_shift($q) : $setting['default_app'];
-		$this->info['path'] = array_merge([$this->info['app']], $q, $path);
+		if(count($q)==0 || !is_dir(APP.$q[0])) {
+            $this->info['app'] = $setting['default_app'];
+        } else {
+            $this->info['app'] = array_shift($q);
+        }
+		$this->info['path'] = array_merge($q, $path);
 		$info = array();
 		if(is_file(APP.$this->info['app'].'/info.php')) {
 			$info = include(APP.$this->info['app'].'/info.php');

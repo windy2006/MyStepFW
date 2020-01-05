@@ -297,7 +297,7 @@
 		add_css:true,
 		callback:function(){
 			ac_options = {
-				serviceUrl:'myStep/api/autoComplete/json',
+				serviceUrl:'api/myStep/autoComplete/json',
 				minChars:1,
 				delimiter: /(,|;)\s*/,
 				maxHeight:400,

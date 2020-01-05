@@ -41,7 +41,7 @@ class plugin_update implements interface_plugin {
         $header = array();
         $header['Referer'] = 'http://'.myReq::server('HTTP_HOST');
         $header['ms_sign'] = time();
-        $url = 'http://'.$s->web->update.'/myStep/api/plugin_update/check';
+        $url = 'http://'.$s->web->update.'/api/plugin_update/';
         $dir = __DIR__;
         switch($info_app['path'][1]) {
             case 'build':
@@ -51,7 +51,7 @@ class plugin_update implements interface_plugin {
                 break;
             case 'check':
                 $ver = require(CONFIG.'version.php');
-                $ver_remote = myString::fromJson(myFile::getRemote_curl($url.'/version?v='.$ver, $header));
+                $ver_remote = myString::fromJson(myFile::getRemote_curl($url.'check/version?v='.$ver, $header));
                 if(!empty($ver_remote['version'])) {
                     foreach($ver_remote['info'] as $k => $v) {
                         $ver_remote['info'][$k] = preg_replace('#\r\n\s+#',chr(10), trim($v));
@@ -66,7 +66,7 @@ class plugin_update implements interface_plugin {
                 echo myString::toJson($result, $s->gen->charset);
                 break;
             case 'check_server':
-                $check_info = myFile::getRemote_curl($url, $header);
+                $check_info = myFile::getRemote_curl($url.'check', $header);
                 if(!empty($check_info)) {
                     $check_info = json_decode($check_info);
                     $the_file = $dir.'/checkfile.php';
@@ -153,7 +153,7 @@ class plugin_update implements interface_plugin {
             case 'download':
                 $ver = require(CONFIG.'version.php');
                 $mode = $info_app['para']['m'];
-                $detail = myFile::getRemote_curl($url.'/download?v='.$ver, $header);
+                $detail = myFile::getRemote_curl($url.'download?v='.$ver, $header);
                 $detail = unserialize(gzinflate($detail));
                 $path_rollback = $dir.'/rollback/'.$ver.'/';
                 if(isset($detail['setting']) && count($detail['setting'])>0) {

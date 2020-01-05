@@ -10,8 +10,11 @@ $sub_tpl = new myTemplate($tpl_setting, false);
 //开启模版PHP代码执行权限（默认关闭，视需要，不建议开启）
 $sub_tpl->allow_script = true;
 //为子模版变量赋值
+$root = ROOT_WEB;
+if(!defined('URL_FIX')) $root = $info_app['app'].$root;
+$sub_tpl->assign('root', $root);
+$sub_tpl->assign('root2', ROOT_WEB);
 $sub_tpl->assign('code', htmlentities(myFile::getLocal(__FILE__)));
-$sub_tpl->assign('root', ROOT_WEB);
 //参数列表及模版循环赋值
 foreach ([
     'info_app' => '当前app基本信息',

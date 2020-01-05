@@ -1,12 +1,12 @@
 <?php
-$module = $info_app['path'][1] ?? null;
-$mode = $info_app['path'][2] ?? null;
+$module = $info_app['path'][0] ?? null;
+$mode = $info_app['path'][1] ?? null;
 if (is_null($mode)) $mode = 'show';
 $sp_module = ['myExcel', 'myImg'];
 $tpl_setting['name'] = 'main';
 $tpl = new myTemplate($tpl_setting, false);
 
-if (is_null($module)) {
+if(is_null($module)) {
     set_include_path(get_include_path() . PATH_SEPARATOR . './lib/database/' . PATH_SEPARATOR . './lib/cache/');
     spl_autoload_extensions('.class.php,.php');
     spl_autoload_register();

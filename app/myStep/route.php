@@ -1,7 +1,7 @@
 <?php
 $rule = array(
-    array('/[str]/api/[any]', 'myStep::api'),
-    array('/[str]/module/[any]', 'myStep::module'),
+    array('/api/[str]/[any]', 'myStep::api'),
+    array('/module/[str]/[any]', 'myStep::module'),
     array('/language/[str]/[any]', 'myStep::language'),
     array('/setting/[any]', 'myStep::setting'),
     array('/captcha/[any]', 'myStep::captcha,4,3'),

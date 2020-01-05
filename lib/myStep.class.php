@@ -569,7 +569,8 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		if(isset($api_list)) {
 			if(isset($api_list[$module])){
 				if(strpos($para[0],'plugin_')!==0) {
-					$name = array_shift($para);
+					$name = $para[1];
+					array_shift($para);
 				} else {
 					$plugin = array_shift($para);
 					$name = array_shift($para);
@@ -594,6 +595,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 				$method = $api_list[$module][$name];
 				if(is_file(APP.$module.'/lib.php')) require_once(APP.$module.'/lib.php');
 				$type = end($para);
+				$para = array_slice($para, 1);
 				$para = array_merge(myReq::getValue(count($_GET)>0?'get':'post', '[ALL]'), $para);
 				if(is_callable($method)) {
 					$api = new myApi();
@@ -831,8 +833,7 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 			}
 		}
 		$router = new myRouter((array)$s->router);
-		extract($router->route);
-		$the_file = ROOT.preg_replace('#&.+$#', '', $p);
+		$the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);
 		$ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
 		$ext_list = explode(',', $s->gen->static);
 		if(strpos(trim($the_file,'/'),'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
@@ -842,7 +843,6 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		}
 		$s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
 		$s->web->url = 'http://'.$host;
-
 		$router->setRules(CONFIG.'route.php');
 		if(!$router->check()) {
 			$info_app = $router->parse();

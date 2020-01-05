@@ -89,7 +89,7 @@ function pageInit(){
         }
 
         $('[data-toggle="tooltip"]').tooltip();
-        $.get('index.php?myStep/api/error/'+Math.random(), function(data, status){
+        $.get('index.php?api/myStep/error/'+Math.random(), function(data, status){
             if(typeof data == 'object' && data.count > 0) {
                 let badge = $('<span>').addClass('badge badge-warning').css('vertical-align', 'super').text(data.count);
                 $("a[href$='/error']").append(badge);

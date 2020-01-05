@@ -4,10 +4,6 @@ $format_list = array (
   array (
     'camel' => '[a-z]+([A-Z][a-z]+)+',
   ),
-  'sample' => 
-  array (
-    'camel' => '[a-z]+([A-Z][a-z]+)+',
-  ),
 );
 
 $rule_list = array (
@@ -55,28 +51,6 @@ $rule_list = array (
     ),
     2 => 
     array (
-      0 => '/Sample/[camel]',
-      1 => 
-      array (
-        0 => 'app\\sample\\preCheck,3',
-        1 => 'app\\sample\\routeTest',
-      ),
-    ),
-  ),
-  'sample' => 
-  array (
-    0 => 
-    array (
-      0 => '/mySample/[any]',
-      1 => 'app\\sample\\route',
-    ),
-    1 => 
-    array (
-      0 => '/mySample2/[any]',
-      1 => 'mystep::getModule',
-    ),
-    2 => 
-    array (
       0 => '/sample/[camel]',
       1 => 
       array (
@@ -89,12 +63,12 @@ $rule_list = array (
   array (
     0 => 
     array (
-      0 => '/[str]/api/[any]',
+      0 => '/api/[str]/[any]',
       1 => 'myStep::api',
     ),
     1 => 
     array (
-      0 => '/[str]/module/[any]',
+      0 => '/module/[str]/[any]',
       1 => 'myStep::module',
     ),
     2 => 
@@ -158,10 +132,6 @@ $api_list = array (
     'download' => 'plugin_update::remote',
   ),
   'Sample' => 
-  array (
-    'sample' => 'app\\sample\\api',
-  ),
-  'sample' => 
   array (
     'sample' => 'app\\sample\\api',
   ),
