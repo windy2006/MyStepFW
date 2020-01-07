@@ -75,8 +75,8 @@ myBase为抽象类，可为所有其他子类提供统一的构建方法和错�
 myController类为核心控制类，具体用法请参加功能类文档，其中几个重要方法说明如下：
 - 页面附加内容设置 - 包括 setAddedContent 和 pushAddedContent 两个方法，可设置指定关键字的内容，并将相关内容插入到模版中"page_关键字"的位置
 - 语言文件管理 - 包括 setLanguage，setLanguagePack 和 getLanguage 三个方法，可设置语言、语言包或调用指定语言、指定索引的文字
-- 应用接口设置 - 包括 regApi 和 runApi 两个方法，可通过路由的 /api/[any] 调用
-- 模块设置 - 包括 regModule 和 module 两个方法，可通过路由的 /module/[any] 调用
+- 应用接口设置 - 包括 regApi 和 runApi 两个方法，可通过路由的 /api/[str]/[any] 调用
+- 模块设置 - 包括 regModule 和 module 两个方法，可通过路由的 /module/[str]/[any] 调用
 - 模版标签设置 - 包括 regTag 一个方法，将在调用show方法时加载给模版类
 - 链接设置 - 包括 regUrl 和 url 两个方法，通过指定方法和相关参数生成对应链接
 - 插件设置 - 包括 regPlugin 和 plugin 两个方法，每个插件是应用接口，模块，标签和链接的组合
@@ -105,7 +105,10 @@ myStep类扩展自myController类，具体用法请参加功能类文档，其�
 - init() - 静态方法，预初始化基本设置信息（如发现有错误将自动调整），声明类加载模式，如为首次执行框架的话，将自动跳转到初始设置页面
 - go() - 框架执行入口，加载设置信息，判断静态文件并直接显示，否则根据路由规则调用相关脚本
 - setPara() - 声明框架实例，默认直接调用myStep类，也可在对应APP中扩展，框架会自动调用APP目录下"[appName].class.php"中与APP同名的类，如存在preload方法，则优先调用。将APP配置覆盖全局配置，然后再调用start方法，同时声明预加载的css和js脚本文件以及模版的初始设置。
-- vendor() - 调用位于VENDOR目录下的第三方PHP功能类。
+- vendor($class_name) - 调用位于VENDOR目录下的第三方PHP功能类，需要满足以下条件。
+   - 所调用类的目录名、文件名和类名必须一致，其中文件名可为"名称.php"或"名称.class.php"
+   - 功能类如有构造函数，传入参数均需要有预设默认值，也就是可以执行不含参数的构造函数
+   - 方法中除了 $class_name 外，还可以夹带其他参数，用于在声明类实例后，再次运行构造函数给类初始化
 - getModule($m) - 自定义路由处理函数（也可以通过自定义方法处理自定义路由，详情参见"自定义路由"专题），机制如下：
    - 传入参数 $m - 本参数传递路由外的路径信息，如路由为 /manager/[any]，URI 为 /manager/path1/path2，则 $m 为 path1/path2，即[any]部分，但需要注意的是在本方法中，$m 被截取为 path1。此参数可直接在自定义的路由处理脚本内调用，但如需在下级函数中调用，需要先进行global处理。
    - 本方法将通过 myStep::setPara 方法调用当前 app 设置中的模版参数设置（可继承于全局设置，存储于全局变量 $tpl_setting 中）
@@ -155,7 +158,11 @@ JS函数：
    - $.evalJSON - 将json字符串转换为对象或数组
    - $.setJs - 批量顺序加载js脚本
    - $.setCss - 批量加载css样式表
-   - $.vendor(name, option) - 加载vender目录下名称为name的第三方js扩展，可根据option判断是否同时加载样式表并调用回调函数
+   - $.vendor(name, option) - 加载vender目录下名称为name的第三方js扩展，可根据option判断是否同时加载样式表并调用回调函数，相关说明如下：
+      - 目录名和js文件名须一致
+      - option 中 add_css 设置为 true 时，将同时加载同名css文件
+      - option 中 name_fix 设置为 true 时，将加载"名称.min.js"文件
+      - option 中 callback 参数为匿名函数，用于在成功调用扩展后，执行相关的功能代码
    - $.cookie(name, value, options) - cookie管理（读取、添加、修改、删除）
    - $obj.serializeObject - 将jQuery对象序列化（如form）
    - $obj.outerHTML - 返回jQuery对象的外部超文本代码
@@ -164,6 +171,7 @@ JS函数：
 路由：
 --------
 路由分为路径调用和自定义路由两种
+- 命名规则 - 为避免路由冲突，路径调用模式下"应用目录名"首字母"建议"为大写；自定义路由模式下，一级路径首字母"必须"为小写字母
 - 路径调用 - 相关路径信息将直接传递给应用目录下的index.php处理，格式为：网址/应用目录名/路径信息
 - 自定义路由 - 可在框架的应用设置中载入应用路由配置，格式如下：
    - $format - 路径辨别格式，含如下默认格式：
@@ -194,8 +202,8 @@ JS函数：
 接口：
 --------
 如果接口规则是以"/[str]/"开头，则直接将该规则视为"[str]"所对应APP向下的接口（参见自定义应用接口和模块接口）。接口处理函数统一返回数组格式，客户端响应格式需要在url最后加上"/返回类型"（可选），格式默认为json，还可为xml、string、hex、script等
-- /[str]/api/[any] - 自定义应用接口，[str]为app名称，[any]为接口名及参数，可通过_GET或_POST接收参数
-- /[str]/module/[any] - 模块接口，[str]为app名称，[any]为模块名及参数
+- /api/[str]/[any] - 自定义应用接口，[str]为app名称，[any]为接口名及参数，可通过_GET或_POST接收参数
+- /module/[str]/[any] - 模块接口，[str]为app名称，[any]为模块名及参数
 - /setting/[any] - 设置接口，[any]为应用名称，获取该应用json格式的设置
 - /captcha/[any] - 验证码图像接口，[any]为随机数，保证新码生成，验证参数为$_SESSION['captcha']
 - /upload - 文件上传接口，上传文件保存在常量FILE目录

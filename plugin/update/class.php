@@ -380,8 +380,8 @@ class plugin_update implements interface_plugin {
             myFile::move($dir.'menu.json', APP.'myStep/menu.json');
             myFile::copy($dir.'../install.php', $dir.$idx.'/index.php');
             myFile::copy(ROOT.'readme.md', $dir.$idx.'/readme.md');
-            $en = myStep::vendor('enphp', $dir.$idx.'/index.php');
-            $en->run();
+            $en = myStep::vendor('enphp');
+            $en->encode($dir.$idx.'/index.php');
             $zip = new myZip($dir.$idx.'.zip', $dir);
             $zip->zip($dir.$idx);
             myFile::del($dir.$idx);

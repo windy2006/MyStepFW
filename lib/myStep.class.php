@@ -42,7 +42,7 @@
 	self::go()                                       // 执行框架
 	self::setPara()                                  // 应用模块初始化参数设置
 	self::getModule($m)                              // 应用模块调用
-	self::vendor()                                   // 调用第三放组件
+	self::vendor($class_name)                        // 调用第三放组件
 */
 
 require_once('function.php');
@@ -944,11 +944,12 @@ Memory Usage : '.$mem.' &nbsp; | &nbsp;
 		$mystep->end();
 	}
 
-	/**
-	 * 调用第三放组件
-	 * @return mixed
-	 */
-	public static function vendor() {
+    /**
+     * 调用第三放组件
+     * @param $class_name
+     * @return mixed
+     */
+	public static function vendor($class_name) {
 		$args = func_get_args();
 		$name = array_shift($args);
 		$file = VENDOR.$name.'/'.$name.'.php';
