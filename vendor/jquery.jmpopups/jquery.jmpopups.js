@@ -397,7 +397,7 @@ window.prompt = function(info, func, value, title, btn, nl) {
 
 function setDialog() {
     $("#info_show").show();
-    $("#info_show > .info").css({"overflow-x":"auto","overflow-y":"auto","width":"auto","height":"auto"});
+    $("#info_show > .info").css({"overflow-x":"hidden","overflow-y":"auto","width":"auto","height":"auto"});
     var the_width = $("#info_show").width();
     var the_height = $("#info_show").height();
     if(the_width<300) the_width = 300;

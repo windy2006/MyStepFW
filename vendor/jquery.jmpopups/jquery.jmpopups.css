@@ -7,6 +7,6 @@
 
 #info_show {display:none;float:left;}
 .info_show {}
-.info_show .info{font-size:16px;white-space:nowrap;word-wrap:keep-all;line-height:24px;}
+.info_show .info{font-size:16px;white-space:nowrap;word-wrap:keep-all;line-height:24px;overflow-x:hidden;}
 .info_show .button{text-align:center; padding:10px 0px 0px 0px;}
 .info_show .button button{padding:0px 10px 0px 10px;margin:0px 10px 0px 10px;}

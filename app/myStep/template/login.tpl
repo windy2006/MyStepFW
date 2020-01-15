@@ -53,7 +53,7 @@
                                 <img id="captcha" src="index.php?captcha/" height="33" />
                             </div>
                             <div class="input-group-append">
-                                <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src='captcha/'+Math.random();return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>
+                                <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src='index.php?captcha/'+Math.random();return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>
                             </div>
                         </div>
                         <div class="text-right">
@@ -72,6 +72,11 @@
 </footer>
 <script language="JavaScript" src="cache/script/myStep.js"></script>
 <script language="JavaScript" src="static/js/checkForm.js"></script>
+<script language="JavaScript">
+setTimeout(function(){
+    document.getElementById('captcha').src='index.php?captcha/'+Math.random();
+}, 500);
+</script>
 <!--page_end-->
 </body>
 </html>
