@@ -329,12 +329,12 @@ class myStep extends myController {
 			if(is_bool($this->setting->show)) {
 				$rate = ceil(strlen(gzcompress($content,$level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
 				$content = str_ireplace('</body>', '
-<div class="text-right text-secondary my-2 pr-3" style="font-size:12px;">
-Memory Usage : '.$mem.' &nbsp; | &nbsp;
-'.$this->getLanguage('info_compressmode').$rate.' &nbsp; | &nbsp;
-'.$this->getLanguage('info_querycount').$query.' &nbsp; | &nbsp;
-'.$this->getLanguage('info_exectime').$time.'ms &nbsp; | &nbsp;
-'.$this->getLanguage('info_cacheuse').$this->setting->gen->cache_mode.'
+<div class="text-right text-secondary my-2 pr-5" style="font-size:12px;">
+<span class="nowrap font-sm">'.$this->getLanguage('info_memory').myFile::formatSize($mem).'</span>&nbsp; | &nbsp;
+<span class="nowrap font-sm">'.$this->getLanguage('info_compressmode').$rate.'</span>&nbsp; | &nbsp;
+<span class="nowrap font-sm">'.$this->getLanguage('info_querycount').(empty($query)?0:$query).'</span>&nbsp; | &nbsp;
+<span class="nowrap font-sm">'.$this->getLanguage('info_exectime').$time.'ms</span>&nbsp; | &nbsp;
+<span class="nowrap font-sm">'.$this->getLanguage('info_cacheuse').$this->setting->gen->cache_mode.'</span>
 </div>
 </body>
 ', $content);

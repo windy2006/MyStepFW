@@ -96,7 +96,7 @@ myController类为核心控制类，具体用法请参加功能类文档，其�
 --------
 myStep类扩展自myController类，具体用法请参加功能类文档，其中几个重要方法说明如下：
 - start($setPlugin) - 执行于脚本主程序开始之前，用于设置框架类及其方法的调用别名，设定错误报告模式，加载应用对应插件，初始化cookie和session，声明数据库（$db, 如果存在全局变量$no_db，且其值为'y'，则不建立连接，以便于无数据库操作的应用）和缓存（$$cache）实例，以及为状态变量赋值
-- show(myTemplate $tpl) - 用于加载网站基本参数至模版实例，并将结果直接显示（在此可添加针对显示内容的预处理方法）；同时也检测并按需更新应用脚本文件（[appName].js 和 [appName].css，详情见相关专题）
+- show(myTemplate $tpl) - 用于加载网站基本参数至模版实例，并将结果直接显示（在此可添加针对显示内容的预处理方法）；同时也检测并按需更新应用脚本文件（[appName].js 和 [appName].css，详情见相关专题），如设置"$mystep->setting->show = true"，则将在页面最下面显示基本运行信息。
 - parseTpl(myTemplate $tpl) - 与 show 方法类似，但是返回通过模版实例所生成的页面内容，而不是直接显示
 - setLink($content) - 针对所生成页面的链接，根据设定的链接模式（rewrite，pathinfo或querystring）进行处理，页面模版中只要按照rewrite模式书写，在页面显示时将自动通过本预处理方法调整为对应设置的链接。
 - end() - 脚本结束时所用的方法，搜集并对比运行结束时的信息，结束并清空变量，并智能调用用户扩展类中自定义的shutdown()方法

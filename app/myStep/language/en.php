@@ -42,6 +42,7 @@ return array (
 
     'setting_done' => 'Setting Updated!',
 
+    'info_memory' => 'Memory Usage : ',
     'info_compressmode' => 'Compass Mode: ',
     'info_compresslevel' => 'Compass Level: ',
     'info_compressrate' => 'Compass rate: ',

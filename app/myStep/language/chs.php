@@ -41,7 +41,8 @@ return array (
     'login_logout' => '您已经成功退出管理系统！',
 
     'setting_done' => '配置文件已更新！',
-    
+
+    'info_memory' => '内存占用：',
     'info_compressmode' => '压缩模式：',
     'info_compresslevel' => '压缩级别：',
     'info_compressrate' => '压缩比率：',

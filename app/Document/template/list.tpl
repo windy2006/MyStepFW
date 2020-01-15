@@ -22,6 +22,3 @@
 	</div>
 </div>
 <!--loop:end-->
-<div class="position-fixed border rounded px-2 py-1" style="bottom:10px;right:10px;cursor:pointer;" onclick="$('html,body').animate({scrollTop: 0},500);">
-	<span class="glyphicon glyphicon-arrow-up"></span>
-</div>
