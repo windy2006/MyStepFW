@@ -20,23 +20,6 @@ $rule_list = array (
       ),
     ),
   ),
-  'plugin_update' => 
-  array (
-    0 => 
-    array (
-      0 => '/update/[any]',
-      1 => 
-      array (
-        0 => 'app\\myStep\\logCheck',
-        1 => 'plugin_update::update',
-      ),
-    ),
-    1 => 
-    array (
-      0 => '/pack/[any]',
-      1 => 'plugin_update::pack',
-    ),
-  ),
   'Sample' => 
   array (
     0 => 
@@ -57,6 +40,23 @@ $rule_list = array (
         0 => 'app\\sample\\preCheck,3',
         1 => 'app\\sample\\routeTest',
       ),
+    ),
+  ),
+  'plugin_update' => 
+  array (
+    0 => 
+    array (
+      0 => '/update/[any]',
+      1 => 
+      array (
+        0 => 'app\\myStep\\logCheck',
+        1 => 'plugin_update::update',
+      ),
+    ),
+    1 => 
+    array (
+      0 => '/pack/[any]',
+      1 => 'plugin_update::pack',
     ),
   ),
   'myStep' => 
@@ -125,15 +125,15 @@ $api_list = array (
     'data' => 'app\\myStep\\getData',
     'autoComplete' => 'app\\myStep\\autoComplete',
   ),
+  'Sample' => 
+  array (
+    'sample' => 'app\\sample\\api',
+  ),
   'plugin_update' => 
   array (
     'check' => 'plugin_update::remote',
     'update' => 'plugin_update::remote',
     'download' => 'plugin_update::remote',
-  ),
-  'Sample' => 
-  array (
-    'sample' => 'app\\sample\\api',
   ),
 );
 
