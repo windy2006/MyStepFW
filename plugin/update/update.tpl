@@ -115,6 +115,10 @@ function checkModify(mode) {
     loadingShow("正在检测系统文件的变更情况，请等待！");
     var url = "update/check_" + (mode==1?'server':'local');
     $.get(url, function(info){
+        if(info.code!='0') {
+            alert('校验信息获取失败！');
+            return;
+        }
         loadingShow('框架文件校验中……');
         if(info==false) {
             if(mode==0) {

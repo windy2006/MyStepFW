@@ -46,19 +46,19 @@ class plugin_update implements interface_plugin {
         switch($info_app['path'][1]) {
             case 'build':
                 if(!self::checkFile(ROOT, true)) {
-                    echo 'error';
+                    echo '{"code":"1","msg":"error"}';
                 }
                 break;
             case 'check':
                 $ver = require(CONFIG.'version.php');
                 $ver_remote = myString::fromJson(myFile::getRemote_curl($url.'check/version?v='.$ver, $header));
-                if(!empty($ver_remote['version'])) {
+                if(isset($ver_remote['version']) && !empty($ver_remote['version'])) {
                     foreach($ver_remote['info'] as $k => $v) {
                         $ver_remote['info'][$k] = preg_replace('#\r\n\s+#',chr(10), trim($v));
                     }
-                    echo '{"version":"'.$ver_remote['version'].'","detail":'.myString::toJson($ver_remote['info'], $s->gen->charset).'}';
+                    echo '{"code":"0","version":"'.$ver_remote['version'].'","detail":'.myString::toJson($ver_remote['info'], $s->gen->charset).'}';
                 } else {
-                    echo '{"version":""}';
+                    echo '{"code":"1","msg":"error","version":""}';
                 }
                 break;
             case 'check_local':
@@ -69,21 +69,25 @@ class plugin_update implements interface_plugin {
                 $check_info = myFile::getRemote_curl($url.'check', $header);
                 if(!empty($check_info)) {
                     $check_info = json_decode($check_info);
-                    $the_file = $dir.'/checkfile.php';
-                    if(file_exists($the_file)) rename($the_file, $the_file.'.bak');
-                    $list_file = $check_info->list_file;
-                    $list_file_md5 = $check_info->list_file_md5;
-                    unset($check_info);
-                    $content = "<?php\n";
-                    $content .= '$list_file = '.var_export($list_file, true).";\n";
-                    $content .= '$list_file_md5 = '.var_export($list_file_md5, true).";\n";
-                    myFile::saveFile($the_file, $content);
-                    $result = self::checkFile();
-                    echo myString::toJson($result, $s->gen->charset);
-                    @unlink($the_file);
-                    if(file_exists($the_file.'.bak')) rename($the_file.'.bak', $the_file);
+                    if(!empty($check_info)) {
+                        $the_file = $dir.'/checkfile.php';
+                        if(file_exists($the_file)) rename($the_file, $the_file.'.bak');
+                        $list_file = $check_info->list_file;
+                        $list_file_md5 = $check_info->list_file_md5;
+                        unset($check_info);
+                        $content = "<?php\n";
+                        $content .= '$list_file = '.var_export($list_file, true).";\n";
+                        $content .= '$list_file_md5 = '.var_export($list_file_md5, true).";\n";
+                        myFile::saveFile($the_file, $content);
+                        $result = self::checkFile();
+                        echo myString::toJson($result, $s->gen->charset);
+                        @unlink($the_file);
+                        if(file_exists($the_file.'.bak')) rename($the_file.'.bak', $the_file);
+                    } else {
+                        echo '{"code":"1","msg":"error"}';
+                    }
                 } else {
-                    echo 'error';
+                    echo '{"code":"1","msg":"error"}';
                 }
                 break;
             case 'empty':
@@ -194,7 +198,7 @@ class plugin_update implements interface_plugin {
                         if(!empty($detail['content'][$i])) $list[] = $i;
                     }
                 }
-                $result = ['info'=>'','link'=>''];
+                $result = ['code'=>0,'info'=>'','link'=>''];
 
                 $m = count($list);
                 if($m>0) {
@@ -270,7 +274,7 @@ class plugin_update implements interface_plugin {
             case 'version':
                 $ver = $info_app['para']['v'];
                 $detail = require(__DIR__.'/version.php');
-                $result = ['version'=>'','info'=>[]];
+                $result = ['code'=>0,'version'=>'','info'=>[]];
                 foreach($detail as $k => $v) {
                     if(version_compare($k,$ver)>0) {
                         $result['info'][$k] = $v['info'];
@@ -339,13 +343,15 @@ class plugin_update implements interface_plugin {
                 break;
             default:
                 $the_file = __DIR__.'/checkfile.php';
+                $check_info = ['code'=>1,'list_file'=>[],'list_file_md5'=>[]];
                 if(file_exists($the_file)) {
                     include($the_file);
+                    $check_info['code'] = 0;
                     $check_info['list_file'] = $list_file;
                     $check_info['list_file_md5'] = $list_file_md5;
-                    echo myString::toJson($check_info, $s->gen->charset);
                     unset($list_file, $list_file_md5);
                 }
+                echo myString::toJson($check_info, $s->gen->charset);
         }
     }
     public static function pack() {
@@ -442,6 +448,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 include($the_file);
             }
             $result = array(
+                'code' => '0',
                 'new' => array(),
                 'mod' => array(),
                 'miss' => array()
