@@ -11,15 +11,15 @@
 **************************************************/
 
 function highlightIt(the_obj){
-    var tag_name = the_obj.tagName.toLowerCase();
-    (tag_name=="input") ? the_obj.select() : the_obj.focus();
-    $(the_obj).addClass('is-invalid').one("keypress", function(){
-        $(this).removeClass('is-invalid');
-    }).one("change", function(){
-        $(this).removeClass('is-invalid');
-    });
-    $(window).scrollTop($(the_obj).offset().top-100);
-    return;
+	var tag_name = the_obj.tagName.toLowerCase();
+	(tag_name=="input") ? the_obj.select() : the_obj.focus();
+	$(the_obj).addClass('is-invalid').one("keypress", function(){
+		$(this).removeClass('is-invalid');
+	}).one("change", function(){
+		$(this).removeClass('is-invalid');
+	});
+	$(window).scrollTop($(the_obj).offset().top-100);
+	return;
 }
 
 function checkForm(the_form, myChecker){
@@ -30,6 +30,17 @@ function checkForm(the_form, myChecker){
 		flag = true;
 	}
 	if(flag==false) return false;
+
+	var theObjs = $(the_form).find("input:password[id$=_r]");
+	for(var i=0; i<theObjs.length; i++) {
+		if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!=theObjs[i].value) {
+			alert(language.checkform_err_password);
+			highlightIt(theObjs[i]);
+			highlightIt($('#'+theObjs[i].id.replace(/_r$/, "")).get(0));
+			return false;
+		}
+	}
+	theObjs.remove();
 	
 	var obj_list = new Array();
 	var the_obj = null;

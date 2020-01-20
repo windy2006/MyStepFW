@@ -62,6 +62,7 @@ return array (
     'checkform_lenth_limit3' => 'Keep the input characters within %1 !',
     'checkform_noempty' => 'Some item must be filled!',
     'checkform_err' => 'Bad format!',
+    'checkform_err_password' => 'Please keep the same password for the two blank!',
     'checkform_err_email' => 'Wrong email format !',
     'checkform_err_url' => 'Wrong website address format !',
     'checkform_err_digital' => 'Digital only !',

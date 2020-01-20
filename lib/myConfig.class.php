@@ -202,7 +202,7 @@ class myConfig extends myBase {
 					$item->$k = $this->set($v, $idx.$k);
 				}
 			} else {
-				if(empty($v) && isset($setting[$k.'_pwd_r']) && isset($item->$k)) continue;
+				if(empty($v) && isset($item->$k)) continue;
 				if($v=='false') $v=false;
 				elseif($v=='true') $v=true;
 				elseif(is_numeric($v)) $v = $v + 0;

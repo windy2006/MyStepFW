@@ -62,6 +62,7 @@ return array (
     'checkform_lenth_limit3' => '请将字符数限制在 %1 个字符！',
     'checkform_noempty' => '您还有一些必添项目没有填充，请填写完全！',
     'checkform_err' => '当前项目格式有误！',
+    'checkform_err_password' => '两次输入密码请保持一致！',
     'checkform_err_email' => '错误的电子邮件格式，请输入合法的电子邮件地址！',
     'checkform_err_url' => '错误的网址格式，请输入合法的网址！',
     'checkform_err_digital' => '当前项目只可以填充数字！',

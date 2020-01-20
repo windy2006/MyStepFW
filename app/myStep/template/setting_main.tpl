@@ -3,7 +3,7 @@
         <b><span class="glyphicon glyphicon-wrench"></span> 框架基本参数设置</b>
     </div>
     <div class="card-body p-0">
-        <form method="post" onsubmit="return myChecker(this)">
+        <form method="post" onsubmit="return checkForm(this)">
             <table class="table table-sm table-striped table-hover m-0">
                 <thead>
                 <tr>
@@ -49,20 +49,6 @@
 </div>
 
 <script language="JavaScript">
-function myChecker(theForm) {
-    if ($('#gen_s_pwd').val() == $('#gen_s_pwd_r').val() && $('#db_password').val() == $('#db_password_r').val()){
-        return checkForm(theForm);
-    }else{
-        alert('两次输入的密码不一致！');
-        if($('#gen_s_pwd').val() != $('#gen_s_pwd_r').val()) {
-            highlightIt($('#gen_s_pwd').get(0));
-        }
-        if($('#db_password').val() != $('#db_password_r').val()) {
-            highlightIt($('#db_password').get(0));
-        }
-        return false;
-    }
-}
 function setSection(sect) {
     if(sect=='') {
         $('tbody[id]').show(1000);
