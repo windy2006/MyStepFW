@@ -163,7 +163,7 @@ class myController extends myBase {
 			$join = function ($content) {
 				return join(chr(10), $content);
 			};
-			$tpl->assign(array_map($join, $this->page_content),'page');
+			$tpl->assign('page', array_map($join, $this->page_content));
 		} else {
 			for ($i = 1; $i < $m; $i++) {
 				if (isset($this->page_content[$argList[$i]])) {
@@ -664,7 +664,7 @@ class myController extends myBase {
 	 */
 	public function show(myTemplate $tpl, $minify = false) {
 		$this->pushAddedContent($tpl);
-		$tpl->assign($this->language,'lng');
+		$tpl->assign('lng', $this->language);
 		$tpl->regTag($this->func_tag);
 		if (count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
 		$page = $tpl->display('$tpl', false, $minify);

@@ -44,10 +44,6 @@ class myApi extends myBase {
 		}
 		if(empty($charset)) $charset="utf-8";
 		switch($return) {
-			case "j":
-			case "json":
-				$result = myString::toJson($result, $charset);
-				break;
 			case "x":
 			case "xml":
 				$result = '<?xml version="1.0" encoding="'.$charset.'"?>
@@ -69,8 +65,10 @@ class myApi extends myBase {
 			case "script":
 				$result = myString::toScript(['result'=>$result]);
 				break;
+            case "j":
+            case "json":
 			default:
-				if(is_array($result) || is_object($result)) $result = myString::toJson($result, $charset);
+				$result = myString::toJson($result, $charset);
 				break;
 		}
 		return $result;

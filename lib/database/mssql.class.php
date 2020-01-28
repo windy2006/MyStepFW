@@ -153,9 +153,15 @@ class MSSQL extends myBase implements interface_db, interface_sql {
 	 */
 	public function record($sql, $mode = 2){
 		if(!preg_match('/^select\s+top/i', $sql)) $sql = preg_replace('/^select/i','select top(1)', $sql);
-		$row_num = $this->query($sql);
-		$result = $this->getRS($mode);
-		$this->free();
+        $key = md5($sql);
+        if(($result = $this->getCache($key))===false) {
+            $row_num = $this->query($sql);
+            if($row_num>0) {
+                $result = $this->getRS($mode);
+                $this->writeCache($key, $result);
+            }
+            $this->free();
+        }
 		return $result;
 	}
 
@@ -166,12 +172,15 @@ class MSSQL extends myBase implements interface_db, interface_sql {
 	 * @return array
 	 */
 	public function records($sql, $mode = 2){
-		$result = array();
-		$this->query($sql);
-		while($result[] = $this->getRS($mode)) {}
-		array_pop($result);
-		$this->free();
-		return $result;
+	    $key = md5($sql);
+        if(($result = $this->getCache($key))===false) {
+            $this->query($sql);
+            while($result[] = $this->getRS($mode)) {}
+            array_pop($result);
+            if(!empty($result)) $this->writeCache($key, $result);
+            $this->free();
+        }
+        return $result;
 	}
 
 	/**
@@ -180,10 +189,17 @@ class MSSQL extends myBase implements interface_db, interface_sql {
 	 * @return array|bool|false|mixed|null
 	 */
 	public function result($sql){
-		if($result = $this->record($sql,1)) {
-			$result = $result[0];
-		}
-		return $result;
+        $key = md5($sql);
+        if(($result = $this->getCache($key))===false) {
+            if($result = $this->record($sql,1)) {
+                $result = $result[0];
+                $this->writeCache($key, $result);
+            } else {
+                $result = false;
+            }
+            $this->free();
+        }
+        return $result;
 	}
 
 	/**
@@ -444,7 +460,7 @@ ORDER BY a.id');
 						break;
 					default:
 						$results[] = array('other', 'unknow', 'unknow', $theSQL);
-						continue;
+						continue 2;
 				}
 			}
 			return $results;

@@ -14,7 +14,6 @@
 /**
 	MySQL查询类
 		$mysql->init($host, $user, $pass, $charse)   // Set the Database Class
-		$mysql->setCache(myCache $cache, $ttl)       // Set external cache service
 		$mysql->connect($pconnect)                   // Build a Connection to MySQL to $mysql->DB_conn
 		$mysql->reconnect($pconnect)                 // Rebuild a Connection to MySQL to $mysql->DB_conn
 		$mysql->selectDB($the_db)                    // Select a Database of MySQL to $mysql->DB_select (Must Build Connect First)
@@ -59,9 +58,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
 	protected
 		$err = false,
 		$err_info = '',
-		$count = 0,
-		$cache = null,
-		$cache_ttl = 600;
+		$count = 0;
 
 	/**
 	 * 构造函数
@@ -84,16 +81,6 @@ class MySQL extends myBase implements interface_db, interface_sql {
 		if(strtolower($charset)=='utf-8') $charset = 'utf8';
 		$this->charset = $charset;
 		return;
-	}
-
-	/**
-	 * 设置外部缓存
-	 * @param myCache $cache
-	 * @param int $ttl
-	 */
-	public function setCache(myCache $cache, $ttl = 600) {
-		$this->cache = $cache;
-		$this->cache_ttl = $ttl;
 	}
 
 	/**
@@ -240,20 +227,16 @@ class MySQL extends myBase implements interface_db, interface_sql {
 	public function record($sql='', $mode = 1) {
 		if(empty($sql)) $sql = $this->select(1);
 		if(stripos($sql, 'select')===0 && stripos($sql, 'limit ')==false) $sql .= ' limit 1';
-
-		if($this->cache!=null) {
-			$key = md5($sql);
-			if($result = $this->cache->get($key)) return $result;
-		}
-		$row_num = $this->query($sql);
-		if($row_num>0) {
-			$result = $this->getRS($mode);
-			if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
-		} else {
-			$result = false;
-		}
-		$this->free();
-		return $result;
+		$key = md5($sql);
+		if(($result = $this->getCache($key))===false) {
+            $row_num = $this->query($sql);
+            if($row_num>0) {
+                $result = $this->getRS($mode);
+                $this->writeCache($key, $result);
+            }
+            $this->free();
+        }
+        return $result;
 	}
 
 	/**
@@ -263,41 +246,41 @@ class MySQL extends myBase implements interface_db, interface_sql {
 	 * @return array
 	 */
 	public function records($sql='', $mode = 1){
-		$result = array();
 		if(!empty($sql) && strpos($sql, ' ')==false) {
 			$this->build('[reset]');
 			$this->build($sql);
 			$sql = '';
 		}
 		if(empty($sql)) $sql = $this->select(1);
-		if($this->cache!=null) {
-			$key = md5($sql);
-			if($result = $this->cache->get($key)) return $result;
-		}
-		$this->query($sql);
-		while($result[] = $this->getRS($mode)) {}
-		array_pop($result);
-		if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
-		$this->free();
-		return $result;
+        $key = md5($sql);
+        if(($result = $this->getCache($key))===false) {
+            $this->query($sql);
+            while($result[] = $this->getRS($mode)) {}
+            array_pop($result);
+            if(!empty($result)) $this->writeCache($key, $result);
+            $this->free();
+        }
+        return $result;
 	}
 
-	/**
-	 * 返回单一结果值
-	 * @param $sql
-	 * @return array|bool|mixed|null
-	 */
+    /**
+     * 返回单一结果值
+     * @param string $sql
+     * @return array|bool|mixed|null
+     */
 	public function result($sql=''){
 		if(empty($sql)) $sql = $this->select(1);
-		if($this->cache!=null) {
-			$key = md5($sql);
-			if($result = $this->cache->get($key)) return $result;
-		}
-		if($result = $this->record($sql,2)) {
-			$result = $result[0];
-			if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
-		}
-		return $result;
+        $key = md5($sql);
+        if(($result = $this->getCache($key))===false) {
+            if($result = $this->record($sql,2)) {
+                $result = $result[0];
+                $this->writeCache($key, $result);
+            } else {
+                $result = false;
+            }
+            $this->free();
+        }
+        return $result;
 	}
 
 	/**
@@ -838,7 +821,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
 					default:
 						preg_match("/^(\w+)\s+.+$/", $theSQL, $match);
 						$results[] = array('other', $match[1], 'unknow', $theSQL);
-						continue;
+						continue 2;
 				}
 			}
 			return $results;

@@ -207,7 +207,8 @@ class myString {
 	 */
 	public static function toJson($var, $charset='UTF-8') {
 		if(!empty($charset)) $var = self::setCharset($var, $charset);
-		return json_encode($var);
+		if(is_array($var) || is_object($var)) $var = json_encode($var);
+		return $var;
 	}
 
 	/**

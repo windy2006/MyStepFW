@@ -635,7 +635,7 @@ class myFile {
 	public function get() {
 		if(empty($this->content) && (false === ($this->content=file_get_contents($this->file, false, $this->context)))) {
 			if($this->remote) {
-				$this->content = self::getRemote_curl($this->file);
+				$this->content = self::getRemote($this->file);
 			} else {
 				$this->content = self::getLocal($this->file);
 			}
@@ -739,7 +739,6 @@ class myFile {
 		$content = preg_replace('#^\d+\r\n#', '', $content);
 		$content = preg_replace('#[\r\n]+0[\r\n]+$#', '', $content);
 		$content = preg_replace('#\r\n\d+\r\n#', '', $content);
-		debug($content);
 		fclose($fp);
 		if(isset($header['Content-Encoding']) && $header['Content-Encoding']=='gzip') {
 			//$content = preg_replace("/(^|[\r\n]+)(\w{3})([\r\n]+|$)/", "", $content);

@@ -130,28 +130,27 @@ class myTemplate extends myBase {
 	 * @param $value
 	 * @return $this
 	 */
-	public function assign($name, $value = '') {
-		if(is_array($name) || is_object($name)) {
-			foreach($name as $k => $v) {
-				$k = empty($value) ? $k : ($value.'_'.$k);
-				self::$tpl_para[$this->hash]['para'][$k] = $v;
-			}
-		} else {
-			if(is_string($value)) {
-				self::$tpl_para[$this->hash]['para'][$name] = $value;
-			} else {
-				self::$tpl_para[$this->hash]['para'][$name] = myString::fromAny($value);
-			}
-		}
+	public function assign($name, $value) {
+        if(is_array($value) || is_object($value)) {
+            foreach ($value as $k => $v) {
+                $k = empty($name) ? $k : ($name . '_' . $k);
+                self::$tpl_para[$this->hash]['para'][$k] = $v;
+            }
+        } elseif(is_string($value)) {
+            self::$tpl_para[$this->hash]['para'][$name] = $value;
+        } else {
+            self::$tpl_para[$this->hash]['para'][$name] = myString::fromAny($value);
+        }
 		return $this;
 	}
 
-	/**
-	 * 读取批量设置文件
-	 * @param $file
-	 * @param string $prefix
-	 * @return $this
-	 */
+    /**
+     * 读取批量设置文件
+     * @param $file
+     * @param string $prefix
+     * @param bool $mode
+     * @return $this
+     */
 	public function loadSet($file, $prefix='', $mode = false) {
 		function get($arr, $mode, $idx = '') {
 			$result = array();
@@ -183,7 +182,7 @@ class myTemplate extends myBase {
 				default:
 					$vars = array();
 			}
-			$this->assign($vars, $prefix);
+			$this->assign($prefix, $vars);
 		}
 		return $this;
 	}

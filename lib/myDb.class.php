@@ -13,8 +13,8 @@
 
 /**
 	数据库代理类，无自身方法，全部根据interface调用数据库对象
-		$myDb = new myDb('db_class', 'arg1', 'arg2', ..., 'argN')    // The arguments is those for the 'init' function of DB Class
-		$myDb->function()                                            // Could be any function from specified DB module
+	$myDb = new myDb('db_class', 'arg1', 'arg2', ..., 'argN')    // The arguments is those for the 'init' function of DB Class
+	$myDb->function()                                            // Could be any function from specified DB module
 */
 class myDb extends myProxy {
 	protected
@@ -42,6 +42,9 @@ class myDb extends myProxy {
  * 基础数据库函数
  */
 trait base_db{
+    protected
+        $cache = null,
+        $cache_ttl = 600;
 	/**
 	 * 获取安全的名称（数据库、表及字段）
 	 * @param $name
@@ -61,6 +64,34 @@ trait base_db{
 		$replace = array('\x00', '\n', '\r', '\\\\' ,"\'", '\"', '\x1a', '');
 		return str_replace($search, $replace, $val);
 	}
+
+    /**
+     * 设置外部缓存
+     * @param myCache $cache
+     * @param int $ttl
+     */
+    public function setCache(myCache $cache, $ttl = 600) {
+        $this->cache = $cache;
+        $this->cache_ttl = $ttl;
+    }
+
+    /**
+     * 检查缓存是否存在
+     * @param $key
+     * @return mixed
+     */
+    public function getCache($key) {
+        return $this->cache==null ? false : $this->cache->get($key);
+    }
+
+    /**
+     * 写入缓存
+     * @param $key
+     * @param $result
+     */
+    public function writeCache($key, $result) {
+        if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
+    }
 }
 
 /**

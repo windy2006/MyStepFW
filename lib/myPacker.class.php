@@ -249,7 +249,7 @@ class myPacker extends myBase {
 			$result .= 'Count: '.$this->pack_result[$i][1].' File(s).<br />'.chr(10);
 			$result .= 'Packed File: <a href="'.$this->pack_result[$i][2].'">'.basename($this->pack_result[$i][2]).'</a> ('.$this->pack_result[$i][3].')';
 		} else {
-			array_push($this->pack_result,'Extract: '.$this->file_count.' File(s) & '.($n-$this->file_count).' Dir(s).');
+			array_push($this->pack_result,'Extract: '.$this->file_count.' File(s) & '.($m-$this->file_count).' Dir(s).');
 			$result .= 'Extract: '.$this->pack_result[$i][1].' File(s) & '.$this->pack_result[$i][2].' Dir(s).';
 		}
 		return $result;
