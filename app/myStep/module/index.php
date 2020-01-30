@@ -39,7 +39,7 @@ if($module=='phpinfo') {
         if($err_content=='') {
             $err_msg = $mystep->getLanguage('page_error_msg');
         } else {
-            $err_lst = preg_split("/\n+[\-]{20,}\n+/",$err_content);
+            $err_lst = preg_split("/\n+[\-] {20, }\n+/", $err_content);
             array_pop($err_lst);
             $err_msg = sprintf($mystep->getLanguage('page_error_info'), count($err_lst));
             for($i=count($err_lst)-1; $i>=0; $i--) {
@@ -56,4 +56,4 @@ if($module=='phpinfo') {
     $t->assign('err_msg', $err_msg);
     $t->assign('err_output', $err_output);
 }
-$content = $mystep->parseTpl($t, 'db,s', false);
+$content = $mystep->parseTpl($t, 'db, s', false);

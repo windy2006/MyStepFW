@@ -207,7 +207,7 @@
         },1000);
         resizeMain();
         $(window).resize(resizeMain);
-        $.getJSON('cms/api/get/admin_cat', function(data){
+        $.getJSON('api/cms/get/admin_cat', function(data){
             if(typeof data.err=='undefined') {
                 var list = data.admin_cat;
                 var obj = null, obj_sub = null;
@@ -257,7 +257,7 @@
             }
             return obj;
         }
-        $.getJSON('cms/api/get/news_cat', function(data){
+        $.getJSON('api/cms/get/news_cat', function(data){
             if(typeof data.err=='undefined') {
                 $('#sidebar').append(getList(data).removeClass('sub-menu'));
                 setLink();

@@ -35,7 +35,7 @@ echo 'toScript: ';
 $alias['xxx'] = array(
     'xxx',
     'a' => 222,
-    'bbb' => [1,2,3,5]
+    'bbb' => [1, 2, 3, 5]
 );
 var_dump(s::toScript($alias, 'alias'));
 var_dump(s::toIni($alias));

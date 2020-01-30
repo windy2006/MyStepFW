@@ -20,8 +20,8 @@ if(isset($setting_class[$idx])) {
 } else {
     myStep::redirect();
 }
-$filter = '*'.str_replace(',',',*',$info['ext']);
-$filter = explode(',',$filter);
+$filter = '*'.str_replace(', ', ', *', $info['ext']);
+$filter = explode(', ', $filter);
 $files = array();
 foreach($filter as $f) {
     if(myFile::find($f, myFile::realPath($info['path'])))

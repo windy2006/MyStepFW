@@ -17,8 +17,8 @@ if(myReq::check('post')) {
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }
 
-$dirs = myFile::find('',APP,false, myFile::DIR);
-$dirs = array_map(function($v){return basename($v);} ,$dirs);
+$dirs = myFile::find('', APP, false, myFile::DIR);
+$dirs = array_map(function ($v) {return basename($v);} , $dirs);
 foreach($dirs as $k) {
     $t->setLoop('app', array('name'=>$k, 'selected'=>($app==$k?'selected':'')));
 }

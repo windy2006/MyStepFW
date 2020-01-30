@@ -8,7 +8,7 @@ $tpl = new myTemplate($tpl_setting, false);
 
 if(is_null($module)) {
     set_include_path(get_include_path() . PATH_SEPARATOR . './lib/database/' . PATH_SEPARATOR . './lib/cache/');
-    spl_autoload_extensions('.class.php,.php');
+    spl_autoload_extensions('.class.php, .php');
     spl_autoload_register();
     $list = f::find('*.php', PATH . 'module');
 

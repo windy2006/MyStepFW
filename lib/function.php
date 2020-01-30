@@ -17,9 +17,9 @@
  * @return string
  */
 function getMicrotime($rate = 5) {
-	list($usec, $sec) = explode(' ',microtime());
-	$time = (string)$sec.'.'.substr($usec,2,$rate);
-	return $time;
+    list($usec, $sec) = explode(' ', microtime());
+    $time = (string)$sec.'.'.substr($usec, 2, $rate);
+    return $time;
 }
 
 /**
@@ -30,11 +30,11 @@ function getMicrotime($rate = 5) {
  * @return int|null|string|string[]
  */
 function getTimeDiff($time_start, $decimal = 2, $micro = true) {
-	$time_end = getMicrotime();
-	$time = ($time_end - $time_start);
-	if($micro) $time *= 1000;
-	$time = round($time, $decimal);
-	return $time;
+    $time_end = getMicrotime();
+    $time = ($time_end - $time_start);
+    if($micro) $time *= 1000;
+    $time = round($time, $decimal);
+    return $time;
 }
 
 /**
@@ -43,38 +43,38 @@ function getTimeDiff($time_start, $decimal = 2, $micro = true) {
  * @return string
  */
 function getDate_cn($date='') {
-	if(empty($date)) $date=time();
-	if(!is_numeric($date)) $date = strtotime($date);
-	$the_year = (STRING)date('Y', $date);
-	$the_month = (STRING)date('n', $date);
-	$the_day = (STRING)date('j', $date);
-	$num_cn = array();
-	$num_cn[] = array('○','十','廿','卅');
-	$num_cn[] = array('○','一','二','三','四','五','六','七','八','九');
-	$result = '';
-	for($i=0,$m=strlen($the_year);$i<$m;$i++) {
-		$result .= $num_cn[1][$the_year[$i]];
-	}
-	$result .= '年';
-	for($i=0,$m=strlen($the_month);$i<$m;$i++) {
-		if($m==1 && $i==0) {
-			$result .= $num_cn[1][$the_month[$i]];
-			break;
-		} else {
-			$result .= $num_cn[$i][$the_month[$i]];
-		}
-	}
-	$result .= '月';
-	for($i=0,$m=strlen($the_day);$i<$m;$i++) {
-		if($m==1 && $i==0) {
-			$result .= $num_cn[1][$the_day[$i]];
-			break;
-		} else {
-			$result .= $num_cn[$i][$the_day[$i]];
-		}
-	}
-	$result .= '日';
-	return $result;
+    if(empty($date)) $date=time();
+    if(!is_numeric($date)) $date = strtotime($date);
+    $the_year = (STRING)date('Y', $date);
+    $the_month = (STRING)date('n', $date);
+    $the_day = (STRING)date('j', $date);
+    $num_cn = array();
+    $num_cn[] = array('○', '十', '廿', '卅');
+    $num_cn[] = array('○', '一', '二', '三', '四', '五', '六', '七', '八', '九');
+    $result = '';
+    for($i=0, $m=strlen($the_year);$i<$m;$i++) {
+        $result .= $num_cn[1][$the_year[$i]];
+    }
+    $result .= '年';
+    for($i=0, $m=strlen($the_month);$i<$m;$i++) {
+        if($m==1 && $i==0) {
+            $result .= $num_cn[1][$the_month[$i]];
+            break;
+        } else {
+            $result .= $num_cn[$i][$the_month[$i]];
+        }
+    }
+    $result .= '月';
+    for($i=0, $m=strlen($the_day);$i<$m;$i++) {
+        if($m==1 && $i==0) {
+            $result .= $num_cn[1][$the_day[$i]];
+            break;
+        } else {
+            $result .= $num_cn[$i][$the_day[$i]];
+        }
+    }
+    $result .= '日';
+    return $result;
 }
 
 /**
@@ -83,7 +83,7 @@ function getDate_cn($date='') {
  * @return bool|string
  */
 function tinyUrl($url) {
-	return file_get_contents('http://tinyurl.com/api-create.php?url='.urlencode($url));
+    return file_get_contents('http://tinyurl.com/api-create.php?url='.urlencode($url));
 }
 
 /**
@@ -91,34 +91,34 @@ function tinyUrl($url) {
  * @return bool
  */
 function isMobile() {
-	if(isset($_SERVER['HTTP_X_WAP_PROFILE'])){
-		return true;
-	}
-	if(isset($_SERVER['HTTP_VIA'])){
-		return stristr($_SERVER['HTTP_VIA'], 'wap') ? true : false;
-	}
-	if(isset($_SERVER['HTTP_USER_AGENT'])){
-		$clientkeywords = array('iphone', 'android', 'phone', 'mobile', 'wap', 'netfront', 'java', 'opera mobi', 'opera mini',
-				'ucweb', 'windows ce', 'symbian', 'series', 'webos', 'sony', 'blackberry', 'dopod', 'nokia', 'samsung',
-				'palmsource', 'xda', 'pieplus', 'meizu', 'midp', 'cldc', 'motorola', 'foma', 'docomo', 'up.browser',
-				'up.link', 'blazer', 'helio', 'hosin', 'huawei', 'novarra', 'coolpad', 'webos', 'techfaith', 'palmsource',
-				'alcatel', 'amoi', 'ktouch', 'nexian', 'ericsson', 'philips', 'sagem', 'wellcom', 'bunjalloo', 'maui', 'smartphone',
-				'iemobile', 'spice', 'bird', 'zte-', 'longcos', 'pantech', 'gionee', 'portalmmm', 'jig browser', 'hiptop',
-				'benq', 'haier', '^lct', '320x320', '240x320', '176x220','windows phone',
-				'cect', 'compal', 'ctl', 'lg', 'nec', 'tcl', 'alcatel', 'ericsson', 'bird', 'daxian', 'dbtel', 'eastcom',
-				'pantech', 'dopod', 'philips', 'haier', 'konka', 'kejian', 'lenovo', 'benq', 'mot', 'soutec', 'nokia', 'sagem', 'sgh',
-				'sed', 'capitel', 'panasonic', 'sonyericsson', 'sharp', 'amoi', 'panda', 'zte','sie-','ipod','windowsce','operamini',
-				'operamobi','openwave','nexusone','pad', 'gt-p1000');
-		if(preg_match('/('.implode('|',$clientkeywords).')/i',strtolower($_SERVER['HTTP_USER_AGENT']))){
-			return true;
-		}
-	}
-	if(isset($_SERVER['HTTP_ACCEPT'])){
-		if((strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') !== false) &&(strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false ||(strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') < strpos($_SERVER['HTTP_ACCEPT'], 'text/html')))){
-			return true;
-		}
-	}
-	return false;
+    if(isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
+        return true;
+    }
+    if(isset($_SERVER['HTTP_VIA'])) {
+        return stristr($_SERVER['HTTP_VIA'], 'wap') ? true : false;
+    }
+    if(isset($_SERVER['HTTP_USER_AGENT'])) {
+        $clientkeywords = array('iphone', 'android', 'phone', 'mobile', 'wap', 'netfront', 'java', 'opera mobi', 'opera mini', 
+                'ucweb', 'windows ce', 'symbian', 'series', 'webos', 'sony', 'blackberry', 'dopod', 'nokia', 'samsung', 
+                'palmsource', 'xda', 'pieplus', 'meizu', 'midp', 'cldc', 'motorola', 'foma', 'docomo', 'up.browser', 
+                'up.link', 'blazer', 'helio', 'hosin', 'huawei', 'novarra', 'coolpad', 'webos', 'techfaith', 'palmsource', 
+                'alcatel', 'amoi', 'ktouch', 'nexian', 'ericsson', 'philips', 'sagem', 'wellcom', 'bunjalloo', 'maui', 'smartphone', 
+                'iemobile', 'spice', 'bird', 'zte-', 'longcos', 'pantech', 'gionee', 'portalmmm', 'jig browser', 'hiptop', 
+                'benq', 'haier', '^lct', '320x320', '240x320', '176x220', 'windows phone', 
+                'cect', 'compal', 'ctl', 'lg', 'nec', 'tcl', 'alcatel', 'ericsson', 'bird', 'daxian', 'dbtel', 'eastcom', 
+                'pantech', 'dopod', 'philips', 'haier', 'konka', 'kejian', 'lenovo', 'benq', 'mot', 'soutec', 'nokia', 'sagem', 'sgh', 
+                'sed', 'capitel', 'panasonic', 'sonyericsson', 'sharp', 'amoi', 'panda', 'zte', 'sie-', 'ipod', 'windowsce', 'operamini', 
+                'operamobi', 'openwave', 'nexusone', 'pad', 'gt-p1000');
+        if(preg_match('/('.implode('|', $clientkeywords).')/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
+            return true;
+        }
+    }
+    if(isset($_SERVER['HTTP_ACCEPT'])) {
+        if((strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') !== false) &&(strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false ||(strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') < strpos($_SERVER['HTTP_ACCEPT'], 'text/html')))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -126,14 +126,14 @@ function isMobile() {
  * @return bool
  */
 function isHttps() {
-	if(!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
-		return true;
-	} elseif(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-		return true;
-	} elseif(!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off') {
-		return true;
-	}
-	return false;
+    if(!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
+        return true;
+    } elseif(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        return true;
+    } elseif(!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off') {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -142,15 +142,15 @@ function isHttps() {
  * @return mixed
  */
 function myEval($code) {
-	if(($fp = tmpfile())===false) {
-		$fp = fopen(tempnam(CACHE.'tmp', 'ms_'), 'w');
-	}
-	$file = stream_get_meta_data($fp)['uri'];
-	fwrite($fp, '<?PHP'.chr(10).$code);
-	$result = include($file);
-	fclose($fp);
-	@unlink($file);
-	return $result;
+    if(($fp = tmpfile())===false) {
+        $fp = fopen(tempnam(CACHE.'tmp', 'ms_'), 'w');
+    }
+    $file = stream_get_meta_data($fp)['uri'];
+    fwrite($fp, '<?PHP'.chr(10).$code);
+    $result = include($file);
+    fclose($fp);
+    @unlink($file);
+    return $result;
 }
 
 /**
@@ -160,34 +160,34 @@ function myEval($code) {
  * @return array|bool
  */
 function arrayMerge($arr_1, $arr_2) {
-	if(!is_array($arr_1)) return false;
-	if(!is_array($arr_2)) {
-		$arr_1[] = $arr_2;
-	} else {
-		foreach($arr_1 as $key => $value) {
-			if(isset($arr_2[$key])) {
-				if(is_array($arr_1[$key])) {
-					if(is_array($arr_2[$key])) {
-						$arr_1[$key] = arrayMerge($arr_1[$key], $arr_2[$key]);
-					} else {
-						$arr_1[$key][] = $arr_2[$key];
-					}
-				} else {
-					if(is_array($arr_2[$key])) {
-						$arr_1[$key] = arrayMerge(array($arr_1[$key]), $arr_2[$key]);
-					} else {
-						$arr_1[$key] = $arr_2[$key];
-					}
-				}
-			}
-		}
-		foreach($arr_2 as $key => $value) {
-			if(!isset($arr_1[$key])) {
-				$arr_1[$key] = $arr_2[$key];
-			}
-		}
-	}
-	return $arr_1;
+    if(!is_array($arr_1)) return false;
+    if(!is_array($arr_2)) {
+        $arr_1[] = $arr_2;
+    } else {
+        foreach($arr_1 as $key => $value) {
+            if(isset($arr_2[$key])) {
+                if(is_array($arr_1[$key])) {
+                    if(is_array($arr_2[$key])) {
+                        $arr_1[$key] = arrayMerge($arr_1[$key], $arr_2[$key]);
+                    } else {
+                        $arr_1[$key][] = $arr_2[$key];
+                    }
+                } else {
+                    if(is_array($arr_2[$key])) {
+                        $arr_1[$key] = arrayMerge(array($arr_1[$key]), $arr_2[$key]);
+                    } else {
+                        $arr_1[$key] = $arr_2[$key];
+                    }
+                }
+            }
+        }
+        foreach($arr_2 as $key => $value) {
+            if(!isset($arr_1[$key])) {
+                $arr_1[$key] = $arr_2[$key];
+            }
+        }
+    }
+    return $arr_1;
 }
 
 /**
@@ -197,42 +197,42 @@ function arrayMerge($arr_1, $arr_2) {
  * @return array
  */
 function recursionFunction($func, $para) {
-	if(function_exists($func)) {
-		if(is_array($para)) {
-			foreach($para as $key => $value) {
-				$para[$key] = recursionFunction($func, $value);
-			}
-		} else {
-			$para = $func($para);
-		}
-	}
-	return $para;
+    if(function_exists($func)) {
+        if(is_array($para)) {
+            foreach($para as $key => $value) {
+                $para[$key] = recursionFunction($func, $value);
+            }
+        } else {
+            $para = $func($para);
+        }
+    }
+    return $para;
 }
 
 /**
  * 变量情况查看
  */
 function debug_show() {
-	echo '<pre>';
-	for($i = 0; $i < func_num_args(); $i++) {
-		if(class_exists('myReflection') && (is_object(func_get_arg($i)))) {
-			$t = new myReflection(func_get_arg($i));
-			var_dump($t->info());
-		} else {
-			var_dump(func_get_arg($i));
-		}
-	}
-	echo '</pre>';
+    echo '<pre>';
+    for($i = 0; $i < func_num_args(); $i++) {
+        if(class_exists('myReflection') && (is_object(func_get_arg($i)))) {
+            $t = new myReflection(func_get_arg($i));
+            var_dump($t->info());
+        } else {
+            var_dump(func_get_arg($i));
+        }
+    }
+    echo '</pre>';
 }
 function debug() {
-	call_user_func_array('debug_show', func_get_args());
-	exit;
+    call_user_func_array('debug_show', func_get_args());
+    exit;
 }
 function debug_set() {
-	global $__sign__;
-	$__sign__ = true;
+    global $__sign__;
+    $__sign__ = true;
 }
 function debug_check() {
-	global $__sign__;
-	if($__sign__) debug(func_get_args());
+    global $__sign__;
+    if($__sign__) debug(func_get_args());
 }

@@ -1,18 +1,18 @@
 <?php
 class myPack {
     protected
-        $file_count		= 0,
-        $file_ignore	= array(),		// ignore these files when packing
-        $pack_file		= "pack.bin",		// the file name of packed file
-        $file_list	= array(),		// only files in the list will be pack
-        $pack_dir		= "./",			// the directory of pack or unpack to
-        $pack_fp		= null,
-        $pack_result	= array(),
+        $file_count        = 0, 
+        $file_ignore    = array(),        // ignore these files when packing
+        $pack_file        = "pack.bin",        // the file name of packed file
+        $file_list    = array(),        // only files in the list will be pack
+        $pack_dir        = "./",            // the directory of pack or unpack to
+        $pack_fp        = null, 
+        $pack_result    = array(), 
         $charset = array();
 
     public function __construct($pack_dir = "./", $pack_file = "pack.pkg") {
-        $this->pack_dir		= str_replace("//", "/", $pack_dir);
-        $this->pack_file	= $pack_file;
+        $this->pack_dir        = str_replace("//", "/", $pack_dir);
+        $this->pack_file    = $pack_file;
         return;
     }
 
@@ -53,7 +53,7 @@ class myPack {
             $ignore = explode("\n", $ignore);
         }
 
-        for($i=0,$m=count($this->file_ignore);$i<$m;$i++) {
+        for($i=0, $m=count($this->file_ignore);$i<$m;$i++) {
             if(substr($dir, -(strlen($this->file_ignore[$i])))==$this->file_ignore[$i]) return;
         }
 
@@ -61,7 +61,7 @@ class myPack {
             $content = "dir".$separator.str_replace($this->pack_dir, "", $dir).$separator.filemtime($dir)."\n";
             fwrite($this->pack_fp, $content);
             $mydir = opendir($dir);
-            while($file = readdir($mydir)){
+            while($file = readdir($mydir)) {
                 if(trim($file, ".") == "" || ($file!="install" && array_search($file, $ignore)!==false)) continue;
                 $this->PackFile($dir."/".$file);
             }
@@ -100,10 +100,10 @@ class myPack {
     protected function UnpackFile($outdir=".", $separator="|") {
         if(!is_dir($outdir)) mkdir($outdir, 0777);
         while(!feof($this->pack_fp)) {
-            $data = explode($separator, trim(fgets($this->pack_fp, 1024),"\r\n"));
+            $data = explode($separator, trim(fgets($this->pack_fp, 1024), "\r\n"));
             if($data[0]=="dir") {
                 if(trim($data[1], ".") != "") {
-                    $flag = mkdir($outdir."/".$data[1],0777);
+                    $flag = mkdir($outdir."/".$data[1], 0777);
                     array_push($this->pack_result, "<b>Build Directory</b> $outdir/$data[1] ".($flag?"<span style='color:green'>Successfully!</span>":"<span style='color:red'>failed!</span>"));
                 }
             }elseif($data[0]=="file") {
@@ -112,11 +112,11 @@ class myPack {
                 if($data[2]==0) {
                     $flag = touch($the_file);
                 } else {
-                    $fp_w = fopen($the_file,"wb");
-                    $content = fread($this->pack_fp,$data[2]);
-                    if(in_array(substr($content, -3),array('dir','fil'))) {
+                    $fp_w = fopen($the_file, "wb");
+                    $content = fread($this->pack_fp, $data[2]);
+                    if(in_array(substr($content, -3), array('dir', 'fil'))) {
                         $content = substr($content, 0, -3);
-                        fseek($this->pack_fp,-3,SEEK_CUR);
+                        fseek($this->pack_fp, -3, SEEK_CUR);
                     }
                     $flag = fwrite($fp_w, $content);
                 }
@@ -134,7 +134,7 @@ class myPack {
     public function DoIt($type = "pack", $separator="|") {
         $this->pack_result = array();
         if($type == "pack") {
-            $this->pack_fp	= fopen($this->pack_file, "wb");
+            $this->pack_fp    = fopen($this->pack_file, "wb");
             if(!$this->pack_fp) die("Error Occurs In Creating Output File !");
             $time = $_SERVER['REQUEST_TIME'];
             if(count($this->file_list)>0) {
@@ -147,27 +147,27 @@ class myPack {
             WriteFile($this->pack_file, gzcompress(GetFile($this->pack_file), 9));
         }else {
             WriteFile($this->pack_file, gzuncompress(GetFile($this->pack_file)));
-            $this->pack_fp	= fopen($this->pack_file, "rb");
+            $this->pack_fp    = fopen($this->pack_file, "rb");
             if(!$this->pack_fp) die("Error Occurs In Reading Pack File !");
             $this->UnpackFile($this->pack_dir, $separator);
             fclose($this->pack_fp);
             unlink($this->pack_file);
         }
-        $filename	= $this->pack_file;
-        $filesize	= GetFileSize($filename);
-        array_push($this->pack_result,"<br />File Count: {$this->file_count} File(s) ".$filesize);
+        $filename    = $this->pack_file;
+        $filesize    = GetFileSize($filename);
+        array_push($this->pack_result, "<br />File Count:{$this->file_count} File(s) ".$filesize);
         return $filename;
     }
 }
 function encoding_detect($str) {
     if(function_exists("iconv")) {
-        $cs_list = array("GBK","UTF-8","BIG5","ASCII");
+        $cs_list = array("GBK", "UTF-8", "BIG5", "ASCII");
         foreach ($cs_list as $item) {
             $sample = iconv($item, $item, $str);
             if (md5($sample) == md5($str)) return $item;
         }
     } elseif(function_exists("mb_detect_encoding")) {
-        return mb_detect_encoding($str, array("ASCII","GB2312","GBK","BIG5","UTF-8","EUC-CN","ISO-8859-1","windows-1251","Shift-JIS"));
+        return mb_detect_encoding($str, array("ASCII", "GB2312", "GBK", "BIG5", "UTF-8", "EUC-CN", "ISO-8859-1", "windows-1251", "Shift-JIS"));
     }
     return null;
 }
@@ -194,100 +194,100 @@ function chg_charset($content, $from="gbk", $to="utf-8") {
     return $result;
 }
 function WriteFile($file_name, $content, $mode="wb") {
-	//Coded By Windy2000 20040410 v1.0
-	MakeDir(dirname($file_name));
-	if($fp = fopen($file_name, $mode)) {
-		if(flock($fp, LOCK_EX)) {
-			fwrite($fp, $content);
-			flock($fp, LOCK_UN);
-		} else {
-			fwrite($fp, $content);
-		}
-		fclose($fp);
-		@chmod($file_name, 0777);
-	}
-	return $fp;
+    //Coded By Windy2000 20040410 v1.0
+    MakeDir(dirname($file_name));
+    if($fp = fopen($file_name, $mode)) {
+        if(flock($fp, LOCK_EX)) {
+            fwrite($fp, $content);
+            flock($fp, LOCK_UN);
+        } else {
+            fwrite($fp, $content);
+        }
+        fclose($fp);
+        @chmod($file_name, 0777);
+    }
+    return $fp;
 }
 function MakeDir($dir) {
-	//Coded By Windy2000 20031001 v1.0
-	$dir = str_replace("\\", "/", $dir);
-	$dir = preg_replace("/\/+/", "/", $dir);
-	$flag = true;
-	if(!is_dir($dir)) {
-		$dir_list = explode("/", $dir);
-		if($dir_list[0]=="") $dir_list[0]="/";
-		$this_dir = "";
-		$oldumask=umask(0);
-		$max_count = count($dir_list);
-		for($i=0; $i<$max_count; $i++) {
-			if(empty($dir_list[$i])) continue;
-			$this_dir .= $dir_list[$i]."/";
-			if(!is_dir($this_dir)) {
-				if(!mkdir($this_dir,0777)) {
-					$flag = false;
-				}
-			}
-		}
-		umask($oldumask);
-	}
-	return $flag;
+    //Coded By Windy2000 20031001 v1.0
+    $dir = str_replace("\\", "/", $dir);
+    $dir = preg_replace("/\/+/", "/", $dir);
+    $flag = true;
+    if(!is_dir($dir)) {
+        $dir_list = explode("/", $dir);
+        if($dir_list[0]=="") $dir_list[0]="/";
+        $this_dir = "";
+        $oldumask=umask(0);
+        $max_count = count($dir_list);
+        for($i=0; $i<$max_count; $i++) {
+            if(empty($dir_list[$i])) continue;
+            $this_dir .= $dir_list[$i]."/";
+            if(!is_dir($this_dir)) {
+                if(!mkdir($this_dir, 0777)) {
+                    $flag = false;
+                }
+            }
+        }
+        umask($oldumask);
+    }
+    return $flag;
 }
 function GetFile($file, $length=0, $offset=0) {
-	//Coded By Windy2000 20020503 v1.5
-	if(!is_file($file)) return "";
-	if($length==0 && $offset==0) {
-		$data = file_get_contents($file);
-	} else {
-		if($length==0) $length = 8192;
-		$fp = fopen($file, "rb");
-		fseek($fp, $offset);
-		$data = fread($fp, $length);
-		fclose($fp);
-	}
-	if(get_magic_quotes_runtime()) $data = stripcslashes($data);
-	return $data;
+    //Coded By Windy2000 20020503 v1.5
+    if(!is_file($file)) return "";
+    if($length==0 && $offset==0) {
+        $data = file_get_contents($file);
+    } else {
+        if($length==0) $length = 8192;
+        $fp = fopen($file, "rb");
+        fseek($fp, $offset);
+        $data = fread($fp, $length);
+        fclose($fp);
+    }
+    if(get_magic_quotes_runtime()) $data = stripcslashes($data);
+    return $data;
 }
 function GetFileSize($para) {
-	if(is_file($para)) {
-		$filesize = filesize($para);
-	} elseif(is_numeric($para)) {
-		$filesize = $para;
-	} else {
-		$para = strtoupper($para);
-		$para = str_replace(" ","",$para);
-		switch(substr($para,-1)) {
-			case "G":
-				$filesize = ((int)str_replace("G","",$para)) * 1024 * 1024 * 1024;
-				break;
-			case "M":
-				$filesize = ((int)str_replace("M","",$para)) * 1024 * 1024;		
-				break;
-			case "K":
-				$filesize = ((int)str_replace("K","",$para)) * 1024;
-				break;
-			default:
-				$filesize = 0;
-				break;
-		}
-		return $filesize;
-	}
-	if($filesize <1024) {
-		$filesize = (string)$filesize . " Bytes";
-	}else if($filesize <(1024 * 1024)) {
-		$filesize = number_format((double)($filesize / 1024), 1) . " KB";
-	}else if($filesize <(1024 * 1024 * 1024)) {
-		$filesize = number_format((double)($filesize / (1024 * 1024)), 1) . " MB";
-	}else{
-		$filesize = number_format((double)($filesize / (1024 * 1024 * 1024)), 1) . " GB";
-	}
-	return $filesize;
+    if(is_file($para)) {
+        $filesize = filesize($para);
+    } elseif(is_numeric($para)) {
+        $filesize = $para;
+    } else {
+        $para = strtoupper($para);
+        $para = str_replace(" ", "", $para);
+        switch(substr($para, -1)) {
+            case "G":
+                $filesize = ((int)str_replace("G", "", $para)) * 1024 * 1024 * 1024;
+                break;
+            case "M":
+                $filesize = ((int)str_replace("M", "", $para)) * 1024 * 1024;
+                break;
+            case "K":
+                $filesize = ((int)str_replace("K", "", $para)) * 1024;
+                break;
+            default:
+                $filesize = 0;
+                break;
+        }
+        return $filesize;
+    }
+    if($filesize <1024) {
+        $filesize = (string)$filesize . " Bytes";
+    }else if($filesize <(1024 * 1024)) {
+        $filesize = number_format((double)($filesize / 1024), 1) . " KB";
+    }else if($filesize <(1024 * 1024 * 1024)) {
+        $filesize = number_format((double)($filesize / (1024 * 1024)), 1) . " MB";
+    }else {
+        $filesize = number_format((double)($filesize / (1024 * 1024 * 1024)), 1) . " GB";
+    }
+    return $filesize;
 }
 $tmp_file = tempnam("./", "mystep");
 if($fp = fopen($tmp_file, "w")) {
-	fclose($fp);
-	unlink($tmp_file);
+    fclose($fp);
+    unlink($tmp_file);
 } else {
-	die("Current directory cannot be writen!");
+    die("Current directory cannot be writen!");
 }
 set_time_limit(0);
 ini_set('memory_limit', '512M');
@@ -300,5 +300,5 @@ unset($mypack);
 ?>
 <script language="JavaScript">
 alert("All files are unpacked and ready to be installed.");
-setTimeout(function(){location.href = "./";}, 2000);
+setTimeout(function () {location.href = "./";}, 2000);
 </script>

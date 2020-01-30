@@ -1,5 +1,6 @@
 <?php
 namespace app\myStep;
+
 global $info_app, $no_db, $s, $setPlugin, $path_admin, $tpl_cache;
 $func = preg_replace('#^/(\w+).*$#', '\1', $info_app['route']);
 $setPlugin = !in_array($func, ['language', 'captcha']);
@@ -61,7 +62,7 @@ function getError() {
     $count = 0;
     if(is_file($err_file)) {
         $err_content= \f::getLocal($err_file);
-        $err_lst = preg_split("/\n+[\-]{20,}\n+/",$err_content);
+        $err_lst = preg_split("/\n+[\-] {20, }\n+/", $err_content);
         $count = count($err_lst) - 1;
     }
     return array('count'=>$count);
@@ -71,8 +72,8 @@ function autoComplete($mode, $keyword) {
     global $s;
     $keyword = \myString::sc($keyword, $s->gen->charset);
     $result = array(
-        'query' => $keyword,
-        'suggestions' => array(),
+        'query' => $keyword, 
+        'suggestions' => array(), 
         'data' => array()
     );
     $dataFile = VENDOR.'jquery.autocomplete/'.$mode.'.php';
@@ -81,7 +82,7 @@ function autoComplete($mode, $keyword) {
         $data = $$mode;
         unset($$mode);
         $keyword = strtolower($keyword);
-        for($i=0,$m=count($data);$i<$m;$i++) {
+        for($i=0, $m=count($data);$i<$m;$i++) {
             if(strpos(strtolower(implode('|', $data[$i])), $keyword)!==false) {
                 if($s->gen->language=='en') {
                     $result['suggestions'][] = $data[$i][1];

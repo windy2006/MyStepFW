@@ -9,7 +9,7 @@ $check_fail = '<font color="red"><b>×</b></font>';
 	<div class="card-body p-0 table-responsive">
 		<table class="table table-striped table-hover m-0 font-sm">
 			<tr>
-				<td width="140">PHP版本</td>
+				<td width="200">PHP版本</td>
 				<td><?=PHP_VERSION;?></td>
 			</tr>
 			<tr>

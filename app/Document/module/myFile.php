@@ -2,17 +2,17 @@
 use myFile as f;
 
 f::regAlias(array(
-			'rt' => 'rootPath',
-			'p' => 'realPath',
-			'd' => 'mkdir',
-			'mime' => 'getMime',
-			'c' => 'copy',
-			'r' => 'rename',
-			'm' => 'rename',
-			's' => 'saveFile',
-			'g' => 'getLocal',
-			'url' => 'getRemote_curl',
-			'grab' => 'getRemoteFile',
+            'rt' => 'rootPath',
+            'p' => 'realPath',
+            'd' => 'mkdir',
+            'mime' => 'getMime',
+            'c' => 'copy',
+            'r' => 'rename',
+            'm' => 'rename',
+            's' => 'saveFile',
+            'g' => 'getLocal',
+            'url' => 'getRemote_curl',
+            'grab' => 'getRemoteFile',
 ));
 
 $f = new f(PATH.'data/file/utf8.txt');
@@ -38,11 +38,11 @@ echo 'Delete : '."PATH.'module_2'\n\n";
 
 $file = 'https://www.baidu.com/img/bd_logo.png';
 f::del(PATH.'data/file/bd_logo.png');
-f::grab($file,PATH.'data/file/bd_logo.png');
+f::grab($file, PATH.'data/file/bd_logo.png');
 echo 'Get Remote File : '.$file."\n\n\n";
 
 echo "Search File(s) : *.php\n";
-$result = f::find('*.php','./',false);
+$result = f::find('*.php', './', false);
 var_dump($result);
 echo "\n\n\n";
 

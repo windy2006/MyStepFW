@@ -8,7 +8,7 @@ $tpl = new myTemplate($tpl_setting, $tpl_cache);
 $info_app['path'][1] = 'install';
 if(!isset($info_app['path'][2])) $info_app['path'][2] = 0;
 reset:
-$tpl_setting['name'] = implode('_', array_slice($info_app['path'],1));
+$tpl_setting['name'] = implode('_', array_slice($info_app['path'], 1));
 $t = new myTemplate($tpl_setting, false);
 $t->allow_script = true;
 switch ($info_app['path'][2]) {
@@ -62,11 +62,11 @@ switch ($info_app['path'][2]) {
                 'exit_on_error' => true
             ));
             $charset_collate = $db->record('SHOW CHARACTER SET LIKE "'.$c->db->charset.'"');
-            $strFind = array('{db_name}', '{pre}', '{charset}', '{host}', '{charset_collate}', '{web_name}');
+            $strFind = array(' {db_name}', ' {pre}', ' {charset}', ' {host}', ' {charset_collate}', ' {web_name}');
             $strReplace = array($c->db->name, $c->db->pre, $c->db->charset, myReq::server('HTTP_HOST'), $charset_collate['Default collation'], $c->web->title);
             $result = $db->file(PATH.'/install/install.sql', $strFind, $strReplace);
-            for($i=0,$m=count($result);$i<$m;$i++) {
-                switch($result[$i][1]){
+            for($i=0, $m=count($result);$i<$m;$i++) {
+                switch($result[$i][1]) {
                     case 'select':
                         $detail = ($i+1) . ' - 数据表 '.$result[$i][2].' 已生成！<br />'.chr(10);
                         break;

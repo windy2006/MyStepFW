@@ -4,11 +4,11 @@ if(empty($app) || !is_dir(APP.$app)) {
     myStep::info('app_missing');
 }
 $dir = APP.$app."/language/";
-$list = myFile::find('*.php', $dir,false, myFile::FILE);
+$list = myFile::find('*.php', $dir, false, myFile::FILE);
 if($list==false) {
     myStep::info('page_error_setting');
 }
-$list = array_map(function($v){return basename($v);} ,$list);
+$list = array_map(function ($v) {return basename($v);} , $list);
 $type = myReq::g('type');
 if(empty($type)) $type = 'default';
 if($type == 'default') {

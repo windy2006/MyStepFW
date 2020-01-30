@@ -43,8 +43,8 @@ if(!empty($id)) {
     }
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");location.href=document.referrer;</script>');
 }
-$dirs = myFile::find('',CACHE,false, myFile::DIR);
-$dirs = array_map(function($v){return basename($v);} ,$dirs);
+$dirs = myFile::find('', CACHE, false, myFile::DIR);
+$dirs = array_map(function ($v) {return basename($v);} , $dirs);
 $t->assign('script', 0);
 $t->assign('template', 0);
 $t->assign('language', 0);

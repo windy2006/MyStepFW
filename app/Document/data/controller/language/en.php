@@ -1,4 +1,4 @@
 <?php
 return array(
-	"test" => "language test",
+    "test" => "language test",
 );

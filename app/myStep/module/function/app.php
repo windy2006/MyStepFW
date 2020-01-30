@@ -5,15 +5,15 @@ if(myReq::check('post')) {
     $route = myReq::p('route');
     $plugin = myReq::p('plugin');
     myFile::del(CONFIG.'route.php');
-    for($i=0,$m=count($name);$i<$m;$i++) {
+    for($i=0, $m=count($name);$i<$m;$i++) {
         myFile::saveFile(APP.$name[$i].'/route.php', $route[$i]);
-        myFile::saveFile(APP.$name[$i].'/plugin.php', '<?PHP'.chr(10).'return '.var_export(explode(',', $plugin[$i]), true).';');
+        myFile::saveFile(APP.$name[$i].'/plugin.php', '<?PHP'.chr(10).'return '.var_export(explode(', ', $plugin[$i]), true).';');
         $router->checkRoute(CONFIG.'route.php', APP.$name[$i].'/route.php', $name[$i]);
     }
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }
-$dirs = myFile::find('',APP,false, myFile::DIR);
-$dirs = array_map(function($v){return basename($v);} ,$dirs);
+$dirs = myFile::find('', APP, false, myFile::DIR);
+$dirs = array_map(function ($v) {return basename($v);} , $dirs);
 foreach($dirs as $k) {
     if(is_file(APP.$k.'/info.php')) {
         $info = include(APP.$k.'/info.php');
@@ -32,7 +32,7 @@ foreach($dirs as $k) {
     }
     $info['plugin'] = '';
     if(is_file(APP.$k.'/plugin.php')) {
-        $info['plugin'] = implode(',',include(APP.$k.'/plugin.php'));
+        $info['plugin'] = implode(', ', include(APP.$k.'/plugin.php'));
     }
     $t->setLoop('app', $info);
 }

@@ -8,9 +8,9 @@ if(myReq::check('post')) {
     myController::redirect();
 }
 $tpl_setting = array(
-    'name' => 'config',
-    'path' => APP.'myStep/template',
-    'style' => '',
+    'name' => 'config', 
+    'path' => APP.'myStep/template', 
+    'style' => '', 
     'path_compile' => CACHE.'template/myStep/'
 );
 $t = new myTemplate($tpl_setting, $tpl_cache);
@@ -20,8 +20,8 @@ $builder = CONFIG.'construct/default.php';
 $config = new myConfig($file);
 $config->cookie->domain = myReq::server('HTTP_HOST');
 
-$dirs = myFile::find('',APP,false, myFile::DIR);
-$dirs = array_map(function($v){return basename($v);} ,$dirs);
+$dirs = myFile::find('', APP, false, myFile::DIR);
+$dirs = array_map(function ($v) {return basename($v);} , $dirs);
 $ext_setting = array('router'=>['default_app'=>['select', $dirs]]);
 
 ob_start();

@@ -14,7 +14,7 @@ $title = $list[$tpl_setting['name']] ?? 'Samples';
 $tpl_setting['name'] = 'index';
 $t = new myTemplate($tpl_setting, false, true);
 foreach($list as $k => $v) {
-    $t->setLoop('idx', array($k,$v));
+    $t->setLoop('idx', array($k, $v));
 }
 
 $t->assign('title', $title);

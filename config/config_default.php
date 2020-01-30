@@ -11,23 +11,23 @@ $setting['gen']['cache_page'] = false;
 $setting['gen']['s_usr'] = 'mystep';
 $setting['gen']['s_pwd'] = 'e10adc3949ba59abbe56e057f20f883e';
 $setting['gen']['close'] = '';
-$setting['gen']['static'] = 'jpg,png,gif,ico,css,js,json,html,htm,woff,woff2,eot,svg,ttf,map,zip';
+$setting['gen']['static'] = 'jpg, png, gif, ico, css, js, json, html, htm, woff, woff2, eot, svg, ttf, map, zip';
 $setting['gen']['debug'] = false;
 
 $setting['web'] = array();
 $setting['web']['title'] = '迈思框架 MyStep Framework';
-$setting['web']['keyword'] = 'mystep,framework,free';
+$setting['web']['keyword'] = 'mystep, framework, free';
 $setting['web']['description'] = '开源PHP框架系统';
 $setting['web']['gzip_level'] = 0;
 $setting['web']['minify'] = false;
 $setting['web']['etag'] = 'etag_20190109';
-$setting['web']['css'] = 'bootstrap,font-awesome,glyphicons';
-$setting['web']['js'] = 'jquery,jquery-ui,jquery.addon,bootstrap.bundle';
+$setting['web']['css'] = 'bootstrap, font-awesome, glyphicons';
+$setting['web']['js'] = 'jquery, jquery-ui, jquery.addon, bootstrap.bundle';
 $setting['web']['update'] = 'www.mysteps.cn';
 
 $setting['upload'] = array();
 $setting['upload']['path_mode'] = 'Y/m/';
-$setting['upload']['ban_ext'] = 'php,exe,com,bat,pif';
+$setting['upload']['ban_ext'] = 'php, exe, com, bat, pif';
 $setting['upload']['free_dl'] = false;
 
 $setting['template'] = array();

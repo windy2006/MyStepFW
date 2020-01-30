@@ -2,7 +2,7 @@
 if(myReq::check('post')) {
     $result = [];
     $list = myReq::post('[ALL]');
-    for($i=0,$m=count($list['domain']);$i<$m;$i++) {
+    for($i=0, $m=count($list['domain']);$i<$m;$i++) {
         if(empty($list['domain'][$i]) || empty($list['rule'][$i])) continue;
         $result[$list['domain'][$i]] = $list['rule'][$i];
     }
@@ -14,13 +14,13 @@ if(is_file(CONFIG.'domain.php')) {
     $t->assign('rule_list', myString::toJson($list));
 }
 $list = [];
-$dirs = myFile::find('',APP,false, myFile::DIR);
-$dirs = array_map(function($v){return basename($v);} ,$dirs);
+$dirs = myFile::find('', APP, false, myFile::DIR);
+$dirs = array_map(function ($v) {return basename($v);} , $dirs);
 foreach($dirs as $k) {
-    $list[] = array('idx'=>'MS_APP','rule'=>$k);
+    $list[] = array('idx'=>'MS_APP', 'rule'=>$k);
 }
 foreach($router->rules as $k) {
     if(!preg_match('@^/\w+/.*@', $k['pattern'])) continue;
-    $list[] = array('idx'=>$k['idx'],'rule'=>$k['pattern']);
+    $list[] = array('idx'=>$k['idx'], 'rule'=>$k['pattern']);
 }
 $t->assign('list', myString::toJson($list));

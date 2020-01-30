@@ -14,7 +14,7 @@
 #
 
 class Parsedown
-{
+ {
     # ~
 
     const version = '1.8.0-beta-7';
@@ -107,9 +107,9 @@ class Parsedown
         'ftp://',
         'ftps://',
         'mailto:',
-        'data:image/png;base64,',
-        'data:image/gif;base64,',
-        'data:image/jpeg;base64,',
+        'data:image/png;base64, ',
+        'data:image/gif;base64, ',
+        'data:image/jpeg;base64, ',
         'irc:',
         'ircs:',
         'git:',
@@ -244,7 +244,7 @@ class Parsedown
 
             foreach ($blockTypes as $blockType)
             {
-                $Block = $this->{"block$blockType"}($Line, $CurrentBlock);
+                $Block = $this-> {"block$blockType"}($Line, $CurrentBlock);
 
                 if (isset($Block))
                 {
@@ -572,7 +572,7 @@ class Parsedown
 
     protected function blockList($Line, array $CurrentBlock = null)
     {
-        list($name, $pattern) = $Line['text'][0] <= '-' ? array('ul', '[*+-]') : array('ol', '[0-9]{1,9}+[.\)]');
+        list($name, $pattern) = $Line['text'][0] <= '-' ? array('ul', '[*+-]') : array('ol', '[0-9] {1, 9}+[.\)]');
 
         if (preg_match('/^('.$pattern.'([ ]++|$))(.*+)/', $Line['text'], $matches))
         {
@@ -717,7 +717,7 @@ class Parsedown
 
         if ( ! isset($Block['interrupted']))
         {
-            $text = preg_replace('/^[ ]{0,'.$requiredIndent.'}+/', '', $Line['body']);
+            $text = preg_replace('/^[ ] {0, '.$requiredIndent.'}+/', '', $Line['body']);
 
             $Block['li']['handler']['argument'] []= $text;
 
@@ -1159,7 +1159,7 @@ class Parsedown
                     continue;
                 }
 
-                $Inline = $this->{"inline$inlineType"}($Excerpt);
+                $Inline = $this-> {"inline$inlineType"}($Excerpt);
 
                 if ( ! isset($Inline))
                 {
@@ -1240,7 +1240,7 @@ class Parsedown
         );
 
         $Inline['element']['elements'] = self::pregReplaceElements(
-            $this->breaksEnabled ? '/[ ]*+\n/' : '/(?:[ ]*+\\\\|[ ]{2,}+)\n/',
+            $this->breaksEnabled ? '/[ ]*+\n/' : '/(?:[ ]*+\\\\|[ ] {2, }+)\n/',
             array(
                 array('name' => 'br'),
                 array('text' => "\n"),
@@ -1272,14 +1272,14 @@ class Parsedown
 
     protected function inlineEmailTag($Excerpt)
     {
-        $hostnameLabel = '[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?';
+        $hostnameLabel = '[a-zA-Z0-9](?:[a-zA-Z0-9-] {0, 61}[a-zA-Z0-9])?';
 
-        $commonMarkEmail = '[a-zA-Z0-9.!#$%&\'*+\/=?^_`{|}~-]++@'
+        $commonMarkEmail = '[a-zA-Z0-9.!#$%&\'*+\/=?^_` {|}~-]++@'
             . $hostnameLabel . '(?:\.' . $hostnameLabel . ')*';
 
         if (strpos($Excerpt['text'], '>') !== false
             and preg_match("/^<((mailto:)?$commonMarkEmail)>/i", $Excerpt['text'], $matches)
-        ){
+        ) {
             $url = $matches[1];
 
             if ( ! isset($matches[2]))
@@ -1533,7 +1533,7 @@ class Parsedown
         }
 
         if (strpos($Excerpt['context'], 'http') !== false
-            and preg_match('/\bhttps?+:[\/]{2}[^\s<]+\b\/*+/ui', $Excerpt['context'], $matches, PREG_OFFSET_CAPTURE)
+            and preg_match('/\bhttps?+:[\/] {2}[^\s<]+\b\/*+/ui', $Excerpt['context'], $matches, PREG_OFFSET_CAPTURE)
         ) {
             $url = $matches[0][0];
 
@@ -1555,7 +1555,7 @@ class Parsedown
 
     protected function inlineUrlTag($Excerpt)
     {
-        if (strpos($Excerpt['text'], '>') !== false and preg_match('/^<(\w++:\/{2}[^ >]++)>/i', $Excerpt['text'], $matches))
+        if (strpos($Excerpt['text'], '>') !== false and preg_match('/^<(\w++:\/ {2}[^ >]++)>/i', $Excerpt['text'], $matches))
         {
             $url = $matches[1];
 
@@ -1957,11 +1957,11 @@ class Parsedown
     # Read-Only
 
     protected $specialCharacters = array(
-        '\\', '`', '*', '_', '{', '}', '[', ']', '(', ')', '>', '#', '+', '-', '.', '!', '|', '~'
+        '\\', '`', '*', '_', ' {', '}', '[', ']', '(', ')', '>', '#', '+', '-', '.', '!', '|', '~'
     );
 
     protected $StrongRegex = array(
-        '*' => '/^[*]{2}((?:\\\\\*|[^*]|[*][^*]*+[*])+?)[*]{2}(?![*])/s',
+        '*' => '/^[*] {2}((?:\\\\\*|[^*]|[*][^*]*+[*])+?)[*] {2}(?![*])/s',
         '_' => '/^__((?:\\\\_|[^_]|_[^_]*+_)+?)__(?!_)/us',
     );
 

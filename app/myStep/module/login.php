@@ -23,7 +23,7 @@ if(r::svr('QUERY_STRING')=='out') {
             }
             myStep::info('login_ok', $url);
         } else {
-        	$err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
+            $err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
         }
     } else {
         $err_no = 1;

@@ -17,7 +17,7 @@ if(isset($_GET['out'])) {
             r::s('ms_user', $usr);
             myStep::info('login_ok', $path_admin);
         } else {
-        	$err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
+            $err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
         }
     } else {
         $err_no = 1;

@@ -1,8 +1,9 @@
 <?php
 namespace app\cms;
+
 \myStep::setPara();
 global $mystep, $info_app, $s, $tpl_setting;
-if(strpos(trim($info_app['route'],'/'), 'admin_cms')===0) {
+if(strpos(trim($info_app['route'], '/'), 'admin_cms')===0) {
     $s->template->style = 'admin';
     $mystep->addCSS(PATH.'asset/'.$s->template->style.'/style.css');
     $mystep->setting->css = CACHE.'script/'.$info_app['app'].'_admin.css';
@@ -14,9 +15,9 @@ if(!isset($info_app['path'])) $info_app['path'] = explode('/', trim($info_app['r
 if(!isset($info_app['name'])) $info_app = array_merge($info_app, include(__DIR__.'/info.php'));
 
 $tpl_setting = array(
-    'name' => $s->template->name,
-    'path' => PATH.$s->template->path,
-    'style' => $s->template->style,
+    'name' => $s->template->name, 
+    'path' => PATH.$s->template->path, 
+    'style' => $s->template->style, 
     'path_compile' => CACHE.'template/'.$info_app['app'].'/'
 );
 
@@ -42,10 +43,10 @@ function logCheck($show = true) {
 }
 
 function getData($idx) {
-    $result = '{"err":"Login First!"}';
+    $result = ' {"err":"Login First!"}';
     if(logCheck(false)) {
         if(($result = getCache($idx))===false) {
-            $result = '{"err":"Data Missing!"}';
+            $result = ' {"err":"Data Missing!"}';
         }
     }
     return $result;
@@ -89,18 +90,18 @@ function buildList($idx) {
         case 'admin_cat':
             $theList = array();
             $db->build($s->db->pre.'admin_cat')
-               ->where('pid','n=',0)
+               ->where('pid', 'n=', 0)
                ->order('order', 1)->order('id', 0);
             $db->select();
             while($record=$db->getRS()) {
                 \myString::htmlTrans($record);
                 $theList[] = $record;
             }
-            for($i=0,$m=count($theList); $i<$m; $i++) {
+            for($i=0, $m=count($theList); $i<$m; $i++) {
                 $theList[$i]['sub'] = array();
                 $db->build('[reset]');
                 $db->build($s->db->pre.'admin_cat')
-                    ->where('pid','n=',$theList[$i]['id'])
+                    ->where('pid', 'n=', $theList[$i]['id'])
                     ->order('order', 1)->order('id', 0);
                 $db->select();
                 while($record=$db->getRS()) {
@@ -123,11 +124,11 @@ function buildList($idx) {
             break;
         case 'news_cat':
             $db->build($s->db->pre.'news_cat')
-               ->field('cat_id,web_id,pid,name,order,layer')
+               ->field('cat_id, web_id, pid, name, order, layer')
                ->order('web_id', 0)->order('order', 0)->order('cat_id', 0);
             $cat = $db->records();
             $id_list = array_column($cat, 'cat_id');
-            for($i=0,$m=count($cat);$i<$m;$i++) {
+            for($i=0, $m=count($cat);$i<$m;$i++) {
                 if($cat[$i]['pid']==0) {
                     $cat[$i]['layer'] = 1;
                     $cat[$i]['order'] = $i;
@@ -145,7 +146,7 @@ function buildList($idx) {
             };
             usort($cat, $cmp);
             $id_list = array_column($cat, 'cat_id');
-            for($i=0,$m=count($cat);$i<$m;$i++) {
+            for($i=0, $m=count($cat);$i<$m;$i++) {
                 if($cat[$i]['layer']>1) {
                     $pid = array_search($cat[$i]['pid'], $id_list);
                     $cat[$pid]['sub'] = $cat[$pid]['sub'] ?? array();

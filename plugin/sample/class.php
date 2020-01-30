@@ -1,10 +1,10 @@
 <?php
 class plugin_sample implements interface_plugin {
-    public static function check(&$result = ''){
+    public static function check(&$result = '') {
         $result = "";
         $theList = array(
-            "dir1/",
-            "dir2/",
+            "dir1/", 
+            "dir2/", 
         );
         $flag = true;
         $dir = __DIR__;
@@ -18,17 +18,17 @@ class plugin_sample implements interface_plugin {
         }
         return $flag;
     }
-    public static function install(){
+    public static function install() {
         $dir = __DIR__;
         myFile::mkdir($dir.'/dir1');
         myFile::mkdir($dir.'/dir2');
     }
-    public static function uninstall(){
+    public static function uninstall() {
         $dir = __DIR__;
         myFile::del($dir.'/dir1');
         myFile::del($dir.'/dir2');
     }
-    public static function setPage($content){
+    public static function setPage($content) {
         return str_replace('<title>', '<title>插件调整(可关闭) - ', $content);
     }
 }

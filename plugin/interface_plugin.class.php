@@ -10,7 +10,7 @@ function addPluginLink($name, $path) {
     $menu = myString::fromJson($menu);
     $len = count($menu) - 1;
     $menu[$len]['items'][] = [
-        "name" => $name,
+        "name" => $name, 
         "link" => $path
     ];
     $menu[$len]['link'] = '#';
@@ -34,9 +34,9 @@ function removePluginLink($path) {
 
 function setPluginTemplate($idx, $name='') {
     $tpl_setting = array(
-        'name' => 'main',
-        'path' => APP.'myStep/template/',
-        'style' => '',
+        'name' => 'main', 
+        'path' => APP.'myStep/template/', 
+        'style' => '', 
         'path_compile' => CACHE.'template/plugin_'.$idx.'/'
     );
     $path = $idx.'/';

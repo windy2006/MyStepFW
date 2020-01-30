@@ -1,5 +1,5 @@
 <?php
-$db = new myDb('MSSQL', '192.168.1.47', 'cfna', 'cfnadb!@#$%','UTF-8');
+$db = new myDb('MSSQL', '192.168.1.47', 'cfna', 'cfnadb!@#$%', 'UTF-8');
 $db->connect('cfna_new');
 $db->selectDB('cfna');
 
@@ -18,7 +18,7 @@ $db->build('sms_stuff_bak')->where(
     )
 )
     ->field('*')
-    ->order('id', 0)->limit(5,10);
+    ->order('id', 0)->limit(5, 10);
 
 $db->build('sms_consumption_bak', array(
     'mode' => 'left',

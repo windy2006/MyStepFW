@@ -6,12 +6,12 @@ if(isset($info_app['path'][3])) $method = $info_app['path'][3];
 $mydb = new myDb('simpleDB', 'plugin', PLUGIN);
 if(!$mydb->check()) {
     $mydb->create(array(
-        array('order',2),
-        array('active',1),
-        array('idx',10),
-        array('ver',10),
-        array('name',40),
-        array('intro',200),
+        array('order', 2), 
+        array('active', 1), 
+        array('idx', 10), 
+        array('ver', 10), 
+        array('name', 40), 
+        array('intro', 200), 
     ));
 }
 $idx = myReq::get('idx');
@@ -42,12 +42,12 @@ switch($method) {
             }
             call_user_func(array($class, 'install'));
             $mydb->insert(array(
-                'order' => 1,
-                'active' => 1,
-                'idx' => $idx,
-                'ver' => $info['ver'],
-                'name' => $info['name'],
-                'intro' => $info['intro'],
+                'order' => 1, 
+                'active' => 1, 
+                'idx' => $idx, 
+                'ver' => $info['ver'], 
+                'name' => $info['name'], 
+                'intro' => $info['intro'], 
             ), true);
             myStep::info('plugin_installed', $path_admin.'function/plugin/');
         }
@@ -109,14 +109,14 @@ switch($method) {
         }
         break;
     case "upload":
-        if(myReq::check('post')){
+        if(myReq::check('post')) {
             $path_upload = CACHE."tmp";
             $upload = new myUploader($path_upload, true);
             $upload->do(false);
             $result = $upload->getResult(0);
             if($result[0]['error'] == 0) {
                 $theFile = $path_upload."/".$result[0]['new_name'];
-                $mypack = $mystep->getInstance("myPacker", PLUGIN.strstr($result[0]['name'],'.', true).'/', $theFile);
+                $mypack = $mystep->getInstance("myPacker", PLUGIN.strstr($result[0]['name'], '.', true).'/', $theFile);
                 $mypack->unpack();
                 unset($mypack);
                 myFile::del($theFile);
@@ -133,7 +133,7 @@ switch($method) {
             $order = myReq::post('order');
             $records = $mydb->records();
             foreach($records as $k => $v) {
-                if(($key=array_search($v['idx'],$idx))!==false) {
+                if(($key=array_search($v['idx'], $idx))!==false) {
                     $records[$k]['order'] = $order[$key];
                 }
             }
@@ -141,8 +141,8 @@ switch($method) {
             $mydb->empty();
             $mydb->insert($records, true);
         }
-        $dirs = myFile::find('',PLUGIN,false, myFile::DIR);
-        $dirs = array_map(function($v){return basename($v);} ,$dirs);
+        $dirs = myFile::find('', PLUGIN, false, myFile::DIR);
+        $dirs = array_map(function ($v) {return basename($v);} , $dirs);
 
         $data = $mydb->records();
         $t->setIf('empty_1', empty($data));
@@ -157,7 +157,7 @@ switch($method) {
             if(is_file(PLUGIN.$v.'/info.php')) {
                 $info = include(PLUGIN.$v.'/info.php');
             } else {
-                $info = array('name'=>$mystep->getLanguage('unknown'),'ver'=>$mystep->getLanguage('unknown'),'intro'=>$mystep->getLanguage('plugin_no_info'),'idx'=>$v);
+                $info = array('name'=>$mystep->getLanguage('unknown'), 'ver'=>$mystep->getLanguage('unknown'), 'intro'=>$mystep->getLanguage('plugin_no_info'), 'idx'=>$v);
             }
             $t->setLoop('list_2', $info);
         }

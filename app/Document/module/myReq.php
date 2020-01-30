@@ -2,42 +2,42 @@
 use myReq as r;
 
 r::regAlias(array(
-			'g' => 'get',
-			'p' => 'post',
-			'f' => 'files',
-			'r' => 'request',
-			'c' => 'cookie',
-			's' => 'session',
-			'e' => 'env',
-			'svr' => 'server',
-			'gl' => 'global',
+            'g' => 'get', 
+            'p' => 'post', 
+            'f' => 'files', 
+            'r' => 'request', 
+            'c' => 'cookie', 
+            's' => 'session', 
+            'e' => 'env', 
+            'svr' => 'server', 
+            'gl' => 'global', 
 ));
 
 $req = new myReq(array(
-			'path' => '/',
-			'prefix' => 'pre_'
-		),array(
-			'id' => r::cookie('sid'),
-			'name' => 'cool',
-			'path' => PATH.'data/session/',
-			'expire' => 30,
-			'gc' => true,
-			'trans_sid' => true
-		));
+            'path' => '/', 
+            'prefix' => 'pre_'
+        ), array(
+            'id' => r::cookie('sid'), 
+            'name' => 'cool', 
+            'path' => PATH.'data/session/', 
+            'expire' => 30, 
+            'gc' => true, 
+            'trans_sid' => true
+        ));
 
 sess_mysql::set(array(
-	'host' => '192.168.1.47:3306',
-	'user' => 'root',
-	'pass' => 'cfnadb!@#$%',
-	'db_name' => 'mystep',
-	'charset' => 'gbk',
+    'host' => '192.168.1.47:3306', 
+    'user' => 'root', 
+    'pass' => 'cfnadb!@#$%', 
+    'db_name' => 'mystep', 
+    'charset' => 'gbk', 
 ));
 sess_mysql::set(array(
-    'host' => '127.0.0.1:3306',
-    'user' => 'root',
-    'pass' => '123456',
-    'db_name' => 'mystep',
-    'charset' => 'gbk',
+    'host' => '127.0.0.1:3306', 
+    'user' => 'root', 
+    'pass' => '123456', 
+    'db_name' => 'mystep', 
+    'charset' => 'gbk', 
 ));
 //r::sessionStart('sess_mysql', true);
 r::sessionStart('sess_file', true);
