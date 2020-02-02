@@ -18,7 +18,8 @@ class myMinify extends myBase {
     protected
         $mode = null, 
         $cache = '', 
-        $content = '';
+        $content = '',
+        $result = '';
 
     /**
      * 初始化类变量
@@ -67,21 +68,21 @@ class myMinify extends myBase {
      */
     public function get($pack = false) {
         if($this->check()) {
-            $this->content = file_get_contents($this->cache);
+            $this->result = file_get_contents($this->cache);
         } else {
             if($this->mode == 'js') {
                 if($pack) {
-                    $packer = new JavaScriptPacker($this->content, 'Normal', false, false);
-                    $this->content = $packer->pack();
+                    $packer = new JavaScriptPacker($this->content, 62, false, false);
+                    $this->result = $packer->pack();
                 }else {
-                    $this->content = \JSMin\JSMin::minify($this->content);
+                    $this->result = \JSMin\JSMin::minify($this->content);
                 }
             } else {
-                $this->content = CssMin::minify($this->content);
+                $this->result = CssMin::minify($this->content);
             }
-            if(!empty($this->cache)) file_put_contents($this->cache, $this->content);
+            if(!empty($this->cache)) file_put_contents($this->cache, $this->result);
         }
-        return $this->content;
+        return $this->result;
     }
 
     /**
@@ -100,5 +101,10 @@ class myMinify extends myBase {
         header("Accept-Length: ".strlen($this->content));
         echo $this->content;
         exit;
+    }
+
+    public function __toString() {
+        if(empty($this->result)) $this->get();
+        return $this->result;
     }
 }
