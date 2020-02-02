@@ -180,35 +180,50 @@
 /**
  *load JS in batch
  */
-jQuery.setJS = function(list, callback, in_turn=true) {
+jQuery.setJS = function(list, in_turn=true, callback, process) {
+    let num_total = list.length;
+    let num_done = 0
 	let loader = function(script) {
-		return new Promise(function (resolve, reject) {
-			$.getScript(script, function(){
-				resolve();
+		return new Promise((resolve, reject) => {
+			$.getScript(script, function(data, textStatus){
+			    if(textStatus==='success') {
+                    resolve(data);
+                } else {
+                    reject(textStatus);
+                }
 			});
 		});
-	}
+	};
 	if(in_turn) {
 		let p = loader(list[0]);
 		for(let i=1,m=list.length;i<m;i++) {
 			p = p.then(()=>{
+			    num_done++;
+			    if(typeof(process)==='function') process(num_done, num_total, list[i-1]);
 				return loader(list[i]);
-			});
+			}).catch((e)=>{
+                console.log(e)
+            });
 		}
 		p.then(()=>{
-			if(typeof(callback)=='function') callback();
+            num_done++;
+            if(typeof(process)==='function') process(num_done, num_total, list[num_done-1]);
+			if(typeof(callback)==='function') callback();
 		});
 	} else {
 		let result = [];
 		list.forEach(current => {
-				let p = loader(current).then(()=>{console.log(current+" loaded!")});
+				let p = loader(current).then(()=>{
+                    num_done++;
+                    if(typeof(process)==='function') process(num_done, num_total, current);
+				});
 				result.push(p);
 			}
 		);
 		Promise.all(result).then(()=>{
-			if(typeof(callback)=='function') callback();
-		}).catch((err)=>{
-			console.log(err)
+			if(typeof(callback)==='function') callback();
+		}).catch((e)=>{
+			console.log(e)
 		});
 	}
 }
@@ -239,17 +254,19 @@ jQuery.setCSS = function(css) {
 jQuery.vendor = function(name, option) {
 	option = $.extend({
 		'add_css' : false,
-		'name_fix' : false,
+		'name_fix' : '',
 		'callback' : function () {}
 	}, option);
+	if(option.add_css===true) option.add_css = '';
+    if(option.name_fix===true) option.name_fix = '.min';
+    if(option.name_fix===false) option.name_fix = '';
 	function setVender() {
-		if(option.add_css) {
-			$.setCSS("vendor/"+name+"/"+name+".css");
-			//$("head").append($('<link id="css_'+name+'" rel="stylesheet" href="vendor/'+name+'/'+name+'.css" type="text/css" media="screen" />'));
+		if(option.add_css!==false) {
+			$.setCSS("vendor/"+name+"/"+name+option.add_css+".css");
 		}
 		option.callback();
 	}
-	$.getScript('vendor/'+name+'/'+name+(option.name_fix?'.min':'')+'.js', setVender);
+	$.getScript('vendor/'+name+'/'+name+option.name_fix+'.js', setVender);
 };
 
 /**

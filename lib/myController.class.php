@@ -105,40 +105,29 @@ class myController extends myBase {
     /**
      * 依照单实例模式引用其他实例
      * @param string $calledClass
-     * @return mixed
+     * @return mixed|object
+     * @throws ReflectionException
      */
     public function getInstance($calledClass = '') {
         if (empty($calledClass)) $calledClass = get_class($this);
         $argList = func_get_args();
         array_shift($argList);
+        $r = new ReflectionClass($calledClass);
         if ($this->singleton) {
             static $instanceList = array();
-            if (!isset($instanceList[$calledClass])) {
-                $instanceList[$calledClass] = new $calledClass();
-                if (count($argList) > 0) {
-                    if (is_callable(array($calledClass, 'init'))) {
-                        call_user_func_array(array($instanceList[$calledClass], 'init'), $argList);
-                    } else {
-                        call_user_func_array(array($instanceList[$calledClass], '__construct'), $argList);
-                    }
-                }
-            } else {
-                if (is_callable(array($calledClass, 'init')) && count($argList) > 0) {
-                    call_user_func_array(array($instanceList[$calledClass], 'init'), $argList);
-                }
-            }
-            return $instanceList[$calledClass];
+            if (!isset($instanceList[$calledClass])) $instanceList[$calledClass] = $r->newInstanceWithoutConstructor();
+            $instance = &$instanceList[$calledClass];
         } else {
-            $instance = new $calledClass();
-            if (count($argList) > 0) {
-                if (method_exists($calledClass, 'init')) {
-                    call_user_func_array(array($instance, 'init'), $argList);
-                } else {
-                    call_user_func_array(array($instance, '__construct'), $argList);
-                }
-            }
-            return $instance;
+            $instance = $r->newInstanceWithoutConstructor();
         }
+        if (count($argList) > 0) {
+            if (method_exists($calledClass, 'init')) {
+                call_user_func_array(array($instance, 'init'), $argList);
+            } elseif (method_exists($calledClass, '__construct'))  {
+                call_user_func_array(array($instance, '__construct'), $argList);
+            }
+        }
+        return $instance;
     }
 
     /**

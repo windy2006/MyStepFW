@@ -42,9 +42,9 @@
 <script language="JavaScript">
 jQuery.vendor('chart', {
     add_css:true,
-    name_fix:true,
+    name_fix:'.bundle.min',
     callback:function(){
-        jQuery.getScript('vendor/Chart/samples/utils.js', function(){
+        jQuery.getScript('vendor/Chart/utils.js', function(){
             let getData = function(m=2, pie=false) {
                 let chartColors = window.chartColors;
                 let color = Chart.helpers.color;

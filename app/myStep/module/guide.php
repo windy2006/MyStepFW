@@ -17,7 +17,7 @@ for($i=0, $m=count($guide);$i<$m;$i++) {
     for($j=1, $n=count($lines);$j<$n;$j++) {
         $lines[$j] = preg_replace('#^\- #', '', $lines[$j]);
         if($j==1 && strpos($lines[$j], ' - ')===false) {
-            $detail[$i]['describe'] = $lines[$j];
+            $detail[$i]['describe'] = str_replace('<p>', '<p class="m-0">', $md->toHtml($lines[$j]));
         } elseif(preg_match('#[\s]{3,}#', $lines[$j])) {
             $the_line[1] .= chr(10).$lines[$j];
         } elseif(strpos($lines[$j], ' - ')) {

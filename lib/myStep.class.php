@@ -869,11 +869,12 @@ class myStep extends myController {
         if(!defined('PATH')) define('PATH', APP.$info_app['app'].'/');
         if(is_file(PATH.$info_app['app'].'.class.php')) {
             require_once(PATH.$info_app['app'].'.class.php');
-            $mystep = new $info_app['app']();
+            $class = $info_app['app'];
+            if(!class_exists($class) || !$class instanceof myStep) $class = __CLASS__;
         } else {
             $class = __CLASS__;
-            $mystep = new $class();
         }
+        $mystep = new $class();
 
         if(is_callable(array($mystep, 'preload'))) $mystep->preload();
         if(is_null($setPlugin)) $setPlugin = true;
@@ -978,6 +979,8 @@ class myStep extends myController {
         //$instance = new $class();
         if(count($args) && is_callable([$instance, '__construct'])) {
             call_user_func_array([$instance, '__construct'], $args);
+        } elseif(count($args) && is_callable([$instance, 'init'])) {
+            call_user_func_array([$instance, 'init'], $args);
         }
         return $instance;
     }

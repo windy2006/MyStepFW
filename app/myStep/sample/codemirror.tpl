@@ -1,7 +1,11 @@
 ﻿<div class="card w-100 mb-5 mb-sm-2">
 	<div class="card-body p-0">
-		<textarea id="code"></textarea>
+		<textarea id="code" class="w-100" title="highlight code">程序初始化，请稍候！</textarea>
 	</div>
+	<div class="progress" style="height:5px;">
+		<div id="progress_bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+	</div>
+    <div id="info" class="text-muted small"></div>
 </div>
 <script language="JavaScript">
     $(function() {
@@ -23,7 +27,7 @@
             "vendor/codemirror/mode/xml/xml.js",
             "vendor/codemirror/mode/css/css.js",
             "vendor/codemirror/mode/htmlmixed/htmlmixed.js",
-        ],function() {
+        ], true, function() {
             $.get('index.php?Document/', function(data) {
                 $("#code").val(data);
                 let editor = CodeMirror.fromTextArea($id("code"), {
@@ -52,7 +56,15 @@
                         cm.foldCode(cm.getCursor());
                     }
                 });
+                $('#info').remove();
             });
-        });
+        }, function(num_done, num_total, script) {
+            $('#progress_bar').css('width', Math.ceil(num_done*100/num_total)+'%');
+            $('#info').html(script + ' loaded!');
+            if(num_done===num_total) {
+                $('#info').html('代码处理中。。。');
+                $('#progress_bar').parent().remove();
+            }
+		});
     });
 </script>

@@ -32,7 +32,7 @@
 				<span class="glyphicon glyphicon-filter"></span>筛选
 			</button>
 		</div>
-		<table id="tb_list" class="table-sm"
+		<table id="tb_list" class="table-sm w-100"
 			   data-sort-class="table-active"
 			   data-mobile-responsive="true" data-check-on-init="true"
 			   data-use-row-attr-func="true" data-reorderable-rows="true"
@@ -55,6 +55,10 @@
 			</thead>
 		</table>
 	</div>
+	<div class="progress" style="height:5px;">
+		<div id="progress_bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+	</div>
+	<div id="info" class="text-muted small"></div>
 
 	<form id="modalForm" class="modal fade" tabindex="-1" role="dialog">
 		<div class="modal-dialog" role="document">
@@ -110,7 +114,7 @@
                     'vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.min.js',
 
                     'vendor/bootstrap-table/extensions/toolbar/bootstrap-table-toolbar.min.js',
-				], function(){
+				], true, function(){
 					$.setCSS([
 					    "vendor/bootstrap-table/extensions/reorder-rows/bootstrap-table-reorder-rows.min.css",
                     	//"vendor/bootstrap-table/extensions/reorder-columns/dragtable.css",
@@ -119,6 +123,13 @@
 					]);
                     checkNrun('setTbl', ['#tb_list']);
                     //setTbl('#tb_list');
+                }, function(num_done, num_total, script) {
+                    $('#progress_bar').css('width', Math.ceil(num_done*100/num_total)+'%');
+                    $('#info').html(script + ' loaded!');
+                    if(num_done===num_total) {
+                        $('#info').html('表格数据处理中。。。');
+                        $('#progress_bar').parent().remove();
+                    }
 				});
             }
         });
@@ -340,5 +351,6 @@
 			});
             $('#modalForm').modal('show');
 		}
+        $('#info').remove();
     };
 </script>

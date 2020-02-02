@@ -18,23 +18,16 @@
 <div class="position-fixed border rounded px-2 py-1 bg-white" style="bottom:10px;right:10px;cursor:pointer;" onclick="$('html,body').animate({scrollTop: 0},500);">
     <span class="glyphicon glyphicon-arrow-up"></span>
 </div>
-<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
-<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
-<script type="text/javascript">SyntaxHighlighter.all();</script>
 <script language="JavaScript">
-    $(function() {
-        $.setCSS([
-            'vendor/syntaxhighlighter/shCore.css',
-            'vendor/syntaxhighlighter/shThemeDefault.css'
-        ]);
-        return;
-        //doesn't work ?
-        $.setJS([
-            "vendor/syntaxhighlighter/shCore.js",
-            "vendor/syntaxhighlighter/shBrushPhp.js",
-        ],function() {
-            SyntaxHighlighter.all();
-        });
+    $.setCSS([
+        'vendor/syntaxhighlighter/shCore.css',
+        'vendor/syntaxhighlighter/shThemeDefault.css'
+    ]);
+    $.setJS([
+        "vendor/syntaxhighlighter/shCore.js",
+        "vendor/syntaxhighlighter/shBrushPhp.js",
+    ], true, function() {
+        SyntaxHighlighter.all();
     });
 </script>
 <!--page_end-->

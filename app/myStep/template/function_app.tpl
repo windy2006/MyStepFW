@@ -96,7 +96,7 @@ $(function() {
         "vendor/codemirror/mode/xml/xml.js",
         "vendor/codemirror/mode/htmlmixed/htmlmixed.js",
         "vendor/codemirror/mode/clike/clike.js"
-    ],function(){
+    ], true, function(){
         $('textarea').each(function() {
             let editor = CodeMirror.fromTextArea(this, {
                 mode: "application/x-httpd-php",
