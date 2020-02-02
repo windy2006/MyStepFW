@@ -53,7 +53,7 @@
         $('#main').css('min-height', $(window).height()-80);
         $('.frame').height($('#main').height()-42);
         if(navigator.userAgent.indexOf(".NET") != -1) {
-            var top = ($('#list').css('display')=='none') ? '0px' : '65px';
+            let top = ($('#list').css('display')=='none') ? '0px' : '65px';
             $('#main').parent().css('padding-top', top);
         }
         setTab();
@@ -61,11 +61,11 @@
     function setTab() {
         $('#list_tab .arrow').hide();
         $('#list_tab').css('width', '100%');
-        var len = $('#list_tab').width();
-        var tabs = $('#list_tab li');
-        var cur = null;
-        var flag = false;
-        for(var i=0,m=tabs.length;i<m;i++) {
+        let len = $('#list_tab').width();
+        let tabs = $('#list_tab li');
+        let cur = null;
+        let flag = false;
+        for(let i=0,m=tabs.length;i<m;i++) {
             cur = $(tabs.get(i));
             if(cur.position().top>0) {
                 len += cur.width();
@@ -81,10 +81,10 @@
         setPos($('#list_tab .right'),0);
     }
     function setPos(obj, unit){
-        var l1 = $('#list_frame').width();
-        var l2 = $('#list_tab').width();
-        var left = $('#list_tab').position().left;
-        var step = 0;
+        let l1 = $('#list_frame').width();
+        let l2 = $('#list_tab').width();
+        let left = $('#list_tab').position().left;
+        let step = 0;
         if(unit==null) unit = 5;
         if($(obj).hasClass('right')) {
             step = l2-l1+left;
@@ -112,15 +112,15 @@
         $('#list_tab .left').css('left',-$('#list_tab').position().left);
     }
     function addFrame(name, url) {
-        var idx = 'tab_'+md5(url);
+        let idx = 'tab_'+md5(url);
         if(url==$('base').attr('href')) idx = 'tab_main';
-        var obj = $('#'+idx);
+        let obj = $('#'+idx);
         if(obj.length==0) {
-            var tab = $('' +
+            let tab = $('' +
                 '<li class="nav-item" idx="'+idx+'">\n' +
                 '   <a class="nav-link" data-toggle="tab" href="#'+idx+'"></a>\n' +
                 '</li>');
-            var frame = $('' +
+            let frame = $('' +
                 '<div class="tab-pane fade" id="'+idx+'">\n' +
                 '   <iframe src="" class="frame" frameborder="0"></iframe>\n' +
                 '</div>');
@@ -135,7 +135,7 @@
             });
             if(tab.position().top>0) setTab();
         } else {
-            var tab = $('#list_tab a[href="#'+idx+'"]').parent();
+            let tab = $('#list_tab a[href="#'+idx+'"]').parent();
         }
         resizeMain();
         $('#list_tab a[href="#'+idx+'"]').tab('show');
@@ -202,16 +202,16 @@
             clearInterval(global.timer);
         });
         setTimeout(function(){
-            var idx = $.cookie('ms_theme');
+            let idx = $.cookie('ms_theme');
             if(typeof setting !== 'undefined') setTheme(idx)
         },1000);
         resizeMain();
         $(window).resize(resizeMain);
         $.getJSON('api/cms/get/admin_cat', function(data){
             if(typeof data.err=='undefined') {
-                var list = data.admin_cat;
-                var obj = null, obj_sub = null;
-                var i = 0, j = 0, n = 0;
+                let list = data.admin_cat;
+                let obj = null, obj_sub = null;
+                let i = 0, j = 0, n = 0;
                 for(i=list.length-1;i>=0;i--) {
                     obj = $('' +
                         '<li class="nav-item">\n' +
@@ -233,11 +233,11 @@
             }
         });
         function getList(data) {
-            var obj = $('<div class="nav sub-menu"></div>');
-            var sub = null;
-            var id = '';
-            var list = null;
-            for(var i=0,m=data.length;i<m;i++) {
+            let obj = $('<div class="nav sub-menu"></div>');
+            let sub = null;
+            let id = '';
+            let list = null;
+            for(let i=0,m=data.length;i<m;i++) {
                 if(typeof data[i].link =='undefined' || data[i].link=='') data[i].link = '#';
                 data[i].icon = 'fa fa-caret-right';
                 sub = $('\n' +
@@ -266,9 +266,9 @@
             }
         });
         $('#sidebar').mousewheel(function(e){
-            var top = $('#sidebar').position().top;
-            var step = 5;
-            var d = e.deltaY;
+            let top = $('#sidebar').position().top;
+            let step = 5;
+            let d = e.deltaY;
             if(d<0) {
                 if($('#sidebar').height()>$(window).height()-$('header').height() && $('#sidebar').height()+$('#sidebar').position().top>$(window).height()-$('header').height()) {
                     $('#sidebar').css('top', top-step);

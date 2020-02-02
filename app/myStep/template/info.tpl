@@ -29,8 +29,8 @@
 </body>
 <script language="JavaScript">
 $(function() {
-    var sec = 5;
-    var url = '<!--url-->';
+    let sec = 5;
+    let url = '<!--url-->';
     $('#countdown').html(sec--);
     //url = url.replace(/^\//, '<!--path_root-->');
     $('#url').attr('href', url);

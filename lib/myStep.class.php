@@ -16,7 +16,7 @@
     $this->getInstance($calledClass)                 // 取得类实例
     $this->start($setPlugin)                         // 框架执行入口，初始化所有变量
     $this->show(myTemplate $tpl)                     // 通过模板类显示页面
-    $this->parseTpl(myTemplate $tpl)                 // 通过模板类输出页面内容
+    $this->render(myTemplate $tpl)                 // 通过模板类输出页面内容
     $this->end()                                     // 框架终止，销毁相关变量
     $this->login($user_id, $user_pwd)                // 登录接口
     $this->logout()                                  // 退出登录接口
@@ -46,6 +46,7 @@
 */
 
 require_once('function.php');
+require_once(VENDOR.'autoload.php');
 require_once('myController.class.php');
 class myStep extends myController {
     public $setting;
@@ -86,6 +87,7 @@ class myStep extends myController {
      * 框架执行入口，初始化所有变量
      * @param bool $setPlugin
      * @param string $dummy
+     * @throws ReflectionException
      */
     public function start($setPlugin = false, $dummy = '') {
         $this->mem_start = memory_get_usage();
@@ -189,7 +191,7 @@ class myStep extends myController {
      * @param myTemplate $tpl
      * @return mixed|string
      */
-    public function parseTpl(myTemplate $tpl) {
+    public function render(myTemplate $tpl) {
         $args = func_get_args();
         array_shift($args);
         $paras = [
@@ -760,9 +762,6 @@ class myStep extends myController {
                 'path' => ROOT . 'lib/', 
                 'ext' => '.php, .class.php', 
                 'idx' => array(
-                        'jsMin' => 'myMinify.class.php', 
-                        'cssMin' => 'myMinify.class.php', 
-                        'JavaScriptPacker' => 'myMinify.class.php', 
                         'interface_plugin' => '../plugin/interface_plugin.class.php'
                     ), 
             );
@@ -945,21 +944,38 @@ class myStep extends myController {
     }
 
     /**
-     * 调用第三放组件
-     * @param $class_name
-     * @return mixed
+     * 调用第三方组件
+     * @return object
+     * @throws ReflectionException
      */
-    public static function vendor($class_name) {
+    public static function vendor() {
         $args = func_get_args();
         $name = array_shift($args);
-        $file = VENDOR.$name.'/'.$name.'.php';
-        if(!is_file($file)) $file = VENDOR.$name.'/'.$name.'.class.php';
+        if(is_array($name)) {
+            if(!isset($name['dir'])) $name['dir'] = $name['file'];
+            if(!isset($name['file'])) $name['file'] = $name['dir'];
+            $file = VENDOR.$name['dir'].'/'.$name['file'];
+            $class = $name['class'] ?? $name['file'];
+            $class = ($name['namespace'] ?? '').$class;
+        } else {
+            $file = VENDOR.$name.'/'.$name;
+            $class = $name;
+        }
+        $file .= is_file($file.'.php') ? '.php':'.class.php';
+
         if(!is_file($file)) {
             global $mystep;
             myStep::info('module_missing');
         }
         require_once($file);
-        $instance = new $name();
+
+        if(!class_exists($class)) {
+            global $mystep;
+            myStep::info('module_missing');
+        }
+        $r = new ReflectionClass($class);
+        $instance = $r->newInstanceWithoutConstructor();
+        //$instance = new $class();
         if(count($args) && is_callable([$instance, '__construct'])) {
             call_user_func_array([$instance, '__construct'], $args);
         }

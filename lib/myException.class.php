@@ -182,6 +182,7 @@ class myException extends ErrorException {
      * @param $e
      */
     public static function exceptionHandle($e) {
+        if($e instanceof ReflectionException) return;
         if(!$e instanceof ErrorException) {
             $e = new ErrorException($e);
         }

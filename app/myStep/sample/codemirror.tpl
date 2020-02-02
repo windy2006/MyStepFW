@@ -26,7 +26,7 @@
         ],function() {
             $.get('index.php?Document/', function(data) {
                 $("#code").val(data);
-                var editor = CodeMirror.fromTextArea($id("code"), {
+                let editor = CodeMirror.fromTextArea($id("code"), {
                     mode: "text/html",
                     lineNumbers: true,
                     lineWrapping: true,
@@ -36,7 +36,7 @@
                 editor.setOption("extraKeys", {
                     // Tab键换成4个空格
                     Tab: function(cm) {
-                        var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                        let spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                         cm.replaceSelection(spaces);
                     },
                     // Ctrl+F11键切换全屏

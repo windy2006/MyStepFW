@@ -256,11 +256,12 @@
 
 <script language="JavaScript">
     jQuery.vendor('select2', {
-		add_css:true,
+        add_css:true,
+        name_fix:true,
 		callback:function(){
             $.getScript('vendor/select2/i18n/zh-CN.js', function(){
                 $("select[adv]").each(function(){
-                    var opt = {
+                    let opt = {
                         language: "zh-CN",
                         placeholder: $(this).attr('placeholder'),
                         allowClear: true,
@@ -281,8 +282,8 @@
                         'width':'auto',
                         'height':'100%'
                     });
-                    var classes = $(this).attr("class").split(' ');
-                    for(var c in classes){
+                    let classes = $(this).attr("class").split(' ');
+                    for(let c in classes){
                         if(!isNaN(c) && classes[c].indexOf('select2')==-1) {
                             $(this).next().addClass(classes[c]);
                         }

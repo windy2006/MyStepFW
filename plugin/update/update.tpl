@@ -113,38 +113,34 @@ $('#form_upload').submit(function(){
 });
 function checkModify(mode) {
     loadingShow("正在检测系统文件的变更情况，请等待！");
-    var url = "update/check_" + (mode==1?'server':'local');
+    let url = "update/check_" + (mode==1?'server':'local');
     $.get(url, function(info){
-        if(info.code!='0') {
-            alert('校验信息获取失败！');
-            return;
-        }
-        loadingShow('框架文件校验中……');
-        if(info==false) {
+        if(info==false || info.code!='0') {
             if(mode==0) {
                 alert("校验失败，请确认校验信息是否已成功建立！");
             } else {
                 alert("服务器连接失败，或不存在本网站对应字符集的校验信息");
             }
             return;
-        } else {
-            var result = "";
-            if(info['new']!=null) {
-                result += "<b>发现 " + info['new'].length + " 个新增文件：</b>\n";
-                result += info['new'].join("\n");
-                result += "\n&nbsp;\n";
-            }
-            if(info['mod']!=null) {
-                result += "<b>发现 " + info['mod'].length + " 个文件发生改变：</b>\n";
-                result += info['mod'].join("\n");
-                result += "\n&nbsp;\n";
-            }
-            if(info['miss']!=null) {
-                result += "<b>发现 " + info['miss'].length + " 个文件被删除：</b>\n";
-                result += info['miss'].join("\n");
-                result += "\n&nbsp;\n";
-            }
         }
+        loadingShow('框架文件校验中……');
+        let result = "";
+        if(info['new']!=null) {
+            result += "<b>发现 " + info['new'].length + " 个新增文件：</b>\n";
+            result += info['new'].join("\n");
+            result += "\n&nbsp;\n";
+        }
+        if(info['mod']!=null) {
+            result += "<b>发现 " + info['mod'].length + " 个文件发生改变：</b>\n";
+            result += info['mod'].join("\n");
+            result += "\n&nbsp;\n";
+        }
+        if(info['miss']!=null) {
+            result += "<b>发现 " + info['miss'].length + " 个文件被删除：</b>\n";
+            result += info['miss'].join("\n");
+            result += "\n&nbsp;\n";
+        }
+        console.log(result);
         if(result.length==0) {
             alert("未发现改变的文件！");
         } else {
@@ -167,13 +163,13 @@ $('#link_4').click(function(){
 $('#link_5').click(function(){
     window.open("pack/");
 });
-var update_info = null;
+let update_info = null;
 function checkUpdate() {
     if(update_info==null) {
         alert("系统当前版本已为最新，无需更新！");
         return;
     }
-    var result = "";
+    let result = "";
     result += '\
 <div class="font-weight-bold text-center"  style="font-size:16px;">\
 	更新详情\

@@ -45,8 +45,8 @@
 </div>
 
 <script language="JavaScript">
-var list = <!--list-->;
-var rule_list = <!--rule_list-->;
+let list = <!--list-->;
+let rule_list = <!--rule_list-->;
 function setPosition() {
     $("#main").css('padding-bottom', 70);
     $("tfoot").css({'right':0, 'bottom':40});
@@ -69,7 +69,7 @@ $(function(){
         });
     }
     $('#rule_list').find('button').click(function(){
-        var obj = $(this).parentsUntil('tr').parent();
+        let obj = $(this).parentsUntil('tr').parent();
         $(this).parentsUntil('tr').parent().remove();
     });
     $('button[func=add]').click(function(){

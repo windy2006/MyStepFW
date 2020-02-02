@@ -10,16 +10,16 @@
  *                                                *
  **************************************************/
 
-var global = {};
+let global = {};
 
 //获取当前路径（可自定义目录层级）
 function getPath(lvl) {
-	var hostname = location.hostname;
-	var pathname = location.pathname;
-	var contextPath = pathname.split("/");
-	var port = location.port;
-	var protocol = location.protocol;
-	if(port!='') port = ':' + port;
+	let hostname = location.hostname;
+	let pathname = location.pathname;
+	let contextPath = pathname.split("/");
+	let port = location.port;
+	let protocol = location.protocol;
+	if(port!=='') port = ':' + port;
 	if(isNaN(lvl)) lvl = 0;
 	return protocol + "//" + hostname + port + contextPath.slice(0,lvl+1).join('/');
 }
@@ -31,10 +31,10 @@ function $id(id) {
 
 //获取某name元素集合
 function $name(name, idx) {
-	var objs = document.getElementsByName(name);
-	if(idx=="first") {
+	let objs = document.getElementsByName(name);
+	if(idx==="first") {
 		return objs[0];
-	} else if(idx=="last") {
+	} else if(idx==="last") {
 		return objs[objs.length-1];
 	} else if(!isNaN(idx)) {
 		return objs[idx];
@@ -45,13 +45,13 @@ function $name(name, idx) {
 
 //获取某标签元素集合
 function $tag(name, theOLE) {
-	if(typeof(theOLE)!="object") theOLE = document;
+	if(typeof(theOLE)!=="object") theOLE = document;
 	return theOLE.getElementsByTagName(name);
 }
 
 //获取某样式元素集合
 function $class(name, context) {
-	if(typeof(context)!="object") context = document;
+	if(typeof(context)!=="object") context = document;
 	return context.getElementsByClassName(name);
 }
 
@@ -62,30 +62,30 @@ function isArray(para) {
 
 //返回某字符串的二进制长度
 String.prototype.blen = function() {
-	var arr=this.match(/[^\x00-\xff]/ig);
+	let arr=this.match(/[^\x00-\xff]/ig);
 	return this.length+(arr==null?0:arr.length);
-}
+};
 
 //去除字符串首尾空字符
 String.prototype.trim= function(){
 	return this.replace(/^\s+|\s+$/g, "");
-}
+};
 
 //字符串赋值
 String.prototype.printf = function() {
-	var num = arguments.length;
-	var str = this;
-	for (var i = 0; i < num; i++) {
-		var pattern = "%" + (i+1);
-		var re = new RegExp(pattern, "g");
+	let num = arguments.length;
+	let str = this;
+	for (let i = 0; i < num; i++) {
+		let pattern = "%" + (i+1);
+		let re = new RegExp(pattern, "g");
 		str = str.replace(re, arguments[i]);
 	}
 	return str;
-}
+};
 
 //格式化日期
 Date.prototype.format = function(format){  //eg:format="YYYY-MM-dd hh:mm:ss";
-	var o = {
+	let o = {
 		"M+" :  this.getMonth()+1,  //month
 		"d+" :  this.getDate(),	 //day
 		"h+" :  this.getHours(),	//hour
@@ -93,29 +93,29 @@ Date.prototype.format = function(format){  //eg:format="YYYY-MM-dd hh:mm:ss";
 		"s+" :  this.getSeconds(), //second
 		"q+" :  Math.floor((this.getMonth()+3)/3),  //quarter
 		"S"  :  this.getMilliseconds() //millisecond
-	}
+	};
 	if(/(y+)/i.test(format)) {
 		format = format.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
 	}
-	for(var k in o) {
+	for(let k in o) {
 		if(new RegExp("("+ k +")").test(format)) {
-			format = format.replace(RegExp.$1, RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
+			format = format.replace(RegExp.$1, RegExp.$1.length===1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
 		}
 	}
 	return format;
-}
+};
 
 //扩展数组
 Array.prototype.append = function(newArray) {
 	if (isArray(newArray)) {
-		for (var i = 0; i < newArray.length; i++) {
+		for (let i = 0; i < newArray.length; i++) {
 			this[this.length] = newArray[i];
 		}
 	} else {
 		this[this.length] = newArray;
 	}
-	return;
-}
+
+};
 
 // 格式化金额
 // 用法: number.formatMoney(保留小数, 金额单位, 千位间隔符, 小数点符号)
@@ -125,7 +125,7 @@ Number.prototype.formatMoney = function (places, symbol, thousand, decimal) {
 	symbol = symbol !== undefined ? symbol : "$";
 	thousand = thousand || ",";
 	decimal = decimal || ".";
-	var number = this,
+	let number = this,
 		negative = number < 0 ? "-" : "",
 		i = parseInt(number = Math.abs(+number || 0).toFixed(places), 10) + "",
 		j = (j = i.length) > 3 ? j % 3 : 0;
@@ -134,9 +134,9 @@ Number.prototype.formatMoney = function (places, symbol, thousand, decimal) {
 
 //显示锁屏信息
 function loadingShow(info) {
-	var obj_loading = $("#bar_loading");
-	var obj_locker = $("#screenLocker");
-	if (obj_loading.length == 0) {
+	let obj_loading = $("#bar_loading");
+	let obj_locker = $("#screenLocker");
+	if (obj_loading.length === 0) {
 		obj_loading = $("<div>")
 			.attr("id", "bar_loading")
 			.addClass("position-absolute font-weight-bold border p-5 text-center bg-light")
@@ -146,7 +146,7 @@ function loadingShow(info) {
 		obj_loading.appendTo("body");
 		obj_loading.hide();
 	}
-	if (obj_locker.length == 0) {
+	if (obj_locker.length === 0) {
 		obj_locker = $("<div>")
 			.attr("id", "screenLocker")
 			.addClass("position-absolute bg-dark")
@@ -163,20 +163,20 @@ function loadingShow(info) {
 		obj_locker.height($(window).height() + $(window).scrollTop());
 		obj_locker.width($(document.body).outerWidth(true) + $(window).scrollLeft());
 		obj_locker.fadeIn(500);
-		if (info == null) info = language.sending;
+		if (info === null) info = language.sending;
 		obj_loading.find('span').html(info);
-		var theTop = ($(document.body).height() - obj_loading.height()) / 2 + $(document.body).scrollTop()-100;
-		var theLeft = ($(document.body).width() - obj_loading.width()) / 2 + $(document.body).scrollLeft();
+		let theTop = ($(document.body).height() - obj_loading.height()) / 2 + $(document.body).scrollTop()-100;
+		let theLeft = ($(document.body).width() - obj_loading.width()) / 2 + $(document.body).scrollLeft();
 		obj_loading.css({"top": theTop, "left": theLeft});
 		obj_loading.fadeIn(500);
 	}
-	return;
+
 }
 
 //开启模态窗口
 function openDialog(url, width, height, mode) {
-	var sOrnaments = "dialogWidth:"+width+"px;dialogHeight:"+height+"px;center:1;dialogLeft:200;dialogTop:100;dialogHide:0;edge:raised;help:0;resizable:0;scroll:0;status:0;unadorned:0;center:1;";
-	var win = null;
+	let sOrnaments = "dialogWidth:"+width+"px;dialogHeight:"+height+"px;center:1;dialogLeft:200;dialogTop:100;dialogHide:0;edge:raised;help:0;resizable:0;scroll:0;status:0;unadorned:0;center:1;";
+	let win = null;
 	try {
 		if(mode){
 			win = window.showModalDialog(url, window, sOrnaments);
@@ -191,46 +191,47 @@ function openDialog(url, width, height, mode) {
 
 //新开窗口
 function openWindow(url,width,height) {
-	var win = window.open(url, "new_window","height="+height+", width="+width+", top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no, modal=yes");
-	return win;
+    return window.open(url, "new_window","height="+height+", width="+width+", top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no, modal=yes");
 }
 
 //程序终端指定时间
 function sleep(the_time) {
-	var over_time = new Date(new Date().getTime() + the_time);
+	let over_time = new Date(new Date().getTime() + the_time);
 	while(over_time > new Date()) {}
 }
 
 //随机数字
 function rndNum(min,max){
-	if(typeof(min)=="undefined") return Math.random();
-	if(typeof(max)=="undefined") max = min, min = 0;
-	var Range = max - min;
-	var Rand = Math.random();
+	if(typeof(min)==="undefined") return Math.random();
+	if(typeof(max)==="undefined") {
+		max = min;
+		min = 0;
+    }
+	let Range = max - min;
+	let Rand = Math.random();
 	return(min + Math.round(Rand * Range));
 }
 
 //随机字符串
 function rndStr(len, t_lst, c_lst) {
-	var str = "";
-	var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	var lower = "abcdefghijklmnopqrstuvwxyz";
-	var number = "1234567890";
-	var cn = false;
-	var char_lst = new Array();
-	var i = 0, rnd_num = 0;
-	if(typeof(t_lst)=="undefined") t_lst = "";
+	let str = "";
+	let upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	let lower = "abcdefghijklmnopqrstuvwxyz";
+	let number = "1234567890";
+	let char_lst = [];
+	let rnd_num = 0;
+	if(typeof(t_lst)==="undefined") t_lst = "";
 	t_lst += "0000";
-	if(t_lst.charAt(0)=="1") char_lst = char_lst.concat(upper.split(/\B/));
-	if(t_lst.charAt(1)=="1") char_lst = char_lst.concat(lower.split(/\B/));
-	if(t_lst.charAt(2)=="1") char_lst = char_lst.concat(number.split(/\B/));
-	cn = (t_lst.charAt(3)=="1");
-	if(typeof(c_lst)=="undefined") {
-		c_lst = new Array();
-	} else if(typeof(c_lst)!="object") {
+	if(t_lst.charAt(0)==="1") char_lst = char_lst.concat(upper.split(/\B/));
+	if(t_lst.charAt(1)==="1") char_lst = char_lst.concat(lower.split(/\B/));
+	if(t_lst.charAt(2)==="1") char_lst = char_lst.concat(number.split(/\B/));
+	let cn = (t_lst.charAt(3)==="1");
+	if(typeof(c_lst)==="undefined") {
+		c_lst = [];
+	} else if(typeof(c_lst)!=="object") {
 		c_lst = [c_lst];
 	}
-	for(i=0; i<len; i++) {
+	for(let i=0; i<len; i++) {
 		rnd_num = rndNum(10);
 		if(c_lst.length>0 && rnd_num>7) {
 			str += c_lst[rndNum(c_lst.length-1)];
@@ -245,33 +246,31 @@ function rndStr(len, t_lst, c_lst) {
 
 //字符串水印
 function watermark(obj, rate, copyright, char_c, jam_tag) {
-	var i = 0;
-	var c_cur = "", result = "", str="";
-	var c_lst = new Array(), u_lst = new Array();
-	var m_start = "", m_end = "";
-	var jam_flag = true;
+	let c_cur = "", result = "", str="";
+	let c_lst = [];
+	let jam_flag = true;
 
-	if(typeof(obj)=="object") {
+	if(typeof(obj)==="object") {
 		str = obj.innerHTML;
 	} else {
 		str = obj.toString();
 	}
-	if(rate==null) rate = 5;
-	if(copyright==null) copyright = "WaterMark Maker, Coded by Windy2000";
-	if(char_c!=null) c_lst = char_c.split(",");
-	if(jam_tag==null) jam_tag = false;
+	if(rate===null) rate = 5;
+	if(copyright===null) copyright = "WaterMark Maker, Coded by Windy2000";
+	if(char_c!==null) c_lst = char_c.split(",");
+	if(jam_tag===null) jam_tag = false;
 
 	str = str.replace(/<(script|style)[^>]*?>([\w\W]*?)<\/\1>/ig,"");
-	u_lst = str.match(/(<(.+?)>)|(&[\w#]+;)/g);
+	let u_lst = str.match(/(<(.+?)>)|(&[\w#]+;)/g);
 	str = str.replace(/(<(.+?)>)|(&[\w#]+;)/g,String.fromCharCode(0));
-	m_start = "<span class='watermark'>";
-	m_end = "</span>";
+	let m_start = "<span class='watermark'>";
+	let m_end = "</span>";
 
-	for(i=0;i<str.length;i++) {
+	for(let i=0;i<str.length;i++) {
 		c_cur = str.charCodeAt(i);
-		if(c_cur==0) {
+		if(c_cur===0) {
 			result += u_lst.shift();
-		} else if(c_cur==10) {
+		} else if(c_cur===10) {
 			result += m_start + rndStr(8, "1111", c_lst) + m_end;
 			result += m_start + "[" + copyright + "]" + m_end + "\n";
 		} else {
@@ -285,7 +284,7 @@ function watermark(obj, rate, copyright, char_c, jam_tag) {
 	}
 	if(!jam_flag) result += "</span>";
 
-	if(typeof(obj)=="object") {
+	if(typeof(obj)==="object") {
 		obj.innerHTML = result;
 	}
 	return result;
@@ -293,51 +292,51 @@ function watermark(obj, rate, copyright, char_c, jam_tag) {
 
 //MD5编码
 function md5(str) {
-	var rhex = function(num) {
-		var hex_chr = "0123456789abcdef";
+	let rhex = function(num) {
+		let hex_chr = "0123456789abcdef";
 		str = "";
-		for(var i=0; i<=3; i++) str += hex_chr.charAt((num >> (i * 8 + 4)) & 0x0F) + hex_chr.charAt((num >> (i * 8)) & 0x0F);
+		for(let i=0; i<=3; i++) str += hex_chr.charAt((num >> (i * 8 + 4)) & 0x0F) + hex_chr.charAt((num >> (i * 8)) & 0x0F);
 		return str;
-	}
-	var str2blks_MD5 = function(str) {
-		var i=0,m=0;
-		var nblk = ((str.length + 8) >> 6) + 1;
-		var blks = new Array(nblk * 16);
+	};
+	let str2blks_MD5 = function(str) {
+		let i=0,m=0;
+		let nblk = ((str.length + 8) >> 6) + 1;
+		let blks = new Array(nblk * 16);
 		for (i=0; i<nblk*16; i++) blks[i] = 0;
 		for (i=0,m=str.length; i<m; i++) blks[i >> 2] |= str.charCodeAt(i) << ((i % 4) * 8);
 		blks[i >> 2] |= 0x80 << ((i % 4) * 8);
 		blks[nblk * 16 - 2] = str.length * 8;
 		return blks;
-	}
-	var add = function(x, y) {
-		var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-		var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+	};
+	let add = function(x, y) {
+		let lsw = (x & 0xFFFF) + (y & 0xFFFF);
+		let msw = (x >> 16) + (y >> 16) + (lsw >> 16);
 		return (msw << 16) | (lsw & 0xFFFF);
-	}
-	var rol = function(num, cnt) {
+	};
+	let rol = function(num, cnt) {
 		return (num << cnt) | (num >>> (32 - cnt));
-	}
-	var cmn = function(q, a, b, x, s, t) {
+	};
+	let cmn = function(q, a, b, x, s, t) {
 		return add(rol(add(add(a, q), add(x, t)), s), b);
-	}
-	var ff = function(a, b, c, d, x, s, t) {
+	};
+	let ff = function(a, b, c, d, x, s, t) {
 		return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-	}
-	var gg = function(a, b, c, d, x, s, t) {
+	};
+	let gg = function(a, b, c, d, x, s, t) {
 		return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-	}
-	var hh = function(a, b, c, d, x, s, t) {
+	};
+	let hh = function(a, b, c, d, x, s, t) {
 		return cmn(b ^ c ^ d, a, b, x, s, t);
-	}
-	var ii = function(a, b, c, d, x, s, t) {
+	};
+	let ii = function(a, b, c, d, x, s, t) {
 		return cmn(c ^ (b | (~d)), a, b, x, s, t);
-	}
-	var x = str2blks_MD5(str);
-	var a = 1732584193;
-	var b = -271733879;
-	var c = -1732584194;
-	var d = 271733878;
-	for (var i=0, m=x.length; i<m; i+=16) {
+	};
+	let x = str2blks_MD5(str);
+	let a = 1732584193;
+	let b = -271733879;
+	let c = -1732584194;
+	let d = 271733878;
+	for (let i=0, m=x.length; i<m; i+=16) {
 		olda = a;
 		oldb = b;
 		oldc = c;
@@ -416,7 +415,7 @@ function md5(str) {
 
 //查看变量
 function debug(para, mode) {
-	if($("#debug").length==0) {
+	if($("#debug").length===0) {
 		$('\
 <div style="margin:10px auto;width:600px;">\
 	<b>Debug:</b><br/>\
@@ -424,16 +423,16 @@ function debug(para, mode) {
 </div>\
 		').appendTo("body");
 	}
-	var str = "";
-	if(typeof(para)!="string" && typeof(para)!="number") {
-		for(var x in para) {
+	let str = "";
+	if(typeof(para)!=="string" && typeof(para)!=="number") {
+		for(let x in para) {
 			str += x + " : " + para[x] + "\n";
 		}
 	} else {
 		str = para;
 	}
 
-	if(mode==true) {
+	if(mode===true) {
 		$id("debug").value = str + "\n\n======================================\n\n" + $id("debug").value;
 	} else {
 		$id("debug").value = str;
@@ -442,29 +441,29 @@ function debug(para, mode) {
 
 //查看对象属性
 function checkObj(obj, func_show) {
-	if(typeof(func_show)!="function") func_show = alert;
-	for(var x in obj) func_show(x + " : " + obj[x]);
-	return;
+	if(typeof(func_show)!=="function") func_show = alert;
+	for(let x in obj) func_show(x + " : " + obj[x]);
+
 }
 
 //错误信息处理
 function reportError(msg, url, line) {
-	var str = "You have found an error as below: \n\n";
+	let str = "You have found an error as below: \n\n";
 	str += "Err: " + msg + "\n\non line: " + line;
-	var report_func = alert;
-	if(typeof(setting)!="undefined" && !setting.debug) report_func(str, true);
+	if(typeof global.err_report_func!=="function") global.err_report_func = alert;
+	if(typeof(setting)!=="undefined" && !setting.debug) global.err_report_func(str, true);
 	return true;
 }
 
 //检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
 function checkNrun(func, params) {
-	var idx = md5(func.toString());
-	if(typeof global.timer == 'undefined') global.timer = new Object();
+	let idx = md5(func.toString());
+	if(typeof global.timer === 'undefined') global.timer = {};
 	global.timer[idx] = setInterval(function(){
-		if(typeof(language)!='undefined' && typeof(setting)!='undefined') {
-			if(typeof func == 'function') {
+		if(typeof(language)!=='undefined' && typeof(setting)!=='undefined') {
+			if(typeof func === 'function') {
 				func.apply(func, params);
-			} else if(typeof func == 'string') {
+			} else if(typeof func === 'string') {
 				window[func].apply(func, params);
 			}
 			clearInterval(global.timer[idx]);
@@ -474,12 +473,12 @@ function checkNrun(func, params) {
 
 //处理页面URL为对应的链接模式
 function setURL(url_fix) {
-	if(typeof(setting) == 'undefined') return;
+	if(typeof(setting) === 'undefined') return;
 	$('a[href]').each(function(){
 		let url = $(this).attr('href');
 		let re = new RegExp("^\/?"+url_fix);
 		url = url.replace(re, '');
-		if(url.indexOf(setting.url_prefix)!=0 && url.indexOf("#")!=0) {
+		if(url.indexOf(setting.url_prefix)!==0 && url.indexOf("#")!==0) {
 			this.href = setting.url_prefix + url;
 		} else {
 			this.href = url;
@@ -487,7 +486,7 @@ function setURL(url_fix) {
 	});
 	$('form[action]').each(function(){
 		let url = $(this).attr('action');
-		if(url.indexOf(setting.url_prefix)!=0) {
+		if(url.indexOf(setting.url_prefix)!==0) {
 			this.action = setting.url_prefix + url;
 		}
 	});

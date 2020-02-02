@@ -94,7 +94,7 @@ function tinymceInit(obj){
 				title : 'Div/P 模式切换',
 				image : setting.path_root+'static/images/div.png',
 				onclick : function() {
-					var content = tinyMCE.activeEditor.getContent();
+					let content = tinyMCE.activeEditor.getContent();
 					if(content.indexOf("<div")==-1) {
 						content = content.replace(/<p(.*?)>([\w\W]+?)<\/p>/ig, "<div$1>$2</div>");
 					} else {
@@ -107,7 +107,7 @@ function tinymceInit(obj){
 				title : '代码清理',
 				image : 'static/images/format.png',
 				onclick : function() {
-					var content = tinyMCE.activeEditor.getContent();
+					let content = tinyMCE.activeEditor.getContent();
 					if(content.indexOf("<div")==-1) {
 						content = content.replace(/(<br(\s\/)?>)+/ig, "</p><p>");
 						content = content.replace(/<p(.*?)>[\xa0\r\n\s\u3000]+/ig, "<p$1>");

@@ -56,7 +56,7 @@
 </table>
 <script language="JavaScript">
 $('#btn').click(function(){
-    var item = $('table[name=tpl]').clone().attr('name', 'new').hide();
+    let item = $('table[name=tpl]').clone().attr('name', 'new').hide();
     item.insertAfter('#theForm > table:last').show(500);
     $('[data-toggle="tooltip"]').tooltip();
     setBtn();

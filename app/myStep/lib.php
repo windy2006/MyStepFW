@@ -62,7 +62,7 @@ function getError() {
     $count = 0;
     if(is_file($err_file)) {
         $err_content= \f::getLocal($err_file);
-        $err_lst = preg_split("/\n+[\-] {20, }\n+/", $err_content);
+        $err_lst = preg_split("/\n+[\-]{20,}\n+/", $err_content);
         $count = count($err_lst) - 1;
     }
     return array('count'=>$count);

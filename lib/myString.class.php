@@ -434,7 +434,7 @@ class myString {
      */
     public static function breakStr($str) {
         if(self::charset($str)=='UTF-8') {
-            preg_match_all('/([\xE0-\xEF][\x80-\xBF] {2})|./', $str, $arr);
+            preg_match_all('/([\xE0-\xEF][\x80-\xBF]{2})|./', $str, $arr);
         } else {
             preg_match_all('/[\xa0-\xff]?./', $str, $arr);
         }

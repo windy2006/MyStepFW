@@ -5,4 +5,4 @@ if(!file_exists($tpl_setting['path'].'/'.$tpl_setting['style'].'/'.$tpl_setting[
     myStep::info('module_missing');
 }
 $t = new myTemplate($tpl_setting, false, true);
-$content = $mystep->parseTpl($t, '', false);
+$content = $mystep->render($t, '', false);

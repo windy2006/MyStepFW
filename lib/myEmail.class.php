@@ -90,7 +90,7 @@ Class myEmail extends myBase {
      */
     public function setFrom($email, $name='', $auto=true) {
         $email = trim($email);
-        if(!preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z] {2, 4}$/i', $email)) return false;
+        if(!preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2, 4}$/i', $email)) return false;
         $name = trim(preg_replace('/[\r\n]+/', '', $name));
         $name = myString::setCharset($name, $this->charset);
         if(empty($name)) {
@@ -164,7 +164,7 @@ Content-Transfer-Encoding: base64
         if(empty($name)) $name = strstr($email, '@', true);
         $name = trim(preg_replace('/[\r\n]+/', '', $name));
         $name = myString::setCharset($name, $this->charset);
-        if($flag = preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z] {2, 4}$/i', $email)) {
+        if($flag = preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2, 4}$/i', $email)) {
             array_push($this->$type, array($email, $name));
         }
         return $flag;

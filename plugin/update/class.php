@@ -258,7 +258,7 @@ class plugin_update implements interface_plugin {
                 $tpl_sub->assign($paras);
                 $tpl_sub->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));
                 $tpl->assign('url_fix', defined('URL_FIX') ? URL_FIX : '');
-                $tpl->assign('main', $mystep->parseTpl($tpl_sub, 's', false));
+                $tpl->assign('main', $mystep->render($tpl_sub, 's', false));
                 include(APP.'myStep/global.php');
                 $mystep->show($tpl);
         }

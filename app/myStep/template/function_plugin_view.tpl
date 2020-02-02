@@ -41,8 +41,8 @@
 </div>
 <script language="JavaScript" type="text/javascript">
 $('form').submit(function() {
-    var theObjs = $(this).find("input:password[id$=_r]");
-    for(var i=0; i<theObjs.length; i++) {
+    let theObjs = $(this).find("input:password[id$=_r]");
+    for(let i=0; i<theObjs.length; i++) {
         if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!=theObjs[i].value) {
             alert("两次输入密码请保持一致！");
             document.getElementById(theObjs[i].id.replace(/_r$/, "")).focus();

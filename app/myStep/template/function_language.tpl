@@ -96,26 +96,26 @@ function setPosition() {
     $("#footer").height($(window).width()>530?60:80);
 }
 function goto(type) {
-    var url = location.href.replace(/&type\=\w+/, '');
+    let url = location.href.replace(/&type\=\w+/, '');
     location.href = url + '&type=' + type;
 }
 function del(obj) {
     $(obj).parent().parent().remove();
 }
 $('#item').on('show.bs.modal', function (event) {
-    var modal = $(this);
+    let modal = $(this);
     modal.find('input').val('');
     modal.find('button[type="submit"]').unbind().click(function(){
-        var idx = modal.find('input[name="idx"]').val();
-        var lng = modal.find('input[name="lng"]').val();
-        var obj = $('input[name="language['+idx+']"]');
+        let idx = modal.find('input[name="idx"]').val();
+        let lng = modal.find('input[name="lng"]').val();
+        let obj = $('input[name="language['+idx+']"]');
         if(obj.length>0) {
             if(confirm("索引 " + idx + " 已存在，表述内容为：" + obj.val() + "\n\n是否需要替换为：" + lng)) {
                 obj.val(lng);
             }
         } else {
             obj = $('#item_list').find('tr:last');
-            var no = parseInt(obj.find('td:first').text()) + 1;
+            let no = parseInt(obj.find('td:first').text()) + 1;
             $('<tr>\n' +
               '    <td>'+no+'</td>\n' +
               '    <td>'+idx+'</td>\n' +

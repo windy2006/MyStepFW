@@ -86,7 +86,7 @@
 	$(function(){
         jQuery.vendor('bootstrap-table', {
             add_css:true,
-            name_fix:false,
+            name_fix:true,
             callback:function(){
                 $.setJS([
                     'vendor/bootstrap-table/locale/bootstrap-table-zh-CN.min.js',
@@ -204,7 +204,7 @@
                 }
             }],
 			rowStyle: function(row, index) {
-				var classes = ['', 'primary', 'secondary','success','danger','warning','info', 'active'];
+				let classes = ['', 'primary', 'secondary','success','danger','warning','info', 'active'];
 				return {
 					'classes' : 'table-'+classes[rndNum(0, classes.length-1)],
                     'css': {
@@ -228,7 +228,7 @@
             },
             detailFormatter: function(index, row) {
                 //格式化详细数据
-                var html = []
+                let html = []
                 $.each(row, function (key, value) {
                     if(isNaN(key)) html.push('<p><b>' + key + ':</b> ' + value + '</p>')
                 })
@@ -272,7 +272,7 @@
         });
 
         $('#btn_edit').click(function() {
-            var data = $tbl.bootstrapTable('getSelections')[0];
+            let data = $tbl.bootstrapTable('getSelections')[0];
             showEdit(data);
         });
 
@@ -281,7 +281,7 @@
         });
 
         $('#btn_filter').click(function() {
-            var flag = $tbl.bootstrapTable('getOptions')['filterControl'];
+            let flag = $tbl.bootstrapTable('getOptions')['filterControl'];
             $tbl.bootstrapTable('refreshOptions', {
                 filterControl: !flag,
 				filterShowClear: !flag
@@ -289,21 +289,21 @@
         });
 
 		function showEdit(data) {
-            var cols = $tbl.bootstrapTable('getOptions').columns[0];
-            var uid = $tbl.bootstrapTable('getOptions').uniqueId;
-            var tpl = '' +
+            let cols = $tbl.bootstrapTable('getOptions').columns[0];
+            let uid = $tbl.bootstrapTable('getOptions').uniqueId;
+            let tpl = '' +
                 '<div class="form-group row">\n' +
                 '  <label class="col-sm-4 col-form-label">项目</label>\n' +
                 '  <div class="col-sm-8">\n' +
                 '    <input type="text" class="form-control" placeholder="值" value="">\n' +
                 '  </div>\n' +
                 '</div>';
-            var obj = null;
-            var add_mode = (data==null);
+            let obj = null;
+            let add_mode = (data==null);
             $('#modalForm').find('.modal-title span.txt').text(add_mode?'添加记录':'修改数据');
             $('#modalForm').find('.modal-footer span.txt').text(add_mode?'添加':'更新');
             $('#modalForm').find('.modal-body').empty();
-            for(var i=0,m=cols.length;i<m;i++) {
+            for(let i=0,m=cols.length;i<m;i++) {
                 if(cols[i].field=='') continue;
                 if(cols[i].field==uid) {
                     obj = $('<input type="hidden" name="'+uid+'" value="'+(add_mode ? 0 : data[cols[i].field])+'" />');
@@ -317,9 +317,9 @@
                 obj = null;
 			}
             $('#modalForm').unbind().submit(function(){
-                var data = $(this).serializeArray();
-                var record = {};
-                for(var i=0,m=data.length;i<m;i++) {
+                let data = $(this).serializeArray();
+                let record = {};
+                for(let i=0,m=data.length;i<m;i++) {
                     record[data[i].name] = data[i].value;
 				}
                 if(add_mode) {

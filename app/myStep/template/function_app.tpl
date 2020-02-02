@@ -66,18 +66,18 @@
 </div>
 <script language="JavaScript">
 $('#plugin').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget);
-    var app = button.data('app');
-    var modal = $(this);
-    var plugin_list = $('#'+app).val().split(',');
+    let button = $(event.relatedTarget);
+    let app = button.data('app');
+    let modal = $(this);
+    let plugin_list = $('#'+app).val().split(',');
     modal.find('input[type="checkbox"]').prop('checked', false);
-    for(var x in plugin_list) {
+    for(let x in plugin_list) {
         modal.find('input[value="'+plugin_list[x]+'"]').prop('checked', true);
     }
     modal.find('button[type="submit"]').unbind().click(function(){
-        var checked = modal.find('input[type="checkbox"]:checked');
-        var result = [];
-        for(var i=0,m=checked.length;i<m;i++) {
+        let checked = modal.find('input[type="checkbox"]:checked');
+        let result = [];
+        for(let i=0,m=checked.length;i<m;i++) {
             result.push(checked[i].value);
         }
         $('#'+app).val(result);
@@ -98,7 +98,7 @@ $(function() {
         "vendor/codemirror/mode/clike/clike.js"
     ],function(){
         $('textarea').each(function() {
-            var editor = CodeMirror.fromTextArea(this, {
+            let editor = CodeMirror.fromTextArea(this, {
                 mode: "application/x-httpd-php",
                 indentUnit: 4,
                 indentWithTabs: true,

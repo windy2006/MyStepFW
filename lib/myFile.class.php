@@ -82,7 +82,7 @@ class myFile {
      * @param array $headers
      */
     public function __construct($file, $headers=array()) {
-        if(preg_match('/^[\w] {2, }:/', $file)) $this->remote = true;
+        if(preg_match('/^[\w]{2,}:/', $file)) $this->remote = true;
         if($this->remote) {
             $this->file = $file;
             $this->context = self::buildContext($file, $headers);
@@ -239,7 +239,7 @@ class myFile {
             $realpath = str_replace(DIRECTORY_SEPARATOR, '/', $realpath);
             $realpath = preg_replace('/\/+/', '/', $realpath);
             $realpath = str_replace('/./', '/', $realpath);
-            $realpath = preg_replace('/[\.] {2, }/', '..', $realpath);
+            $realpath = preg_replace('/[\.]{2,}/', '..', $realpath);
             $realpath = '/'.str_replace($root, '', $realpath);
             while(preg_match('/\/[^\/]+\/\.\.\//', $realpath)) {
                 $realpath = preg_replace('/\/[^\/]+\/\.\.\//', '/', $realpath);

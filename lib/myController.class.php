@@ -418,9 +418,9 @@ class myController extends myBase {
      */
     public function CSS($show = true, $expires = 604800) {
         $css = implode(chr(10), $this->css);
-        if (!$show) return cssMin::minify($css);
+        if (!$show) return CssMin::minify($css);
         $md5 = md5($css);
-        $this->etag($md5 . '.css');
+        $this->etag($md5 . '.css', $expires);
         $minify = new myMinify('css', dirname(__DIR__) . '/cache/' . $md5 . '.css');
         if (!$minify->check($expires)) {
             $minify->add($css);
@@ -475,9 +475,9 @@ class myController extends myBase {
      */
     public function JS($show = true, $expires = 604800) {
         $js = implode(chr(10), $this->js);
-        if (!$show) return jsMin::minify($js);
+        if (!$show) return \JSMin\JSMin::minify($js);
         $md5 = md5($js);
-        $this->etag($md5 . '.js');
+        $this->etag($md5 . '.js', $expires);
         $minify = new myMinify('js', dirname(__DIR__) . '/cache/' . $md5 . '.js');
         if (!$minify->check($expires)) {
             $minify->add($js);
@@ -743,7 +743,10 @@ class myController extends myBase {
             spl_autoload_register(function ($class) use ($current) {
                 $ext = explode(', ', $current['ext']);
                 foreach($ext as $e) {
-                    if(is_file($current['path'].$class.$e)) require_once($current['path'].$class.$e);
+                    if(is_file($current['path'].$class.$e)) {
+                        require_once($current['path'].$class.$e);
+                        break;
+                    }
                 }
             });
             if(isset($current['idx'])) {

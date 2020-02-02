@@ -1,0 +1,214 @@
+[
+    {
+        "name": "erusev/parsedown",
+        "version": "2.0.x-dev",
+        "version_normalized": "2.0.9999999.9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/erusev/parsedown.git",
+            "reference": "bded7a6ff34f9f0f31be2c60b98e973508e3bf27"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/erusev/parsedown/zipball/bded7a6ff34f9f0f31be2c60b98e973508e3bf27",
+            "reference": "bded7a6ff34f9f0f31be2c60b98e973508e3bf27",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "ext-mbstring": "*",
+            "php": "^7.1"
+        },
+        "require-dev": {
+            "friendsofphp/php-cs-fixer": "^2.13",
+            "infection/infection": "^0.12.0",
+            "phpunit/phpunit": "^7.4||^6.5.13||^5.7.27||^4.8.36",
+            "vimeo/psalm": "^3.8.3"
+        },
+        "time": "2020-01-19T18:14:37+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "Erusev\\Parsedown\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Emanuil Rusev",
+                "email": "hello@erusev.com",
+                "homepage": "http://erusev.com"
+            }
+        ],
+        "description": "Parser for Markdown.",
+        "homepage": "http://parsedown.org",
+        "keywords": [
+            "markdown",
+            "parser"
+        ]
+    },
+    {
+        "name": "meenie/javascript-packer",
+        "version": "1.1",
+        "version_normalized": "1.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/meenie/javascript-packer.git",
+            "reference": "dcab0159ae1ed9d7535c034fb8afe1e4c3495d22"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/meenie/javascript-packer/zipball/dcab0159ae1ed9d7535c034fb8afe1e4c3495d22",
+            "reference": "dcab0159ae1ed9d7535c034fb8afe1e4c3495d22",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "time": "2013-03-25T21:54:33+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "class.JavaScriptPacker.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "LGPL 2.1"
+        ],
+        "authors": [
+            {
+                "name": "Nicolas Martin",
+                "role": "Developer"
+            }
+        ],
+        "description": "Composer hosted mirror of the PHP Version of Dean Edwards' JavaScript Packer",
+        "homepage": "http://joliclic.free.fr/php/javascript-packer/en/",
+        "keywords": [
+            "javascript packer"
+        ]
+    },
+    {
+        "name": "mrclay/jsmin-php",
+        "version": "2.4.0",
+        "version_normalized": "2.4.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/mrclay/jsmin-php.git",
+            "reference": "bb05febc9440852d39899255afd5569b7f21a72c"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/mrclay/jsmin-php/zipball/bb05febc9440852d39899255afd5569b7f21a72c",
+            "reference": "bb05febc9440852d39899255afd5569b7f21a72c",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "ext-pcre": "*",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "4.2"
+        },
+        "time": "2018-12-06T15:03:38+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "JSMin\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Stephen Clay",
+                "email": "steve@mrclay.org",
+                "role": "Developer"
+            },
+            {
+                "name": "Ryan Grove",
+                "email": "ryan@wonko.com",
+                "role": "Developer"
+            }
+        ],
+        "description": "Provides a modified port of Douglas Crockford's jsmin.c, which removes unnecessary whitespace from JavaScript files.",
+        "homepage": "https://github.com/mrclay/jsmin-php/",
+        "keywords": [
+            "compress",
+            "jsmin",
+            "minify"
+        ]
+    },
+    {
+        "name": "phrozenbyte/cssmin",
+        "version": "v3.0.2",
+        "version_normalized": "3.0.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/PhrozenByte/cssmin.git",
+            "reference": "cbf03632033927f2bccf19b424d61a14fc44e37a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/PhrozenByte/cssmin/zipball/cbf03632033927f2bccf19b424d61a14fc44e37a",
+            "reference": "cbf03632033927f2bccf19b424d61a14fc44e37a",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "php": ">=5.0"
+        },
+        "time": "2017-05-26T17:05:01+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "src/"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Joe Scylla",
+                "email": "joe.scylla@gmail.com",
+                "homepage": "https://profiles.google.com/joe.scylla"
+            }
+        ],
+        "description": "CssMin is a css parser and minfier. It minifies css by removing unneeded whitespace character, comments, empty blocks and empty declarations. In addition declaration values can get rewritten to shorter notation if available. The minification if configurable.",
+        "homepage": "http://code.google.com/p/cssmin/",
+        "keywords": [
+            "css",
+            "minify"
+        ]
+    }
+]

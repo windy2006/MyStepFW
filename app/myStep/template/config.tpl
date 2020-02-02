@@ -90,9 +90,9 @@ $(window).resize(setPosition);
 $(setPosition);
 $('[data-toggle="tooltip"]').tooltip();
 $(function(){
-    var srv = '<!--server-->';
+    let srv = '<!--server-->';
     srv = srv.toLowerCase();
-    var obj = document.getElementsByName("setting[router][mode]")[0];
+    let obj = document.getElementsByName("setting[router][mode]")[0];
     console.log(obj);
     if(srv.indexOf('iis')!=-1 || srv.indexOf('apache')!=-1) {
         obj.selectedIndex = 2;

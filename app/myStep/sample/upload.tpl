@@ -73,7 +73,7 @@
             },
 
             uploadStarted:function(i, file, len){
-                var file_info = $('<div class="file_info"><div class="file_name"></div><div class="progressHolder"><div class="progress"></div></div></div>');
+                let file_info = $('<div class="file_info"><div class="file_name"></div><div class="progressHolder"><div class="progress"></div></div></div>');
                 file_info.find(".file_name").html(file.name);
                 showPop('info_upload','文件上传','id','info_upload',300);
                 $("#popupLayer_info_upload_content").addClass("info_upload");
@@ -81,7 +81,7 @@
                 if($("#popupLayer_info_upload > .button").length==0) $('<div class="button"></div>').css({"text-align":"center","margin-bottom":"10px"}).append($("<button>").html("关闭").attr("onclick", "$.closePopupLayer_now();")).appendTo("#popupLayer_info_upload");
                 $.setPopupLayersPosition();
 
-                var reader = new FileReader();
+                let reader = new FileReader();
                 reader.readAsDataURL(file);
                 $.data(file,file_info);
                 return;
@@ -97,7 +97,7 @@
                     return;
                 } else {
                     $('#list_file').removeClass('d-none');
-					var obj = $('<a href="download/'+result.new_name.split('.').slice(0,2).join('.')+'">'+file.name+'<span>X</span></a> ');
+					let obj = $('<a href="download/'+result.new_name.split('.').slice(0,2).join('.')+'">'+file.name+'<span>X</span></a> ');
 					obj.appendTo('#list_file');
 					obj.find('span').click(function(e){
 						e.preventDefault();

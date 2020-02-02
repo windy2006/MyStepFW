@@ -11,29 +11,27 @@
 **************************************************/
 
 function highlightIt(the_obj){
-	var tag_name = the_obj.tagName.toLowerCase();
-	(tag_name=="input") ? the_obj.select() : the_obj.focus();
+	(the_obj.tagName.toLowerCase()==="input") ? the_obj.select() : the_obj.focus();
 	$(the_obj).addClass('is-invalid').one("keypress", function(){
 		$(this).removeClass('is-invalid');
 	}).one("change", function(){
 		$(this).removeClass('is-invalid');
 	});
 	$(window).scrollTop($(the_obj).offset().top-100);
-	return;
 }
 
 function checkForm(the_form, myChecker){
-	var flag = false;
-	if(typeof(myChecker)=="function") {
+	let flag = false;
+	if(typeof(myChecker)==="function") {
 		flag = myChecker(the_form);
 	} else {
 		flag = true;
 	}
-	if(flag==false) return false;
+	if(flag===false) return false;
 
-	var theObjs = $(the_form).find("input:password[id$=_r]");
-	for(var i=0; i<theObjs.length; i++) {
-		if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!=theObjs[i].value) {
+	let theObjs = $(the_form).find("input:password[id$=_r]");
+	for(let i=0; i<theObjs.length; i++) {
+		if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!==theObjs[i].value) {
 			alert(language.checkform_err_password);
 			highlightIt(theObjs[i]);
 			highlightIt($('#'+theObjs[i].id.replace(/_r$/, "")).get(0));
@@ -42,24 +40,21 @@ function checkForm(the_form, myChecker){
 	}
 	theObjs.remove();
 	
-	var obj_list = new Array();
-	var the_obj = null;
-	var the_value, the_need, the_len;
-	var tag_name = "";
-	obj_list = $(the_form).find("input,select,textarea");
-	for(var i=0;i<obj_list.length;i++){
+	let obj_list = $(the_form).find("input,select,textarea");
+	let the_obj = null;
+	let the_value, the_need, the_len;
+	for(let i=0;i<obj_list.length;i++){
 		the_obj = obj_list[i];
-		tag_name = the_obj.tagName.toLowerCase();
-		if(typeof(the_obj.getAttribute)=="undefined") continue;
+		if(typeof(the_obj.getAttribute)==="undefined") continue;
 		the_value = the_obj.value;
 		the_value = (the_value==null?"":the_value.replace(/(^\s*)|(\s*$)/g,""));
 		the_need = the_obj.getAttribute("need");
 		the_len = the_obj.getAttribute("len");
-		the_length = typeof(String.prototype.blen)=="undefined"?the_value.length:the_value.blen();
+		the_length = typeof(String.prototype.blen)==="undefined"?the_value.length:the_value.blen();
 		if(the_len!=null) {
 			if(the_len.match(/^(\d+)(\!)?$/)) {
-				if(RegExp.$2=="!") {
-					if(the_length != RegExp.$1) {
+				if(RegExp.$2==="!") {
+					if(the_length !== RegExp.$1) {
 						alert(language.checkform_lenth_limit1_2.printf(RegExp.$1));
 						highlightIt(the_obj);
 						return false;
@@ -73,9 +68,9 @@ function checkForm(the_form, myChecker){
 				}
 			} else {
 				the_len = the_len.split("-");
-				if(the_len.length==2 && the_len[0].match(/^\d+$/) && the_len[1].match(/^\d+$/)) {
+				if(the_len.length===2 && the_len[0].match(/^\d+$/) && the_len[1].match(/^\d+$/)) {
 					if(the_length < the_len[0] || the_length > the_len[1]) {
-						if(the_len[0]==the_len[1]) {
+						if(the_len[0]===the_len[1]) {
 							alert(language.checkform_lenth_limit2.printf(the_len[0]));
 						} else {
 							alert(language.checkform_lenth_limit2.printf(the_len.join(" - ")));
@@ -87,7 +82,7 @@ function checkForm(the_form, myChecker){
 			}
 		}
 		if(the_need!=null) {
-			if(the_need.search("_")>=0 && the_value=="") continue;
+			if(the_need.search("_")>=0 && the_value==="") continue;
 			the_need = the_need.toLowerCase().replace("_", "");
 		}
 		switch(the_need){
@@ -150,9 +145,9 @@ function checkForm(the_form, myChecker){
 					return false;
 				} else {
 					the_value = the_value.replace(/\s.+$/,"");
-					var the_list = the_value.split(/[\-\/]/g);
-					var cur_date = new Date((the_list[0]-0), (the_list[1]-1), (the_list[2]-0));
-					if(cur_date.getDate()!=(the_list[2]-0) || cur_date.getMonth()!=(the_list[1]-1) ) {
+					let the_list = the_value.split(/[\-\/]/g);
+					let cur_date = new Date((the_list[0]-0), (the_list[1]-1), (the_list[2]-0));
+					if(cur_date.getDate()!==(the_list[2]-0) || cur_date.getMonth()!==(the_list[1]-1) ) {
 						alert(language.checkform_err_date2);
 						highlightIt(the_obj);
 						return false;
@@ -165,13 +160,13 @@ function checkForm(the_form, myChecker){
 					highlightIt(the_obj);
 					return false;
 				} else {
-					var the_list = the_value.split(/:/g);
+					let the_list = the_value.split(/:/g);
 					if(parseInt(the_list[0])>23 || parseInt(the_list[1])>59) {
 						alert(language.checkform_err_time2);
 						highlightIt(the_obj);
 						return false;
 					} else {
-						if(the_list.length==3) {
+						if(the_list.length===3) {
 							if(parseInt(the_list[2])>59) {
 								alert(language.checkform_err_time2);
 								highlightIt(the_obj);
@@ -190,7 +185,7 @@ function checkForm(the_form, myChecker){
 				}
 				break;
 			case "":
-				if(the_value.replace(/\s/g,"").length==0) {
+				if(the_value.replace(/\s/g,"").length===0) {
 					alert(language.checkform_noempty);
 					highlightIt(the_obj);
 					return false;
@@ -198,7 +193,7 @@ function checkForm(the_form, myChecker){
 				break;
 			default:
 				try{
-					var re=new RegExp(the_need,"i");
+					let re=new RegExp(the_need,"i");
 					if(!re.test(the_value)) {
 						alert(language.checkform_err);
 						highlightIt(the_obj);

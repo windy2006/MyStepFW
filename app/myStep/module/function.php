@@ -12,7 +12,7 @@ if(!is_file(PATH.'template/function_'.$module.'.tpl')) {
 $tpl_setting['name'] = 'function_'.$module;
 $t = new myTemplate($tpl_setting, false, true);
 include($script);
-$content = $mystep->parseTpl($t, 's', false);
+$content = $mystep->render($t, 's', false);
 $mystep->setAddedContent('end', '
 <script language="JavaScript" src="static/js/checkForm.js"></script>
 ');

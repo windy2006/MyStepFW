@@ -1003,14 +1003,14 @@ class myImg extends myBase {
             if($fontsize<12) $fontsize = 12;
             $fontcolor = isset($para['fontcolor']) ? $para['fontcolor'] : 'white';
             $bgcolor = isset($para['bgcolor']) ? $para['bgcolor'] : null;
-            if(preg_match('/(#)?[0-9a-f] {6}/i', $bgcolor)) $bgcolor = array_map('hexdec', str_split(str_replace('#', '', $bgcolor), '2'));
+            if(preg_match('/(#)?[0-9a-f]{6}/i', $bgcolor)) $bgcolor = array_map('hexdec', str_split(str_replace('#', '', $bgcolor), '2'));
 
             if($this->setFont($font)) {
                 $font_size = $this->getFontSize($watermark, $fontsize);
                 $font_size[0] += 10;
                 $font_size[1] += 10;
                 $img_txt = new myImg($font_size[0], $font_size[1], array(true, $bgcolor));
-                if(preg_match('/(#)?[0-9a-f] {6}/i', $fontcolor)) {
+                if(preg_match('/(#)?[0-9a-f]{6}/i', $fontcolor)) {
                     $img_txt->setColor('fontcolor', array_map('hexdec', str_split(str_replace('#', '', $fontcolor), '2')));
                     $fontcolor = 'fontcolor';
                 }

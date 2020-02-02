@@ -144,7 +144,7 @@
 <script language="JavaScript">
     $(function(){
         $('.js--animations').change(function(){
-            var x = $(this).val();
+            let x = $(this).val();
             $('#animationSandbox').removeClass().addClass('mx-auto').addClass(x + ' animated').one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
                 $(this).removeClass().addClass('mx-auto');
             });

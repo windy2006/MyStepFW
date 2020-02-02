@@ -164,7 +164,7 @@ class myReq extends myBase {
                             $result = preg_replace('/[^\w]/', '', $result);
                             break;
                         case 'str':
-                            //$result = preg_replace("/[".preg_quote('"\'`~!@#$%^&*()[] {};:<>?\\=').']/', '', $result);
+                            //$result = preg_replace("/[".preg_quote('"\'`~!@#$%^&*()[]{};:<>?\\=').']/', '', $result);
                             $result = str_ireplace('eval', 'eval!', $result);
                             $result = str_ireplace('assert', 'assert!', $result);
                             $result = str_ireplace('riny', 'riny!', $result);

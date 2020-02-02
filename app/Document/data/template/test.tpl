@@ -194,7 +194,7 @@ table td.cat {
 			</div>
 			<div>&nbsp;</div>
 			<div style="font-weight:bold">Sub-template with Variants</div>
-			<!--test_var var1='$test1' var2='$test2["a"]' var3='$_get["c"]'-->
+			<!--test_let var1='$test1' var2='$test2["a"]' var3='$_get["c"]'-->
 			<div>&nbsp;</div>
 			<div style="font-weight:bold">Sub-template with Loop Block</div>
 			<!--test_loop name='list - name' author="myStep" time='Y-m-d' loop='5'-->
