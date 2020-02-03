@@ -124,8 +124,8 @@
                     checkNrun('setTbl', ['#tb_list']);
                     //setTbl('#tb_list');
                 }, function(num_done, num_total, script) {
-                    $('#progress_bar').css('width', Math.ceil(num_done*100/num_total)+'%');
-                    $('#info').html(script + ' loaded!');
+                    $('#progress_bar').width($('#progress_bar').parent().width() * Math.ceil(num_done/num_total));
+                    $('#info').html('脚本 ' + script + ' 已载入！');
                     if(num_done===num_total) {
                         $('#info').html('表格数据处理中。。。');
                         $('#progress_bar').parent().remove();

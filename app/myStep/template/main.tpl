@@ -56,7 +56,7 @@ function resizeMain() {
     }
 }
 $(window).resize(resizeMain);
-function pageInit(){
+(function() {
     $.get('app/myStep/menu.json?'+(new Date()).getTime(), function(data) {
         let obj_top = $("#top_nav");
         let obj_side = $("#list > div:first");
@@ -124,8 +124,7 @@ function pageInit(){
         }
 
     }, "json");
-}
-checkNrun('pageInit');
+}());
 </script>
 </body>
 </html>

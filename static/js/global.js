@@ -468,7 +468,7 @@ function checkNrun(func, params) {
 			}
 			clearInterval(global.timer[idx]);
 		}
-	}, 500);
+	}, 100);
 }
 
 //处理页面URL为对应的链接模式
