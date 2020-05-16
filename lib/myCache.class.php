@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : My Cache                        *
@@ -25,30 +25,40 @@
 class myCache extends myProxy {
     protected
         $func_alias = array(
-            's' => 'set', 
-            'g' => 'get', 
-            'r' => 'remove', 
-            'c' => 'clean', 
-            'db' => 'getData_DB', 
-            'func' => 'getData_func', 
+            's' => 'set',
+            'g' => 'get',
+            'r' => 'remove',
+            'c' => 'clean',
+            'db' => 'getData',
+            'func' => 'getData_func',
         );
 
     /**
      * 类对象初始化
      * @param string $module
      * @param null $setting
+     * @param float $gc_rate
      */
-    public function init($module = '', $setting = null) {
+    public function init($module = '', $setting = null, $gc_rate = 0.1) {
         spl_autoload_register(function ($class) {
             $file = __DIR__.'/cache/'.$class.'.class.php';
-            if(is_file($file)) require_once($file);
+            if(is_file($file)) {
+                require_once($file);
+            } else {
+                $file = __DIR__.'/cache/myCache_'.$class.'.class.php';
+                if(is_file($file)) require_once($file);
+            }
         });
         if(class_exists($module)) {
             $flag = $this->obj = new $module($setting);
         } else {
             $flag = $this->obj = new myCache_File($setting);
         }
-        if(!$flag) $this->error('Cannot initialize cache module!', E_USER_ERROR);
+        if(!$flag) {
+            $this->error('Cannot initialize cache module!', E_USER_ERROR);
+        } else {
+            if(rand(0,100)<$gc_rate*100) $this->obj->clean();
+        }
     }
 
     /**
@@ -70,6 +80,7 @@ class myCache extends myProxy {
      */
     public function getData($query, $mode='all', $ttl = 600) {
         global $db;
+        $db->build('[reset]');
         if($db==null || !($db instanceof myDb)) return '';
         $key = md5($query);
         if($mode=='remove' || $ttl==0) {
@@ -77,6 +88,10 @@ class myCache extends myProxy {
             return '';
         }
         $result = $this->get($key);
+        if(is_numeric($mode)) {
+            $ttl = $mode;
+            $mode = 'all';
+        }
         if(!$result) {
             switch($mode) {
                 case 'record':
@@ -104,7 +119,7 @@ class myCache extends myProxy {
      */
     public function getData_func($func, $args = array(), $ttl = 600) {
         $key = md5(serialize(array($func, $args)));
-        if($ttl==0) {
+        if($ttl==0 || $ttl==null) {
             $result = $this->set($key);
         } else {
             $result = $this->get($key);

@@ -1,4 +1,4 @@
-<?php
+<?PHP
 interface interface_session {
     public static function open($sess_path, $sess_name);
     public static function close();

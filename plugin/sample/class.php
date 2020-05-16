@@ -1,10 +1,10 @@
-<?php
+<?PHP
 class plugin_sample implements interface_plugin {
     public static function check(&$result = '') {
         $result = "";
         $theList = array(
-            "dir1/", 
-            "dir2/", 
+            "dir1/",
+            "dir2/",
         );
         $flag = true;
         $dir = __DIR__;

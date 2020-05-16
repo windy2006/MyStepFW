@@ -56,14 +56,14 @@
 </div>
 
 <footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
-    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2019 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
+    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2020 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
-<script language="JavaScript" src="static/js/jquery.js"></script>
-<script language="JavaScript" src="static/js/bootstrap.bundle.js"></script>
-<script language="JavaScript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="static/js/jquery.js"></script>
+<script type="application/javascript" src="static/js/bootstrap.bundle.js"></script>
+<script type="application/javascript" src="static/js/checkForm.js"></script>
 <!--page_end-->
 </body>
-<script language="JavaScript">
+<script type="application/javascript">
 function myChecker(theForm) {
     if($('#gen_s_pwd').val()=='') {
         alert('请输入管理员密码！');
@@ -93,7 +93,6 @@ $(function(){
     let srv = '<!--server-->';
     srv = srv.toLowerCase();
     let obj = document.getElementsByName("setting[router][mode]")[0];
-    console.log(obj);
     if(srv.indexOf('iis')!=-1 || srv.indexOf('apache')!=-1) {
         obj.selectedIndex = 2;
     } else {

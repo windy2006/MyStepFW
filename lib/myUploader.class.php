@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Upload Manager                  *
@@ -21,9 +21,9 @@ class myUploader extends myBase {
     public
         $result = array();
     protected
-        $path = '', 
-        $counter = 0, 
-        $rename = false, 
+        $path = '',
+        $counter = 0,
+        $rename = false,
         $banlst = '';
 
     /**
@@ -88,9 +88,9 @@ class myUploader extends myBase {
     private function uploadFile() {
         switch($this->result[$this->counter]['error']) {
             case 0:
-                $file_ext = strtolower(strrchr($this->result[$this->counter]['name'], '.'));
-                if(strpos($this->banlst, str_replace('.', '', $file_ext))!==false) $file_ext = '.upload';
-                $this->result[$this->counter]['new_name'] = $this->rename?(getMicrotime().substr(md5($this->result[$this->counter]['size']), 0, 5).$file_ext):$this->result[$this->counter]['name'];
+                $file_ext = strtolower(pathinfo($this->result[$this->counter]['name'], PATHINFO_EXTENSION));
+                if(empty($file_ext) || strpos($this->banlst, $file_ext)!==false) $file_ext = 'upload';
+                $this->result[$this->counter]['new_name'] = $this->rename?(getMicrotime().substr(md5($this->result[$this->counter]['size']), 0, 5).'.'.$file_ext):$this->result[$this->counter]['name'];
                 if(file_exists($this->path.$this->result[$this->counter]['new_name'])) {
                     $this->result[$this->counter]['message'] = 'The Same-name-file Has Existed In The Upload Path !';
                     $this->result[$this->counter]['error'] = 8;

@@ -86,7 +86,7 @@
 	</form>
 
 
-<script language="JavaScript">
+<script type="application/javascript">
 	$(function(){
         jQuery.vendor('bootstrap-table', {
             add_css:true,
@@ -121,15 +121,15 @@
 						"vendor/bootstrap-table/extensions/resizable/jquery.resizableColumns.css",
 						"vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.css"
 					]);
-                    checkNrun('setTbl', ['#tb_list']);
-                    //setTbl('#tb_list');
+                    setTbl('#tb_list');
                 }, function(num_done, num_total, script) {
-                    $('#progress_bar').width($('#progress_bar').parent().width() * Math.ceil(num_done/num_total));
-                    $('#info').html('脚本 ' + script + ' 已载入！');
-                    if(num_done===num_total) {
-                        $('#info').html('表格数据处理中。。。');
-                        $('#progress_bar').parent().remove();
-                    }
+					let obj = $('#progress_bar');
+					obj.width(obj.parent().width() * Math.ceil(num_done/num_total));
+					$('#info').html('脚本 ' + script + ' 已载入！');
+					if(num_done===num_total) {
+						$('#info').html('表格数据处理中。。。');
+						obj.parent().remove();
+					}
 				});
             }
         });
@@ -137,7 +137,7 @@
     function setTbl(tbl_idx) {
         $tbl = $(tbl_idx);
         $tbl.bootstrapTable({
-            url: setting.path_root+'index.php?api/myStep/data/&tbl=cms_admin_cat',         //表格数据
+            url: '<!--url_prefix-->api/myStep/data/&tbl=cms_admin_cat',         //表格数据
             dataType : "json", 					//从服务端接收数据类型定义。
             contentType : "application/json",   //请求体类型定义。
             method: 'post',                     //请求方式（*）
@@ -173,8 +173,7 @@
                 field: 'pid',
                 title: '父栏目',
                 formatter : function (value, row, index) {
-                    return value == 0 ? "顶级" : value;
-                    //return row.pid == 1 ? "顶级" : value;
+                    return value === 0 ? "顶级" : value;
                 }
             }, {
                 field: 'name',
@@ -267,7 +266,7 @@
 
         $('#btn_query').click(function() {
             $tbl.bootstrapTable('refresh', {
-                url : setting.path_root+'api/myStep/data/?tbl=cms_admin_cat'
+                url : '<!--path_root-->api/myStep/data/?tbl=cms_admin_cat'
             });
         });
 

@@ -44,7 +44,7 @@
     </div>
 </div>
 
-<script language="JavaScript">
+<script type="application/javascript">
 let list = <!--list-->;
 let rule_list = <!--rule_list-->;
 function setPosition() {

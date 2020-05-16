@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : My Config                       *
@@ -22,8 +22,8 @@
 */
 class myConfig extends myBase {
     protected
-        $file = '', 
-        $type = '', 
+        $file = '',
+        $type = '',
         $setting = array();
 
     /**
@@ -111,7 +111,7 @@ class myConfig extends myBase {
                 $v = (INT)$v;
                 break;
             case is_array($v):
-                $v = implode(', ', $v);
+                $v = implode(',', $v);
                 break;
             case strtolower($v) == 'true':
                 $v = true;
@@ -197,7 +197,7 @@ class myConfig extends myBase {
             if(preg_match('/_pwd_r$/', $k)) continue;
             if(is_array($v)) {
                 if(isset($v[0])) {
-                    $item->$k = implode(', ', $v);
+                    $item->$k = implode(',', $v);
                 } else {
                     $item->$k = $this->set($v, $idx.$k);
                 }
@@ -224,10 +224,10 @@ class myConfig extends myBase {
         switch($type) {
             case 'php':
 /*
-                $result = '<?php
+                $result = '<?PHP
 return '.var_export($setting, true).';';
 */
-                $result = '<?php'.chr(10);
+                $result = '<?PHP'.chr(10);
                 $result .= myString::toScript($setting, 'setting');
                 $result .= 'return $setting;';
                 break;
@@ -289,8 +289,8 @@ return '.var_export($setting, true).';';
                 continue;
             };
             $item = array(
-                'name' => $v['name'], 
-                'describe' => $v['describe'], 
+                'name' => $v['name'],
+                'describe' => $v['describe'],
             );
             $keys = explode('.', $cur_idx);
             $the_value = $this->setting;
@@ -313,14 +313,14 @@ return '.var_export($setting, true).';';
                     $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'" name="setting['.$k.']" value="" maxlength="'.$v['type'][2].'" />';
                     $result[] = $item;
                     $item = array(
-                        'name' => $v['name2'], 
-                        'describe' => $v['describe'], 
+                        'name' => $v['name2'],
+                        'describe' => $v['describe'],
                     );
                     $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'_r" name="setting['.$k.'_pwd_r]" value="" maxlength="'.$v['type'][2].'" />';
                     break;
                 case 'checkbox':
                     $cur_component = '';
-                    $the_value = explode(', ', $the_value);
+                    $the_value = explode(',', $the_value);
                     foreach($v['type'][1] as $k_c => $v_c) {
                         $v_c = myString::fromAny($v_c);
                         $checked = array_search($v_c, $the_value)!==false ?'checked':'';

@@ -39,7 +39,7 @@
         </form>
 	</div>
 </div>
-<script language="JavaScript" type="text/javascript">
+<script type="text/javascript">
 $('form').submit(function() {
     let theObjs = $(this).find("input:password[id$=_r]");
     for(let i=0; i<theObjs.length; i++) {

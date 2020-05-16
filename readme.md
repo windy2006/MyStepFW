@@ -21,7 +21,9 @@
 - isMobile() - 判断是否为移动设备
 - isHttps() - 判断当前是否为SSL链接
 - myEval($code) - 自定义代码执行
+- checkPara($att_list, $parse) - 检测数据变量中是否有待解析的变量，并解析
 - recursionFunction($func, $para) - 递归执行某一函数
+- getOB() - 获取缓存区内容并清空
 - debug系列函数 - 变量情况查看
 
 执行顺序：
@@ -29,9 +31,14 @@
 所有响应网址均通过rewrite模块反馈给根目录下的index.php脚本统一处理，虽然框架也支持QueryString和PathInfo两种模式，但是为了更好的网址优化和安全性，建议采用rewrite的方式，主要执行流程如下：
 - 初始化框架 - 通过框架根目录index.php，调用myStep::init()
 - 路由模式判断 - 通过 $router->check() 判断是否存在自定义路由
-   - 当前响应路径符合已设定的自定义路由规则，按规则调用指定的响应方法，可由多方法依次执行构成多级响应。框架默认处理方法是myStep::getModule()（具体处理流程详见核心类对应方法讲解），也可以根据需要替换为自定义方法。
+   - 当前响应路径符合已设定的自定义路由规则，按规则调用指定的响应方法，可由多方法依次执行构成多级响应。可通过框架默认处理方法myStep::getModule()调用相应模块（具体处理流程详见核心类对应方法讲解），也可以根据需要替换为自定义方法。
    - 如未发现何时规则，则分析响应路径，将一级路径或默认app指定为响应app，并调用该app路径下的index.php处理
-- 框架变量设置 - 在调用第二部处理方法或脚本之前会调用应用预加载脚本（app/[name]/lib.php），并执行框架变量设置方法为 myStep::setPara()。如需调整框架变量，可直接在lib.php中预先执行 myStep::setPara() 方法，并做响应调整，此方法不会二次执行。
+- 框架变量设置 - 在获取执行入口之后，框架将继续调用以下程序
+   - myStep::setPara() - 此方法在执行入口脚本之前将调用，用于加载应用设置（config.php）、应用函数库（lib.php），并设置基本框架变量
+   - $mystep->preload() - 并非myStep类中的原生方法，但是如果应用扩展类中存在此方法，将会在声明类后立即执行
+   - lib.php - 应用函数库（app/[name]/lib.php，推荐使用命名空间），在核心类已加载并声明实例后加载
+   - global.php - 本脚本为应用通用脚本，自定义路由模式下通过 myStep::getModule() 自动加载，其他模式下需手动加载，可用于在模版实例声明后做后期变量及程序调整。
+   - $mystep->shutdown() - 并非myStep类中的原生方法，但是如果应用扩展类中存在此方法，将在页面结束时执行
 
 PHP常量：
 --------
@@ -51,7 +58,7 @@ PHP常量：
 --------
 - $s - 框架配置，通过对象模式调用，如$s->web-title
 - $info_app - 当前调用应用的基本信息，除对应APP信息外（APP目录下info.php定义），还包括path（数组）和route（字符串）项目
-- $mystep - 应用入口类，如应用路径下不存在以应用路径名命名的类（如test/test.class.php里面的test类，且此类应该是mystep类的扩展），则调用默认mystep类，并会预载类下的 preload 方法，在页面结束时会调用类下 shutdown 方法
+- $mystep - 应用入口类，如应用路径下不存在以应用路径名命名的类（如test/test.class.php里面的test类，且此类应该是mystep类的扩展），则调用默认mystep类
 - $db - 数据库操作类，在函数初始化时根据设置连接，采用代理模式，可扩展
 - $cache - 数据缓存类，在函数初始化时根据设置连接，采用代理模式，可扩展
 - $tpl_setting - 模版参数，从 app 设置中调用，并继承于全局变量
@@ -95,16 +102,16 @@ myController类为核心控制类，具体用法请参加功能类文档，其�
 核心类：
 --------
 myStep类扩展自myController类，具体用法请参加功能类文档，其中几个重要方法说明如下：
-- start($setPlugin) - 执行于脚本主程序开始之前，用于设置框架类及其方法的调用别名，设定错误报告模式，加载应用对应插件，初始化cookie和session，声明数据库（$db, 如果存在全局变量$no_db，且其值为'y'，则不建立连接，以便于无数据库操作的应用）和缓存（$$cache）实例，以及为状态变量赋值
+- start($set_plugin) - 执行于脚本主程序开始之前，用于设置框架类及其方法的调用别名，设定错误报告模式，加载应用对应插件，初始化cookie和session，声明数据库（$db, 如$s->db->auto为false，则不建立连接，以便于无数据库操作的应用）和缓存（$cache）实例，以及为状态变量赋值
 - show(myTemplate $tpl) - 用于加载网站基本参数至模版实例，并将结果直接显示（在此可添加针对显示内容的预处理方法）；同时也检测并按需更新应用脚本文件（[appName].js 和 [appName].css，详情见相关专题），如设置"$mystep->setting->show = true"，则将在页面最下面显示基本运行信息。
-- parseTpl(myTemplate $tpl) - 与 show 方法类似，但是返回通过模版实例所生成的页面内容，而不是直接显示
+- render(myTemplate $tpl) - 与 show 方法类似，但是返回通过模版实例所生成的页面内容，而不是直接显示
 - setLink($content) - 针对所生成页面的链接，根据设定的链接模式（rewrite，pathinfo或querystring）进行处理，页面模版中只要按照rewrite模式书写，在页面显示时将自动通过本预处理方法调整为对应设置的链接。
-- end() - 脚本结束时所用的方法，搜集并对比运行结束时的信息，结束并清空变量，并智能调用用户扩展类中自定义的shutdown()方法
+- end() - 脚本结束时所用的方法，搜集并对比运行结束时的信息，结束并清空变量，并智能调用用户扩展类中自定义的 shutdown() 方法
 - info($msg, $url) - 执行结果或提示信息显示，并在5秒后自动跳转到对应的链接
 - redirect($url, $code) - 脚本内链接跳转，如$url为空则退回来路链接；$code默认是302临时跳转，可根据需要改变。
 - init() - 静态方法，预初始化基本设置信息（如发现有错误将自动调整），声明类加载模式，如为首次执行框架的话，将自动跳转到初始设置页面
 - go() - 框架执行入口，加载设置信息，判断静态文件并直接显示，否则根据路由规则调用相关脚本
-- setPara() - 声明框架实例，默认直接调用myStep类，也可在对应APP中扩展，框架会自动调用APP目录下"[appName].class.php"中与APP同名的类，如存在preload方法，则优先调用。将APP配置覆盖全局配置，然后再调用start方法，同时声明预加载的css和js脚本文件以及模版的初始设置。
+- setPara() - 声明框架实例，默认直接调用myStep类，也可在对应APP中扩展，框架会自动调用APP目录下"[appName].class.php"中与APP同名的类。将APP配置覆盖全局配置，然后再调用start方法，同时声明预加载的css和js脚本文件以及模版的初始设置。
 - vendor($class_info) - 调用位于VENDOR目录下的第三方PHP功能类，需要满足以下条件。
    - 如$class_info为字符串，所调用类（位于vendor目录下）的目录名、文件名和类名必须一致，其中文件名可为"名称.php"或"名称.class.php"
    - $class_info可以为数组，包含
@@ -128,7 +135,7 @@ JS变量：
 --------
 相关变量是通过脚本在页面被调取时动态生成，在调用时建议在onload事件或jQuery的$(function(){<!--code-->})中调用
 - language - 调用系统语言设置（可自动扩展app语言包）
-- setting - 调用系统设置 （app可通过$setting['js']扩充）
+- setting - 调用系统设置（包括：language，router，debug，app，path_root，path_app，url_fix，url_prefix，url_prefix_app等信息，可通过APP设置重的 $setting['js'] 扩充）
 
 JS函数：
 --------
@@ -137,7 +144,7 @@ JS函数：
 - $name(name, idx) - 获取对应name的页面元素（组），idx可为first，last，数字索引，否则返回全部符合的元素组
 - $tag(name, context) - 依照context（默认为document）获取对应tag的页面元素组
 - isArray(para) - 判断变量是否为数组
-- loadingShow(info) - 显示锁屏信息
+- loadingShow(info) - 显示锁屏信息，再次调用则关闭
 - openDialog(url, width, height, mode) - 开启模态窗口
 - openWindow(url,width,height) - 新开窗口
 - sleep(the_time) - 程序终端指定时间
@@ -148,8 +155,8 @@ JS函数：
 - debug(para, mode) - 检测指定变量para的内容
 - checkObj(obj, func_show) - 查看对象属性
 - reportError(msg, url, line) - 错误信息处理  
-- checkNrun(func, params) - 检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
-- setURL() - 配合checkNrun函数（需用到setting设置），处理页面内链接，以符合设置的链接模式
+- checkSetting() - 通过在需要调用检language, setting变量的函数开始加上"if(!checkSetting()) return;"（参考global.js中setURL函数的用法）来保证对应函数执行时可调用系统变量
+- setURL(prefix) - 配合域名绑定模式和路由模式，智能处理页面内链接
 - 对象方法扩展 - 针对 String，Data，Number，Array 等对象
    - string.blen - 返回某字符串的二进制长度
    - string.trim - 去除字符串首尾空字符
@@ -205,14 +212,15 @@ JS函数：
 
 框架接口：
 --------
-以下接口为框架通过路由规则预定义的接口，接口处理函数统一返回数组格式数据，可通过在url最后加上"/返回类型"来控制（可选），格式默认为json，还可为xml、string、hex、script等
+以下接口为框架通过路由规则预定义的接口，接口处理函数统一返回数组格式数据，可通过在url最后加上"/返回类型"来控制（可选），格式默认为json，还可为xml、string、hex、script等，如需在某一APP内调用另外一个APP的插件接口（如captcha），可通过在url上加上"&app=[AppName]"的模式保重接口依照对应app的设置执行。
 - /api/[str]/[any] - 自定义应用接口，[str]为app名称，[any]为接口名及参数，可通过_GET或_POST接收参数
 - /module/[str]/[any] - 模块接口，[str]为app名称，[any]为模块名及参数
-- /setting/[any] - 设置接口，[any]为应用名称，获取该应用json格式的设置
 - /captcha/[any] - 验证码图像接口，[any]为随机数，保证新码生成，验证参数为$_SESSION['captcha']
-- /upload - 文件上传接口，上传文件保存在常量FILE目录
-- /download/[any] - 文件下载接口，[any]为文件索引
-- /remove_ul/[any] - 上传文件删除接口，[any]为文件索引
+- /ms_setting/[any] - 设置接口，[any]为应用名称，获取该应用json格式的设置
+- /ms_language/[str]/[any] - 设置接口，[str]为应用名称，[any]为语种索引，获取该应用json格式的设置
+- /api/myStep/upload - 文件上传接口，上传文件保存在常量FILE目录
+- /api/myStep/download/[any] - 文件下载接口，[any]为文件索引
+- /api/myStep/remove/[any] - 上传文件删除接口，[any]为文件索引
 
 应用结构：
 --------
@@ -221,13 +229,14 @@ JS函数：
 - language - 语言包文件，可通过框架自动调用
 - module - 针对不同请求的功能模块，默认处理脚本为 index.php
 - template - 模版文件
-- asset - 资源文件
+- asset - 资源文件，此目录下的文件可以直接通过"/[appName]/asset/[fileName]"的方式调用存放于"模版样式名子目录"下的文件，框架可自行根据设置调用，如设置了域名绑定，可进一步简化为"/asset/[fileName]"。例如：应用名为MyApp，模版类型为default，文件存储在 app/MyApp/asset/default/myfile.txt，调用网址为：http://hostname/MyApp/asset/myfile.txt
 - asset/style.css - 应用样式表文件（自动载入）
 - asset/function.js - 应用脚本文件（自动载入）
 - config.php - 配置信息（参考config目录下的描述文件）
 - index.php - 入口文件（必需）
 - info.php - 介绍文件（必需）
-- lib.php - 应用通用函数库（可用于预载）
+- lib.php - 应用通用函数库，自动加载，在myStep::setPara()前引入
+- global.php - 应用通用脚本，自定义路由模式下通过myStep::getModule()自动加载，用于在模版实例声明后做后期调整，其他模式下需手动加载
 - plugin.php - 插件引用记录（自动生成）
 - route.php - 路由信息，格式详见路由章节
 
@@ -243,7 +252,6 @@ JS函数：
    - [appName]/asset/[TemplateStyle]/style.css
 - cache/script/[appName].js - 将自动载入以下文件（其中前四个文件可在设置中调整）：
    - static/js/jquery.js
-   - static/js/jquery-ui.js
    - static/js/jquery.addon.js
    - static/js/bootstrap.bundle.js
    - static/js/global.js
@@ -258,6 +266,25 @@ JS函数：
 - class.php - 包含检测（check）、安装（install）、卸载（uninstall）以及其他基本功能（如模版标签解析，页面钩子等）的脚本（必需）
 - config.php - 配置信息（参考config目录下的描述文件）
 - module - 存放功能模块所需文件（脚本及模版），模块可以理解为针对插件功能的客户交互页面
+
+框架钩子
+--------
+包含程序钩子和框架钩子两类
+- 程序钩子 - 主控制类中包括 setFunction 和 run 两个方法，将在指定的位置（start，end，page等，也可自定义）依次（顺序或倒序）执行指定的方法
+   - setFunction($func, $position) 用于注册某个方法（$func），并指定在某个位置（$position）响应
+   - run($position, $desc, $para) 在特定位置（$position）执行已注册的所有方法，如果$desc为false的话，则按照注册顺序的反序执行，$para为对应方法的参数，需要为数组模式（即使参数本身即为数组，也需要将其作为数组的首变量，即[$para]），如未设置，则会将当前类作为作为参数传递给对应方法
+- 模版钩子 - 模版类中包括 setAddedContent 和 pushAddedContent 两个方法
+   - setAddedContent($position, $content) 用于在指定位置（$position）注册所需添加的内容，其中对应位置将被
+   - pushAddedContent(myTemplate $tpl) 将已注册内容加入对应模版变量的"page_{$position}"的位置，如 $mystep->setAddedContent('somewhere', 'content1')、 $mystep->setAddedContent('somewhere', 'content2') ，对应模版中<!-page_somewhere->将被替换为'content1content2'
+
+链接设定
+--------
+由于框架支持Rewrite，QueryString和PathInfo三种模式，在页面链接的设定方面可根据，按照如下两种方式：
+- PHP脚本模式 - 链接直接按照路由对应规则（即rewrite模式）设置，通过myStep类中的静态方法 setURL 转换待转换链接即可，但是每次执行仅能转换一个链接
+- JS脚本模式 - 链接直接按照路由对应规则（即rewrite模式）设置，在页面载入最后执行JS函数 setURL() （setURL函数的规则详见JS函数章节），即可智能转换页面所有链接
+- 其他说明 - 在实际应用中需参考以下情况：
+   - 在转换链接的同时，也会给链接加上路径信息，如：<br />框架存放在 /dir/ 目录下，设置模式为PathInfo，路由链接为 /func/method/id，经过转换后的链接为：/dir/index.php/func/method/id
+   - 模版函数也将传递一个路径变量：<!--url_prefix-->，，参照上例，此变量内容为：/dir/index.php/，如所调用文件为静态文件可直接在利用<!--path_root-->即可。
 
 域名绑定：
 --------

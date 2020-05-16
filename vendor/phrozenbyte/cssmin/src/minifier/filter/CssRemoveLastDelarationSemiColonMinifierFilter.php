@@ -1,6 +1,6 @@
 <?php
 /**
- * This {@link aCssMinifierFilter minifier filter} sets the IsLast property of any last declaration in a ruleset, 
+ * This {@link aCssMinifierFilter minifier filter} sets the IsLast property of any last declaration in a ruleset,
  * @font-face at-rule or @page at-rule block. If the property IsLast is TRUE the decrations will get stringified 
  * without tailing semicolon.
  * 

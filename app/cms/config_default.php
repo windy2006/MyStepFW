@@ -1,10 +1,11 @@
-<?php
+<?PHP
 $setting = array();
 
 $setting['web'] = array();
 $setting['web']['title'] = '迈思内容管理系统 MyStep CMS';
 
 $setting['db'] = array();
+$setting['db']['auto'] = true;
 $setting['db']['type'] = 'mysql';
 $setting['db']['host'] = '127.0.0.1:3306';
 $setting['db']['user'] = 'root';
@@ -15,6 +16,9 @@ $setting['db']['name'] = 'mystep_cms';
 $setting['db']['pre'] = 'cms_';
 
 $setting['content'] = array();
+$setting['content']['cat_pos'] = '主导航,列表导航,自定义位置';
+$setting['content']['push_pos'] = '首页,列表页,内容页';
+$setting['content']['push_mode'] = '不推送,标题列表,幻灯图片';
 $setting['content']['upload'] = 'files/';
 $setting['content']['get_remote_img'] = true;
 

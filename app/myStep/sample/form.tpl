@@ -18,13 +18,36 @@
 					</div>
 				</td>
 			</tr>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">日期选择1</span>
+                        </div>
+                        <input name="date2" class="form-control" type="date" value="2019-04-01" />
+                    </div>
+                </td>
+            </tr>
 			<tr>
 				<td>
 					<div class="input-group">
 						<div class="input-group-prepend">
-							<span class="input-group-text">日期选择</span>
+							<span class="input-group-text">日期选择2</span>
 						</div>
 						<input name="date" class="form-control" type="text" value="2019-04-01" need="date" />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text">日期选择3</span>
+						</div>
+						<input name="date2" class="form-control date" type="text" value="2019-04-01" />
+						<div class="input-group-append">
+							<span class="input-group-text"><i class="glyphicon glyphicon-th"></i></span>
+						</div>
 					</div>
 				</td>
 			</tr>
@@ -254,7 +277,7 @@
 	</div>
 </div>
 
-<script language="JavaScript">
+<script type="application/javascript">
     jQuery.vendor('select2', {
         add_css:true,
         name_fix:true,
@@ -315,6 +338,27 @@
 				$('#auto_fill').unbind();
 				ac_options.params.mode = this.value;
 				$('#auto_fill').autocomplete(ac_options);
+			});
+		}
+    });
+    jQuery.vendor('bootstrap-datepicker', {
+		add_css:'.min',
+		name_fix:'.min',
+		callback:function(){
+            $.getScript('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js', function(){
+                $('.form-control.date').prop("readonly", true).datepicker({
+                    language: "zh-CN",
+                    orientation: "bottom left",
+                    todayBtn: "linked",
+                    daysOfWeekHighlighted: "0,6",
+                    weekStart: 0,
+                    clearBtn: true,
+                    autoclose: true,
+                    calendarWeeks: true,
+                    todayHighlight: true
+                }).next().css('cursor','pointer').click(function(){
+                    $('.form-control.date').datepicker('show');
+				});
 			});
 		}
     });

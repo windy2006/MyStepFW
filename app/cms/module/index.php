@@ -1,2 +1,3 @@
-<?php
-//code from index page
+<?PHP
+$tpl_setting['name'] = 'index';
+$t = new myTemplate($tpl_setting);

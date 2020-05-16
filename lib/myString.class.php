@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Functions For String Operations *
@@ -126,7 +126,7 @@ class myString {
                 if(function_exists('iconv')) {
                     $str = iconv($charset_str, $charset.'//TRANSLIT//IGNORE', $str);
                 } else {
-                    $str = mb_convert_encoding($str, $charset, 'UTF-8, GBK');
+                    $str = mb_convert_encoding($str, $charset, 'UTF-8,GBK');
                 }
             }
         }
@@ -140,7 +140,7 @@ class myString {
      */
     public static function toHex($str) {
         $hex='';
-        for($i=0, $m=strlen($str); $i<$m; $i++) {
+        for($i=0,$m=strlen($str); $i<$m; $i++) {
             $hex .= dechex(ord($str[$i]));
         }
         return $hex;
@@ -193,7 +193,7 @@ class myString {
      */
     public static function fromHex($hex) {
         $str='';
-        for($i=0, $m=strlen($hex)-1; $i<$m; $i+=2) {
+        for($i=0,$m=strlen($hex)-1; $i<$m; $i+=2) {
             $str .= chr(hexdec($hex[$i].$hex[$i+1]));
         }
         return $str;
@@ -242,7 +242,7 @@ class myString {
                 break;
             /*
             case is_array($var):
-                $result = join(', ', $var);
+                $result = join(',', $var);
                 break;
             case is_object($var):
                 $result = (STRING)$var;
@@ -373,7 +373,7 @@ class myString {
      * @param string $charset
      * @return array|string
      */
-    public static function rndKey($length, $scope=1, $charset='gbk') {
+    public static function rndKey($length, $scope=1, $charset='UTF-8') {
         //Coded By Windy2000 20020501 v1.0
         $char_list    = array();
         $char_list[]    = '1234567890';
@@ -453,7 +453,7 @@ class myString {
      * @param bool $jam_tag 干扰标签
      * @return mixed|string
      */
-    public static function watermark($html, $rate=2, $scope=4, $str_append='', $charset='', $class_name='watermark', $tag_name='span', $jam_tag=false) {
+    public static function watermark($html, $rate=2, $scope=4, $str_append='', $charset='utf-8', $class_name='watermark', $tag_name='span', $jam_tag=false) {
         /*
         Please make sure that the following style exist on your style sheet of the watermark page
         .{$class_name} {
@@ -467,7 +467,7 @@ class myString {
         $arr_tag = $arr_tag[0];
         $html = str_replace($arr_tag, chr(0), $html);
         $arr_char = self::breakStr($html);
-        for($i=0, $m=count($arr_char); $i<$m; $i++) {
+        for($i=0,$m=count($arr_char); $i<$m; $i++) {
             if(ord($arr_char[$i])==0) {
                 $cur_tag = array_shift($arr_tag);
                 if(!empty($str_append) && preg_match('/<(\/(p|div))|(br( +\/)?)>/i', $cur_tag)) {
@@ -505,15 +505,13 @@ class myString {
         if($length<=0) return '';
         if($mode) return implode('', array_slice($arr, $start, $length));
         $str = '';
-        $sub_start = false;
-        for($i=0; $i<$m; $i++) {
-            if(strlen($str)>=$start && $sub_start==false) {
+        for($i=0, $m=count($arr); $i<$m; $i++) {
+            if(strlen($str)>=$start && $str=='') {
                 $str = $arr[$i];
-                $sub_start = true;
             } else {
                 $str .= $arr[$i];
             }
-            if($sub_start && strlen($str)>=$length) break;
+            if(strlen($str)>=$length) break;
         }
         return $str;
     }

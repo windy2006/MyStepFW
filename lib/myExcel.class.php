@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Excel File Builder              *
@@ -125,7 +125,7 @@ class myExcel extends myBase {
         $now = date('Y-m-d').'T'.date('H:i:s').'Z';
         $content = '';
         $content .= <<<CODE
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -151,7 +151,7 @@ class myExcel extends myBase {
   <Style ss:ID="Default" ss:Name="Normal">
    <Alignment ss:Vertical="Center"/>
    <Borders/>
-   <Font ss:FontName="Times New Roman" x:CharSet="134" ss:Size="12"/>
+   <Font ss:FontName="Times New Roman" ss:Size="12"/>
    <Interior/>
    <NumberFormat/>
    <Protection/>
@@ -174,7 +174,7 @@ CODE;
 CODE;
             for($i=0; $i<$count_rows; $i++) {
                 $content .= '   <Row>'.chr(13).chr(10);
-                for($j=0, $m=count($value[$i]); $j<$m; $j++) {
+                for($j=0,$m=count($value[$i]); $j<$m; $j++) {
                     $value[$i][$j] = htmlspecialchars($value[$i][$j]);
                     $value[$i][$j] = str_replace(chr(13), '', $value[$i][$j]);
                     $value[$i][$j] = str_replace(chr(10), '&#10;', $value[$i][$j]);

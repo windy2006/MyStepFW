@@ -64,7 +64,7 @@
         </div>
     </div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
 $('#plugin').on('show.bs.modal', function (event) {
     let button = $(event.relatedTarget);
     let app = button.data('app');
@@ -105,7 +105,9 @@ $(function() {
                 matchBrackets: true,    //括号匹配
                 styleActiveLine: true,  //高亮当前行
                 lineNumbers: true,
-                lineWrapping: true
+                lineWrapping: true,
+                foldGutter: true,
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
             });
             editor.setSize('auto', 'auto');
         });

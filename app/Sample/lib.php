@@ -1,10 +1,9 @@
-<?php
+<?PHP
 //本文件为当前应用的预加载脚本，在route.php中声明
 namespace app\sample;
 
 //设置无需尝试数据库连接
-global $no_db;
-$no_db = 'y';
+$s->db->auto = false;
 
 //以下为各类接口的执行函数
 
@@ -30,12 +29,11 @@ function route($para) {
     global $mystep, $router, $db, $cache, $s, $info_app, $tpl_setting, $tpl_cache;
     $tpl = new \myTemplate($tpl_setting, false);
     $tpl_setting['name'] = 'route';
-    $sub_tpl = new \myTemplate($tpl_setting, false);
-    $sub_tpl->allow_script = true;
-    $sub_tpl->assign('code', htmlentities(\myFile::getLocal(__DIR__.'/lib.php')));
-    $sub_tpl->assign('code2', htmlentities(\myFile::getLocal(PATH.'route.php')));
-    $sub_tpl->assign('root', ROOT_WEB);
-    $tpl->assign('main', $sub_tpl->display('', false));
+    $tpl_sub = new \myTemplate($tpl_setting, false, true);
+    $tpl_sub->assign('code', htmlentities(\myFile::getLocal(__DIR__.'/lib.php')));
+    $tpl_sub->assign('code2', htmlentities(\myFile::getLocal(PATH.'route.php')));
+    $tpl_sub->assign('root', ROOT_WEB);
+    $tpl->assign('main', $tpl_sub->render('', false));
     $mystep->setting->show = true;
     $mystep->show($tpl);
     $mystep->end();

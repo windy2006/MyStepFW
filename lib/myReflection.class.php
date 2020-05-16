@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Reflection Function For All     *
@@ -58,14 +58,14 @@ class myReflection extends myProxy {
                 break;
         }
         $this->info = array(
-            'para' => $para, 
-            'name' => $this->obj->getName(), 
-            'type' => $type, 
-            'file' => $this->getFileName(), 
-            'start' => $this->getStartLine(), 
-            'end' => $this->getEndLine(), 
-            'ext' => $this->getExtensionName(), 
-            'doc' => $this->getComment(), 
+            'para' => $para,
+            'name' => $this->obj->getName(),
+            'type' => $type,
+            'file' => $this->getFileName(),
+            'start' => $this->getStartLine(),
+            'end' => $this->getEndLine(),
+            'ext' => $this->getExtensionName(),
+            'doc' => $this->getComment(),
         );
 
         if($type=='class') {
@@ -153,7 +153,7 @@ class myReflection extends myProxy {
         if($this->inNamespace()) {
             if($mode) {
                 $result = array(
-                    'namespace' => $this->getNamespaceName(), 
+                    'namespace' => $this->getNamespaceName(),
                     'name' => $this->getShortName()
                 );
             } else {
@@ -173,7 +173,7 @@ class myReflection extends myProxy {
         if(empty($this->info)) return;
         if($this->info['type']=='function') return null;
         return array(
-            'constant' => $this->getConstants(), 
+            'constant' => $this->getConstants(),
             'variant' => $this->getDefaultProperties()
         );
     }
@@ -190,12 +190,12 @@ class myReflection extends myProxy {
             case 'extension':
                 if($mode) {
                     $result = array(
-                        'function' => $this->getFunctions(), 
+                        'function' => $this->getFunctions(),
                         'class' => $this->getClasses()
                     );
                 } else {
                     $result = array(
-                        'function' => get_extension_funcs($this->info['name']), 
+                        'function' => get_extension_funcs($this->info['name']),
                         'class' => $this->getClassNames()
                     );
                 }

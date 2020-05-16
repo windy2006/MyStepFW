@@ -1,8 +1,8 @@
-<?php
+<?PHP
 $module = array_pop($info_app['path']);
 if(empty($module) || !is_file(PATH.'template/info_'.$module.'.tpl')) $module = 'index';
 $tpl_setting['name'] = 'info_'.$module;
-$t = new myTemplate($tpl_setting, false, true);
+$t = new myTemplate($tpl_setting);
 if($module=='phpinfo') {
     phpinfo();
     $content = ob_get_contents();
@@ -19,7 +19,7 @@ if($module=='phpinfo') {
     } elseif($method=='download') {
         $content = f::getLocal($err_file);
         if(!empty($content)) {
-            if(ob_get_length()!==false) ob_end_clean();
+            getOB();
             $content = preg_replace('/[\r\n]+/', "\r\n", $content);
             header('Content-type: text/plain');
             header('Accept-Ranges: bytes');
@@ -55,5 +55,7 @@ if($module=='phpinfo') {
     }
     $t->assign('err_msg', $err_msg);
     $t->assign('err_output', $err_output);
+} else {
+    $t->allow_script = true;
 }
-$content = $mystep->render($t, 'db, s', false);
+$content = $mystep->render($t);

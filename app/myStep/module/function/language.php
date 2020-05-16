@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $app = myReq::r('app');
 if(empty($app) || !is_dir(APP.$app)) {
     myStep::info('app_missing');
@@ -24,7 +24,7 @@ if(myReq::check('post')) {
         $type = $new;
         $list[] = $type.'.php';
     }
-    $script = '<?php
+    $script = '<?PHP
 return '.var_export($lng, true).';';
     myFile::saveFile($dir.$type.'.php', $script);
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');

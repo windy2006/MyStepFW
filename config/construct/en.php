@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $setting_detail = array();
 
 $setting_detail['gen'] = array(
@@ -22,7 +22,7 @@ $setting_detail['gen'] = array(
         'cache_mode' => array(
             'name' => 'Cache Mode',
             'describe' => 'Open the cache mode to reduce the db query',
-            'type' => array('select', array('File Mode'=>'file', 'DB Mode'=>'mysql', 'MemCache'=>'memcache'))
+            'type' => array('select', array('File Mode'=>'File', 'DB Mode'=>'MySQL', 'MemCached'=>'memoryCache'))
         ),
         'cache_page' => array(
             'name' => 'HTML Cache',
@@ -48,7 +48,7 @@ $setting_detail['gen'] = array(
         'static' => array(
             'name' => 'Static File',
             'describe' => 'A list of extensions which can be visited through url.',
-            'type' => array("text", "", "80")
+            'type' => array('text', '', '80')
         ),
         'debug' => array(
             'name' => 'Error',
@@ -94,12 +94,12 @@ $setting_detail['web'] = array(
         'css' => array(
             'name' => 'CSS Files',
             'describe' => 'Split with common in order, and the files in static folder will be load to all the pages',
-            'type' => array("text", "", "150")
+            'type' => array('text', '', '150')
         ),
         'js' => array(
             'name' => 'JS Files',
             'describe' => 'Split with common in order, and the files in static folder will be load to all the pages',
-            'type' => array("text", "", "150")
+            'type' => array('text', '', '150')
         ),
         'update' => array(
             'name' => 'Update URL',
@@ -115,17 +115,17 @@ $setting_detail['upload'] = array(
         'path_mode' => array(
             'name' => 'Path Mode',
             'describe' => 'The directory construction to save the upload file, according to the date function of php',
-            'type' => array("text", "", "10")
+            'type' => array('text', '', '10')
         ),
         'ban_ext' => array(
             'name' => 'Special File',
             'describe' => 'FW will change the extension for the specified files.',
-            'type' => array("text", "", "50")
+            'type' => array('text', '', '50')
         ),
         'free_dl' => array(
             'name' => 'Free Download',
             'describe' => 'If the uploaded files can be download from external.',
-            'type' => array("radio", array("开启"=>"true", "关闭"=>"false"))
+            'type' => array('radio', array('开启'=>'true', '关闭'=>'false'))
         ),
     ]
 );
@@ -190,11 +190,6 @@ $setting_detail['session'] = array(
 $setting_detail['cookie'] = array(
     'name' => 'Cookie Setting',
     'list' => [
-        'domain' => array(
-            'name' => 'Domain',
-            'describe' => 'Cookie will only avilable in the domain',
-            'type' => array('text', '', '20')
-        ),
         'path' => array(
             'name' => 'Path',
             'describe' => 'Cookie will only avilable in the path',
@@ -214,7 +209,7 @@ $setting_detail['router'] = array(
         'mode' => array(
             'name' => 'Parse Mode',
             'describe' => 'The way to parse the router path',
-            'type' => array("select", array("QueryString"=>"query_string", "PathInfo"=>"path_info", "Rewrite"=>"rewrite"))
+            'type' => array('select', array('QueryString'=>'query_string', 'PathInfo'=>'path_info', 'Rewrite'=>'rewrite'))
         ),
         'default_app' => array(
             'name' => 'Default APP',
@@ -268,6 +263,11 @@ $setting_detail['email'] = array(
 $setting_detail['db'] = array(
     'name' => 'Database Setting',
     'list' => [
+        'auto' => array(
+            'name' => 'Auto Connect',
+            'describe' => 'Build DB Connection automatically',
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
+        ),
         'type' => array(
             'name' => 'Database',
             'describe' => 'Which database will be used',

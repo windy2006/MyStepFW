@@ -344,9 +344,9 @@ $(function() {
             short_month_names: [language.short_month_names_1, language.short_month_names_2, language.short_month_names_3, language.short_month_names_4, language.short_month_names_5, language.short_month_names_6, language.short_month_names_7, language.short_month_names_8, language.short_month_names_9, language.short_month_names_10, language.short_month_names_11, language.short_month_names_12],
             short_day_names: [language.short_day_names_1, language.short_day_names_2, language.short_day_names_3, language.short_day_names_4, language.short_day_names_5, language.short_day_names_6, language.short_day_names_7]
         });
-        $("input[need=date]").attr("readonly", true);
+        $("input[need=date]").prop("readonly", true);
         $("input[need=date]").date_input();
-        $("input[need=date_]").attr("readonly", true);
+        $("input[need=date_]").prop("readonly", true);
         $("input[need=date_]").date_input();
         clearInterval(setDateInput);
         return;

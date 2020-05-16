@@ -1,4 +1,4 @@
-<?php
+<?PHP
 if(myReq::check('post')) {
     foreach($_POST as $k => $v) {
         if(empty($v)) unset($_POST[$k]);
@@ -20,8 +20,8 @@ if(isset($setting_class[$idx])) {
 } else {
     myStep::redirect();
 }
-$filter = '*'.str_replace(', ', ', *', $info['ext']);
-$filter = explode(', ', $filter);
+$filter = '*'.str_replace(',', ', *', $info['ext']);
+$filter = explode(',', $filter);
 $files = array();
 foreach($filter as $f) {
     if(myFile::find($f, myFile::realPath($info['path'])))
@@ -36,4 +36,4 @@ foreach($files as $class) {
     }
 }
 $t->assign('dummy', ($i%2?'<td colspan="2"></td>':''));
-$tpl->assign('path', 'manager/setting/class');
+$tpl->assign('path', '/setting/class');

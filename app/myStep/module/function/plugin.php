@@ -1,17 +1,16 @@
-<?php
-global $path_admin;
+<?PHP
 $method = '';
 if(isset($info_app['path'][3])) $method = $info_app['path'][3];
 
 $mydb = new myDb('simpleDB', 'plugin', PLUGIN);
 if(!$mydb->check()) {
     $mydb->create(array(
-        array('order', 2), 
-        array('active', 1), 
-        array('idx', 10), 
-        array('ver', 10), 
-        array('name', 40), 
-        array('intro', 200), 
+        array('order', 2),
+        array('active', 1),
+        array('idx', 10),
+        array('ver', 10),
+        array('name', 40),
+        array('intro', 200),
     ));
 }
 $idx = myReq::get('idx');
@@ -42,14 +41,14 @@ switch($method) {
             }
             call_user_func(array($class, 'install'));
             $mydb->insert(array(
-                'order' => 1, 
-                'active' => 1, 
-                'idx' => $idx, 
-                'ver' => $info['ver'], 
-                'name' => $info['name'], 
-                'intro' => $info['intro'], 
+                'order' => 1,
+                'active' => 1,
+                'idx' => $idx,
+                'ver' => $info['ver'],
+                'name' => $info['name'],
+                'intro' => $info['intro'],
             ), true);
-            myStep::info('plugin_installed', $path_admin.'function/plugin/');
+            myStep::info('plugin_installed', $app_root.'function/plugin/');
         }
         $check = $class::check($check_info);
         $t->assign('check', $check_info);
@@ -59,7 +58,7 @@ switch($method) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
-            myStep::redirect($path_admin.'function/plugin/');
+            myStep::redirect($app_root.'function/plugin/');
         }
         $t->assign($info);
         if(!is_file(PLUGIN.$idx.'/config.php')) {
@@ -88,7 +87,7 @@ switch($method) {
     case 'active':
         $active = $mydb->result('idx='.$idx, 'active');
         $mydb->update('idx='.$idx, array('active' => 1 - (int)$active));
-        myStep::redirect($path_admin.'function/plugin/');
+        myStep::redirect($app_root.'function/plugin/');
         break;
     case 'delete':
         myFile::del(PLUGIN.$idx);
@@ -97,7 +96,7 @@ switch($method) {
     case 'uninstall':
         $mydb->delete('idx='.$idx);
         call_user_func(array($class, 'uninstall'));
-        myStep::info('plugin_uninstalled', $path_admin.'function/plugin/');
+        myStep::info('plugin_uninstalled', $app_root.'function/plugin/');
         break;
     case 'pack':
         if(!empty($idx) || is_dir(PLUGIN.$idx)) {
@@ -109,23 +108,36 @@ switch($method) {
         }
         break;
     case "upload":
-        if(myReq::check('post')) {
+        if(myReq::check('files')) {
             $path_upload = CACHE."tmp";
             $upload = new myUploader($path_upload, true);
             $upload->do(false);
             $result = $upload->getResult(0);
             if($result[0]['error'] == 0) {
-                $theFile = $path_upload."/".$result[0]['new_name'];
-                $mypack = $mystep->getInstance("myPacker", PLUGIN.strstr($result[0]['name'], '.', true).'/', $theFile);
+                $file = $path_upload."/".$result[0]['new_name'];
+                $mypack = $mystep->getInstance("myPacker", PLUGIN.strstr($result[0]['name'], '.', true).'/', $file);
                 $mypack->unpack();
                 unset($mypack);
-                myFile::del($theFile);
-                myStep::info('plugin_upload_done');
+                myFile::del($file);
+                $result = [
+                    'error' => 0,
+                    'message' => $mystep->getLanguage('plugin_upload_done')
+                ];
             } else {
-                myStep::info($mystep->getLanguage('plugin_upload_fail').'< br />< br />'.$result[0]['message']);
+                $result = [
+                    'error' => $result[0]['error'],
+                    'message' => $result[0]['message']
+                ];
             }
             unset($upload);
+        } else {
+            $result = [
+                'error' => '-1',
+                'message' => 'No file uploaded!'
+            ];
         }
+        echo myString::toJson($result, $s->gen->charset);
+        $mystep->end();
         break;
     default:
         if(myReq::check('post')) {
@@ -164,4 +176,4 @@ switch($method) {
         $t->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));
 }
 $mydb->close();
-$tpl->assign('path', 'manager/function/plugin');
+$tpl->assign('path', '/function/plugin');

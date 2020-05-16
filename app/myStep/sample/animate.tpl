@@ -141,7 +141,7 @@
 	</div>
 </div>
 
-<script language="JavaScript">
+<script type="application/javascript">
     $(function(){
         $('.js--animations').change(function(){
             let x = $(this).val();

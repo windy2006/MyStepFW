@@ -149,13 +149,13 @@ function strip_whitespace($content, $options = array()) {
 
     shuffle($global_vars);
     $str_global     = end($global_vars);
-    $str_global_var = $str_global . ' {' . $str_define_name . '}';
+    $str_global_var = $str_global . '{' . $str_define_name . '}';
 
-    $same_quotes = array(' {' => '[', '}' => ']');
+    $same_quotes = array('{' => '[', '}' => ']');
     /*
     switch (rand(0, 1)) {
         case 0:
-            $str_global_var = $str_global . ' {' . $str_define_name . '}';
+            $str_global_var = $str_global . '{' . $str_define_name . '}';
             break;
         case 1:
             $str_global_var = $str_global . '[' . $str_define_name . ']';
@@ -261,7 +261,7 @@ function strip_whitespace($content, $options = array()) {
                         }
                         $is_get_func_var = false;
                         if ($is_static_call) {
-                            if (find_last_token($list, $key, array('(', ', '))) {
+                            if (find_last_token($list, $key, array('(',', '))) {
                                 $is_get_func_var = 1;
                             } else {
                                 break;
@@ -466,7 +466,7 @@ function strip_whitespace($content, $options = array()) {
                         $pattern_str_var = '%s';
                         $remove_dollar   = 1;
                         if (find_next_token($list, $key, array('['))) {
-                            $pattern_str_var = ' {%s}';
+                            $pattern_str_var = '{%s}';
                             $remove_dollar   = 0;
                         }
                         if (isset($str_var_list['__call' . $token_str])) {
@@ -497,7 +497,7 @@ function strip_whitespace($content, $options = array()) {
                         break;
                     }
                     if ($is_ob) {
-                        $next_is_static = find_next_token($list, $key, array('.', ', ', ')', ';', '+',
+                        $next_is_static = find_next_token($list, $key, array('.',', ', ')', ';', '+',
                                                                              '-', '/', '%', '&', '|', ':', //三元操作符
                                                                              '>>', '!=', '!==', '==',
                                                                              '>=', '<=', '!==', '<>', '^', '?>', '::',
@@ -692,7 +692,7 @@ function strip_whitespace($content, $options = array()) {
                     $is_throw && $is_throw = 0;
                     $is_ns_separator && $is_ns_separator--;
                     break;
-                case ' {':
+                case '{':
                     $trim_last = 1;
                     if ($is_catch) {
                         $is_catch = false;
@@ -772,7 +772,7 @@ function strip_whitespace($content, $options = array()) {
                                     case 'function':
                                         //$_function_stack[++$_function_index] = 0;
                                         break;
-                                    case ' {':
+                                    case '{':
                                         if (--$_function_stack[$_function_index] == 0) {
                                             //$_function_index--;
                                         }
@@ -807,7 +807,7 @@ function strip_whitespace($content, $options = array()) {
                                             case 'function':
                                                 $_function_stack[++$_function_index] = 0;
                                                 break;
-                                            case ' {':
+                                            case '{':
                                                 $_function_stack[$_function_index]++;
                                                 break;
                                             case '}':
@@ -1025,7 +1025,7 @@ function strip_whitespace($content, $options = array()) {
         if ($c['token_name'] == 'T_NAMESPACE') {
             $is_namespace = true;
         } else if ($is_namespace) {
-            if ($is_namespace && (trim($c['content']) == ';' || trim($c['content']) == ' {')) {
+            if ($is_namespace && (trim($c['content']) == ';' || trim($c['content']) == '{')) {
                 $str          .= $vars;
                 $vars         = '';
                 $is_namespace = false;
@@ -1491,7 +1491,7 @@ function strip_str($str) {
  */
 function rand_quote($str) {
     static $index = 0;
-    return $index++ % 2 == 1 ? ' {' . $str . '}' : '[' . $str . ']';
+    return $index++ % 2 == 1 ? '{' . $str . '}' : '[' . $str . ']';
 }
 
 /**

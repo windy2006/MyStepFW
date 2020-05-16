@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Functions For File Operations   *
@@ -267,7 +267,7 @@ class myFile {
             $dir_list = explode('/', $dir);
             if($dir_list[0]=='') $dir_list[0]='/';
             $cur_dir = '';
-            for($i=0, $m=count($dir_list); $i<$m; $i++) {
+            for($i=0,$m=count($dir_list); $i<$m; $i++) {
                 if(empty($dir_list[$i])) continue;
                 $cur_dir .= $dir_list[$i].'/';
                 if(!is_dir($cur_dir)) {
@@ -425,6 +425,12 @@ class myFile {
      * @return array|bool
      */
     public static function getHeader($url, $mode = true) {
+        stream_context_set_default( [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ]);
         if($headers = get_headers($url, $mode)) {
             return array_change_key_case($headers, CASE_LOWER);
         }
@@ -741,7 +747,7 @@ class myFile {
         $content = preg_replace('#\r\n\d+\r\n#', '', $content);
         fclose($fp);
         if(isset($header['Content-Encoding']) && $header['Content-Encoding']=='gzip') {
-            //$content = preg_replace("/(^|[\r\n]+)(\w {3})([\r\n]+|$)/", "", $content);
+            //$content = preg_replace("/(^|[\r\n]+)(\w{3})([\r\n]+|$)/", "", $content);
             $content = self::gzdecode($content);
         }
         return self::removeBom($content);
@@ -887,7 +893,7 @@ class myFile {
      */
     public static function getTree($dir='./', $recursion = false) {
         $tree = array();
-        $mydir    = dir($dir);
+        $mydir = dir($dir);
         if(!$mydir) return array();
         while(($file = $mydir->read()) !== false) {
             if($file=='.' || $file=='..') continue;
@@ -899,7 +905,7 @@ class myFile {
                 $tree[$file]['size'] = self::getSize($theFile);
             }
             $tree[$file]['attr'] = self::getAttrib($theFile, 1);
-            $tree[$file]['time'] = date('Y/d/y H:i:s', filemtime($theFile));
+            $tree[$file]['time'] = date('Y/m/d H:i:s', filemtime($theFile));
         }
         $mydir->close();
         return $tree;

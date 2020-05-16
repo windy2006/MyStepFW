@@ -1,158 +1,268 @@
 <?PHP
-$method = strtolower(end($info_app['path']));
-switch(true) {
-    case in_array(strtolower($method), ['add', 'edit', 'list']):
-        $method = strtolower($method);
-        break;
-    case is_numeric($method):
-        $method = 'edit';
-        break;
-    default:
-        $method = 'list';
-        break;
+if(empty($id)) $id = r::r('cat_id');
+if(!empty($id)) {
+    if($cat_info = \app\cms\getPara($news_cat_plat, "cat_id", $id)) {
+        if(!checkPower('web', $cat_info['web_id'])) {
+            myStep::info('admin_art_catalog_error');
+        }
+    } else {
+        myStep::info('admin_art_catalog_error');
+    }
 }
-debug($method);
-$cat = \app\cms\getCache('news_cat');
-debug($s->db->pre);
-
 switch($method) {
-    case "add":
-    case "edit":
-    case "list":
-        build_page($method);
+    case 'add':
+    case 'edit':
+    case 'list':
+        $content = build_page($method);
         break;
-    case "delete":
-        $log_info = $mystep->getLanguage('admin_art_catalog_delete');
+    case 'delete':
+        cms::$log = $mystep->getLanguage('admin_art_catalog_delete');
         function multiDelData($cat_id) {
             global $db, $s;
-            $db->delete($s->db->pre."news_cat", array("cat_id", "n=", $cat_id));
-            $db->delete($s->db->pre."news_show", array("cat_id", "n=", $cat_id));
-            $db->delete($s->db->pre."news_detail", array("cat_id", "n=", $cat_id));
+            $db->build($s->db->pre.'news_cat')
+                ->where('cat_id', 'n=', $cat_id);
+            $db->delete();
+            $db->build($s->db->pre.'news_show')
+                ->where('cat_id', 'n=', $cat_id);
+            $db->delete();
+            $db->build($web_info['setting']->db->pre.'news_show')
+                ->where('cat_id', 'n=', $cat_id);
+            $db->delete();
+            $db->build($web_info['setting']->db->pre.'news_detail')
+                ->where('cat_id', 'n=', $cat_id);
+            $db->delete();
             $cat_id_list = array();
-            $db->select($s->db->pre."news_cat", "cat_id", array("cat_main", "n=", $cat_id));
-            while($record = $db->GetRS()){$catid_list[] = $record['cat_id'];}
+            $db->build($s->db->pre.'news_cat')
+                ->field('cat_id')
+                ->where('pid', 'n=', $cat_id);
+            $db->select();
+            while($record = $db->getRS()){$cat_id_list[] = $record['cat_id'];}
             $db->free();
-            $max_count = count($catid_list);
-            for($i=0; $i<$max_count; $i++) {
-                multiDelData($catid_list[$i]);
+            for($i=0,$m=count($cat_id_list); $i<$m; $i++) {
+                multiDelData($cat_id_list[$i]);
             }
             return;
         }
-        multiDelData($cat_id);
-        \app\cms\deleteCache("news_cat");
+        multiDelData($id);
+        \app\cms\deleteCache('news_cat');
+        $cache->func('\app\cms\setCatList', [$news_cat], null);
+        cms::redirect();
         break;
-    case "order":
-        $log_info = $mystep->getLanguage('admin_art_catalog_change');
-        for($i=0, $m=count($_POST['cat_id']);$i<$m;$i++) {
-            $db->update($s->db->pre."news_cat", array("cat_order"=>$_POST['cat_order'][$i]), array("cat_id", "n=", $_POST['cat_id'][$i]));
+    case 'order':
+        cms::$log = $mystep->getLanguage('admin_art_catalog_change');
+        $cat_id_list = r::p('cat_id');
+        $cat_order_list = r::p('cat_order');
+        $cat_layer_list = r::p('cat_layer');
+        for($i=0,$m=count($cat_id_list);$i<$m;$i++) {
+            $db->build($s->db->pre.'news_cat')
+               ->field([
+                   'order'=>$cat_order_list[$i],
+                   'layer'=>$cat_layer_list[$i]
+               ])
+               ->where('cat_id', 'n=', $cat_id_list[$i]);
+            $db->update();
         }
-        deleteCache("news_cat");
+        \app\cms\deleteCache('news_cat');
+        $cache->func('\app\cms\setCatList', [$news_cat], null);
+        cms::redirect();
         break;
-    case "up":
-    case "down":
-        $log_info = $mystep->getLanguage('admin_art_catalog_change');
-        list($cat_main, $cat_layer, $web_id)=array_values($db->record($s->db->pre."news_cat", "cat_main, cat_layer, web_id", array("cat_id", "n=", $cat_id)));
-        $db->select($s->db->pre."news_cat", "cat_id, cat_order, web_id", array(array("cat_layer", "n=", $cat_layer), array("cat_main", "n=", $cat_main, "and"), array("web_id", "n=", $web_id, "and")), array("order"=>"cat_order"));
-        while($record[] = $db->GetRS()) {}
-        $db->Free();
-        $max_count = count($record)-1;
-        for($i=0; $i<$max_count; $i++) {
-            if($record[$i]['cat_id']!=$cat_id) continue;
-            if($method=="up") {
-                if($i>0) {
-                    $db->update($s->db->pre."news_cat", array("cat_order", $record[$i-1]['cat_order']), array("cat_id", "n=", $cat_id));
-                    $db->update($s->db->pre."news_cat", array("cat_order", $record[$i]['cat_order']), array("cat_id", "n=", $record[$i-1]['cat_id']));
-                }
-            } elseif($method=="down") {
-                if($i<count($record)-2) {
-                    $db->update($s->db->pre."news_cat", array("cat_order", $record[$i+1]['cat_order']), array("cat_id", "n=", $cat_id));
-                    $db->update($s->db->pre."news_cat", array("cat_order", $record[$i]['cat_order']), array("cat_id", "n=", $record[$i+1]['cat_id']));
-                }
-            }
-            break;
-        }
-        deleteCache("news_cat");
-        break;
-    case "add_ok":
-    case "edit_ok":
+    case 'add_ok':
+    case 'edit_ok':
         if(myReq::check('post')) {
-            if($_POST['cat_main']==0) {
-                $_POST['cat_layer'] = 1;
+            $data = r::p('[ALL]');
+            if($data['pid']==0) {
+                $data['layer'] = 1;
             } else {
-                $_POST['cat_layer'] = 1 + $db->result($s->db->pre."news_cat", "cat_layer", array("cat_id", "n=", $_POST['cat_main']));
+                $db->build($s->db->pre.'news_cat')
+                   ->where('cat_id', 'n=', $data['pid'])
+                   ->field('layer');
+                $data['layer'] = 1 + $db->result();
             }
-            $_POST['cat_show'] = array_sum($_POST['cat_show']);
-            if(is_null($_POST['cat_show'])) $_POST['cat_show'] = 0;
-            $view_lvl_org = $_POST['view_lvl_org'];
-            unset($_POST['view_lvl_org']);
-            $notice_org = $_POST['notice_org'];
-            unset($_POST['notice_org']);
-            $merge = $_POST['merge'];
-            unset($_POST['merge']);
-            $template = "";
-            if($_POST['cat_type']==3) $template = $_POST['template'];
-            unset($_POST['template']);
-            if($_POST['cat_type']==3 && $template=="") $_POST['cat_type'] = 1;
-            if($method=="add_ok") {
-                $log_info = $mystep->getLanguage('admin_art_catalog_add');
-                $_POST['cat_order'] = 1 + $db->result($s->db->pre."news_cat", "max(cat_order)");
-                $db->insert($s->db->pre."news_cat", $_POST, true);
+            $db->build($s->db->pre.'news_cat')->field('idx')->where('idx', '=', $data['idx'])->where('web_id', 'n=', $data['web_id']);
+            if($method=='edit_ok') {
+                $db->build($s->db->pre.'news_cat')->where('cat_id', 'n!=', $data['cat_id'], 'and');
+            }
+            if($db->result()) {
+                myStep::info('admin_art_catalog_error_idx');
+            }
+            $data['show'] = array_sum($data['show']);
+            if(is_null($data['show'])) $data['show'] = 0;
+            $view_lvl_org = $data['view_lvl_org'];
+            unset($data['view_lvl_org']);
+            $merge = $data['merge']??0;
+            unset($data['merge']);
+            $template = '';
+            if($data['type']==3) $template = htmlspecialchars_decode($data['template']);
+            unset($data['template']);
+            if($data['type']==3 && $template=='') $data['type'] = 1;
+            if($method=='add_ok') {
+                cms::$log = $mystep->getLanguage('admin_art_catalog_add');
+                $db->build($s->db->pre.'news_cat')->field('max(`order`)');
+                $data['order'] = 1 + $db->result();
+                $db->build($s->db->pre.'news_cat')
+                   ->field($data);
+                $db->insert();
             } else {
-                if(!is_null($merge) && $_POST['cat_main']!=0 && $_POST['cat_main']!=$cat_id) {
-                    $log_info = $mystep->getLanguage('admin_art_catalog_merge');
-                    $db->update($s->db->pre."news_cat", array("cat_id", $_POST['cat_main']), array("cat_main", "n=", $cat_id));
-                    $db->update($s->db->pre."news_show", array("cat_id", $_POST['cat_main']), array("cat_id", "n=", $cat_id));
-                    $db->update($s->db->pre."news_detail", array("cat_id", $_POST['cat_main']), array("cat_id", "n=", $cat_id));
-                    $db->delete($s->db->pre."news_cat", array("cat_id", $cat_id));
+                if($merge==1 && $data['pid']!=0 && $data['pid']!=$data['cat_id']) {
+                    cms::$log = $mystep->getLanguage('admin_art_catalog_merge');
+                    $db->build($s->db->pre.'news_cat')
+                       ->field(['pid'=>$data['pid']])
+                       ->where('pid', 'n=', $data['cat_id']);
+                    $db->update();
+                    $db->build($s->db->pre.'news_show')
+                       ->field(['cat_id'=>$data['pid']])
+                       ->where('cat_id', 'n=', $data['cat_id']);
+                    $db->update();
+                    $db->build($s->db->pre.'news_detail')
+                       ->field(['cat_id'=>$data['pid']])
+                       ->where('cat_id', 'n=', $data['cat_id']);
+                    $db->update();
+                    $db->build($s->db->pre.'news_cat')
+                        ->where('cat_id', 'n=', $data['cat_id']);
+                    $db->delete();
                 } else {
-                    $log_info = $mystep->getLanguage('admin_art_catalog_edit');
-                    function multiChange($catid, $layer) {
-                        global $db, $setting, $mystep;
-                        if($layer>100) showInfo($mystep->getLanguage('admin_art_catalog_error'));
-                        $db->update($s->db->pre."news_cat", array("cat_layer"=>$layer), array("cat_id", "n=", $catid));
-                        $catid_list = array();
-                        $db->select($s->db->pre."news_cat", "cat_id", array("cat_main", "n=", $catid));
-                        while($record = $db->GetRS()){$catid_list[] = $record['cat_id'];}
+                    cms::$log = $mystep->getLanguage('admin_art_catalog_edit');
+                    function multiChange($cat_id, $layer) {
+                        global $db, $s;
+                        if($layer>100) myStep::info('admin_art_catalog_error');
+                        $db->build($s->db->pre.'news_cat')
+                           ->field(['layer'=>$layer])
+                           ->where('cat_id', 'n=', $cat_id);
+                        $db->update();
+                        $id_list = array();
+                        $db->build($s->db->pre.'news_cat')
+                           ->field('cat_id')
+                           ->where('pid', 'n=', $cat_id);
+                        $db->select();
+                        while($record = $db->getRS()){$id_list[] = $record['cat_id'];}
                         $db->free();
-                        for($i=0, $m=count($catid_list); $i<$m; $i++) {
-                            multiChange($catid_list[$i], $layer+1);
+                        for($i=0,$m=count($id_list); $i<$m; $i++) {
+                            multiChange($id_list[$i], $layer+1);
                         }
                         return;
                     }
-                    multiChange($cat_id, $_POST['cat_layer']);
-                    $db->update($s->db->pre."news_cat", $_POST, array("cat_id", "n=", $cat_id));
-                    $setting_sub = getSubSetting($webInfo['web_id']);
-                    if($setting['db']['name']==$setting_sub['db']['name']) {
-                        $setting['db']['pre_sub'] = $setting_sub['db']['pre'];
-                    } else {
-                        $setting['db']['pre_sub'] = $setting_sub['db']['name'].".".$setting_sub['db']['pre'];
-                    }
-                    if($view_lvl_org!=$_POST['view_lvl'] && is_numeric($_POST['view_lvl'])) {
-                        $db->update($setting['db']['pre_sub']."news_show", array("view_lvl", $_POST['view_lvl']), array(array("cat_id", "n=", $cat_id), array("view_lvl", "n=", $view_lvl_org, "and")));
-                    }
-                    if($notice_org!=$_POST['notice']) {
-                        $db->update($setting['db']['pre_sub']."news_show", array("notice", $_POST['notice']), array(array("cat_id", "n=", $cat_id), array("notice", "=", $notice_org, "and")));
+                    multiChange($data['cat_id'], $data['layer']);
+                    $db->build($s->db->pre.'news_cat')
+                       ->field($data)
+                       ->where('cat_id', 'n=', $data['cat_id']);
+                    $db->update();
+                    if($view_lvl_org!=$data['view_lvl']) {
+                        $db->build($web_info['setting']->db->pre.'news_show')
+                           ->field(['view_lvl'=>$data['view_lvl']])
+                           ->where([
+                                   array('cat_id', 'n=', $data['cat_id']),
+                                   array('view_lvl', 'n=', $view_lvl_org, 'and')
+                               ]);
+                        $db->update();
                     }
                 }
             }
-            if($method=="add_ok") {
-                $cat_id = $db->GetInsertId();
-                if($group['power_cat']!="all") {
-                    $db->update($s->db->pre."user_group", array("power_cat", "concat(power_cat, ', ".$cat_id."')"), array("group_id", "n=", $usergroup));
-                    deleteCache("user_group");
-                }
+            if($method=='add_ok') {
+                $id = $db->getInsertId();
             }
-            deleteCache("news_cat");
-            $the_file = ROOT."/".$setting['path']['template']."/default/list_cat_".$cat_id.".tpl";
+            $the_file = PATH.'/template/custom/cat_'.$id.'.tpl';
             if(!empty($template)) {
-                WriteFile($the_file, $template, "wb");
+                f::s($the_file, $template);
             } else {
-                @unlink($the_file);
+                f::del($the_file);
             }
-        } else {
-            $goto_url = $setting['info']['self'];
+            \app\cms\deleteCache('news_cat');
+            $cache->func('\app\cms\setCatList', [$news_cat], null);
         }
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
         break;
     default:
-        $goto_url = $setting['info']['self'];
+        $content = build_page('list');
+}
+
+function build_page($method) {
+    global $mystep, $tpl_setting, $s, $db, $cache;
+    global $news_cat_plat, $id, $website, $web_info;
+
+    $tpl_setting['name'] = 'art_catalog_'.($method=='list'?'list':'input');
+    $tpl = new myTemplate($tpl_setting, false);
+
+    if($method == 'list') {
+        $tpl->assign('news_cat', myString::toJson($news_cat_plat, $s->gen->charset));
+        for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
+            if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
+            $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
+            $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
+            $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));
+            $web = $cache->func('\app\cms\getPara', [$website, 'web_id', $news_cat_plat[$i]['web_id']]);
+            $news_cat_plat[$i]['web_name'] = $web ? $web['name'] : $mystep->getLanguage('admin_art_catalog_public');
+            $news_cat_plat[$i]['order'] = $i+1;
+            $tpl->setLoop('record', $news_cat_plat[$i]);
+        }
+        $tpl->assign('title', $mystep->getLanguage('admin_art_catalog_catalog'));
+    } else {
+        if($method == 'edit') {
+            $show_merge = 'inline';
+            $db->build($s->db->pre.'news_cat')
+               ->where('cat_id','n=',$id);
+            if(($record = $db->record())===false) {
+                myStep::info('admin_art_catalog_error');
+            }
+            myString::htmlTrans($record);
+            $record['template'] = '';
+            $the_file = PATH.'/template/custom/cat_'.$id.'.tpl';
+            if(file_exists($the_file)) $record['template'] = f::g($the_file);
+        } else {
+            $show_merge = 'none';
+            $record = array();
+            $record['cat_id'] = 0;
+            $record['web_id'] = 0;
+            $record['pid'] = 0;
+            $record['name'] = '';
+            $record['idx'] = '';
+            $record['prefix'] = '';
+            $record['keyword'] = '';
+            $record['comment'] = '';
+            $record['image'] = '';
+            $record['link'] = '';
+            $record['view_lvl'] = 0;
+            $record['view_lvl_org'] = 0;
+            $record['type'] = 0;
+            $record['show'] = 255;
+            $record['template'] = '';
+        }
+        for($i=0,$m=count($website); $i<$m; $i++) {
+            if(!checkPower('web', $website[$i]['web_id'])) continue;
+            if($method == 'edit' && $website[$i]['web_id']!=$record['web_id']) continue;
+            $website[$i]['selected'] = $website[$i]['web_id']==$record['web_id']?'selected':'';
+            $tpl->setLoop('website', $website[$i]);
+        }
+        $positions = explode(',', $s->content->cat_pos);
+        for($i=0,$m=count($positions); $i<$m; $i++) {
+            $tpl->setLoop('positions', ['idx'=>pow(2, $i),'name'=>$positions[$i]]);
+        }
+        $tpl->assign('cat', $record);
+
+        $cur_layer = 99;
+        for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
+            if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
+            if($method == 'edit' && $news_cat_plat[$i]['web_id']!=$record['web_id']) continue;
+            if($news_cat_plat[$i]['cat_id']==$record['cat_id']) {
+                $cur_layer = $news_cat_plat[$i]['layer'];
+                continue;
+            }
+            if(!empty($news_cat_plat[$i]['link'])) continue;
+            if($news_cat_plat[$i]['layer'] > $cur_layer) {
+                continue;
+            } else {
+                $cur_layer = 99;
+            }
+            $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
+            $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
+            $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));
+            $tpl->setLoop('catalog', array('cat_id'=>$news_cat_plat[$i]['cat_id'], 'name'=>$news_cat_plat[$i]['name'], 'web_id'=>$news_cat_plat[$i]['web_id']));
+        }
+
+        $tpl->assign('title', $mystep->getLanguage($method=='add'?'admin_art_catalog_add':'admin_art_catalog_edit'));
+        $tpl->assign('method', $method);
+        $tpl->assign('show_merge', $show_merge);
+        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    }
+    $tpl->assign('web_id', $web_info['web_id']);
+    return $mystep->render($tpl);
 }

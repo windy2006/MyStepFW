@@ -1,11 +1,11 @@
-<?php
+<?PHP
 return array(
     '0' => array( //sample
-        'info' => 'comment of the current update', 
+        'info' => 'comment of the current update',
         'file' => array(
-            'update/update.php', 
-        ), 
-        'setting' => array(), 
-        'code' => 'echo "any php script";', 
-    ), 
+            'update/update.php',
+        ),
+        'setting' => array(),
+        'code' => 'echo "any php script";',
+    ),
 );

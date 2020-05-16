@@ -39,7 +39,7 @@
         <canvas id="canvas9"></canvas>
     </div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
 jQuery.vendor('chart', {
     add_css:true,
     name_fix:'.bundle.min',
@@ -279,7 +279,6 @@ jQuery.vendor('chart', {
                     },
                 }
             };
-            console.log(config7.data);
             new Chart($id('canvas7').getContext('2d'), config7);
 
             let config8 = {

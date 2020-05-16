@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : MySQL Manager                   *
@@ -21,20 +21,20 @@ MySQL查询类
     $mysql->changUser($user, $pass, $db)         // Change the Database User (Unusable in some versoin of MySQL)
     $mysql->query($sql)                          // Execute a Query of MySQL, Result into $mysql->DB_resut
     $mysql->getRS()                              // Return The Current Result as an Array and Set the Point of Result to the Next Result
-    $mysql->record()                             // Get the first line of the recordset
+    $mysql->record()                             // Get the first line of the record set
     $mysql->records()                            // Get the all of the lines of the query
     $mysql->result()                             // Get the single value of the query with the parameters of buildSel function
     $mysql->count()                              // Count the result number of current query
     $mysql->getData($line, $field)               // Get specified field or line of a query
     $mysql->GetFields($the_db, $the_tbl)         // Get the Columns List of a Table as an Array
-    $mysql->getCreateScript($the_tbl, $the_db)   // Get the Whole Struction of Current Selected Database as an Array
+    $mysql->getCreateScript($the_tbl, $the_db)   // Get the Whole structure of Current Selected Database as an Array
     $mysql->getDataScript($the_tbl, $the_db)     // Get All of The Data of a Table
     $mysql->getIdxScript($the_tbl, $the_db)      // Get the Indexes List of a Table as an Array
     $mysql->getDBs()                             // Get the Databases List of Current MySQL Server as an Array
     $mysql->getTbls($the_db)                     // Get the Tables List of Current Selected Database as an Array
     $mysql->getPri($the_tbl, $the_db)            // Get the Primary Keys of a Table as an Array
     $mysql->getInsertId()                        // Return auto increment id generate by insert query
-    $mysql->optTabs()                            // Optimize the Tablses of Selected Database
+    $mysql->optTabs()                            // Optimize the Tables of Selected Database
     $mysql->getStat()                            // Get the Current Status of MySQL
     $mysql->getProcesses($mode, $time_limit)     // Get the processes list of MySQL
     $mysql->build($tbl, $join)                   // Set or get a SQL builder to create a sql script
@@ -118,8 +118,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
      */
     public function reconnect($pconnect = false, $the_db = null) {
         $this->close();
-        $this->connect($pconnect, $the_db);
-        return;
+        return $this->connect($pconnect, $the_db);
     }
 
     /**
@@ -170,6 +169,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
      */
     public function query($sql) {
         if(!$this->check()) return false;
+        $this->build('[reset]');
         $this->free();
         $this->count++;
         $sql = str_replace('    ', ' ', $sql);
@@ -236,6 +236,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
             }
             $this->free();
         }
+        $this->build('[reset]');
         return $result;
     }
 
@@ -247,7 +248,6 @@ class MySQL extends myBase implements interface_db, interface_sql {
      */
     public function records($sql='', $mode = 1) {
         if(!empty($sql) && strpos($sql, ' ')==false) {
-            $this->build('[reset]');
             $this->build($sql);
             $sql = '';
         }
@@ -260,6 +260,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
             if(!empty($result)) $this->writeCache($key, $result);
             $this->free();
         }
+        $this->build('[reset]');
         return $result;
     }
 
@@ -280,6 +281,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
             }
             $this->free();
         }
+        $this->build('[reset]');
         return $result;
     }
 
@@ -356,8 +358,9 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $this->query('SELECT * FROM `'.$this->safeName($the_db).'`.`'.$this->safeName($the_tbl).'`');
         $result = '';
         while($row = $this->getRS(2)) {
+
             $result .= 'INSERT INTO `'.$the_tbl.'` VALUES (';
-            for($i=0, $m=count($row); $i<$m; $i++) {
+            for($i=0,$m=count($row); $i<$m; $i++) {
                 $result .= '"'.$this->safeValue($row[$i]).'", ';
             }
             $result .= ");\n";
@@ -466,7 +469,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         } else {
             $tabs = func_get_args();
         }
-        for($i=0, $m=count($tabs); $i<$m; $i++) {
+        for($i=0,$m=count($tabs); $i<$m; $i++) {
             $this->query('OPTIMIZE TABLE '.$tabs[$i]);
         }
         $this->free();
@@ -518,6 +521,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * 构建数据查询
      * @param $tbl
      * @param null $join
+     * @return mixed|void
      */
     public function build($tbl, $join=null) {
         if($tbl=='[reset]') {
@@ -562,12 +566,19 @@ class MySQL extends myBase implements interface_db, interface_sql {
             $sql = current($this->builder)->select();
         } else {
             $sql = 'select ';
+            if(!empty($this->builder[0]->sel_prefix)) $sql = $this->builder[0].$this->sel_prefix.' ';
             $fields = array();
             foreach($this->builder as $cur_tbl) {
                 $the_field = $cur_tbl->field();
+                if($the_field=='*') {
+                    $the_field = $cur_tbl->dl.$cur_tbl->idx.$cur_tbl->dr.'.*';
+                } elseif(substr(strtolower($the_field),0,6)=='count(') {
+                    $fields = array($the_field);
+                    break;
+                }
                 if(!empty($the_field)) $fields[] = $the_field;
             }
-            $sql .= implode(', ', $fields);
+            $sql .= implode(',', $fields);
 
             reset($this->builder);
             $cur_tbl = current($this->builder);
@@ -594,7 +605,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
                 $the_order = $cur_tbl->order();
                 if(!empty($the_order)) $orders[] = $the_order;
             }
-            if(!empty($orders)) $sql .= ' order by '.implode(', ', $orders);
+            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
 
             reset($this->builder);
             $sql .= current($this->builder)->limit();
@@ -635,7 +646,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
                 $the_field = $cur_tbl->field('update');
                 if(!empty($the_field)) $fields[] = $the_field;
             }
-            $sql .= implode(', ', $fields);
+            $sql .= implode(',', $fields);
 
             $conditions = array();
             foreach($this->builder as $cur_tbl) {
@@ -650,7 +661,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
                 $the_order = $cur_tbl->order();
                 if(!empty($the_order)) $orders[] = $the_order;
             }
-            if(!empty($orders)) $sql .= ' order by '.implode(', ', $orders);
+            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
 
             reset($this->builder);
             $sql .= current($this->builder)->limit();
@@ -696,7 +707,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
                 $the_order = $cur_tbl->order();
                 if(!empty($the_order)) $orders[] = $the_order;
             }
-            if(!empty($orders)) $sql .= ' order by '.implode(', ', $orders);
+            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
 
             reset($this->builder);
             $sql .= current($this->builder)->limit();
@@ -714,9 +725,14 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * 更新替换数据
      * @return mixed
      */
-    public function replace() {
+    public function replace($show = false) {
         reset($this->builder);
-        return current($this->builder)->insert(true);
+        $sql = current($this->builder)->insert(true);
+        if($show) {
+            return $sql;
+        } else {
+            return $this->query($sql);
+        }
     }
 
     /**
@@ -728,7 +744,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         if(!$this->check()) return false;
         if(is_string($SQLs)) $SQLs = array($SQLs);
         $result = array();
-        for($i=0, $m=count($SQLs); $i<$m; $i++) {
+        for($i=0,$m=count($SQLs); $i<$m; $i++) {
             if(empty($SQLs[$i])) continue;
             $result[] = array($SQLs[$i], $this->query($SQLs[$i]));
         }
@@ -749,7 +765,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $strSQL = preg_replace("/[\t ]+/", " ", $strSQL);
         $temp = preg_split("/;\s*\n/", $strSQL);
         $result = array();
-        for($i=0, $m=count($temp); $i<$m; $i++) {
+        for($i=0,$m=count($temp); $i<$m; $i++) {
             if(str_replace("\n", '', $temp[$i]) != '') {
                 $result[] = preg_replace("/^\n*(.*)\n*$/m", '\1', $temp[$i]);
             }
@@ -769,7 +785,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         if(is_file($file)) {
             $results = array();
             $SQLs = $this->handleSQL(str_replace($find, $replace, file_get_contents($file)));
-            for($i=0, $m=count($SQLs); $i<$m; $i++) {
+            for($i=0,$m=count($SQLs); $i<$m; $i++) {
                 $theSQL = $SQLs[$i];
                 $theSQL = strtolower($theSQL);
                 $theSQL = str_replace('if not exists', '', $theSQL);
@@ -839,7 +855,15 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $result = false;
         if(isset($this->$obj)) {
             if($type=='object' && is_object($this->$obj)) {
-                if(($obj == 'result') || ($obj == 'connect' && empty($this->connect->errno)))  $result = true;
+                if($obj == 'result') {
+                    $result = true;
+                } elseif($obj == 'connect') {
+                    if(empty($this->connect->errno)) {
+                        $result = true;
+                    } elseif(mysqli_errno($this->connect)==2006 || mysqli_errno($this->connect)==2013) {
+                        $result = $this->reconnect();
+                    }
+                }
             } elseif($type=='bool' && is_bool($this->$obj)) {
                 $result = $this->$obj;
             }

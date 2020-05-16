@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /**
  * 文件存储SESSION控制类
  */
@@ -11,7 +11,7 @@ class sess_file implements interface_session {
     }
 
     public static function close() {
-        self::gc(ini_get('session.gc_maxlifetime'));
+        if(rand(1,100)>95) self::gc(ini_get('session.gc_maxlifetime'));
         return true;
     }
 
@@ -33,13 +33,21 @@ class sess_file implements interface_session {
     }
 
     public static function gc($maxlifetime) {
+        $dirname = basename(self::$path);
+        if(preg_match('#^[\d\-]+$#', $dirname)) {
+            $dir = dirname(self::$path);
+            $mydir = opendir($dir);
+            while($file = readdir($mydir)) {
+                if($file=='.' || $file=='..' || $file==$dirname) continue;
+                myFile::del($dir.'/'.$file);
+            }
+        }
         $mydir = opendir(self::$path);
         while($file = readdir($mydir)) {
-            if($file!='.' && $file!='..') {
-                $the_file = self::$path.'/'.$file;
-                if(filemtime($the_file)+$maxlifetime < $_SERVER['REQUEST_TIME']) {
-                    @unlink($the_file);
-                }
+            if($file=='.' || $file=='..') continue;
+            $the_file = self::$path.'/'.$file;
+            if(filemtime($the_file)+$maxlifetime < $_SERVER['REQUEST_TIME']) {
+                myFile::del($the_file);
             }
         }
         return true;

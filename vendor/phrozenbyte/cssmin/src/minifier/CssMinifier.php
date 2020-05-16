@@ -44,7 +44,7 @@ class CssMinifier
 		$filters = array_merge(array
 			(
 			"ImportImports"					=> false,
-			"RemoveComments"				=> true, 
+			"RemoveComments"				=> true,
 			"RemoveEmptyRulesets"			=> true,
 			"RemoveEmptyAtBlocks"			=> true,
 			"ConvertLevel3Properties"		=> false,

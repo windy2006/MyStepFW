@@ -26,9 +26,10 @@
 		</textarea>
 	</div>
 </div>
-<script language="JavaScript" src="vendor/tinymce/tinymce.min.js"></script>
-<script language="JavaScript" type="text/javascript">
+<script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
+<script type="text/javascript">
 function tinymceInit(obj){
+	if(!checkSetting()) return;
 	if(obj==null) obj = 'textarea';
 	tinymce.init({
 		language:'zh_CN',
@@ -46,17 +47,17 @@ function tinymceInit(obj){
 		toolbar_items_size: 'small',
 
 		menubar: false,
-		/*
-		menubar: 'file edit insert view format table',
-		menu: {
-			file: {title: 'File', items: 'newdocument'},
-		edit: {title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall'},
-		insert: {title: 'Insert', items: 'link media | template hr'},
-		view: {title: 'View', items: 'visualaid'},
-		format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
-		table: {title: 'Table', items: 'inserttable tableprops deletetable | cell row column'},
-	},
-	*/
+        /*
+        menubar: 'file edit insert view format table',
+        menu: {
+            file: {title: 'File', items: 'newdocument'},
+			edit: {title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall'},
+			insert: {title: 'Insert', items: 'link media | template hr'},
+			view: {title: 'View', items: 'visualaid'},
+			format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
+			table: {title: 'Table', items: 'inserttable tableprops deletetable | cell row column'},
+		},
+		*/
 		// Custom settings
 		//content_css : setting.path_root+"vendor/tinymce/editor.css",
 		content_css : setting.path_root+"static/css/bootstrap.css",
@@ -72,13 +73,13 @@ function tinymceInit(obj){
 		relative_urls : true,
 		invalid_elements : "script",
 		extended_valid_elements : "form[action|method|name],"+
-		"textarea[class|type|title|name|rows|cols],"+
-		"input[type|name|value|checked|src|alt|size|maxlength],"+
-		"button[name|value|type],"+
-		"select[name|size|multiple|onchange],"+
-		"iframe[src|frameborder=0|width|height|align|scrolling|name],"+
-		"center,"+
-		"script[charset|defer|language|src|type]",
+			"textarea[class|type|title|name|rows|cols],"+
+			"input[type|name|value|checked|src|alt|size|maxlength],"+
+			"button[name|value|type],"+
+			"select[name|size|multiple|onchange],"+
+			"iframe[src|frameborder=0|width|height|align|scrolling|name],"+
+			"center,"+
+			"script[charset|defer|language|src|type]",
 		forced_root_block : "p",
 		flash_wmode : "transparent",
 		flash_quality : "high",
@@ -130,5 +131,5 @@ function tinymceInit(obj){
 		}
 	});
 }
-checkNrun('tinymceInit');
+tinymceInit();
 </script>

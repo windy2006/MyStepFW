@@ -1,4 +1,4 @@
-<?php
+<?PHP
 return array(
-    "test" => "���԰�����", 
+    "test" => "中文测试",
 );

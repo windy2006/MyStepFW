@@ -1,3 +1,3 @@
-<?php
+<?PHP
 $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
-myStep::redirect(str_replace(myFile::rootPath(), '/', ROOT).'/manager/', 302);
+myStep::redirect(ROOT_WEB.'manager/', 302);

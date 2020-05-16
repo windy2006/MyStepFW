@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : My Simple Datebase              *
@@ -398,7 +398,7 @@ class simpleDB implements interface_db {
         if($rows==false) return false;
         $setting = $this->getFields();
         if(!$setting) return false;
-        for($n=0, $m=count($rows);$n<$m;$n++) {
+        for($n=0,$m=count($rows);$n<$m;$n++) {
             $content = '';
             $i = 0;
             $row = $rows[$n]['db_row'];

@@ -11,6 +11,8 @@
  **************************************************/
 
 let global = {};
+global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
+global.root_fix = global.root_fix.replace(/\/+/g, '/');
 
 //获取当前路径（可自定义目录层级）
 function getPath(lvl) {
@@ -143,16 +145,14 @@ function loadingShow(info) {
 			.cssText("top:0;left:0;z-index:9999;color:#333333;opacity:0.9")
 			.append($('<img src="static/images/loading.gif" style="width:90%;min-width:300px;height:10px">'))
 			.append("<br />").append($("<span style='font-size:24px;line-height:48px;'>"));
-		obj_loading.appendTo("body");
-		obj_loading.hide();
+		obj_loading.appendTo("body").hide();
 	}
 	if (obj_locker.length === 0) {
 		obj_locker = $("<div>")
 			.attr("id", "screenLocker")
 			.addClass("position-absolute bg-dark")
 			.cssText("top:0;left:0;z-index:8888;opacity:0.8");
-		obj_locker.appendTo("body");
-		obj_locker.hide();
+		obj_locker.appendTo("body").hide();
 	}
 	if (obj_locker.is(':visible')) {
 		$('body').css('overflow', 'auto');
@@ -170,7 +170,6 @@ function loadingShow(info) {
 		obj_loading.css({"top": theTop, "left": theLeft});
 		obj_loading.fadeIn(500);
 	}
-
 }
 
 //开启模态窗口
@@ -288,6 +287,28 @@ function watermark(obj, rate, copyright, char_c, jam_tag) {
 		obj.innerHTML = result;
 	}
 	return result;
+}
+
+//移动设备判断
+function isMobile() {
+	let isMobile = {
+		Android: function () {
+			return navigator.userAgent.match(/Android/i) ? true : false;
+		},
+		BlackBerry: function () {
+			return navigator.userAgent.match(/BlackBerry/i) ? true : false;
+		},
+		iOS: function () {
+			return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
+		},
+		Windows: function () {
+			return navigator.userAgent.match(/IEMobile/i) ? true : false;
+		},
+		any: function () {
+			return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+		}
+	};
+	return isMobile;
 }
 
 //MD5编码
@@ -438,6 +459,12 @@ function debug(para, mode) {
 		$id("debug").value = str;
 	}
 }
+function c(){
+    for(let x in arguments) console.log(arguments[x]);
+}
+function a(){
+	for(let x in arguments) alert(arguments[x]);
+}
 
 //查看对象属性
 function checkObj(obj, func_show) {
@@ -455,7 +482,7 @@ function reportError(msg, url, line) {
 	return true;
 }
 
-//检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量
+//检测language, setting可被调用后运行指定函数，func为需要运行的函数，params为对应函数数组形式的变量，此函数可通过checkSetting()替代
 function checkNrun(func, params) {
 	let idx = md5(func.toString());
 	if(typeof global.timer === 'undefined') global.timer = {};
@@ -471,23 +498,48 @@ function checkNrun(func, params) {
 	}, 100);
 }
 
+//检测language, setting可被调用后，回调函数
+function checkSetting(timer = 500){
+	let flag = true;
+	if(typeof(language)=='undefined' || typeof(setting)=='undefined') {
+		//let caller = arguments.callee.caller; //Cannot work at strict mode
+		let caller = checkSetting.caller;
+		let args = caller.arguments;
+		setTimeout(function(){
+			caller.apply(caller, args);
+		}, timer);
+		flag = false;
+	}
+	return flag;
+}
+
 //处理页面URL为对应的链接模式
-function setURL(url_fix) {
-	if(typeof(setting) === 'undefined') return;
-	$('a[href]').each(function(){
-		let url = $(this).attr('href');
-		let re = new RegExp("^\/?"+url_fix);
-		url = url.replace(re, '');
-		if(url.indexOf(setting.url_prefix)!==0 && url.indexOf("#")!==0) {
-			this.href = setting.url_prefix + url;
-		} else {
-			this.href = url;
+function setURL(prefix=global.root_fix, context=window.document.body) {
+	if(!checkSetting()) return;
+	if(typeof(prefix) === 'undefined') {
+		prefix = setting.app+'/';
+	} else {
+		if(setting.url_prefix.length>0 && prefix.indexOf(setting.url_prefix)===0) {
+			prefix = prefix.replace(setting.url_prefix,'');
 		}
-	});
-	$('form[action]').each(function(){
-		let url = $(this).attr('action');
-		if(url.indexOf(setting.url_prefix)!==0) {
-			this.action = setting.url_prefix + url;
-		}
-	});
+	}
+	let re = new RegExp("^\/?"+setting.url_fix+"\/?");
+	let list = {
+		'a':'href',
+		'form':'action',
+		'img':'src'
+	};
+	for(let x in list) {
+		$(x+'['+list[x]+']', context).each(function(){
+			if($(this).attr('keep-url')!==undefined) return;
+			let url = $(this).attr(list[x]);
+			if(url.indexOf('//')===0 || url.indexOf(':')!==-1 || url.indexOf("#")===0) return;
+			if(url.indexOf(setting.url_prefix)!==0) {
+				url = prefix + url.replace('?', '&');
+				url = setting.url_prefix + url.replace(re, '');
+				$(this).attr(list[x], url.replace(/\/+/g, '/'));
+			}
+		});
+	}
+	return true;
 }

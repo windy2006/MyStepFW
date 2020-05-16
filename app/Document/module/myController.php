@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $ctrl = new myController();
 
 // etag 测试，如不变更参数此页面将不会改变，多用于js、css和图片显示
@@ -6,8 +6,8 @@ $ctrl = new myController();
 
 // 调用模板类
 $template = $ctrl->getInstance('myTemplate', array(
-    "name" => 'test_mycontroller', 
-    "path" => PATH.'data/template/', 
+    "name" => 'test_mycontroller',
+    "path" => PATH.'data/template/',
     'path_compile' => CACHE.'/template/'.$info_app['app'].'/test/'
 ), false);
 
@@ -51,8 +51,8 @@ $ctrl->regLog(function () {return 'login';}, function() {return 'logout';}, func
 
 echo '<div><b>登陆函数测试: </b></div>';
 debug_show(
-    $ctrl->login('name', 'pwd'), 
-    $ctrl->logout(), 
+    $ctrl->login('name', 'pwd'),
+    $ctrl->logout(),
     $ctrl->chg_psw('id', 'psw_old', 'psw_new')
 );
 

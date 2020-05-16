@@ -1,9 +1,9 @@
-<?php
+<?PHP
 return array(
-    'name' => '测试插件', 
-    'idx' => basename(realpath(__DIR__)), 
-    'ver' => '1.0', 
-    'intro' => '插件应用示例', 
-    'copyright' => '版权所有 2019 <a href="mailto:windy2006@gmail.com">Windy2000</a>', 
-    'description' => '<i>测试插件</i>，包含插件设置示例。', 
+    'name' => '测试插件',
+    'idx' => basename(realpath(__DIR__)),
+    'ver' => '1.0',
+    'intro' => '插件应用示例',
+    'copyright' => '版权所有 2019 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
+    'description' => '<i>测试插件</i>，包含插件设置示例。',
 );

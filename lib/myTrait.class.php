@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Magical Functions               *
@@ -17,7 +17,7 @@
  */
 trait myTrait {
     protected
-        $methods = array(), 
+        $methods = array(),
         $vars = array();
 
     public function __get($para) {
@@ -36,7 +36,7 @@ trait myTrait {
     public function __destruct() {
         if(!isset($this)) return;
         $varList = array_keys(get_class_vars(get_class($this)));
-        for($i=0, $m=count($varList);$i<$m;$i++) {
+        for($i=0,$m=count($varList);$i<$m;$i++) {
             if($varList[$i] == 'vars') continue;
             unset($this->{$varList[$i]});
         }

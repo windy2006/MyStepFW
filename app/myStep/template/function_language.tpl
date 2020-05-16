@@ -81,7 +81,7 @@
     </div>
 </div>
 
-<script language="JavaScript">
+<script type="application/javascript">
 $(function() {
     setPosition();
     $(window).resize(setPosition);

@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /*--- myCache_MySQL ---*/
 class myCache_MySQL implements interface_cache {
     protected $cnt;
@@ -9,10 +9,10 @@ class myCache_MySQL implements interface_cache {
         if($this->cnt = mysqli_connect($setting['host'], $setting['user'], $setting['password'], $setting['name'])) {
             $sql = '
 CREATE TABLE IF NOT EXISTS `my_cache` (
-    `key` char(32) NOT NULL, 
-    `expiration` int(10) NOT NULL, 
-    `value` text NOT NULL, 
-    INDEX `expiration` (`expiration`), 
+    `key` char(32) NOT NULL,
+    `expiration` int(10) NOT NULL,
+    `value` text NOT NULL,
+    INDEX `expiration` (`expiration`),
     PRIMARY KEY (`key`)
 ) ENGINE=MyISAM DEFAULT CHARSET='.$setting['charset'];
             $result = mysqli_query($this->cnt, $sql);
@@ -20,12 +20,12 @@ CREATE TABLE IF NOT EXISTS `my_cache` (
         return $result;
     }
 
-    public function set($key, $value = "", $ttl = 600) {
+    public function set($key, $value = '', $ttl = 600) {
         $new_key = md5($key);
         if(empty($value)) {
             return mysqli_query($this->cnt, "delete from my_cache where key='{$new_key}'");
         } else {
-            $expiration = $_SERVER["REQUEST_TIME"] + $ttl;
+            $expiration = $_SERVER['REQUEST_TIME'] + $ttl;
             $value = mysqli_real_escape_string($this->cnt, serialize($value));
             return mysqli_query($this->cnt, "REPLACE INTO my_cache (`key`, `expiration`, `value`) VALUES ('{$new_key}',{$expiration} , '{$value}')");
         }

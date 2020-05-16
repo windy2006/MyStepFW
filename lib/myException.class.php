@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Exception Class For Errors      *
@@ -16,13 +16,13 @@
  */
 class myException extends ErrorException {
     public static
-        $err_all = array(), 
-        $err_last = array(), 
-        $callback = array('myException', 'show'), 
-        $callback_type = E_ERROR|E_CORE_ERROR|E_CORE_WARNING|E_USER_ERROR, 
-        $log_type = E_ALL ^ E_NOTICE, 
-        $log_file = 'error.log', 
-        $log_mode = 0, 
+        $err_all = array(),
+        $err_last = array(),
+        $callback = array('myException', 'show'),
+        $callback_type = E_ERROR|E_CORE_ERROR|E_CORE_WARNING|E_USER_ERROR,
+        $log_type = E_ALL ^ E_NOTICE,
+        $log_file = 'error.log',
+        $log_mode = 0,
         $exit_on_error = true;
 
 /*
@@ -60,10 +60,10 @@ class myException extends ErrorException {
      * @param array $options
      * err_all = array()                                    已有错误记录
      * err_last = ''                                        最近的错误
-     * callback = array('myException', 'show')                 错误回调
-     * callback_type = E_ERROR|E_CORE_ERROR|E_CORE_WARNING    需要捕获的错误类型
-     * log_type = E_ALL ^ E_NOTICE                            需要记录日志的错误类型
-     * log_file = 'error.log'                                 日志文件位置
+     * callback = array('myException', 'show')              错误回调
+     * callback_type = E_ERROR|E_CORE_ERROR|E_CORE_WARNING  需要捕获的错误类型
+     * log_type = E_ALL ^ E_NOTICE                          需要记录日志的错误类型
+     * log_file = 'error.log'                               日志文件位置
      * log_mode = 0                                         日志记录模式，0-系统，1-用户
      * exit_on_error = true                                 出错时终止执行
      */
@@ -72,7 +72,6 @@ class myException extends ErrorException {
             if(!is_numeric($k) && isset(self::$$k)) self::$$k = $v;
         }
         ini_set('display_errors', 'off');
-        //ini_set('track_errors', true);
         error_reporting(self::$log_type);
 
         if(!empty(self::$log_file)) {
@@ -118,28 +117,28 @@ class myException extends ErrorException {
         }
         $idx = count(self::$err_all);
         self::$err_all[$idx] = array(
-            'err_no' => $err_no, 
-            'err_msg' => $err_msg, 
-            'err_file' => $err_file, 
+            'err_no' => $err_no,
+            'err_msg' => $err_msg,
+            'err_file' => $err_file,
             'err_line' => $err_line
         );
         $err_type = array(
-            E_ERROR => 'Fatal run-time errors', 
-            E_WARNING => 'Run-time warnings', 
-            E_PARSE => 'Compile-time parse error', 
-            E_NOTICE => 'Run-time notice', 
-            E_CORE_ERROR => 'Fatal Core Error', 
-            E_CORE_WARNING => 'Core Warning', 
-            E_COMPILE_ERROR => 'Compilation Error', 
-            E_COMPILE_WARNING => 'Compilation Warning', 
-            E_USER_ERROR => 'User-generated error', 
-            E_USER_WARNING => 'User-generated warning', 
-            E_USER_NOTICE => 'User-generated notice', 
-            E_STRICT => 'Suggestion notice', 
-            E_RECOVERABLE_ERROR => 'Catchable Fatal Error', 
-            E_DEPRECATED => 'Will not work Notice', 
-            E_USER_DEPRECATED => 'User-generated Deprecated', 
-            E_ALL =>    'All errors and warnings', 
+            E_ERROR => 'Fatal run-time errors',
+            E_WARNING => 'Run-time warnings',
+            E_PARSE => 'Compile-time parse error',
+            E_NOTICE => 'Run-time notice',
+            E_CORE_ERROR => 'Fatal Core Error',
+            E_CORE_WARNING => 'Core Warning',
+            E_COMPILE_ERROR => 'Compilation Error',
+            E_COMPILE_WARNING => 'Compilation Warning',
+            E_USER_ERROR => 'User-generated error',
+            E_USER_WARNING => 'User-generated warning',
+            E_USER_NOTICE => 'User-generated notice',
+            E_STRICT => 'Suggestion notice',
+            E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
+            E_DEPRECATED => 'Will not work Notice',
+            E_USER_DEPRECATED => 'User-generated Deprecated',
+            E_ALL =>    'All errors and warnings',
         );
         if(is_array($err_msg)) $err_msg = implode(chr(10), $err_msg);
         $cur_err = array();
@@ -153,15 +152,17 @@ class myException extends ErrorException {
         $cur_err['Trace'] = array();
         $trace_info = debug_backtrace();
         $n=0;
+        $idx=0;
         for($i=count($trace_info)-1; $i>=0; $i--) {
             if(empty($trace_info[$i]['file'])) continue;
             $cur_err['Trace'][$n]['file'] = str_replace($root, '', $trace_info[$i]['file']);
             $cur_err['Trace'][$n]['line'] = $trace_info[$i]['line'];
             $cur_err['Trace'][$n]['function'] = $trace_info[$i]['function'];
+            if($trace_info[$i]['function']=='__call') $idx = $n;
             $n++;
         }
-        if($err_no == E_USER_ERROR) {
-            $the_file = $cur_err['Trace'][$n-3];
+        if($idx>0) {
+            $the_file = $cur_err['Trace'][$idx];
             $err_file = $cur_err['File'] = $the_file['file'];
             $err_line = $cur_err['Line'] = $the_file['line'];
             $cur_err['Code'] = self::getLines($root.$the_file['file'], $cur_err['Line']);
@@ -226,7 +227,7 @@ class myException extends ErrorException {
             foreach(self::$err_last as $k => $v) {
                 if($k == 'Trace') {
                     $cur_item = array();
-                    for($i=0, $m=count($v);$i<$m;$i++) {
+                    for($i=0,$m=count($v);$i<$m;$i++) {
                         $cur_item[] = chr(9).($i+1).'. '.$v[$i]['file'].' (line:'.$v[$i]['line'].', function:'.$v[$i]['function'].')';
                     }
                     $v = chr(10).implode(chr(10), $cur_item);
@@ -277,16 +278,13 @@ class myException extends ErrorException {
         $title = 'MyStep Error: '.self::$err_last['Type'];
         unset(self::$err_last['Type']);
         $root = ROOT_WEB;
-        $out = ob_get_length()>0;
-        if(!$out) echo <<<mystep
+        if(ob_get_length()!==false) ob_clean();
+        echo <<<mystep
 <base href="{$root}" />
 <link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
 <link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
-
-mystep;
-        echo <<<mystep
 <div style='line-height:24px;border:#999 1px solid;white-space:nowrap;overflow:hidden;'>
-<div style='background-color:#999;color:#FFF'>&nbsp;<strong>{$title}</strong></div>
+    <div style='background-color:#999;color:#FFF'>&nbsp;<strong>{$title}</strong></div>
 
 mystep;
         $color='#fff';
@@ -295,20 +293,22 @@ mystep;
             if($k == 'Trace') {
                 $cur_item = array();
                 $cur_item[] = '<pre>';
-                for($i=0, $m=count($v);$i<$m;$i++) {
+                for($i=0,$m=count($v);$i<$m;$i++) {
                     $cur_item[] = chr(9).($i+1).'. '.$v[$i]['file'].' (line:'.$v[$i]['line'].', function:'.$v[$i]['function'].')';
                 }
                 $cur_item[] = '</pre>';
                 $v = chr(10).implode(chr(10), $cur_item);
             } elseif(is_array($v)) {
                 $cur_item = array();
-                $keys = array_keys($v);
-                if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].'">';
-                foreach($v as $k1 => $v1) {
-                    if($v1=='//') $v1='//Blank Line';
-                    $cur_item[] = trim(htmlspecialchars($v1), "\r\n");
+                if(!empty($v)) {
+                    $keys = array_keys($v);
+                    if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].'">';
+                    foreach($v as $k1 => $v1) {
+                        if($v1=='//') $v1='//Blank Line';
+                        $cur_item[] = trim(htmlspecialchars($v1), chr(13).chr(10));
+                    }
+                    if($k=='Code') $cur_item[] = '</pre>';
                 }
-                if($k=='Code') $cur_item[] = '</pre>';
                 $v = chr(10).implode(chr(10), $cur_item);
             } elseif(strpos($v, chr(10))!==false) {
                 $v = chr(10).chr(9).str_replace(chr(10), chr(10).chr(9), trim($v, chr(10)));
@@ -316,14 +316,11 @@ mystep;
             }
             echo '<div style="background-color:'.$color.'">&nbsp;<strong>'.$k.': </strong>'.str_replace(chr(9), ' &nbsp; &nbsp;', $v).'</div>'.chr(10);
         }
-        echo '</div>'.chr(10);
-        echo '<div>&nbsp;</div>'.chr(10);
-        if(!$out) echo <<<mystep
+        echo <<<mystep
+</div>
 <script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
 <script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
-
-
 mystep;
         return true;
     }

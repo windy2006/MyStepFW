@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Functions 4 PHP                 *
@@ -52,11 +52,11 @@ function getDate_cn($date='') {
     $num_cn[] = array('○', '十', '廿', '卅');
     $num_cn[] = array('○', '一', '二', '三', '四', '五', '六', '七', '八', '九');
     $result = '';
-    for($i=0, $m=strlen($the_year);$i<$m;$i++) {
+    for($i=0,$m=strlen($the_year);$i<$m;$i++) {
         $result .= $num_cn[1][$the_year[$i]];
     }
     $result .= '年';
-    for($i=0, $m=strlen($the_month);$i<$m;$i++) {
+    for($i=0,$m=strlen($the_month);$i<$m;$i++) {
         if($m==1 && $i==0) {
             $result .= $num_cn[1][$the_month[$i]];
             break;
@@ -65,7 +65,7 @@ function getDate_cn($date='') {
         }
     }
     $result .= '月';
-    for($i=0, $m=strlen($the_day);$i<$m;$i++) {
+    for($i=0,$m=strlen($the_day);$i<$m;$i++) {
         if($m==1 && $i==0) {
             $result .= $num_cn[1][$the_day[$i]];
             break;
@@ -74,6 +74,19 @@ function getDate_cn($date='') {
         }
     }
     $result .= '日';
+    return $result;
+}
+
+/**
+ * 格式化日期
+ * @param string $date
+ * @param string $format
+ * @return false|string
+ */
+function formatDate($date='', $format='Y-m-d') {
+    if(!is_numeric($date) && ($date=strtotime($date))===false) $date = time();
+    $result = date($format, $date);
+    if($result==$format || !preg_match('#^\d#', $result)) $result = date('Y-m-d', $date);
     return $result;
 }
 
@@ -98,16 +111,16 @@ function isMobile() {
         return stristr($_SERVER['HTTP_VIA'], 'wap') ? true : false;
     }
     if(isset($_SERVER['HTTP_USER_AGENT'])) {
-        $clientkeywords = array('iphone', 'android', 'phone', 'mobile', 'wap', 'netfront', 'java', 'opera mobi', 'opera mini', 
-                'ucweb', 'windows ce', 'symbian', 'series', 'webos', 'sony', 'blackberry', 'dopod', 'nokia', 'samsung', 
-                'palmsource', 'xda', 'pieplus', 'meizu', 'midp', 'cldc', 'motorola', 'foma', 'docomo', 'up.browser', 
-                'up.link', 'blazer', 'helio', 'hosin', 'huawei', 'novarra', 'coolpad', 'webos', 'techfaith', 'palmsource', 
-                'alcatel', 'amoi', 'ktouch', 'nexian', 'ericsson', 'philips', 'sagem', 'wellcom', 'bunjalloo', 'maui', 'smartphone', 
-                'iemobile', 'spice', 'bird', 'zte-', 'longcos', 'pantech', 'gionee', 'portalmmm', 'jig browser', 'hiptop', 
-                'benq', 'haier', '^lct', '320x320', '240x320', '176x220', 'windows phone', 
-                'cect', 'compal', 'ctl', 'lg', 'nec', 'tcl', 'alcatel', 'ericsson', 'bird', 'daxian', 'dbtel', 'eastcom', 
-                'pantech', 'dopod', 'philips', 'haier', 'konka', 'kejian', 'lenovo', 'benq', 'mot', 'soutec', 'nokia', 'sagem', 'sgh', 
-                'sed', 'capitel', 'panasonic', 'sonyericsson', 'sharp', 'amoi', 'panda', 'zte', 'sie-', 'ipod', 'windowsce', 'operamini', 
+        $clientkeywords = array('iphone', 'android', 'phone', 'mobile', 'wap', 'netfront', 'java', 'opera mobi', 'opera mini',
+                'ucweb', 'windows ce', 'symbian', 'series', 'webos', 'sony', 'blackberry', 'dopod', 'nokia', 'samsung',
+                'palmsource', 'xda', 'pieplus', 'meizu', 'midp', 'cldc', 'motorola', 'foma', 'docomo', 'up.browser',
+                'up.link', 'blazer', 'helio', 'hosin', 'huawei', 'novarra', 'coolpad', 'webos', 'techfaith', 'palmsource',
+                'alcatel', 'amoi', 'ktouch', 'nexian', 'ericsson', 'philips', 'sagem', 'wellcom', 'bunjalloo', 'maui', 'smartphone',
+                'iemobile', 'spice', 'bird', 'zte-', 'longcos', 'pantech', 'gionee', 'portalmmm', 'jig browser', 'hiptop',
+                'benq', 'haier', '^lct', '320x320', '240x320', '176x220', 'windows phone',
+                'cect', 'compal', 'ctl', 'lg', 'nec', 'tcl', 'alcatel', 'ericsson', 'bird', 'daxian', 'dbtel', 'eastcom',
+                'pantech', 'dopod', 'philips', 'haier', 'konka', 'kejian', 'lenovo', 'benq', 'mot', 'soutec', 'nokia', 'sagem', 'sgh',
+                'sed', 'capitel', 'panasonic', 'sonyericsson', 'sharp', 'amoi', 'panda', 'zte', 'sie-', 'ipod', 'windowsce', 'operamini',
                 'operamobi', 'openwave', 'nexusone', 'pad', 'gt-p1000');
         if(preg_match('/('.implode('|', $clientkeywords).')/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
             return true;
@@ -139,18 +152,51 @@ function isHttps() {
 /**
  * 自定义代码执行
  * @param $code
- * @return mixed
+ * @param bool $return
+ * @return false|mixed|string
  */
-function myEval($code) {
-    if(($fp = tmpfile())===false) {
-        $fp = fopen(tempnam(CACHE.'tmp', 'ms_'), 'w');
+function myEval($code, $return = false) {
+    $file = tempnam(sys_get_temp_dir(), 'ms_');
+    $fp = fopen($file, 'w');
+    if(!preg_match('#^<\?PHP#i', $code)) {
+        if($return && !preg_match('#^[\r\n\s]*return#i', $code)) {
+            $code = 'return '.$code.';';
+        }
+        $code = '<?PHP'.chr(10).$code;
     }
-    $file = stream_get_meta_data($fp)['uri'];
-    fwrite($fp, '<?PHP'.chr(10).$code);
-    $result = include($file);
+    fwrite($fp, $code);
+    if($return) {
+        $result = include($file);
+    } else {
+        ob_clean();
+        include($file);
+        $result = ob_get_contents();
+        ob_clean();
+    }
     fclose($fp);
     @unlink($file);
     return $result;
+}
+
+/**
+ * 检测数据变量中是否有待解析的变量，并解析
+ * @param $att_list
+ * @param bool $parse
+ * @return bool
+ */
+function checkPara(&$att_list, $parse = false) {
+    $flag = false;
+    foreach($att_list as $k => $v) {
+        if(strpos($v, '$')===0) {
+            $flag = true;
+            if($parse) {
+                $att_list[$k] = myEval($v, true);
+            } else {
+                break;
+            }
+        }
+    }
+    return $flag;
 }
 
 /**
@@ -207,6 +253,20 @@ function recursionFunction($func, $para) {
         }
     }
     return $para;
+}
+
+/**
+ * 获取缓存区内容并清空
+ * @param bool $clean
+ * @return false|string
+ */
+function getOB($clean=true) {
+    $result = '';
+    if(ob_get_length()!==false) {
+        $result = ob_get_contents();
+        if($clean) ob_clean();
+    }
+    return $result;
 }
 
 /**

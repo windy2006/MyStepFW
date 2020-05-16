@@ -1,4 +1,4 @@
-<?php
+<?PHP
 if(myReq::check('post')) {
     $config = new myConfig(CONFIG.'config.php');
     $setting = myReq::post('setting');
@@ -8,12 +8,12 @@ if(myReq::check('post')) {
     myController::redirect();
 }
 $tpl_setting = array(
-    'name' => 'config', 
-    'path' => APP.'myStep/template', 
-    'style' => '', 
+    'name' => 'config',
+    'path' => APP.'myStep/template',
+    'style' => '',
     'path_compile' => CACHE.'template/myStep/'
 );
-$t = new myTemplate($tpl_setting, $tpl_cache);
+$t = new myTemplate($tpl_setting);
 
 $file = CONFIG.'config_default.php';
 $builder = CONFIG.'construct/default.php';
@@ -48,5 +48,4 @@ foreach($list as $v) {
     }
 }
 $t->assign('server', myReq::server('SERVER_SOFTWARE'));
-$t->assign('path_root', str_replace(myFile::rootPath(), '/', ROOT));
-$t->display();
+$t->render();

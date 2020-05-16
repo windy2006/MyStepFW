@@ -178,181 +178,6 @@
 })(jQuery);
 
 /**
- *load JS in batch
- */
-jQuery.setJS = function(list, in_turn=true, callback, process) {
-    let num_total = list.length;
-    let num_done = 0
-	let loader = function(script) {
-		return new Promise((resolve, reject) => {
-			$.getScript(script, function(data, textStatus){
-			    if(textStatus==='success') {
-                    resolve(data);
-                } else {
-                    reject(textStatus);
-                }
-			});
-		});
-	};
-	if(in_turn) {
-		let p = loader(list[0]);
-		for(let i=1,m=list.length;i<m;i++) {
-			p = p.then(()=>{
-			    num_done++;
-			    if(typeof(process)==='function') process(num_done, num_total, list[i-1]);
-				return loader(list[i]);
-			}).catch((e)=>{
-                console.log(e)
-            });
-		}
-		p.then(()=>{
-            num_done++;
-            if(typeof(process)==='function') process(num_done, num_total, list[num_done-1]);
-			if(typeof(callback)==='function') callback();
-		});
-	} else {
-		let result = [];
-		list.forEach(current => {
-				let p = loader(current).then(()=>{
-                    num_done++;
-                    if(typeof(process)==='function') process(num_done, num_total, current);
-				});
-				result.push(p);
-			}
-		);
-		Promise.all(result).then(()=>{
-			if(typeof(callback)==='function') callback();
-		}).catch((e)=>{
-			console.log(e)
-		});
-	}
-}
-
-
-/**
- *load CSS in batch
- */
-jQuery.setCSS = function(css) {
-	if(css==null) return;
-	if(css instanceof Array) {
-		for(var i=0,m=css.length;i<m;i++) {
-			jQuery.setCSS(css[i]);
-		}
-	} else {
-		var name = md5(css);
-		$("head").append($('<link id="css_'+name+'" rel="stylesheet" href="'+css+'" type="text/css" media="screen" />'));
-		setTimeout(function(){
-			$("#css_"+name).attr("href", css);
-		}, 1000);
-	}
-};
-
-
-/**
- *load Vendor's Code
- */
-jQuery.vendor = function(name, option) {
-	option = $.extend({
-		'add_css' : false,
-		'name_fix' : '',
-		'callback' : function () {}
-	}, option);
-	if(option.add_css===true) option.add_css = '';
-    if(option.name_fix===true) option.name_fix = '.min';
-    if(option.name_fix===false) option.name_fix = '';
-	function setVender() {
-		if(option.add_css!==false) {
-			$.setCSS("vendor/"+name+"/"+name+option.add_css+".css");
-		}
-		option.callback();
-	}
-	$.getScript('vendor/'+name+'/'+name+option.name_fix+'.js', setVender);
-};
-
-/**
-example
-$.cookie('name', 'value');
-$.cookie('name', 'value', {expires: 7, path: '/', domain: 'jquery.com', secure: true});
-$.cookie('name', null);
-*/
-jQuery.cookie = function(name, value, options) {
-	if (typeof value != 'undefined') { // name and value given, set cookie
-		options = options || {};
-		if (value === null) {
-			value = '';
-			options.expires = -1;
-		}
-		var expires = '';
-		if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
-			var date;
-			if (typeof options.expires == 'number') {
-				date = new Date();
-				date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-			} else {
-				date = options.expires;
-			}
-			expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
-		}
-		// CAUTION: Needed to parenthesize options.path and options.domain
-		// in the following expressions, otherwise they evaluate to undefined
-		// in the packed version for some reason...
-		var path = options.path ? '; path=' + (options.path) : '';
-		var domain = options.domain ? '; domain=' + (options.domain) : '';
-		var secure = options.secure ? '; secure' : '';
-		document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
-	} else { // only name given, get cookie
-		var cookieValue = null;
-		if (document.cookie && document.cookie != '') {
-			var cookies = document.cookie.split(';');
-			for (var i = 0; i < cookies.length; i++) {
-				var cookie = jQuery.trim(cookies[i]);
-				// Does this cookie string begin with the name we want?
-				if (cookie.substring(0, name.length + 1) == (name + '=')) {
-					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-					break;
-				}
-			}
-		}
-		return cookieValue;
-	}
-};
-
-/**
- *serialize form data for the use of json
- */
-$.fn.serializeObject = function() {
-	var o = {};
-	var a = this.serializeArray();
-	$.each(a, function() {
-		if (o[this.name]) {
-			if (!o[this.name].push) {
-				o[this.name] = [ o[this.name] ];
-			}
-			o[this.name].push(this.value || '');
-		} else {
-			o[this.name] = this.value || '';
-		}
-	});
-	return o;
-};
-
-jQuery.fn.outerHTML = function(s) {
-	return (s) ? this.before(s).remove() : $('<p>').append(this.eq(0).clone()).html();
-};
-
-jQuery.fn.cssText = function(css) {
-	var css_list = css.trim().split(";");
-	var cur_style = null;
-	for(var i=0,m=css_list.length;i<m;i++) {
-		css_list[i] = css_list[i].trim();
-		if(css_list[i].length<3) continue;
-		cur_style = css_list[i].split(":");
-		if(cur_style.length==2) $(this).css(cur_style[0].trim(), cur_style[1].trim());
-	}
-	return this;
-};
-
-/*!
  * jQuery Mousewheel 3.1.13
  *
  * Copyright jQuery Foundation and other contributors
@@ -372,7 +197,6 @@ jQuery.fn.cssText = function(css) {
 		factory(jQuery);
 	}
 }(function ($) {
-
 	var toFix  = ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'],
 		toBind = ( 'onwheel' in document || document.documentMode >= 9 ) ?
 			['wheel'] : ['mousewheel', 'DomMouseScroll', 'MozMousePixelScroll'],
@@ -573,3 +397,180 @@ jQuery.fn.cssText = function(css) {
 	}
 
 }));
+
+/**
+ * My Extensions for jQuery
+ */
+(function($) {
+	/**
+	 example
+	 $.cookie('name', 'value');
+	 $.cookie('name', 'value', {expires: 7, path: '/', domain: 'jquery.com', secure: true});
+	 $.cookie('name', null);
+	 */
+	$.cookie = function(name, value, options) {
+		if (typeof value != 'undefined') { // name and value given, set cookie
+			options = options || {};
+			if (value === null) {
+				value = '';
+				options.expires = -1;
+			}
+			var expires = '';
+			if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+				var date;
+				if (typeof options.expires == 'number') {
+					date = new Date();
+					date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+				} else {
+					date = options.expires;
+				}
+				expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+			}
+			// CAUTION: Needed to parenthesize options.path and options.domain
+			// in the following expressions, otherwise they evaluate to undefined
+			// in the packed version for some reason...
+			var path = options.path ? '; path=' + (options.path) : '';
+			var domain = options.domain ? '; domain=' + (options.domain) : '';
+			var secure = options.secure ? '; secure' : '';
+			document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+		} else { // only name given, get cookie
+			var cookieValue = null;
+			if (document.cookie && document.cookie != '') {
+				var cookies = document.cookie.split(';');
+				for (var i = 0; i < cookies.length; i++) {
+					var cookie = jQuery.trim(cookies[i]);
+					// Does this cookie string begin with the name we want?
+					if (cookie.substring(0, name.length + 1) == (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+		}
+	};
+	//load JS in batch
+	$.setJS = function(list, in_turn=true, callback, process) {
+		let num_total = list.length;
+		let num_done = 0
+		let loader = function(script) {
+			return new Promise((resolve, reject) => {
+				$.getScript(script, function(data, textStatus){
+					if(textStatus==='success') {
+						resolve(data);
+					} else {
+						reject(textStatus);
+					}
+				});
+			});
+		};
+		if(in_turn) {
+			let p = loader(list[0]);
+			for(let i=1,m=list.length;i<m;i++) {
+				p = p.then(()=>{
+					num_done++;
+					if(typeof(process)==='function') process(num_done, num_total, list[i-1]);
+					return loader(list[i]);
+				}).catch((e)=>{
+					console.log(e)
+				});
+			}
+			p.then(()=>{
+				num_done++;
+				if(typeof(process)==='function') process(num_done, num_total, list[num_done-1]);
+				if(typeof(callback)==='function') callback();
+			});
+		} else {
+			let result = [];
+			list.forEach(current => {
+					let p = loader(current).then(()=>{
+						num_done++;
+						if(typeof(process)==='function') process(num_done, num_total, current);
+					});
+					result.push(p);
+				}
+			);
+			Promise.all(result).then(()=>{
+				if(typeof(callback)==='function') callback();
+			}).catch((e)=>{
+				console.log(e)
+			});
+		}
+	}
+	//load CSS in batch
+	$.setCSS = function(css) {
+		if(css==null) return;
+		if(css instanceof Array) {
+			for(var i=0,m=css.length;i<m;i++) {
+				jQuery.setCSS(css[i]);
+			}
+		} else {
+			var name = md5(css);
+			$("head").append($('<link id="css_'+name+'" rel="stylesheet" href="'+css+'" type="text/css" media="screen" />'));
+			setTimeout(function(){
+				$("#css_"+name).attr("href", css);
+			}, 1000);
+		}
+	};
+	//load Vendor's Code
+	$.vendor = function(name, option) {
+		option = $.extend({
+			'add_css' : false,
+			'name_fix' : '',
+			'callback' : function () {}
+		}, option);
+		if(option.add_css===true) option.add_css = '';
+		if(option.name_fix===true) option.name_fix = '.min';
+		if(option.name_fix===false) option.name_fix = '';
+		let root = typeof(global.root)==='undefined'?'/':global.root;
+		$.getScript(root+'vendor/'+name+'/'+name+option.name_fix+'.js', () => {
+			if(option.add_css!==false) {
+				$.setCSS(root+"vendor/"+name+"/"+name+option.add_css+".css");
+			}
+			option.callback();
+		});
+	};
+	//serialize form data for the use of json
+	$.fn.serializeObject = function() {
+		var o = {};
+		var a = this.serializeArray();
+		$.each(a, function() {
+			if (o[this.name]) {
+				if (!o[this.name].push) {
+					o[this.name] = [ o[this.name] ];
+				}
+				o[this.name].push(this.value || '');
+			} else {
+				o[this.name] = this.value || '';
+			}
+		});
+		return o;
+	};
+	//outerHTML
+	$.fn.outerHTML = function(s) {
+		return (s) ? this.before(s).remove() : $('<p>').append(this.eq(0).clone()).html();
+	};
+	//cssText
+	$.fn.cssText = function(css) {
+		var css_list = css.trim().split(";");
+		var cur_style = null;
+		for(var i=0,m=css_list.length;i<m;i++) {
+			css_list[i] = css_list[i].trim();
+			if(css_list[i].length<3) continue;
+			cur_style = css_list[i].split(":");
+			if(cur_style.length==2) $(this).css(cur_style[0].trim(), cur_style[1].trim());
+		}
+		return this;
+	};
+	//disableSelection
+	$.fn.disableSelection = function() {
+		return this.attr('unselectable', 'on')
+			.css({'-moz-user-select':'-moz-none',
+				'-o-user-select':'none',
+				'-khtml-user-select':'none',
+				'-webkit-user-select':'none',
+				'-ms-user-select':'none',
+				'user-select':'none'})
+			.bind('selectstart', false);
+	};
+})(jQuery);

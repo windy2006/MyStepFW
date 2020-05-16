@@ -19,7 +19,7 @@ CREATE TABLE `{pre}website` (
 	UNIQUE (`idx`)
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='网站列表';
 
-INSERT INTO `{pre}website` VALUES (1, '{web_name}', 'main', '{domain}');
+INSERT INTO `{pre}website` VALUES (1, '{web_name}', 'main', '');
 # ---------------------------------------------------------------------------------------------------------------
 
 # 管理目录
@@ -37,31 +37,31 @@ CREATE TABLE `{pre}admin_cat` (
 
 INSERT INTO `{pre}admin_cat` VALUES
 		(1, 0, '首页', '###', 0, 9, '管理首页'),
-		(2, 0, '用户', '###', 0, 6, '用户管理'),
-		(3, 0, '功能', '###', 0, 5, '网站功能'),
-		(4, 0, '内容', '###', 0, 8, '内容管理'),
-		(5, 0, '设置', '###', 0, 4, '网站管理'),
+		(2, 0, '内容', '###', 0, 8, '内容管理'),
+		(3, 0, '功能', '###', 0, 7, '网站功能'),
+		(4, 0, '设置', '###', 0, 6, '网站管理'),
+		(5, 0, '用户', '###', 0, 5, '用户管理'),
 
 		(0, 1, '流量统计', 'info/count', 0, 0, '简单网站访问统计'),
-		(0, 1, '更新日志', 'info/log', 0, 0, '更新日志'),
+		(0, 1, '管理日志', 'info/log', 0, 0, '管理日志'),
 
-		(0, 2, '用户管理', 'user/detail', 0, 0, '用户管理'),
-		(0, 2, '用户类型', 'user/type', 0, 0, '用户类型维护'),
-		(0, 2, '管理群组', 'user/group', 0, 0, '管理群组维护'),
-		(0, 2, '用户权限', 'user/power', 0, 0, '用户权限维护'),
-		(0, 2, '在线用户', 'user/online', 0, 0, '在线用户'),
-		
-		(0, 3, '附件管理', 'function/attach', 0, 0, '附件管理'),
+		(0, 2, '内容分类', 'article/catalog', 1, 0, '文章分类管理'),
+		(0, 2, '文章内容', 'article/content', 1, 0, '文章内容管理'),
+		(0, 2, '标签管理', 'article/tag', 1, 0, '文章标签管理'),
+		(0, 2, '页面信息', 'article/custom', 1, 0, '用户自定义内容'),
+
 		(0, 3, '友情链接', 'function/link', 1, 0, '友情链接管理'),
 		(0, 3, '数据维护', 'function/backup', 0, 0, '数据维护'),
-		
-		(0, 4, '文章分类', 'article/catalog', 1, 0, '文章分类管理'),
-		(0, 4, '文章内容', 'article/content', 1, 0, '文章内容管理'),
-		(0, 4, '文章标签', 'article/tag', 1, 0, '文章标签管理'),
-		(0, 4, '页面信息', 'article/info', 1, 0, '展示内容管理'),
+		(0, 3, '模板管理', 'function/template', 0, 0, '模板管理'),
 
-		(0, 5, '子站管理', 'setting/subweb', 1, 0, '子站管理'),
-		(0, 5, '模板管理', 'setting/template', 0, 0, '模板管理');
+		(0, 4, '子站管理', 'setting/subweb', 1, 0, '子站管理'),
+		(0, 4, '管理账户', 'setting/sysop', 0, 0, '管理员维护'),
+		(0, 4, '管理群组', 'setting/sysgroup', 0, 0, '管理群组维护'),
+
+		(0, 5, '用户管理', 'user/detail', 0, 0, '网站用户维护'),
+		(0, 5, '用户群组', 'user/group', 0, 0, '用户群组维护'),
+		(0, 5, '用户权限', 'user/power', 0, 0, '用户权限维护'),
+		(0, 5, '在线用户', 'user/online', 0, 0, '在线用户');
 # ---------------------------------------------------------------------------------------------------------------
 
 # 新闻分类
@@ -145,35 +145,16 @@ CREATE TABLE `{pre}news_tag` (
 
 # ---------------------------------------------------------------------------------------------------------------
 
-# 新闻附件（所有上传的附件都在此表记录）
-CREATE TABLE `{pre}attachment` (
-	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`web_id` TINYINT UNSIGNED DEFAULT 0 COMMENT '所属子站',
-	`news_id` MEDIUMINT UNSIGNED COMMENT '关联索引',
-	`file_name` Char(150) NOT NULL COMMENT '附件文件名',
-	`file_type` Char(80) NOT NULL COMMENT '附件类型',
-	`file_size` INT UNSIGNED NOT NULL COMMENT '附件大小',
-	`file_time` Char(15) DEFAULT 0 COMMENT '附件上传时间（unixtimestamp）',
-	`file_count` MEDIUMINT UNSIGNED DEFAULT 0 COMMENT '附件下载次数',
-	`add_user` Char(20) NOT NULL COMMENT '附件添加人',
-	`watermark` BOOL NOT NULL DEFAULT 0 COMMENT '是否添加图片水印',
-	INDEX `idx` (`web_id`, `news_id`),
-	PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='新闻附件';
-
-# ---------------------------------------------------------------------------------------------------------------
-
 # 内容展示
 CREATE TABLE `{pre}info` (
 	`id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`web_id` TINYINT UNSIGNED DEFAULT 0 COMMENT '所属子站',
-	`subject` Char(100) NOT NULL COMMENT '展示标题',
-	`attach_list` Char(255) default '' COMMENT '相关附件',
-	`content` MEDIUMTEXT NOT NULL COMMENT '展示内容',
+	`idx` Char(100) NOT NULL COMMENT '索引',
+	`content` MEDIUMTEXT NOT NULL COMMENT '内容',
 	INDEX (`web_id`),
 	PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='内容展示';
-INSERT INTO `{pre}info` VALUES (0, 1, 'copyright', '', '<p style="text-align: center;">&copy;2010-2019&nbsp;www.mysteps.cn</p>');
+INSERT INTO `{pre}info` VALUES (0, 1, 'copyright', '', '<p style="text-align: center;">&copy;2010-2020&nbsp;www.mysteps.cn</p>');
 INSERT INTO `{pre}info` VALUES (0, 1, 'contact', '', '<p>QQ：18509608</p><p>Email：windy_sk@126.com</p>');
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -194,8 +175,21 @@ CREATE TABLE `{pre}links` (
 
 # ---------------------------------------------------------------------------------------------------------------
 
+# 网站用户
+CREATE TABLE `{pre}sys_op` (
+	`id` mediumint(8) unsigned auto_increment,
+	`group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '管理组索引',
+	`username` varchar(15) UNIQUE COMMENT '用户名',
+	`password` varchar(40)  COMMENT '密码',
+	`email` varchar(60)  COMMENT '电子邮件',
+	INDEX (`username`),
+	PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='网站管理员';
+
+# ---------------------------------------------------------------------------------------------------------------
+
 # 管理组权限
-CREATE TABLE `{pre}user_group` (
+CREATE TABLE `{pre}sys_group` (
 	`group_id` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`group_name` Char(20) NOT NULL UNIQUE COMMENT '管理组名称',
 	`power_func` Char(255) NOT NULL COMMENT '功能权限',
@@ -208,22 +202,35 @@ INSERT INTO `{pre}user_group` VALUES (0, '管理员', 'all', 'all', 'all');
 
 # ---------------------------------------------------------------------------------------------------------------
 
+# 维护日志
+CREATE TABLE `{pre}sys_log` (
+	`id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`user` Char(40) NOT NULL COMMENT '管理员',
+	`group` Char(40) NOT NULL COMMENT '管理组',
+	`time` Char(15) DEFAULT 0 COMMENT '发生时间（unixtimestamp）',
+	`link` Char(255) COMMENT '访问页面',
+	`comment` Char(100) DEFAULT '' COMMENT '操作内容',
+	PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='网站维护日志';
+
+# ---------------------------------------------------------------------------------------------------------------
+
 # 访客组权限（可通过用户组权限扩展）
-CREATE TABLE `{pre}user_type` (
-	`type_id` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`type_name` Char(20) NOT NULL UNIQUE COMMENT '访客组名称',
+CREATE TABLE `{pre}user_group` (
+	`group_id` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`name` Char(20) NOT NULL UNIQUE COMMENT '访客组名称',
 	PRIMARY KEY (`type_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='访客组权限';
 
-INSERT INTO `{pre}user_type` VALUES (1, '一般访客');
-INSERT INTO `{pre}user_type` VALUES (2, '普通用户');
-INSERT INTO `{pre}user_type` VALUES (3, '高级用户');
+INSERT INTO `{pre}user_group` VALUES (1, '一般访客');
+INSERT INTO `{pre}user_group` VALUES (2, '普通用户');
+INSERT INTO `{pre}user_group` VALUES (3, '高级用户');
 
 # ---------------------------------------------------------------------------------------------------------------
 
 # 用户组权限
 CREATE TABLE `{pre}user_power` (
-	`power_id` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`id` TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`idx` Char(20) NOT NULL UNIQUE COMMENT '权限索引',
 	`name` Char(40) NOT NULL UNIQUE COMMENT '权限名称',
 	`value` Char(255) NOT NULL COMMENT '权限默认值',
@@ -233,21 +240,21 @@ CREATE TABLE `{pre}user_power` (
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='会员组权限';
 
 INSERT INTO `{pre}user_power` VALUES (0, 'view_lvl', '阅读权限', '0', 'digital', '用于文章阅读时的权限判断');
-alter table `{pre}user_type` add `view_lvl` Char(10) NOT NULL DEFAULT '0';
-update `{pre}user_type` set `view_lvl`='1' where `type_id`=2;
-update `{pre}user_type` set `view_lvl`='5' where `type_id`=3;
+alter table `{pre}user_group` add `view_lvl` Char(10) NOT NULL DEFAULT '0';
+update `{pre}user_group` set `view_lvl`='1' where `group_id`=2;
+update `{pre}user_group` set `view_lvl`='5' where `group_id`=3;
 
 # ---------------------------------------------------------------------------------------------------------------
 
 # 网站用户
 CREATE TABLE `{pre}users` (
 	`user_id` mediumint(8) unsigned auto_increment,
-	`group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '管理组索引',
-	`type_id` TINYINT UNSIGNED NOT NULL Default 1 COMMENT '访客组索引',
+	`group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '用户组',
 	`username` varchar(15) UNIQUE COMMENT '用户名',
 	`password` varchar(40)  COMMENT '密码',
 	`email` varchar(60)  COMMENT '电子邮件',
-	`regdate` int(10) unsigned Default "0"  COMMENT '注册日期',
+	`reg_date` int(10) unsigned Default "0"  COMMENT '注册日期',
+	`hash` varchar(32)  COMMENT '哈希码',
 	INDEX (`username`),
 	PRIMARY KEY (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='网站用户';
@@ -259,26 +266,11 @@ CREATE TABLE `{pre}user_online` (
 	`sid` char(32) UNIQUE NOT NULL COMMENT 'SessionID',
 	`ip` Char(50) NOT NULL UNIQUE COMMENT 'ip地址',
 	`username` Char(40) NOT NULL DEFAULT 'guest' COMMENT '用户名称',
-	`group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '管理组索引',
-	`type_id` TINYINT UNSIGNED NOT NULL Default 1 COMMENT '访客组索引',
-	`reflash` Char(15) DEFAULT 0 COMMENT '最近刷新时间（unixtimestamp）',
+	`refresh` Char(15) DEFAULT 0 COMMENT '最近刷新时间（unixtimestamp）',
 	`url` Char(200) COMMENT '当前访问页面',
-	`userinfo` Char(255) default 0 COMMENT '用户信息',
+	`data` Char(255) default 0 COMMENT '用户信息',
 	PRIMARY KEY (`sid`)
 ) ENGINE=HEAP DEFAULT CHARSET={charset} COMMENT='网站当前浏览者';
-
-# ---------------------------------------------------------------------------------------------------------------
-
-# 维护日志
-CREATE TABLE `{pre}modify_log` (
-	`id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`user` Char(40) NOT NULL COMMENT '管理员',
-	`group` Char(40) NOT NULL COMMENT '管理组',
-	`time` Char(15) DEFAULT 0 COMMENT '发生时间（unixtimestamp）',
-	`link` Char(255) COMMENT '访问页面',
-	`comment` Char(100) DEFAULT '' COMMENT '操作内容',
-	PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='网站维护日志';
 
 # ---------------------------------------------------------------------------------------------------------------
 

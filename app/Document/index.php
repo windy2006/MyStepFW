@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $module = $info_app['path'][0] ?? null;
 $mode = $info_app['path'][1] ?? null;
 if (is_null($mode)) $mode = 'show';
@@ -8,13 +8,11 @@ $tpl = new myTemplate($tpl_setting, false);
 
 if(is_null($module)) {
     set_include_path(get_include_path() . PATH_SEPARATOR . './lib/database/' . PATH_SEPARATOR . './lib/cache/');
-    spl_autoload_extensions('.class.php, .php');
+    spl_autoload_extensions('.class.php,.php');
     spl_autoload_register();
     $list = f::find('*.php', PATH . 'module');
-
     $tpl_setting['name'] = 'list';
-    $sub_tpl = new myTemplate($tpl_setting, false);
-
+    $tpl_sub = new myTemplate($tpl_setting, false);
     $t = new myReflection('stdClass');
     $n = 1;
     foreach ($list as $file) {
@@ -24,9 +22,9 @@ if(is_null($module)) {
             $t->init($name);
             $doc = $t->doc;
         }
-        $sub_tpl->setLoop('item', ['no' => $n++, 'name' => $name, 'doc' => $doc]);
+        $tpl_sub->setLoop('item', ['no' => $n++, 'name' => $name, 'doc' => $doc]);
     }
-    $tpl->assign('main', $sub_tpl->display('', false));
+    $tpl->assign('main', $tpl_sub->render('', false));
 } else {
     if (!class_exists($module)) myStep::header('404');
     switch ($mode) {
@@ -36,7 +34,7 @@ if(is_null($module)) {
                 $mystep->end();
             } elseif (is_file(PATH . 'module/' . $module . '.php')) {
                 $tpl_setting['name'] = 'sample';
-                $sub_tpl = new myTemplate($tpl_setting, false);
+                $tpl_sub = new myTemplate($tpl_setting, false);
                 $mystep->setAddedContent('start', '
 <link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
 <link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
@@ -51,10 +49,10 @@ if(is_null($module)) {
                 $content = ob_get_contents();
                 ob_clean();
 
-                $sub_tpl->assign('name', $module);
-                $sub_tpl->assign('code', htmlspecialchars(f::g(PATH . 'module/' . $module . '.php')));
-                $sub_tpl->assign('sample', $content);
-                $content = $sub_tpl->display('', false);
+                $tpl_sub->assign('name', $module);
+                $tpl_sub->assign('code', htmlspecialchars(f::g(PATH . 'module/' . $module . '.php')));
+                $tpl_sub->assign('sample', $content);
+                $content = $tpl_sub->render('', false);
                 $mystep->setting->web->title = 'Sample : ' . $module . ' - ' . $mystep->setting->web->title;
             } else {
                 $content = '模块不存在！';
@@ -62,20 +60,20 @@ if(is_null($module)) {
             break;
         default:
             $tpl_setting['name'] = 'detail';
-            $sub_tpl = new myTemplate($tpl_setting, false);
+            $tpl_sub = new myTemplate($tpl_setting, false);
             $detail = new myReflection($module);
             $methods = $detail->getFunc();
-            $sub_tpl->assign('name', $module);
-            $sub_tpl->assign('doc', $detail->getComment());
+            $tpl_sub->assign('name', $module);
+            $tpl_sub->assign('doc', $detail->getComment());
 
             $n = 1;
             foreach ($methods as $method) {
                 $doc = $method->getDocComment();
                 $doc = trim($doc, '/*');
                 if (empty($doc)) continue;
-                $sub_tpl->setLoop('item', ['no' => $n++, 'name' => $method->getName(), 'doc' => $doc]);
+                $tpl_sub->setLoop('item', ['no' => $n++, 'name' => $method->getName(), 'doc' => $doc]);
             }
-            $content = $sub_tpl->display('', false);
+            $content = $tpl_sub->render('', false);
             $mystep->setting->web->title = 'Class : ' . $module . ' - ' . $mystep->setting->web->title;
     }
     $tpl->assign('main', $content);

@@ -1,4 +1,4 @@
-<?php
+<?PHP
 if(myReq::check('post')) {
     $path = myReq::p('path');
     $ext = myReq::p('ext');
@@ -7,9 +7,9 @@ if(myReq::check('post')) {
     $result = array();
     for($i=0;$i<$m;$i++) {
         $result[] = array(
-            'path' => myFile::realPath($path[$i]), 
-            'ext' => $ext[$i], 
-            'idx' => empty($idx[$i]) ? array() : myEval('return '.$idx[$i].';')
+            'path' => myFile::realPath($path[$i]),
+            'ext' => $ext[$i],
+            'idx' => empty($idx[$i]) ? array() : myEval($idx[$i], true)
         );
     }
     myFile::saveFile(CONFIG.'class.php', '<?PHP'.chr(10).'return '.var_export($result, true).';');

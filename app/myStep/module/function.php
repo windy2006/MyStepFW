@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $module = $info_app['path'][2];
 $script = __DIR__.'/function/'.$module.'.php';
 if(!is_file($script)) {
@@ -10,9 +10,9 @@ if(!is_file(PATH.'template/function_'.$module.'.tpl')) {
     myStep::info('page_error_module');
 }
 $tpl_setting['name'] = 'function_'.$module;
-$t = new myTemplate($tpl_setting, false, true);
+$t = new myTemplate($tpl_setting);
 include($script);
-$content = $mystep->render($t, 's', false);
+$content = $mystep->render($t);
 $mystep->setAddedContent('end', '
-<script language="JavaScript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="static/js/checkForm.js"></script>
 ');

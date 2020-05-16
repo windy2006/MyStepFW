@@ -130,7 +130,7 @@ foreach($theList as $cur) {
 	</FORM>
 </DIV>
 
-<script language="JavaScript">
+<script type="application/javascript">
 $(function(){
 	if($("#error").length==0) {
 		$("#err_info").hide();

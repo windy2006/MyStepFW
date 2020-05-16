@@ -1,4 +1,4 @@
-<?php
+<?PHP
 
 $setting = array();
 $setting['pack'] = false;

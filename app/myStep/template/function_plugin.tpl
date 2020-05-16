@@ -11,7 +11,7 @@
                     <td>名称</td>
                     <td width="40">版本</td>
                     <td>描述</td>
-                    <td width="160">操作</td>
+                    <td width="170">操作</td>
                 </tr>
 <!--loop:start key="list_1"-->
                 <tr align="center">
@@ -50,7 +50,7 @@
                 <td>名称</td>
                 <td width="40">版本</td>
                 <td>描述</td>
-                <td width="140">操作</td>
+                <td width="170">操作</td>
             </tr>
 <!--loop:start key="list_2"-->
             <tr align="center">
@@ -72,7 +72,7 @@
 <!--if:end-->
             <tr align="center">
                 <td colspan="4" class="p-3 font-md text-center">
-                    <button class="btn btn-primary btn-sm mr-3" type="button" data-toggle="modal" data-target="#upload"> 上传插件 </button>
+                    <button id="upload" class="btn btn-primary btn-sm mr-3" type="button"> 上传插件 </button>
                 </td>
             </tr>
             </tr>
@@ -80,33 +80,27 @@
     </div>
 </div>
 
-<div class="modal fade" id="upload" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form name="upload" method="post" ACTION="manager/function/plugin/upload" ENCTYPE="multipart/form-data">
-            <div class="modal-header">
-                <h5 class="modal-title"><span class="glyphicon glyphicon-upload"></span> 请选择需要上传的插件文件</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">插件</span>
-                    </div>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" name="plugin" id="customFile" required />
-                        <label class="custom-file-label" for="customFile">文件选取</label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <input type="hidden" name="MAX_FILE_SIZE" value="<!--max_size-->" />
-                <button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span>  关闭 </button>
-                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-open"></span>  上传 </button>
-            </div>
-            </form>
-        </div>
-    </div>
-</div>
+<script type="text/javascript">
+    jQuery.vendor('jquery.powerupload', {
+        callback:function(){
+            $('#upload').powerUpload({
+                url: '<!--url_prefix-->manager/function/plugin/upload',
+                title: '请选择需要上传的插件文件',
+                mode: 'browse',
+                maxfiles: 1,
+                maxfilesize: 8,
+                errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
+                uploadFinished:function(i,file,result,timeDiff){
+                    if(result.error!=0) {
+                        alert("上传失败！\n原因：" + result.message);
+                    } else {
+                        $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
+                        $('#uploader').on('hidden.bs.modal', function (e) {
+                            window.location.reload();
+                        });
+                    }
+                }
+            });
+        }
+    });
+</script>

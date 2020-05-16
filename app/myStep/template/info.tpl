@@ -8,7 +8,7 @@
     <link rel="Shortcut Icon" href="favicon.ico" />
     <link rel="stylesheet" media="screen" type="text/css" href="static/css/bootstrap.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="static/css/glyphicons.css" />
-    <script language="JavaScript" src="static/js/jquery.js"></script>
+    <script type="application/javascript" src="static/js/jquery.js"></script>
 </head>
 <body>
 <div class="container">
@@ -27,12 +27,11 @@
     </div>
 </div>
 </body>
-<script language="JavaScript">
+<script type="application/javascript">
 $(function() {
     let sec = 5;
     let url = '<!--url-->';
     $('#countdown').html(sec--);
-    //url = url.replace(/^\//, '<!--path_root-->');
     $('#url').attr('href', url);
     setInterval(function(){
         if(sec<=0) {

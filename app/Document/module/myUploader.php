@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $path = PATH.'data/upload/';
 $upload = new myUploader($path, true);
 $upload->do();

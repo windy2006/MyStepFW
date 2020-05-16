@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $id = myReq::get('id', 'int');
 if(!empty($id)) {
     if($id & 1) {

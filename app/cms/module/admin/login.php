@@ -1,31 +1,31 @@
-<?php
-$path_admin = '/admin_cms/';
-if(isset($_GET['out'])) {
-    r::removeCookie('ms_user');
+<?PHP
+require 'inc.php';
+if(r::svr('QUERY_STRING')=='out') {
+    r::removeCookie('ms_cms_op');
     r::sessionEnd();
     myStep::info('login_logout', $path_admin);
-} elseif(r::s('ms_user')!='') {
-    myStep::redirect($path_admin);
-} elseif(myReq::check('post')) {
-    $captcha = strtolower(r::p('captcha'));
+} elseif(r::s('ms_cms_op')!='') {
+    cms::redirect($path_admin);
+} elseif(!is_null($captcha = r::p('captcha'))) {
     $err_no = 0;
-    if(!empty($captcha) && $captcha == strtolower(r::s('captcha'))) {
+    if(strtolower($captcha) == strtolower(r::s('captcha'))) {
         $usr = r::p('username');
-        $pwd = md5(r::p('password'));
-        if($s->gen->s_usr==r::p('username') && $s->gen->s_pwd==$pwd) {
-            r::setCookie('ms_user', $usr.chr(9).$pwd, 60*60*24);
-            r::s('ms_user', $usr);
+        $pwd = r::p('password');
+        if(($result = $mystep->login($usr, $pwd))===1) {
+            r::setCookie('ms_cms_op', $usr.chr(9).md5($pwd), 60*60*24);
             myStep::info('login_ok', $path_admin);
         } else {
-            $err_no = $s->gen->s_usr==r::p('username') ? 1 : 2;
+            $err_no = 2;
         }
     } else {
         $err_no = 1;
     }
     myStep::info($mystep->getLanguage('login_error').'(Error No: '.$err_no.')', $path_admin.'login');
 }
-
 $tpl_setting['name'] = 'login';
-$t = new myTemplate($tpl_setting, false);
-$mystep->show($t);
-$mystep->end();
+$t = new myTemplate($tpl_setting);
+$t->assign('path_admin', $path_admin);
+$content = $mystep->render($t);
+$tpl->assign('path_admin', $path_admin);
+$tpl->assign('list_func', '');
+$tpl->assign('list_web', '');

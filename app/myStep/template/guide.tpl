@@ -6,7 +6,7 @@
     </ul>
     <div id="container" class="p-0"></div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
 let detail = <!--detail-->;
 $(function(){
     let obj, obj_sub;
@@ -38,10 +38,10 @@ $(function(){
         $('#idx_list a').removeClass('active');
         $(this).addClass('active');
         if(idx=='#all') {
-            $('#container').find('div.card').show(200);
+            $('#container').find('div.card').fadeIn(1000);
         } else {
             $('#container').find('div.card').hide();
-            $(idx).show(200);
+            $(idx).slideDown(500);
         }
         resizeMain();
         return false;

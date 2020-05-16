@@ -12,14 +12,11 @@
 
 function highlightIt(the_obj){
 	(the_obj.tagName.toLowerCase()==="input") ? the_obj.select() : the_obj.focus();
-	$(the_obj).addClass('is-invalid').one("keypress", function(){
-		$(this).removeClass('is-invalid');
-	}).one("change", function(){
+	$(the_obj).addClass('is-invalid').one("keypress change", function(){
 		$(this).removeClass('is-invalid');
 	});
 	$(window).scrollTop($(the_obj).offset().top-100);
 }
-
 function checkForm(the_form, myChecker){
 	let flag = false;
 	if(typeof(myChecker)==="function") {
@@ -28,18 +25,6 @@ function checkForm(the_form, myChecker){
 		flag = true;
 	}
 	if(flag===false) return false;
-
-	let theObjs = $(the_form).find("input:password[id$=_r]");
-	for(let i=0; i<theObjs.length; i++) {
-		if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!==theObjs[i].value) {
-			alert(language.checkform_err_password);
-			highlightIt(theObjs[i]);
-			highlightIt($('#'+theObjs[i].id.replace(/_r$/, "")).get(0));
-			return false;
-		}
-	}
-	theObjs.remove();
-	
 	let obj_list = $(the_form).find("input,select,textarea");
 	let the_obj = null;
 	let the_value, the_need, the_len;
@@ -203,5 +188,15 @@ function checkForm(the_form, myChecker){
 				break;
 		}
 	}
+	let theObjs = $(the_form).find("input:password[id$=_r]");
+	for(let i=0; i<theObjs.length; i++) {
+		if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!==theObjs[i].value) {
+			alert(language.checkform_err_password);
+			highlightIt(theObjs[i]);
+			highlightIt($('#'+theObjs[i].id.replace(/_r$/, "")).get(0));
+			return false;
+		}
+	}
+	theObjs.remove();
 	return true;
 }

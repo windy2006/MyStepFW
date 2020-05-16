@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Email Sender                    *
@@ -52,7 +52,7 @@ Class myEmail extends myBase {
                         'mail' => 'addEmail',
                         'file' => 'addFile',
                         'header' => 'addHeader',
-                );
+                        );
 
     /**
      * 参数初始化
@@ -90,7 +90,7 @@ Class myEmail extends myBase {
      */
     public function setFrom($email, $name='', $auto=true) {
         $email = trim($email);
-        if(!preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2, 4}$/i', $email)) return false;
+        if(!preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2,4}$/i', $email)) return false;
         $name = trim(preg_replace('/[\r\n]+/', '', $name));
         $name = myString::setCharset($name, $this->charset);
         if(empty($name)) {
@@ -164,7 +164,7 @@ Content-Transfer-Encoding: base64
         if(empty($name)) $name = strstr($email, '@', true);
         $name = trim(preg_replace('/[\r\n]+/', '', $name));
         $name = myString::setCharset($name, $this->charset);
-        if($flag = preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2, 4}$/i', $email)) {
+        if($flag = preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2,4}$/i', $email)) {
             array_push($this->$type, array($email, $name));
         }
         return $flag;
@@ -403,12 +403,12 @@ Content-Type: multipart/alternative;
         $this->addHeader('Return-Path', $this->from);
         $mail_list = array_merge($this->to, $this->cc, $this->bcc);
         if($single==false) {
-            if(count($this->to)>0) $this->addHeader('To', implode(', ', $this->formatEmail($this->to)));
-            if(count($this->cc)>0) $this->addHeader('Cc', implode(', ', $this->formatEmail($this->cc)));
-            if(count($this->bcc)>0) $this->addHeader('Bcc', implode(', ', $this->formatEmail($this->bcc)));
+            if(count($this->to)>0) $this->addHeader('To', implode(',', $this->formatEmail($this->to)));
+            if(count($this->cc)>0) $this->addHeader('Cc', implode(',', $this->formatEmail($this->cc)));
+            if(count($this->bcc)>0) $this->addHeader('Bcc', implode(',', $this->formatEmail($this->bcc)));
         }
         $this->addHeader('From', $this->from);
-        if(count($this->reply)>0) $this->addHeader('Reply-To', implode(', ', $this->formatEmail($this->reply)));
+        if(count($this->reply)>0) $this->addHeader('Reply-To', implode(',', $this->formatEmail($this->reply)));
         $this->addHeader('Subject', $this->subject);
         $this->addHeader('Message-ID',  sprintf('<%s@%s>', md5(uniqid(time())), $_SERVER['HTTP_HOST']));
         if(!preg_match('/[1-5]/', $priority)) $priority = 3;
@@ -446,7 +446,7 @@ Content-Type: multipart/alternative;
             $this->error('Bad sender email');
             return false;
         }
-        for($i=0, $m=count($mail_list); $i<$m; $i++) {
+        for($i=0,$m=count($mail_list); $i<$m; $i++) {
             if($smtp->Recipient($mail_list[$i][0])) {
                 $info = ' sent successfully!';
             } else {

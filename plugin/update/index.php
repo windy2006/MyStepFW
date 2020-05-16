@@ -1,4 +1,4 @@
-<?php
+<?PHP
 require_once(__DIR__."/class.php");
 $this->setLanguage([
     'plugin_update_error'=>'请下载升级包，并手动更新！',

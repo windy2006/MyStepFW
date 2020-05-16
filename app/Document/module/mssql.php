@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $db = new myDb('MSSQL', '192.168.1.47', 'cfna', 'cfnadb!@#$%', 'UTF-8');
 $db->connect('cfna_new');
 $db->selectDB('cfna');

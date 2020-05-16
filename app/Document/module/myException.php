@@ -1,10 +1,10 @@
 <?PHP
 //initialize the instance
 myException::init(array(
-    'log_mode' => 0, 
-    'log_type' => E_ALL, 
-    'log_file' => ROOT.'error.log', 
-    'callback_type' => E_ALL, 
+    'log_mode' => 0,
+    'log_type' => E_ALL,
+    'log_file' => ROOT.'error.log',
+    'callback_type' => E_ALL,
     'exit_on_error' => false
 ));
 

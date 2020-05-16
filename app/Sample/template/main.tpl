@@ -18,7 +18,7 @@
 <div class="position-fixed border rounded px-2 py-1 bg-white" style="bottom:10px;right:10px;cursor:pointer;" onclick="$('html,body').animate({scrollTop: 0},500);">
     <span class="glyphicon glyphicon-arrow-up"></span>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
     $.setCSS([
         'vendor/syntaxhighlighter/shCore.css',
         'vendor/syntaxhighlighter/shThemeDefault.css'

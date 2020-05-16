@@ -1,4 +1,4 @@
-<?php
+<?PHP
 if(!file_exists(ROOT.'readme.md')) {
     myStep::info('page_error_module');
 }
@@ -7,7 +7,7 @@ $guide = myFile::getLocal(ROOT.'readme.md');
 $guide = str_replace(chr(13), '', $guide);
 $guide = preg_split('#[\n]{2,}#', $guide);
 $detail = array();
-for($i=0, $m=count($guide);$i<$m;$i++) {
+for($i=0,$m=count($guide);$i<$m;$i++) {
     $detail[$i] = array();
     $guide[$i] = preg_replace('#\n[\-]{5,}#', '', $guide[$i]);
     $lines = explode(chr(10), $guide[$i]);
@@ -34,6 +34,6 @@ for($i=0, $m=count($guide);$i<$m;$i++) {
     }
 }
 $tpl_setting['name'] = 'guide';
-$t = new myTemplate($tpl_setting, false, true);
+$t = new myTemplate($tpl_setting);
 $t->assign('detail', myString::toJson($detail, $s->gen->charset));
-$content = $mystep->render($t, 's', false);
+$content = $mystep->render($t);

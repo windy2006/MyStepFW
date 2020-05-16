@@ -20,4 +20,7 @@
 </div>
 <!--page_end-->
 </body>
+<script type="application/javascript">
+setURL();
+</script>
 </html>

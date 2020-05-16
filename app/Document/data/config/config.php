@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $setting = array();
 $setting['para_1'] = 'test';
 $setting['para_2'] = -123456.78;

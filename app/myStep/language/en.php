@@ -1,4 +1,4 @@
-﻿<?php
+﻿<?PHP
 return array (
     'open' => 'Open',
     'close' => 'Closed',
@@ -6,8 +6,10 @@ return array (
     'sending' => 'Data Sending...',
     'unknown' => 'Unknown',
     'app_missing' => 'The specified APP cannot be found!',
+    'error_para' => 'Import data is missing, check the database please!',
 
     'page_main' => 'Main',
+    'page_update' => 'News Update',
     'page_info' => 'Message',
     'page_info_refresh' => 'The page will be redirected within <span id="countdown">X</span> Seconds, <a id="url" href="#">Redirect Now</a>',
     'page_login' => 'Login Please',
@@ -75,6 +77,7 @@ return array (
     'checkform_err_time' => 'Keep the format like 9:00 or 22:00:00 !',
     'checkform_err_time2' => 'Wrong time !',
     'checkform_err_tel' => 'Normal phone number like 010-12345678 ro 010-87654321-999 !',
+    'checkform_item_string' => 'Any Standard String',
     'checkform_item_email' => 'Email Only(name@host.com)',
     'checkform_item_url' => 'URL Only(http://www.host.com/...)',
     'checkform_item_digital' => 'Digital Only(0-9)',

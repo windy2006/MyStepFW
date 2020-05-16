@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : MSSQL Manager                   *
@@ -50,8 +50,8 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     use base_db, base_sql;
 
     private
-        $error    = false, 
-        $error_info    = '', 
+        $error    = false,
+        $error_info    = '',
         $count    = 0;
 
     /**
@@ -84,9 +84,9 @@ class MSSQL extends myBase implements interface_db, interface_sql {
      */
     public function connect($the_db = '') {
         $connectionInfo = array(
-            'Database' => $the_db, 
-            'UID' => $this->user, 
-            'PWD' => $this->pwd, 
+            'Database' => $the_db,
+            'UID' => $this->user,
+            'PWD' => $this->pwd,
             'CharacterSet' => $this->charset
         );
         $this->connect = sqlsrv_connect($this->host, $connectionInfo);
@@ -127,6 +127,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
         } else {
             $num_rows = sqlsrv_rows_affected($this->result);
         }
+        $this->build('[reset]');
         if($this->checkError()) $this->error('Error Occur in Query !');
         return $num_rows;
     }
@@ -162,6 +163,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
             }
             $this->free();
         }
+        $this->build('[reset]');
         return $result;
     }
 
@@ -180,6 +182,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
             if(!empty($result)) $this->writeCache($key, $result);
             $this->free();
         }
+        $this->build('[reset]');
         return $result;
     }
 
@@ -199,6 +202,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
             }
             $this->free();
         }
+        $this->build('[reset]');
         return $result;
     }
 
@@ -295,8 +299,8 @@ ORDER BY a.id');
         if(empty($the_db)) $the_db = $this->db;
         $the_db = $this->safeName($the_db);
         $the_tbl = $this->safeName($the_tbl);
-        $this->query('SELECT a.name, 
-(CASE WHEN COLUMNPROPERTY(a.id, a.name, \'IsIdentity\')    = 1 THEN \'y\' ELSE \'\' END) AS [identity], 
+        $this->query('SELECT a.name,
+(CASE WHEN COLUMNPROPERTY(a.id, a.name, \'IsIdentity\')    = 1 THEN \'y\' ELSE \'\' END) AS [identity],
 (CASE WHEN (
     SELECT COUNT(*) FROM sysobjects WHERE (name IN (
     SELECT name FROM sysindexes WHERE (id = a.id) AND (indid IN (
@@ -305,13 +309,13 @@ ORDER BY a.id');
         ))
     ))
     )) AND (xtype = \'PK\')
-) > 0 THEN \'y\' ELSE \'\' END) AS [primary], 
-b.name AS [type], 
-a.length AS [bytes], 
-COLUMNPROPERTY(a.id, a.name, \'PRECISION\') AS [length], 
-ISNULL(COLUMNPROPERTY(a.id, a.name, \'Scale\'), 0) AS [float], 
-(CASE WHEN a.isnullable = 1 THEN \'y\' ELSE \'\' END) AS [null], 
-ISNULL(e.text, \'\') AS [default], 
+) > 0 THEN \'y\' ELSE \'\' END) AS [primary],
+b.name AS [type],
+a.length AS [bytes],
+COLUMNPROPERTY(a.id, a.name, \'PRECISION\') AS [length],
+ISNULL(COLUMNPROPERTY(a.id, a.name, \'Scale\'), 0) AS [float],
+(CASE WHEN a.isnullable = 1 THEN \'y\' ELSE \'\' END) AS [null],
+ISNULL(e.text, \'\') AS [default],
 ISNULL(g.value, \' \') AS [comment]
 FROM sys.syscolumns AS a 
 LEFT OUTER JOIN sys.systypes AS b ON a.xtype = b.xusertype 
@@ -357,7 +361,7 @@ ORDER BY a.id');
         while($row = $this->getRS(SQLSRV_FETCH_NUMERIC)) {
             if($n%10==0) $result .= $perfix;
             $result .= '(';
-            for($i=0, $m=count($row); $i<$m; $i++) {
+            for($i=0,$m=count($row); $i<$m; $i++) {
                 if($row[$i] instanceof DateTime) $row[$i] = $row[$i]->format('Y-m-d H:i:s');
                 $result .= "'".$this->safeValue($row[$i])."', ";
             }
@@ -388,7 +392,7 @@ ORDER BY a.id');
                 $script .= 'CLUSTERED ';
             }
             $script .= 'INDEX ['.$current['index_name'].'] ON ['.$the_tbl.']('.chr(10);
-            $keys = explode(', ', $current['index_keys']);
+            $keys = explode(',', $current['index_keys']);
             foreach ($keys as $k) {
                 if(strpos($k, '(-)')) {
                     $k = str_replace('(-)', '', $k);
@@ -422,7 +426,7 @@ ORDER BY a.id');
         if(is_file($file)) {
             $results = array();
             $SQLs = $this->handleSQL(file_get_contents($file));
-            for($i=0, $m=count($SQLs); $i<$m; $i++) {
+            for($i=0,$m=count($SQLs); $i<$m; $i++) {
                 $theSQL = $SQLs[$i];
                 $theSQL = strtolower($theSQL);
                 $result = $this->query($SQLs[$i]);
@@ -524,6 +528,7 @@ ORDER BY a.id');
         if($show) {
             return $sql;
         } else {
+            $this->build('[reset]');
             return $this->query($sql);
         }
     }
@@ -541,9 +546,12 @@ ORDER BY a.id');
             $fields = array();
             foreach($this->builder as $cur_tbl) {
                 $the_field = $cur_tbl->field();
+                if($the_field=='*') {
+                    $the_field = $cur_tbl->dl.$cur_tbl->idx.$cur_tbl->dr.'.*';
+                }
                 if(!empty($the_field)) $fields[] = $the_field;
             }
-            $sql .= implode(', ', $fields);
+            $sql .= implode(',', $fields);
 
             reset($this->builder);
             $cur_tbl = current($this->builder);
@@ -570,15 +578,16 @@ ORDER BY a.id');
                 $the_order = $cur_tbl->order();
                 if(!empty($the_order)) $orders[] = $the_order;
             }
-            if(!empty($orders)) $sql .= ' order by '.implode(', ', $orders);
+            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
 
             reset($this->builder);
             $sql .= current($this->builder)->limit();
-            $sql = $this->convertLimit($sql, implode(', ', $orders));
+            $sql = $this->convertLimit($sql, implode(',', $orders));
         }
         if($show) {
             return $sql;
         } else {
+            $this->build('[reset]');
             return $this->query($sql);
         }
     }
@@ -599,7 +608,7 @@ ORDER BY a.id');
             $fields = array();
             $the_field = $cur_tbl->field('update');
             if(!empty($the_field)) $fields[] = $the_field;
-            $sql .= implode(', ', $fields);
+            $sql .= implode(',', $fields);
 
             reset($this->builder);
             $cur_tbl = current($this->builder);
@@ -626,7 +635,7 @@ ORDER BY a.id');
                 $the_order = $cur_tbl->order();
                 if(!empty($the_order)) $orders[] = $the_order;
             }
-            if(!empty($orders)) $sql .= ' order by '.implode(', ', $orders);
+            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
 
             reset($this->builder);
             $sql = $this->convertLimit($sql.current($this->builder)->limit());
@@ -635,6 +644,7 @@ ORDER BY a.id');
         if($show) {
             return $sql;
         } else {
+            $this->build('[reset]');
             return $this->query($sql);
         }
     }
@@ -670,7 +680,7 @@ ORDER BY a.id');
                 $the_order = $cur_tbl->order();
                 if(!empty($the_order)) $orders[] = $the_order;
             }
-            if(!empty($orders)) $sql .= ' order by '.implode(', ', $orders);
+            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
 
             reset($this->builder);
             $sql = $this->convertLimit($sql.current($this->builder)->limit());
@@ -679,6 +689,7 @@ ORDER BY a.id');
         if($show) {
             return $sql;
         } else {
+            $this->build('[reset]');
             return $this->query($sql);
         }
     }
@@ -716,15 +727,15 @@ ORDER BY a.id');
                 $the_order = $the_order_2 = '';
                 if(preg_match('/order by\s+(.+?)\s+limit/i', $sql, $matches)) {
                     $the_order = $matches[1];
-                    $the_order = preg_replace('/\s*, \s*/', ', ', $the_order);
-                    $order_list = explode(', ', $the_order);
+                    $the_order = preg_replace('/\s*,\s*/',',', $the_order);
+                    $order_list = explode(',', $the_order);
                     $tmp_field = '';
-                    for($i=0, $m=count($order_list);$i<$m;$i++) {
+                    for($i=0,$m=count($order_list);$i<$m;$i++) {
                         if(strpos($order_list[$i], ' ')===false) $order_list[$i] .= ' asc';
                         $tmp_field .= ', '.preg_replace('/\s\w+$/', ' as tmp_limit_'.$i, $order_list[$i]);
                         $order_list[$i] = preg_replace('/^.+(\s\w+)$/', 'tmp_limit_'.$i.'\1', $order_list[$i]);
                     }
-                    $the_order = implode(', ', $order_list);
+                    $the_order = implode(',', $order_list);
                     $the_order_2 = str_ireplace('desc', '[xxxx]', $the_order);
                     $the_order_2 = str_ireplace('asc', 'desc', $the_order_2);
                     $the_order_2 = str_ireplace('[xxxx]', 'asc', $the_order_2);

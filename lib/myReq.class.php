@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Request Object Functions        *
@@ -24,6 +24,8 @@
         self::env($para)                                // Get variable from _ENV
         self::globals($para)                            // Get or Set variable for GLOBAL
         self::ip()                                      // Get Client IP
+        self::ping('ip:port')                           // Check if it's open of any IP on one specified port
+        self::pingURL($url)                             // Get the request time of some url
 
         self::setCookieOpt($setting)                                                // Set cookie settings
         self::setCookie($name, $value, $expire, $path, $domain, $secure)            // Set a cookie
@@ -41,33 +43,35 @@
         self::sessionId()                               // Get the current session id
         self::setSessionPath($path)                     // Get or set the current session save path
         self::setSessionName($name)                     // Get or set the current session name
+        self::sessionEncode($array)                        // Encode an array parameter to session string
+        self::sessionDecode($array)                        // Decode a session string
 */
 class myReq extends myBase {
     use myTrait;
 
     public static
         $func_alias = array(
-            'g' => 'get', 
-            'p' => 'post', 
-            'f' => 'files', 
-            'r' => 'request', 
-            'c' => 'cookie', 
-            's' => 'session', 
-            'e' => 'env', 
-            'svr' => 'server', 
-            'gl' => 'globals', 
+            'g' => 'get',
+            'p' => 'post',
+            'f' => 'files',
+            'r' => 'request',
+            'c' => 'cookie',
+            's' => 'session',
+            'e' => 'env',
+            'svr' => 'server',
+            'gl' => 'globals',
         );
     protected static
         $cookie_opt = array(
-            'path' => '', 
-            'domain' => '', 
+            'path' => '',
+            'domain' => '',
             'prefix' => ''
-        ), 
+        ),
         $session_opt = array(
-            'id' => '', 
-            'expire' => 30, 
-            'gc' => false, 
-            'mode' => 'files', 
+            'id' => '',
+            'expire' => 30,
+            'gc' => false,
+            'mode' => 'files',
             'trans_sid' => false
         );
 
@@ -153,6 +157,7 @@ class myReq extends myBase {
                     }
                     switch($format) {
                         case '!':
+                        case '':
                             break;
                         case 'int':
                             $result = floor(floatval($result));
@@ -192,10 +197,10 @@ class myReq extends myBase {
      */
     public static function get($para = '', $format = 'str') {
         if(empty($para)) {
-            self::getValue("get");
+            self::getValue('get');
             return count($_GET);
         } else {
-            return self::getValue("get", $para, $format);
+            return self::getValue('get', $para, $format);
         }
     }
 
@@ -207,10 +212,10 @@ class myReq extends myBase {
      */
     public static function post($para = '', $format = 'str') {
         if(empty($para)) {
-            self::getValue("post");
+            self::getValue('post');
             return count($_POST);
         } else {
-            return self::getValue("post", $para, $format);
+            return self::getValue('post', $para, $format);
         }
     }
 
@@ -221,10 +226,10 @@ class myReq extends myBase {
      */
     public static function files($para = '') {
         if(empty($para)) {
-            self::getValue("files");
+            self::getValue('files');
             return count($_FILES);
         } else {
-            return self::getValue("files", $para, '!');
+            return self::getValue('files', $para, '!');
         }
     }
 
@@ -236,10 +241,10 @@ class myReq extends myBase {
      */
     public static function request($para = '', $format = 'str') {
         if(empty($para)) {
-            self::getValue("request");
+            self::getValue('request');
             return count($_REQUEST);
         } else {
-            return self::getValue("request", $para, $format);
+            return self::getValue('request', $para, $format);
         }
     }
 
@@ -249,12 +254,12 @@ class myReq extends myBase {
      * @param string $format
      * @return bool|float|mixed|null|string|string[]
      */
-    public static function server($para = "", $format = '!') {
-        if(empty($para)) return "";
+    public static function server($para = '', $format = '!') {
+        if(empty($para)) return '';
         $para = strtoupper($para);
-        $return = self::getValue("server", $para, $format);
-        if(empty($return)) $return = self::getValue("server", 'HTTP_'.$para, $format);
-        if(empty($return)) $return = self::getValue("env", $para, $format);
+        $return = self::getValue('server', $para, $format);
+        if(empty($return)) $return = self::getValue('server', 'HTTP_'.$para, $format);
+        if(empty($return)) $return = self::getValue('env', $para, $format);
         return $return;
     }
 
@@ -285,21 +290,80 @@ class myReq extends myBase {
      * @return null|string|string[]
      */
     public static function ip() {
-        $ip = $ip_org = $_SERVER["REMOTE_ADDR"];
-        if(isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-            $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
-            $ip_list = explode(", ", $ip);
+        $ip = $ip_org = $_SERVER['REMOTE_ADDR'];
+        if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            $ip_list = explode(',', $ip);
             if(count($ip_list)>1) $ip = $ip_list[0];
-        } elseif(isset($_SERVER["HTTP_CLIENT_IP"])) {
-            $ip = $_SERVER["HTTP_CLIENT_IP"];
+        } elseif(isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
         }
         if(!empty($ip) && $ip!=$ip_org) {
-            $ip = $ip_org.", ".$ip;
+            $ip = $ip_org.', '.$ip;
         } else {
             $ip = $ip_org;
         }
-        $ip = preg_replace("/[^\w\.\-, ]+/", "", $ip);
+        $ip = preg_replace('/[^\w\.\-, ]+/', '', $ip);
+        if($ip=='1') $ip = '127.0.0.1';
         return $ip;
+    }
+
+    /**
+     * IP地址连通测试 (IP:PORT)
+     * @param $address
+     * @param string $info
+     * @return bool|string
+     */
+    public static function ping($address, &$info = '') {
+        if(filter_var($address,FILTER_VALIDATE_URL)) {
+            $info = parse_url($address);
+            $ip_info = [
+                gethostbyname($info['host']),
+                $info['port']??'80'
+            ];
+        } else {
+            $ip_info = explode(':', $address);
+            $ip_info[0] = gethostbyname($ip_info[0]);
+            if(!isset($ip_info[1])) $ip_info[1] = '80';
+        }
+        if(filter_var($ip_info[0],FILTER_VALIDATE_IP,FILTER_FLAG_IPV6)) { //IPv6
+            $socket = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
+        } elseif(filter_var( $ip_info[0],FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) { //IPv4
+            $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        }else{
+            return false;
+        }
+        $time = getMicrotime();
+        if($result = @socket_connect($socket, $ip_info[0], $ip_info[1])) {
+            $time = getMicrotime() - $time;
+            $info = '';
+        } else {
+            $time = false;
+            $info = socket_strerror(socket_last_error($socket));
+        }
+        socket_close($socket);
+        return $time;
+    }
+
+    /**
+     * 获取某个URL的链接时间，$detail返回相关时间参数（其他参数请自行var_export）如下：
+     *  total_time - 获得用秒表示的上一次传输总共的时间，包括DNS解析、TCP连接等。
+     *  namelookup_time - 获得用秒表示的从最开始到域名解析完毕的时间。
+     *  connect_time - 获得用秒表示的从最开始直到对远程主机（或代理）的连接完毕的时间。
+     *  pretransfer_time - 获得用秒表示的从最开始直到文件刚刚开始传输的时间。
+     *  starttransfer_time - 获得用秒表示的从最开始到第一个字节被curl收到的时间。
+     *  redirect_time - 获得所有用秒表示的包含了所有重定向步骤的时间，包括DNS解析、连接、传输前（pretransfer)和在最后的一次传输开始之前。
+     * @param $url
+     * @param $detail
+     * @return mixed
+     */
+    public static function pingURL($url, &$detail) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER , 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_exec($ch);
+        $detail = curl_getinfo($ch);
+        return $detail['http_code']==0?false:$detail['total_time'];
     }
 
     /**
@@ -317,11 +381,12 @@ class myReq extends myBase {
      * @param int $expire
      * @param string $path
      * @param string $domain
+     * @param bool $httponly
      * @return bool
      */
-    public static function setCookie($name, $value = '', $expire = 0, $path = '', $domain = '') {
+    public static function setCookie($name, $value = '', $expire = 0, $path = '', $domain = '', $httponly = true) {
         if(headers_sent($file, $line)) {
-            trigger_error("Content is already been sent at $line line of '$file'!");
+            trigger_error('Content is already been sent at $line line of "'.$file.'"!');
             return false;
         }
         if($expire<=0) {
@@ -332,10 +397,11 @@ class myReq extends myBase {
         if(empty($path) && !empty(self::$cookie_opt['path'])) {
             $path = self::$cookie_opt['path'];
         } else {
-            $path = "/";
+            $path = '/';
         }
         if(empty($domain) && !empty(self::$cookie_opt['domain'])) $domain = self::$cookie_opt['domain'];
-        return setcookie(self::$cookie_opt['prefix'].$name, $value, $expire, $path, $domain, isHttps());
+        $_COOKIE[self::$cookie_opt['prefix'].$name] = $value;
+        return setcookie(self::$cookie_opt['prefix'].$name, $value, $expire, $path, $domain, isHttps(), $httponly);
     }
 
     /**
@@ -369,13 +435,13 @@ class myReq extends myBase {
      * @param bool $pre
      * @return bool|float|int|mixed|null|string|string[]
      */
-    public static function cookie($para = "", $pre = true) {
+    public static function cookie($para = '', $pre = true) {
         if(empty($para)) {
-            self::getValue("cookie");
+            self::getValue('cookie');
             return count($_COOKIE);
         } else {
             if($pre) $para = self::$cookie_opt['prefix'].$para;
-            return self::getValue("cookie", $para, "!");
+            return self::getValue('cookie', $para, '!');
         }
     }
 
@@ -403,51 +469,49 @@ class myReq extends myBase {
         $flag = false;
         if(is_string($handle) && class_exists($handle)) {
             $flag = session_set_save_handler(
-                                array($handle, 'open'), 
-                                array($handle, 'close'), 
-                                array($handle, 'read'), 
-                                array($handle, 'write'), 
-                                array($handle, 'destroy'), 
+                                array($handle, 'open'),
+                                array($handle, 'close'),
+                                array($handle, 'read'),
+                                array($handle, 'write'),
+                                array($handle, 'destroy'),
                                 array($handle, 'gc')
                             );
-        }elseif(is_array($handle) && count($handle)==6) {
+        } elseif(is_array($handle) && count($handle)==6) {
             $flag = session_set_save_handler($handle[0], $handle[1], $handle[2], $handle[3], $handle[4], $handle[5]);
         }
         if($flag) {
             //ini_set('session.save_handler', 'user');
-            //session_module_name("user");
+            //session_module_name('user');
             self::$session_opt['mode']=='user';
-        }else {
+        } else {
             //ini_set('session.save_handler', 'files');
-            session_module_name("files");
+            session_module_name('files');
             self::$session_opt['mode']=='files';
         }
         if(!empty(self::$session_opt['id'])) {
             session_id(self::$session_opt['id']);
         }
         if(self::$session_opt['gc']) {
-            ini_set('session.gc_maxlifetime', self::$session_opt['expire'] * 3);
+            ini_set('session.gc_maxlifetime', self::$session_opt['expire'] * 60);
             ini_set('session.gc_probability', 5);
             ini_set('session.gc_divisor', 100);
         }
         ini_set('session.use_trans_sid', (self::$session_opt['trans_sid']?'1':'0'));
         if(self::$session_opt['trans_sid']) {
-            ini_set("session.use_cookies", "0");
-            ini_set("url_rewriter.tags", "a=href, area=href, script=src, link=href, frame=src, input=src, form=fakeentry");
+            ini_set('session.use_cookies', '0');
+            ini_set('url_rewriter.tags', 'a=href,area=href,script=src,link=href,frame=src,input=src,form=fakeentry');
         } else {
-            ini_set("session.use_cookies", "1");
+            ini_set('session.use_cookies', '1');
             $lifetime = self::$session_opt['expire']*60;
             $path = self::$cookie_opt['path'];
             $domain = self::$cookie_opt['domain'];
             $secure = isHttps();
             session_set_cookie_params($lifetime, $path, $domain, $secure, $httponly);
         }
-        session_cache_limiter('private, must-revalidate');
+        session_cache_limiter('private,must-revalidate');
         session_cache_expire(self::$session_opt['expire']);
         session_start();
-        if(!self::$session_opt['trans_sid']) setcookie(session_name(), session_id(), $_SERVER["REQUEST_TIME"]+self::$session_opt['expire']*60, self::$cookie_opt['path'], self::$cookie_opt['domain']);
         function_exists('session_register_shutdown') ? session_register_shutdown() : register_shutdown_function('session_write_close');
-        self::setCookie_nopre(self::setSessionName(), session_id(), ini_get('session.gc_maxlifetime'));
         return session_id();
     }
 
@@ -457,7 +521,7 @@ class myReq extends myBase {
      * @param bool $delete_old_session
      * @return string
      */
-    public static function sessionRestart($id = "", $delete_old_session = true) {
+    public static function sessionRestart($id = '', $delete_old_session = true) {
         session_regenerate_id($delete_old_session);
         session_write_close();
         if(!empty($id)) {
@@ -487,14 +551,14 @@ class myReq extends myBase {
      * @param null $value
      * @return bool|float|mixed|null|string|string[]
      */
-    public static function session($key="", $value=null) {
+    public static function session($key='', $value=null) {
         if(!self::sessionCheck() || is_int($key)) {
             return null;
         } elseif(empty($key)) {
             return session_encode();
         } else {
             if(is_null($value)) {
-                return self::getValue("session", $key, '!');
+                return self::getValue('session', $key, '!');
             } else {
                 $_SESSION[$key] = $value;
             }
@@ -550,12 +614,12 @@ class myReq extends myBase {
      * @param string $path
      * @return string
      */
-    public static function setSessionPath($path = "") {
+    public static function setSessionPath($path = '') {
         if(empty($path) || self::sessionCheck()) {
             return session_save_path();
         } else {
             if(self::$session_opt['mode']=='files' && (is_dir($path) || @mkdir($path, 0777, true))) {
-                $path =    realpath($path);
+                $path = realpath($path);
                 session_save_path($path);
             }
             return session_save_path();
@@ -567,12 +631,116 @@ class myReq extends myBase {
      * @param string $name
      * @return string
      */
-    public static function setSessionName($name = "") {
+    public static function setSessionName($name = '') {
         if(empty($name) || self::sessionCheck()) {
             return session_name();
         } else {
             return session_name($name);
         }
     }
+
+    /**
+     * Session 编码
+     * @param $array
+     * @param bool $safe
+     * @return string
+     */
+    public static function sessionEncode($array, $safe = true) {
+        if($safe) $array = unserialize(serialize($array));
+        $raw = '';
+        $line = 0;
+        foreach($array as $key => $value) {
+            $line ++ ;
+            $raw .= $key .'|' ;
+            if(is_array($value) && isset($value['MySessSign'])) {
+                $raw .= 'R:'. $value['MySessSign'] . ';' ;
+            } else {
+                $raw .= serialize($value);
+            }
+            $array[$key] = Array('MySessSign' => $line) ;
+        }
+        return $raw;
+    }
+
+    /**
+     * Session 解码
+     * @param $str
+     * @return bool|mixed
+     */
+    public static function sessionDecode($str) {
+        $str = (string)$str;
+        $endptr = strlen($str);
+        $p = 0;
+        $serialized = '';
+        $items = 0;
+        $level = 0;
+        while($p < $endptr) {
+            $q = $p;
+            while($str[$q] != '|') {
+                if(++$q >= $endptr) break 2;
+            }
+            if($str[$p] == '!') {
+                $p++;
+                $has_value = false;
+            } else {
+                $has_value = true;
+            }
+            $name = substr($str, $p, $q - $p);
+            $q++;
+            $serialized .= 's:' . strlen($name) . ':"' . $name . '";';
+            if($has_value) {
+                for(;;) {
+                    $p = $q;
+                    switch ($str[$q]) {
+                        case 'N': /* null */
+                        case 'b': /* boolean */
+                        case 'i': /* integer */
+                        case 'd': /* decimal */
+                            do $q++;
+                            while ( ($q < $endptr) && ($str[$q] != ';') );
+                            $q++;
+                            $serialized .= substr($str, $p, $q - $p);
+                            if($level == 0) break 2;
+                            break;
+                        case 'R': /* reference    */
+                            $q+= 2;
+                            for($id = ''; ($q < $endptr) && ($str[$q] != ';'); $q++) $id .= $str[$q];
+                            $q++;
+                            $serialized .= 'R:' . ($id + 1) . ';'; /* increment pointer because of outer array */
+                            if($level == 0) break 2;
+                            break;
+                        case 's': /* string */
+                            $q+=2;
+                            for($length=''; ($q < $endptr) && ($str[$q] != ':'); $q++) $length .= $str[$q];
+                            $q+=2;
+                            $q+= (int)$length + 2;
+                            $serialized .= substr($str, $p, $q - $p);
+                            if($level == 0) break 2;
+                            break;
+                        case 'a': /* array */
+                        case 'O': /* object */
+                            do $q++;
+                            while ( ($q < $endptr) && ($str[$q] != '{') );
+                            $q++;
+                            $level++;
+                            $serialized .= substr($str, $p, $q - $p);
+                            break;
+                        case '}': /* end of array|object */
+                            $q++;
+                            $serialized .= substr($str, $p, $q - $p);
+                            if(--$level == 0) break 2;
+                            break;
+                        default:
+                            return false;
+                    }
+                }
+            } else {
+                $serialized .= 'N;';
+                $q+= 2;
+            }
+            $items++;
+            $p = $q;
+        }
+        return unserialize('a:' . $items . ':{' . $serialized . '}');
+    }
 }
-?>

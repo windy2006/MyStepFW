@@ -25,7 +25,7 @@
         <div class="grid-item grid-item--height2">23.h2</div>
 	</div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
     jQuery.vendor('masonry.pkgd', {
         add_css:true,
         callback:function(){

@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /**
  * 获取汉字拼音及缩写
  * $pinyin = pinyin($str, &$abbr)

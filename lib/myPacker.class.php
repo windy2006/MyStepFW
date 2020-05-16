@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Pack Manager                    *
@@ -19,14 +19,14 @@
 */
 class myPacker extends myBase {
     protected
-        $file_count = 0, 
+        $file_count = 0,
         $file_ignore = array(),        // ignore these files when packing
         $file_list = array(),        // only files in the list will be pack
         $pack_file = 'pack.bin',    // the file name of packed file
         $pack_dir = './',            // the directory of pack or unpack to
-        $pack_fp = null, 
-        $pack_result = array(), 
-        $separator = '|', 
+        $pack_fp = null,
+        $pack_result = array(),
+        $separator = '|',
         $charset = array();
 
     /**
@@ -78,7 +78,7 @@ class myPacker extends myBase {
      * 打包已添加文件
      */
     protected function packFileList() {
-        for($i=0, $m=count($this->file_list); $i<$m; $i++) {
+        for($i=0,$m=count($this->file_list); $i<$m; $i++) {
             $this->packFile($this->file_list[$i]);
         }
         return;
@@ -91,7 +91,7 @@ class myPacker extends myBase {
     protected function packFile($dir='.') {
         $root = myFile::rootPath();
         $dir = myFile::realPath($dir);
-        for($i=0, $m=count($this->file_ignore);$i<$m;$i++) {
+        for($i=0,$m=count($this->file_ignore);$i<$m;$i++) {
             if(substr($dir, -(strlen($this->file_ignore[$i])))==$this->file_ignore[$i]) return;
         }
         if(is_dir($dir)) {
@@ -242,7 +242,7 @@ class myPacker extends myBase {
     public function getResult($mode = 0) {
         if($mode) return $this->pack_result;
         $result = '';
-        for($i=0, $m=count($this->pack_result)-1;$i<$m;$i++) {
+        for($i=0,$m=count($this->pack_result)-1;$i<$m;$i++) {
             $result .= '<b>'.$this->pack_result[$i][0].'</b> - <i>'.$this->pack_result[$i][1].'</i> &nbsp; '.$this->pack_result[$i][2].'<br />'.chr(10);
         }
         if($this->pack_result[$i][0]=='pack') {

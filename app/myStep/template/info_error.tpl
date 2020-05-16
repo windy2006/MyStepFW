@@ -22,7 +22,7 @@
 	</div>
 </div>
 
-<script language="JavaScript">
+<script type="application/javascript">
     function setPosition() {
         $("#main").css('padding-bottom', 80);
         $("tfoot").css({'right':0, 'bottom':40});

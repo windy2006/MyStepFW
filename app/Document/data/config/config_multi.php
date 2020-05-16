@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $setting = array();
 $setting['text'] = array();
 $setting['text']['para_1'] = 'change';

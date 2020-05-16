@@ -7,7 +7,7 @@
 	</div>
     <div id="info" class="text-muted small"></div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
     $(function() {
         $.setCSS([
             'vendor/codemirror/lib/codemirror.css',
@@ -28,7 +28,7 @@
             "vendor/codemirror/mode/css/css.js",
             "vendor/codemirror/mode/htmlmixed/htmlmixed.js",
         ], true, function() {
-            $.get('index.php?Document/', function(data) {
+            $.get('<!--url_prefix-->Document/', function(data) {
                 $("#code").val(data);
                 let editor = CodeMirror.fromTextArea($id("code"), {
                     mode: "text/html",
@@ -59,12 +59,13 @@
                 $('#info').remove();
             });
         }, function(num_done, num_total, script) {
-            $('#progress_bar').width($('#progress_bar').parent().width() * Math.ceil(num_done/num_total));
-            $('#info').html('脚本 ' + script + ' 已载入！');
-            if(num_done===num_total) {
-                $('#info').html('代码处理中。。。');
-                $('#progress_bar').parent().remove();
-            }
+			let obj = $('#progress_bar');
+			obj.width(obj.parent().width() * Math.ceil(num_done/num_total));
+			$('#info').html('脚本 ' + script + ' 已载入！');
+			if(num_done===num_total) {
+				$('#info').html('代码处理中。。。');
+				obj.parent().remove();
+			}
 		});
     });
 </script>

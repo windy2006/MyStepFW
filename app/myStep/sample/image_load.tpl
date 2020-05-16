@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
     jQuery.vendor('jquery.powerimage', {
         callback:function(){
             $("#pic_container").powerImage({

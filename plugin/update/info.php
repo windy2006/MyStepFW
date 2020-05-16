@@ -1,4 +1,4 @@
-<?php
+<?PHP
 return array(
     'name' => '框架更新插件',
     'idx' => basename(realpath(__DIR__)),

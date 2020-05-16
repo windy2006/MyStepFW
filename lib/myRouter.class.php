@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Ruoter handler                  *
@@ -17,24 +17,24 @@
     $router->format('hex', '[a-fA-F0-9]+');
     $router->rule('/test/[any]/[str]/[hex]/[yyy]/[int]', function() {var_dump(func_get_args());});
     $router->check('/test/哈哈/string/aB123f/yyy/123456');
-    $router->parse()
+    $router->parseQuery()
  */
 class myRouter extends myBase {
     use myTrait;
 
     public
-        $query = '', 
-        $rules = array(), 
-        $route = array();
+        $query = '',
+        $rules = array(),
+        $route = array(),
+        $info = array('app'=>'', 'path'=>'', 'para'=>array());
 
     protected
-        $setting = array(), 
+        $setting = array(),
         $formats = array(
-            'any' => '(.*?)', 
-            'int' => '(\d+)', 
+            'any' => '(.*?)',
+            'int' => '(\d+)',
             'str' => '(\w+)'
-        ), 
-        $info = array('app'=>'', 'path'=>'', 'para'=>array());
+        );
 
     /**
      * 参数初始化
@@ -46,32 +46,40 @@ class myRouter extends myBase {
         if(!isset($setting['default_app'])) $setting['default_app'] = 'myStep';
         if(!isset($setting['delimiter_path'])) $setting['delimiter_path'] = '/';
         if(!isset($setting['delimiter_para'])) $setting['delimiter_para'] = '&';
+        $this->setting = $setting;
+        $this->route = $this->parseQuery();
+        $this->query = $this->route['qstr'];
+        $this->parse();
+    }
 
-        $qstr = trim(myReq::svr('QUERY_STRING'));
-        $path_info = myReq::svr('PATH_INFO');
-        if(empty($path_info)) {
-            $path_info = myReq::server('ORIG_PATH_INFO');
-            $path_info = str_replace(myReq::server('SCRIPT_NAME'), '', $path_info);
-        }
+    /**
+     * 解析路径及查询字串
+     * @param $qstr
+     * @return array
+     */
+    public function parseQuery($qstr='') {
         if(empty($qstr)) {
-            $qstr = $path_info;
-        } else {
-            $qstr = $path_info.'?'.$qstr;
+            $qstr = trim(myReq::svr('QUERY_STRING'));
+            $path_info = myReq::svr('PATH_INFO');
+            if(empty($path_info)) {
+                $path_info = myReq::server('ORIG_PATH_INFO');
+                $path_info = str_replace(myReq::server('SCRIPT_NAME'), '', $path_info);
+            }
+            if(empty($qstr)) {
+                $qstr = $path_info;
+            } else {
+                $qstr = $path_info.'?'.$qstr;
+            }
         }
         $qstr = str_replace('?', '&', trim($qstr, '?'));
         if(strpos($qstr, '/')!==0) $qstr = '/'.$qstr;
-
         array_shift($_GET);
         preg_match('#^(.+?)((&|\?)(.+))?$#', $qstr, $match);
         $p = $match[1] ?? '';
         $q = $match[4] ?? '';
         parse_str($q, $_GET);
-
-        $_SERVER["QUERY_STRING"] = preg_replace('#^.+(\?|&)(.+)$#', '\2', $qstr);
-        $this->route = compact('qstr', 'p', 'q');
-        $this->query = $qstr;
-        $this->setting = $setting;
-        $this->parse();
+        $_SERVER["QUERY_STRING"] = preg_replace('#^.+?([?&])(.+)$#', '\2', $qstr);
+        return compact('qstr', 'p', 'q');
     }
 
     /**
@@ -112,7 +120,7 @@ class myRouter extends myBase {
      */
     public function rule($rule, $method, $idx = '') {
         preg_match_all('#\[(\w+)\]#', $rule, $match);
-        for($i=0, $m=count($match[0]);$i<$m;$i++) {
+        for($i=0,$m=count($match[0]);$i<$m;$i++) {
             if(isset($this->formats[$match[1][$i]])) {
                 $rule = str_replace($match[0][$i], $this->formats[$match[1][$i]], $rule);
             } else {
@@ -157,105 +165,122 @@ class myRouter extends myBase {
     public function check() {
         if(preg_match('@^/[A-Z]@', $this->query)) return false;
         $url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
-        foreach($this->rules as $rule) {
-            if(
-                preg_match('#^'.$rule['pattern'].'$#', $this->query, $match)
-                ||
-                preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query, $match)
-            ) {
-                array_shift($match);
-                if(preg_match('#^/(api|module)/#', $rule['pattern'])) {
-                    $rule['idx'] = $match[0];
-                    $match = [$match[0].'/'.$match[1]];
-                }
-                if(strpos($rule['idx'], 'plugin_')===0) $rule['idx'] = 'myStep';
-                if(!is_dir(APP.$rule['idx'])) {
-                    myStep::info('app_missing');
-                }
-                $info_app = include(APP.$rule['idx'].'/info.php');
-                $info_app['path'] = explode('/', trim($this->route['p'], '/'));
-                $info_app['para'] = $this->info['para'];
-                $info_app['route'] = $this->route['p'];
-                myReq::globals('info_app', $info_app);
-                if(is_file(APP.$rule['idx'].'/lib.php')) require_once(APP.$rule['idx'].'/lib.php');
-                myStep::setPara();
-                if(is_array($rule['method'])) {
-                    $match = array_slice($match, 0, 1);
-                    $last = array_pop($rule['method']);
-                    $flag = true;
-                    foreach($rule['method'] as $each) {
-                        $each = explode(', ', $each);
-                        $method = array_shift($each);
-                        array_push($each, $flag);
-                        if(is_callable($method)) {
-                            $flag = call_user_func_array($method, $each);
-                        } else {
-                            $flag = false;
-                        }
-                        if($flag===false) break;
-                    }
-                    array_push($match, $flag);
-                    if($flag!==false && is_callable($last)) {
-                        call_user_func_array($last, $match);
-                        exit;
-                    }
-                    return true;
-                } else {
-                    if(gettype($rule['method'])=='object') {
-                        $paras = array();
-                        $method = $rule['method'];
-                    } else {
-                        $paras = explode(', ', $rule['method']);
-                        $method = array_shift($paras);
-                    }
-                    $paras = array_merge($paras, $match);
+        $rule = '';
+        $fix_mode = true;
+        foreach($this->rules as $the_rule) {
+            if(preg_match('#^'.$the_rule['pattern'].'$#', $this->query, $match)) {
+                $rule = $the_rule;
+                $fix_mode = false;
+                break;
+            } elseif(preg_match('#^'.$the_rule['pattern'].'$#', $url_fix.$this->query, $match)) {
+                $rule = $the_rule;
+                continue;
+            }
+        }
+        if(!empty($rule)) {
+            if(empty($match)) {
+                preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query, $match);
+            }
+            $path = trim(array_shift($match), '/');
+            $path = preg_replace('#/.*$#', '', $path);
+            if(preg_match('#^/(api|module)/#', $rule['pattern'])) {
+                $rule['idx'] = $match[0];
+                $match = [$match[0].'/'.$match[1]];
+            }
+            if(strpos($rule['idx'], 'plugin_')===0) $rule['idx'] = 'myStep';
+            if(!is_dir(APP.$rule['idx'])) {
+                myStep::info('app_missing');
+            }
+            if(!$fix_mode || !empty($url_fix) && strpos($this->route['p'], $url_fix)===0) $url_fix = '';
+            $info_app = include(APP.$rule['idx'].'/info.php');
+            $info_app['path'] = explode('/', trim($url_fix.$this->route['p'], '/'));
+            $info_app['para'] = $this->info['para'];
+            $info_app['route'] = $url_fix.$this->route['p'];
+            myReq::globals('info_app', $info_app);
+
+            global $s;
+            if(is_file(APP.$info_app['app'].'/config.php')) {
+                $s->merge(APP.$info_app['app'].'/config.php');
+            }
+            if(is_file(APP.$info_app['app'].'/config_'.$path.'.php')) {
+                $s->merge(APP.$info_app['app'].'/config_'.$path.'.php');
+            }
+            if(isset($info_app['para']['ms_app']) && is_dir(APP.$info_app['para']['ms_app'])) {
+                if(is_file(APP.$info_app['para']['ms_app'].'/config.php')) $s->merge(APP.$info_app['para']['ms_app'].'/config.php');
+            }
+            myStep::setPara();
+            if(is_array($rule['method'])) {
+                $match = array_slice($match, 0, 1);
+                $last = array_pop($rule['method']);
+                $flag = true;
+                foreach($rule['method'] as $each) {
+                    $each = str_replace(' ', '', $each);
+                    $each = explode(',', $each);
+                    $method = array_shift($each);
+                    array_push($each, $flag);
                     if(is_callable($method)) {
-                        call_user_func_array($method, $paras);
+                        $flag = call_user_func_array($method, $each);
                     } else {
-                        return false;
+                        $flag = false;
                     }
+                    if($flag===false) break;
+                }
+                array_push($match, $flag);
+                if($flag!==false && is_callable($last)) {
+                    call_user_func_array($last, $match);
+                    exit;
                 }
                 return true;
+            } else {
+                if(gettype($rule['method'])=='object') {
+                    $paras = array();
+                    $method = $rule['method'];
+                } else {
+                    $paras = explode(',', $rule['method']);
+                    $method = array_shift($paras);
+                }
+                $paras = array_merge($paras, $match);
+                if(is_callable($method)) {
+                    call_user_func_array($method, $paras);
+                } else {
+                    return false;
+                }
             }
+            return true;
         }
         return false;
     }
 
     /**
-     * 路由解析
-     * @param string $q
-     * @return array
+     * APP路由信息解析
      */
-    public function parse($q='') {
-        if(empty($q)) $q = $this->query;
+    public function parse() {
+        extract($this->route);
         $setting = $this->setting;
-        $q = explode($setting['delimiter_path'], trim($q, '/'));
-        $path = array();
-        if(end($q) && (strpos(end($q), $setting['delimiter_para'])!==false || strpos(end($q), '=')!==false)) {
-            $para = explode($setting['delimiter_para'], array_pop($q));
+        $p = explode($setting['delimiter_path'], trim($p, '/'));
+        if(strpos($q, $setting['delimiter_para'])!==false || strpos($q, '=')!==false) {
+            $para = explode($setting['delimiter_para'], $q);
             foreach($para as $k => $v) {
                 if(strpos($v, '=')) {
                     list($k, $v) = explode('=', $v);
                     $k = trim($k, '?&');
                     $this->info['para'][$k] = $v;
                 } else {
-                    if(!empty($v)) $path[] = $v;
+                    $this->info['para'][$v] = '';
                 }
             }
         }
-        if(empty(reset($q))) array_shift($q);
-        if(count($q)==0 || !is_dir(APP.$q[0])) {
+        if(empty($p[0]) || !is_dir(APP.$p[0])) {
             $this->info['app'] = $setting['default_app'];
         } else {
-            $this->info['app'] = array_shift($q);
+            $this->info['app'] = array_shift($p);
         }
-        $this->info['path'] = array_merge($q, $path);
+        $this->info['path'] = $p;
         $info = array();
         if(is_file(APP.$this->info['app'].'/info.php')) {
             $info = include(APP.$this->info['app'].'/info.php');
         }
         $this->info = array_merge($info, $this->info);
-        return $this->info;
     }
 
     /**

@@ -1,4 +1,4 @@
-<?php
+<?PHP
 interface interface_cache {
     public function set($key, $value, $ttl);
     public function get($key);

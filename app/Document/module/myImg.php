@@ -43,14 +43,14 @@ $width = 1350;
 $height = 850;
 $painter = new coordinateMaker($width, $height, array(50, 800), array(true, array(0xee, 0xee, 0xee)));
 $painter->setPara(array(
-                                        'scale_x' => 180, 
-                                        'scale_y' => 1, 
-                                        'distance_x' => 1, 
-                                        'distance_y' => 100, 
-                                        'start_x' => 2000, 
-                                        'start_y' => 1000, 
-                                        'text_x' => '年度', 
-                                        'text_y' => '数值', 
+                                        'scale_x' => 180,
+                                        'scale_y' => 1,
+                                        'distance_x' => 1,
+                                        'distance_y' => 100,
+                                        'start_x' => 2000,
+                                        'start_y' => 1000,
+                                        'text_x' => '年度',
+                                        'text_y' => '数值',
                                         'font' => PATH.'data/image/font.ttc'))
                 ->setLine(1);
 

@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $config = new myConfig(PATH.'data/config/config_multi.php');
 if(myReq::check('post')) {
     $config->set($_POST['setting']);

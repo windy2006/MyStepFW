@@ -20,7 +20,7 @@
 	</form>
 </DIV>
 
-<script language="JavaScript">
+<script type="application/javascript">
     function myChecker(theForm) {
         if ($('#db_password').val() == $('#db_password_r').val()){
             return checkForm(theForm);

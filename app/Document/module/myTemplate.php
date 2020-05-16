@@ -46,7 +46,7 @@ if(!$tpl_test->checkCache()) {
 
     function test_var() {
         return <<<'mytpl'
-<?php
+<?PHP
 echo 'test1 : '. {myTemplate::var1}.'<br />';
 echo 'test2 : '. {myTemplate::var2}.'<br />';
 echo 'test3 : '. {myTemplate::var3}.'<br />';
@@ -59,15 +59,15 @@ mytpl;
         $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_loop.tpl');
         list($block, $att_list['unit'], $att_list['unit_blank'])= $tpl_test->getBlock($tpl_test_content, 'loop', 'news');
         $result = <<<'mytpl'
-<?php
+<?PHP
 $result = array(
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'], 
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
         );
 $n = 0;
 foreach($result as $news) {
@@ -89,8 +89,8 @@ mytpl;
         $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_if.tpl');
         list($block, $att_list['yes'], $att_list['no'])= $tpl_test->getBlock($tpl_test_content, 'if');
         $result = <<<'mytpl'
-<?php
-echo ( {myTemplate::key}) ? " {myTemplate::yes}" : " {myTemplate::no}";
+<?PHP
+echo ( {myTemplate::key}) ? "{myTemplate::yes}" : "{myTemplate::no}";
 ?>
 mytpl;
         return str_replace($block, $result, $tpl_test_content);
@@ -98,8 +98,8 @@ mytpl;
         $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_switch.tpl');
         list($block, $cases)= $tpl_test->getBlock($tpl_test_content, 'switch');
         $result = <<<'mytpl'
-<?php
-switch(" { {myTemplate::key}}") {
+<?PHP
+switch("{{myTemplate::key}}") {
 mytpl;
         foreach($cases as $k => $v) {
             $k = addslashes($k);
@@ -119,4 +119,4 @@ mytpl;
         return str_replace($block, $result, $tpl_test_content);
     })->loadSet(PATH.'data/template/setting.ini', 'pre', 1);
 }
-$tpl_test->display('$test', true, false);
+$tpl_test->render('$test', true, false);

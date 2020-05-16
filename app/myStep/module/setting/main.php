@@ -1,4 +1,4 @@
-<?php
+<?PHP
 $app = $info_app['path'][2] ?? '';
 if(!empty($app)) {
     $builder = APP.$app.'/config/'.$s->gen->language.'.php';
@@ -18,11 +18,16 @@ if(myReq::check('post')) {
 }
 
 $dirs = myFile::find('', APP, false, myFile::DIR);
-$dirs = array_map(function ($v) {return basename($v);} , $dirs);
+$dirs = array_map(function ($v) {return basename($v);}, $dirs);
 foreach($dirs as $k) {
     $t->setLoop('app', array('name'=>$k, 'selected'=>($app==$k?'selected':'')));
 }
-$ext_setting = array('router'=>['default_app'=>['select', $dirs]]);
+$files = myFile::find('', PATH.'language', false, myFile::FILE);
+$files = array_map(function($v){return str_replace('.php', '', basename($v));}, $files);
+$ext_setting = array(
+    'gen'=>['language'=>['select', $files]],
+    'router'=>['default_app'=>['select', $dirs]]
+);
 
 $list = $config->build($builder, $ext_setting);
 foreach($list as $v) {
@@ -45,4 +50,4 @@ foreach($list as $v) {
                 ']);
     }
 }
-$tpl->assign('path', 'manager/setting/');
+$tpl->assign('path', '/setting/');

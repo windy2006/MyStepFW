@@ -1,13 +1,13 @@
-<?php
+<?PHP
 class myPack {
     protected
-        $file_count        = 0, 
+        $file_count        = 0,
         $file_ignore    = array(),        // ignore these files when packing
         $pack_file        = "pack.bin",        // the file name of packed file
         $file_list    = array(),        // only files in the list will be pack
         $pack_dir        = "./",            // the directory of pack or unpack to
-        $pack_fp        = null, 
-        $pack_result    = array(), 
+        $pack_fp        = null,
+        $pack_result    = array(),
         $charset = array();
 
     public function __construct($pack_dir = "./", $pack_file = "pack.pkg") {
@@ -36,7 +36,7 @@ class myPack {
     }
 
     protected function PackFileList($separator="|") {
-        for($i=0, $m=count($this->file_list); $i<$m; $i++) {
+        for($i=0,$m=count($this->file_list); $i<$m; $i++) {
             $this->PackFile($this->file_list[$i], $separator);
         }
         return;
@@ -53,7 +53,7 @@ class myPack {
             $ignore = explode("\n", $ignore);
         }
 
-        for($i=0, $m=count($this->file_ignore);$i<$m;$i++) {
+        for($i=0,$m=count($this->file_ignore);$i<$m;$i++) {
             if(substr($dir, -(strlen($this->file_ignore[$i])))==$this->file_ignore[$i]) return;
         }
 
@@ -298,7 +298,7 @@ echo $mypack->GetResult();
 unset($mypack);
 @unlink($pack_file);
 ?>
-<script language="JavaScript">
+<script type="application/javascript">
 alert("All files are unpacked and ready to be installed.");
 setTimeout(function () {location.href = "./";}, 2000);
 </script>

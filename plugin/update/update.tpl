@@ -26,7 +26,7 @@
             <tr>
                 <td>上传更新</td>
                 <td>
-                    <a href="javascript:" data-toggle="modal" data-target="#upload"> 点击上传 </a>
+                    <a href="javascript:" id="upload"> 点击上传 </a>
                 </td>
             </tr>
             <tr>
@@ -47,39 +47,30 @@
     </div>
 </div>
 
-<div class="modal fade" id="upload" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="form_upload" name="upload" method="post" ACTION="update/upload" ENCTYPE="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title"><span class="glyphicon glyphicon-upload"></span> 请选择需要上传的升级文件</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">更新</span>
-                        </div>
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" name="plugin" id="customFile" required />
-                            <label class="custom-file-label" for="customFile">文件选取</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <input type="hidden" name="MAX_FILE_SIZE" value="<!--max_size-->" />
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span>  关闭 </button>
-                    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-open"></span>  上传 </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script language="JavaScript" type="text/javascript">
+<script type="text/javascript">
 jQuery.vendor('jquery.jmpopups', {add_css:true});
+jQuery.vendor('jquery.powerupload', {
+    callback:function(){
+        $('#upload').powerUpload({
+            title: '请选择需要上传的升级文件',
+            mode: 'browse',
+            maxfiles: 1,
+            maxfilesize: 8,
+            errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
+            url: '<!--path_root-->update/upload',
+            uploadFinished:function(i,file,result,timeDiff){
+                if(result.error!=0) {
+                    alert("上传失败！\n原因：" + result.message);
+                } else {
+                    $('#uploader').find(".modal-title > b").html("更新完成，请关闭本对话框！");
+                    $('#uploader').on('hidden.bs.modal', function (e) {
+                        window.location.reload();
+                    });
+                }
+            }
+        });
+    }
+});
 $('#link_1').click(function(){
     confirm(
         '更新校验信息会造成自动升级时将已改动文件错误覆盖！\n\n是否继续？',
@@ -91,7 +82,7 @@ $('#link_1').click(function(){
 function buildVerify(mode) {
     if(mode==1) return;
     loadingShow("正在更新系统文件校验信息，请等待！");
-    $.get("update/build?"+(new Date()).getTime(), function(info){
+    $.get("<!--url_prefix-->update/build?"+(new Date()).getTime(), function(info){
         loadingShow();
         if(info.length==0) {
             alert("已成功更新当前系统文件校验信息！");
@@ -108,19 +99,12 @@ $('#link_2').click(function(){
         '文件校验'
     );
 });
-$('#form_upload').submit(function(){
-    loadingShow('文件上传并更新中……');
-});
 function checkModify(mode) {
     loadingShow("正在检测系统文件的变更情况，请等待！");
-    let url = "update/check_" + (mode==1?'server':'local');
+    let url = "<!--url_prefix-->update/check_" + (mode==1?'server':'local');
     $.get(url, function(info){
-        if(info==false || info.code!='0') {
-            if(mode==0) {
-                alert("校验失败，请确认校验信息是否已成功建立！");
-            } else {
-                alert("服务器连接失败，或不存在本网站对应字符集的校验信息");
-            }
+        if(info==false || typeof(info.error)!="undefined") {
+            alert(mode==0?"校验失败，请确认校验信息是否已成功建立！":"服务器连接失败，或不存在本网站对应字符集的校验信息");
             return;
         }
         loadingShow('框架文件校验中……');
@@ -140,7 +124,6 @@ function checkModify(mode) {
             result += info['miss'].join("\n");
             result += "\n&nbsp;\n";
         }
-        console.log(result);
         if(result.length==0) {
             alert("未发现改变的文件！");
         } else {
@@ -149,7 +132,7 @@ function checkModify(mode) {
     }, "json");
 }
 $('#link_3').click(function(){
-    $.get("update/empty", function(info){
+    $.get("<!--url_prefix-->update/empty", function(info){
         if(info.length==0) {
             alert("更新数据已清空！");
         } else {
@@ -191,7 +174,7 @@ function checkUpdate() {
 }
 function applyUpdate(mode) {
     loadingShow("系统正在获取更新，请耐心等待！");
-    $.get("update/download?m="+mode, function(info){
+    $.get("<!--url_prefix-->update/download?m="+mode, function(info){
         loadingShow();
         try {
             alert_org(info.info);
@@ -206,8 +189,8 @@ function applyUpdate(mode) {
     }, "json");
 }
 $(function(){
-    $.get("update/check/version?"+Math.random(), function(info){
-        if(info==null) return;
+    $.get("<!--url_prefix-->update/check/version?"+Math.random(), function(info){
+        if(info.version=='') return;
         if(info.version.length>0) {
             $('<a href="javascript:" onclick="checkUpdate()">点击更新（v'+info.version+'）</a>').appendTo("#info");
         }

@@ -1,14 +1,14 @@
-<?php
+<?PHP
 class plugin_update implements interface_plugin {
     public static function check(&$result = '') {
         $result = '';
         $theList = array(
-            'version.php', 
-            'checkfile.php', 
-            'update.db', 
-            'pack/', 
-            'update/', 
-            'rollback/', 
+            'version.php',
+            'checkfile.php',
+            'update.db',
+            'pack/',
+            'update/',
+            'rollback/',
         );
         $flag = true;
         foreach($theList as $cur) {
@@ -23,14 +23,14 @@ class plugin_update implements interface_plugin {
     }
     public static function install() {
         global $router;
-        $router->checkRoute(CONFIG.'route.php', __DIR__.'/route.php', 'plugin_update');
+        regPluginRoute('update');
         myFile::mkdir(__DIR__.'/update');
         myFile::mkdir(__DIR__.'/pack');
         addPluginLink('在线更新', 'update/');
     }
     public static function uninstall() {
         global $router;
-        $router->remove(CONFIG.'route.php', 'plugin_update');
+        removePluginRoute('update');
         myFile::del(__DIR__.'/update');
         myFile::del(__DIR__.'/pack');
         removePluginLink('update/');
@@ -46,7 +46,7 @@ class plugin_update implements interface_plugin {
         switch($info_app['path'][1]) {
             case 'build':
                 if(!self::checkFile(ROOT, true)) {
-                    echo ' {"code":"1", "msg":"error"}';
+                    echo 'error';
                 }
                 break;
             case 'check':
@@ -56,9 +56,9 @@ class plugin_update implements interface_plugin {
                     foreach($ver_remote['info'] as $k => $v) {
                         $ver_remote['info'][$k] = preg_replace('#\r\n\s+#', chr(10), trim($v));
                     }
-                    echo ' {"code":"0", "version":"'.$ver_remote['version'].'", "detail":'.myString::toJson($ver_remote['info'], $s->gen->charset).'}';
+                    echo '{"version":"'.$ver_remote['version'].'", "detail":'.myString::toJson($ver_remote['info'], $s->gen->charset).'}';
                 } else {
-                    echo ' {"code":"1", "msg":"error", "version":""}';
+                    echo '{"version":""}';
                 }
                 break;
             case 'check_local':
@@ -69,13 +69,15 @@ class plugin_update implements interface_plugin {
                 $check_info = myFile::getRemote_curl($url.'check', $header);
                 if(!empty($check_info)) {
                     $check_info = json_decode($check_info);
-                    if(!empty($check_info)) {
+                    if(empty($check_info) || isset($check_info->error)) {
+                        echo '{"code":1, "error":"Cannot parse the message from the update server!"}';
+                    } else {
                         $the_file = $dir.'/checkfile.php';
                         if(file_exists($the_file)) rename($the_file, $the_file.'.bak');
                         $list_file = $check_info->list_file;
                         $list_file_md5 = $check_info->list_file_md5;
                         unset($check_info);
-                        $content = "<?php\n";
+                        $content = "<?PHP\n";
                         $content .= '$list_file = '.var_export($list_file, true).";\n";
                         $content .= '$list_file_md5 = '.var_export($list_file_md5, true).";\n";
                         myFile::saveFile($the_file, $content);
@@ -83,11 +85,9 @@ class plugin_update implements interface_plugin {
                         echo myString::toJson($result, $s->gen->charset);
                         @unlink($the_file);
                         if(file_exists($the_file.'.bak')) rename($the_file.'.bak', $the_file);
-                    } else {
-                        echo ' {"code":"1", "msg":"error"}';
                     }
                 } else {
-                    echo ' {"code":"1", "msg":"error"}';
+                    echo '{"code":2, "error":"Cannot connect to the update server!"}';
                 }
                 break;
             case 'empty':
@@ -104,7 +104,7 @@ class plugin_update implements interface_plugin {
                     $xls->addRow();
                     $fields = ['date', 'idx', 'remote', 'local', 'ip', 'referer'];
                     $xls->addCells($fields);
-                    for($i=0, $m=count($data);$i<$m;$i++) {
+                    for($i=0,$m=count($data);$i<$m;$i++) {
                         $xls->addRow();
                         $xls->addCells(array_values($data[$i]));
                     }
@@ -115,7 +115,7 @@ class plugin_update implements interface_plugin {
                 }
                 break;
             case 'upload':
-                if(myReq::check('post')) {
+                if(myReq::check('files')) {
                     $path_upload = CACHE.'tmp/';
                     $upload = new myUploader($path_upload, true);
                     $upload->do(false);
@@ -145,14 +145,24 @@ class plugin_update implements interface_plugin {
                             }
                         }
                         myFile::del($dir);
-                        myStep::info('plugin_update_done');
+                        $result = [
+                            'error' => 0,
+                            'message' => $mystep->getLanguage('plugin_update_done')
+                        ];
                     } else {
-                        myStep::info($mystep->getLanguage('plugin_update_upload_fail').'< br />< br />'.$result[0]['message']);
+                        $result = [
+                            'error' => $result[0]['error'],
+                            'message' => $result[0]['message']
+                        ];
                     }
                     unset($upload);
                 } else {
-                    myStep::redirect();
+                    $result = [
+                        'error' => '-1',
+                        'message' => 'No file uploaded!'
+                    ];
                 }
+                echo myString::toJson($result, $s->gen->charset);
                 break;
             case 'download':
                 $ver = require(CONFIG.'version.php');
@@ -168,21 +178,21 @@ class plugin_update implements interface_plugin {
                         $config->merge($detail['setting']);
                         $config->save();
                     }
-                    myFile::saveFile($path_rollback.'_config.php', '<?php'.chr(10).myString::toScript($detail['setting'], 'setting').chr(10).'return $setting;');
+                    myFile::saveFile($path_rollback.'_config.php', '<?PHP'.chr(10).myString::toScript($detail['setting'], 'setting').chr(10).'return $setting;');
                 }
                 if(isset($detail['code']) && count($detail['code'])>0) {
                     if($mode==1) {
-                        for($i=0, $m=count($detail['code']); $i<$m; $i++) {
-                            myEval($detail['code'][$i]);
+                        for($i=0,$m=count($detail['code']); $i<$m; $i++) {
+                            myEval($detail['code'][$i], false);
                         }
                     }
-                    myFile::saveFile($path_rollback.'_code.php', '<?php'.chr(10).implode("\n/*------------------------------*/\n", $detail['code']));
+                    myFile::saveFile($path_rollback.'_code.php', '<?PHP'.chr(10).implode("\n/*------------------------------*/\n", $detail['code']));
                 }
 
                 $check_list_file = self::checkFile();
                 if($check_list_file==false) $check_list_file = array();
                 $list = array();
-                for($i=0, $m=count($detail['file']); $i<$m; $i++) {
+                for($i=0,$m=count($detail['file']); $i<$m; $i++) {
                     $file = myFile::realPath(ROOT.$detail['file'][$i]);
                     if(strpos(strtolower($file), 'config.php')!==false) continue;
                     if($mode==1 && myFile::rewritable($file)) {
@@ -198,7 +208,7 @@ class plugin_update implements interface_plugin {
                         if(!empty($detail['content'][$i])) $list[] = $i;
                     }
                 }
-                $result = ['code'=>0, 'info'=>'', 'link'=>''];
+                $result = ['info'=>'', 'link'=>''];
 
                 $m = count($list);
                 if($m>0) {
@@ -217,13 +227,13 @@ class plugin_update implements interface_plugin {
                         myFile::saveFile($dir.'include/config.php', $content);
                     }
                     if(count($detail['code'])>0) {
-                        $script_update = "<?php\n";
+                        $script_update = "<?PHP\n";
                         $script_update .= join("\n/*------------------------------*/\n", $detail['code']);
                         $files[] = $dir.'_code.php';
                         myFile::saveFile($dir.'_code.php', $script_update);
                     }
                     if(count($detail['setting'])>0) {
-                        $script_update = "<?php\n";
+                        $script_update = "<?PHP\n";
                         $script_update .= myString::toScript($detail['setting'], 'setting');
                         $script_update .= chr(10).'return $setting;';
                         $files[] = $dir.'_config.php';
@@ -234,9 +244,9 @@ class plugin_update implements interface_plugin {
                         $result['link'] = str_replace(ROOT, '/', $zipfile);
                     }
                     myFile::del($dir);
-                    $result['info'] .= chr(10).$mystep->getLanguage('plugin_update_error');
+                    $result['info'] = $mystep->getLanguage('plugin_update_error');
                 } else {
-                    $result['info'] .= chr(10). sprintf($mystep->getLanguage('plugin_update_file'), count($detail['file']));
+                    $result['info'] = sprintf($mystep->getLanguage('plugin_update_file'), count($detail['file']));
                 }
                 myFile::del(CACHE.'script');
                 myFile::del(CACHE.'template');
@@ -251,15 +261,13 @@ class plugin_update implements interface_plugin {
                 break;
             default:
                 list($tpl, $tpl_sub) = setPluginTemplate('update');
+                include(APP.'myStep/global.php');
                 $paras = [
-                    'version' => include(CONFIG.'version.php'), 
+                    'version' => include(CONFIG.'version.php'),
                     'link'=> $mystep->setting->web->update
                 ];
                 $tpl_sub->assign($paras);
-                $tpl_sub->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));
-                $tpl->assign('url_fix', defined('URL_FIX') ? URL_FIX : '');
-                $tpl->assign('main', $mystep->render($tpl_sub, 's', false));
-                include(APP.'myStep/global.php');
+                $tpl->assign('main', $mystep->render($tpl_sub));
                 $mystep->show($tpl);
         }
         $mystep->end();
@@ -274,7 +282,7 @@ class plugin_update implements interface_plugin {
             case 'version':
                 $ver = $info_app['para']['v'];
                 $detail = require(__DIR__.'/version.php');
-                $result = ['code'=>0, 'version'=>'', 'info'=>[]];
+                $result = ['version'=>'', 'info'=>[]];
                 foreach($detail as $k => $v) {
                     if(version_compare($k, $ver)>0) {
                         $result['info'][$k] = $v['info'];
@@ -303,7 +311,7 @@ class plugin_update implements interface_plugin {
                     }
                     $list_file = array_values(array_unique($list_file));
                     $result = array('file'=>$list_file, 'content'=>array(), 'setting'=>$list_setting, 'code'=>$list_code);
-                    for($i=0, $m=count($result['file']); $i<$m; $i++) {
+                    for($i=0,$m=count($result['file']); $i<$m; $i++) {
                         if(file_exists(ROOT.$result['file'][$i])) {
                             if(is_dir(ROOT.$result['file'][$i])) {
                                 $result['content'][$i] = '.';
@@ -321,20 +329,20 @@ class plugin_update implements interface_plugin {
                 $mydb = new myDb('simpleDB', 'update', __DIR__.'/');
                 if(!$mydb->check()) {
                     $mydb->create(array(
-                        array('date', 10), 
-                        array('idx', 40), 
-                        array('ver_remote', 30), 
-                        array('ver_local', 30), 
-                        array('remote_ip', 50), 
+                        array('date', 10),
+                        array('idx', 40),
+                        array('ver_remote', 30),
+                        array('ver_local', 30),
+                        array('remote_ip', 50),
                         array('referer', 200)
                     ));
                 }
                 $data = array (
-                    date('Y-m-d H:i:s'), 
-                    md5($v.$v_remote), 
-                    $v_remote, 
-                    $v, 
-                    myReq::ip(), 
+                    date('Y-m-d H:i:s'),
+                    md5($v.$v_remote),
+                    $v_remote,
+                    $v,
+                    myReq::ip(),
                     myReq::server('HTTP_REFERER')
                 );
                 $mydb->insert($data);
@@ -343,13 +351,14 @@ class plugin_update implements interface_plugin {
                 break;
             default:
                 $the_file = __DIR__.'/checkfile.php';
-                $check_info = ['code'=>1, 'list_file'=>[], 'list_file_md5'=>[]];
+                $check_info = ['list_file'=>[], 'list_file_md5'=>[]];
                 if(file_exists($the_file)) {
                     include($the_file);
-                    $check_info['code'] = 0;
                     $check_info['list_file'] = $list_file;
                     $check_info['list_file_md5'] = $list_file_md5;
                     unset($list_file, $list_file_md5);
+                } else {
+                    $check_info = ['error'=>'No verify data found from the update server!'];
                 }
                 echo myString::toJson($check_info, $s->gen->charset);
         }
@@ -363,14 +372,14 @@ class plugin_update implements interface_plugin {
         $dir = __DIR__.'/pack/';
         $log_file = $dir.'log.txt';
         $log = array(
-            'time' => date('Y-m-d H:i:s'), 
-            'ip' => myReq::ip(), 
-            'agent' => myReq::server('HTTP_USER_AGENT'), 
+            'time' => date('Y-m-d H:i:s'),
+            'ip' => myReq::ip(),
+            'agent' => myReq::server('HTTP_USER_AGENT'),
         );
         if(strpos($log['agent'], 'spider')!==false || strpos($log['agent'], 'bot')!==false) {
             myStep::header('404', '', true);
         }
-        myFile::saveFile($log_file, implode(', ', $log).chr(10), 'ab');
+        myFile::saveFile($log_file, implode(',', $log).chr(10), 'ab');
         if(!is_file($dir.$idx.'.zip')) {
             myFile::del($dir.$idx);
             myFile::mkdir($dir.$idx);
@@ -435,7 +444,7 @@ class plugin_update implements interface_plugin {
                 }
             }
             if($layer==0) {
-                $content = '<?php
+                $content = '<?PHP
 $list_file = '.var_export($list_file, true).';
 $list_file_md5 = '.var_export($list_file_md5, true).';
 ';
@@ -448,9 +457,8 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 include($the_file);
             }
             $result = array(
-                'code' => '0', 
-                'new' => array(), 
-                'mod' => array(), 
+                'new' => array(),
+                'mod' => array(),
                 'miss' => array()
             );
             while (false !== ($file = readdir($handle))) {

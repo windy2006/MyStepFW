@@ -1,4 +1,4 @@
-<?php
+<?PHP
 //初始化程序一般在页面初始化程序之前执行，用于相关设置
 require_once(__DIR__."/class.php");
 $this->regModule("test1", __DIR__."/show.php");

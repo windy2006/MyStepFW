@@ -4,6 +4,6 @@ return array(
     'g' => 'get',
     'r' => 'remove',
     'c' => 'clean',
-    'db' => 'getData_DB',
+    'db' => 'getData',
     'func' => 'getData_func',
 );

@@ -37,7 +37,7 @@
         <img src="http://cccfna.org.cn/_test/logo/logo_df.png" />
     </div>
 </div>
-<script language="JavaScript">
+<script type="application/javascript">
     jQuery.vendor('jquery.showimage', {
         add_css:true,
         callback:function(){

@@ -10,9 +10,6 @@ body:before {
     z-index: -1;
     opacity: 0.3;
 }
-.frame{
-    opacity: 0.8;
-}
 .navbar-c {
     min-height: 4rem;
     background-color: #563d7c;

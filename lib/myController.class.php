@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
  *                                           *
  * Name    : Controller for the application  *
@@ -254,7 +254,7 @@ class myController extends myBase {
     public static function module($module, $global_vars = '') {
         if (isset(self::$modules[$module])) {
             if (!empty($global_vars)) {
-                if (is_string($global_vars)) $global_vars = explode(', ', $global_vars);
+                if (is_string($global_vars)) $global_vars = explode(',', $global_vars);
                 foreach ($global_vars as $k) {
                     $k = str_replace('$', '', trim($k));
                     global $$k;
@@ -597,8 +597,8 @@ class myController extends myBase {
      * 执行钩子代码
      * @param $position
      * @param bool $desc
-     * @param string $para
-     * @return mixed|string
+     * @param array $para
+     * @return array|mixed
      */
     public function run($position, $desc = false, $para = '') {
         if (isset($this->functions[$position])) {
@@ -606,7 +606,8 @@ class myController extends myBase {
             for ($i = 0; $i < $m; $i++) {
                 $n = $desc ? ($m - $i - 1) : $i;
                 if (!empty($para)) {
-                    $para = call_user_func($this->functions[$position][$n], $para);
+                    if(!is_array($para)) $para = [$para];
+                    $para = call_user_func_array($this->functions[$position][$n], $para);
                 } else {
                     call_user_func($this->functions[$position][$n], $this);
                 }
@@ -618,9 +619,9 @@ class myController extends myBase {
     /**
      * 页面起始
      * @param string $charset
-     * @param bool $setPlugin
+     * @param bool $set_plugin
      */
-    public function start($charset = 'UTF-8', $setPlugin = true) {
+    public function start($charset = 'UTF-8', $set_plugin = true) {
         ob_start();
         ob_implicit_flush(false);
         header('Powered-by: MyStep Framework');
@@ -643,20 +644,21 @@ class myController extends myBase {
             'file_cache' => dirname(__DIR__) . '/cache/op/'
         ));
 
-        if ($setPlugin) $this->plugin();
+        if ($set_plugin) $this->plugin();
         $this->run('start');
     }
 
     /**
      * 显示页面
      * @param myTemplate $tpl
+     * @param bool $minify
      */
     public function show(myTemplate $tpl, $minify = false) {
         $this->pushAddedContent($tpl);
         $tpl->assign('lng', $this->language);
         $tpl->regTag($this->func_tag);
         if (count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
-        $page = $tpl->display('$tpl', false, $minify);
+        $page = $tpl->render((func_num_args()==3 ? func_get_arg(2) : ''), false, $minify);
         echo $this->run('page', false, $page);
         unset($tpl);
     }
@@ -666,8 +668,10 @@ class myController extends myBase {
      */
     public function end() {
         $this->run('end', true);
+        if(is_callable(array($this, 'shutdown'))) $this->shutdown();
         if (!empty(self::$goto_url) && ob_get_length() == 0) {
             $this->redirect(self::$goto_url);
+            exit();
         }
     }
 
@@ -730,7 +734,7 @@ class myController extends myBase {
             spl_autoload_register();
             */
             spl_autoload_register(function ($class) use ($current) {
-                $ext = explode(', ', $current['ext']);
+                $ext = explode(',', $current['ext']);
                 foreach($ext as $e) {
                     if(is_file($current['path'].$class.$e)) {
                         require_once($current['path'].$class.$e);

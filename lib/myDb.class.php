@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Proxy for Database Module       *
@@ -19,13 +19,13 @@
 class myDb extends myProxy {
     protected
         $func_alias = array(
-            'c' => 'connect', 
-            'i' => 'insert', 
-            's' => 'select', 
-            'u' => 'update', 
-            'd' => 'delete', 
-            'q' => 'query', 
-            'r' => 'record', 
+            'c' => 'connect',
+            'i' => 'insert',
+            's' => 'select',
+            'u' => 'update',
+            'd' => 'delete',
+            'q' => 'query',
+            'r' => 'record',
             'g' => 'result'
         );
 
@@ -43,7 +43,8 @@ class myDb extends myProxy {
  */
 trait base_db {
     protected
-        $cache = null, 
+        $cache_mode = 255,
+        $cache = null,
         $cache_ttl = 600;
     /**
      * 获取安全的名称（数据库、表及字段）
@@ -60,9 +61,22 @@ trait base_db {
      * @return mixed
      */
     public function safeValue($val) {
-        $search = array("\x00", "\n", "\r", '\\', "'", "'", "\x1a", chr(0xdf).chr(0x27));
-        $replace = array('\x00', '\n', '\r', '\\\\' , "\'", '\"', '\x1a', '');
+        $search  = array('\\',      "\n",   "\r",   "'",    '"',    "\x1a", "\x00", chr(0xdf).chr(0x27));
+        $replace = array('\\\\',    '\n',   '\r',   "\'",   '\"',   '\x1a', '\x00', '');
         return str_replace($search, $replace, $val);
+    }
+
+
+    /**
+     * 设置外部缓存模式 0 - 关闭， 1 - 可读， 2 - 可写，3 - 可读写
+     * @param null $mode
+     * @return int|null
+     */
+    public function cache($mode=null) {
+        if($mode!==null) {
+            $this->cache_mode = $mode;
+        }
+        return $this->cache_mode;
     }
 
     /**
@@ -81,7 +95,7 @@ trait base_db {
      * @return mixed
      */
     public function getCache($key) {
-        return $this->cache==null ? false : $this->cache->get($key);
+        return ($this->cache==null || $this->cache_mode & 1 !== 1) ? false : $this->cache->get($key);
     }
 
     /**
@@ -90,7 +104,7 @@ trait base_db {
      * @param $result
      */
     public function writeCache($key, $result) {
-        if($this->cache!=null) $this->cache->set($key, $result, $this->cache_ttl);
+        if($this->cache!=null && $this->cache_mode & 2 === 2) $this->cache->set($key, $result, $this->cache_ttl);
     }
 }
 
@@ -98,16 +112,17 @@ trait base_db {
  * SQL数据库变量
  */
 trait base_sql {
+    public $builder = array();
     protected
-        $host = "", 
-        $user = "", 
-        $pwd    = "", 
-        $charset = "utf8", 
-        $connect = NULL, 
-        $result    = NULL, 
-        $sql = "", 
-        $db    = "", 
-        $builder = array();
+        $host = '',
+        $user = '',
+        $pwd = '',
+        $charset = 'utf8',
+        $connect = NULL,
+        $result = NULL,
+        $sql = '',
+        $db = '',
+        $builder1 = array();
 }
 
 /**
@@ -117,18 +132,20 @@ class SQLBuilder {
     use base_db;
     public 
         $join = array(
-            'mode' => 'left', 
-            'field' => '', 
+            'mode' => 'left',
+            'field' => '',
             'field_join' => ''
-        ), 
-        $dl = '', 
-        $dr = '', 
-        $tbl = '', 
+        ),
+        $dl = '',
+        $dr = '',
+        $tbl = '',
+        $sel_prefix = '',
         $idx = '';
     protected 
-        $condition = array(), 
-        $fields = array(), 
-        $order = array(), 
+        $condition = array(),
+        $fields = array(),
+        $order = array(),
+        $values = array(),
         $limit = '';
 
     /**
@@ -156,7 +173,7 @@ class SQLBuilder {
         if(!empty($join)) {
             if(!isset($join['mode'])) $join['mode'] = 'left';
             $join['field'] = str_replace(' ', '', $join['field']);
-            $join['field'] = $this->dl.str_replace(', ', $this->dr.'.'.$this->dl, $join['field']).$this->dr;
+            $join['field'] = $this->dl.str_replace(',', $this->dr.'.'.$this->dl, $join['field']).$this->dr;
             if(!isset($join['field_join'])) {
                 $join['field_join'] = '';
             } else {
@@ -183,8 +200,10 @@ class SQLBuilder {
             $this->tbl = '';
             $this->idx = '';
         }
+        $this->sel_prefix = '';
         $this->condition = array();
         $this->fields = array();
+        $this->values = array();
         $this->order = array();
         $this->limit = '';
     }
@@ -229,46 +248,46 @@ class SQLBuilder {
      * @param null $value
      */
     public function condition(&$field, &$condition=null, &$value=null) {
-        if(!preg_match("/^\(.+\)$/", $field) && $condition!='!') $field = $this->safeName($field);
+        if(!preg_match('/^\(.+\)$/', $field) && $condition!='!') $field = $this->safeName($field);
         $condition = strtolower(trim($condition));
         switch($condition) {
-            case "=":
-            case "<":
-            case "<=":
-            case ">":
-            case ">=":
-            case "<>":
-            case "!=":
+            case '=':
+            case '<':
+            case '<=':
+            case '>':
+            case '>=':
+            case '<>':
+            case '!=':
                 $value = "'".$this->safeValue($value)."'";
                 break;
-            case "n=":
-            case "n<":
-            case "n<=":
-            case "n>":
-            case "n>=":
-            case "n<>":
-            case "n!=":
+            case 'n=':
+            case 'n<':
+            case 'n<=':
+            case 'n>':
+            case 'n>=':
+            case 'n<>':
+            case 'n!=':
                 $condition = substr($condition, 1);
                 $value = intval($value);
                 break;
-            case "d=":
-            case "d<":
-            case "d<=":
-            case "d>":
-            case "d>=":
-            case "d<>":
-            case "d!=":
+            case 'd=':
+            case 'd<':
+            case 'd<=':
+            case 'd>':
+            case 'd>=':
+            case 'd<>':
+            case 'd!=':
                 $condition = substr($condition, 1);
-                if(preg_match("/([ymdqwh])(\+|\-)(\d+)/i", $value[1], $match)) {
+                if(preg_match('/([ymdqwh])(\+|\-)(\d+)/i', $value[1], $match)) {
                     switch(strtolower($match[1])) {
-                        case "y": $match[1] = "YEAR"; break;
-                        case "m": $match[1] = "MONTH"; break;
-                        case "d": $match[1] = "DAY"; break;
-                        case "q": $match[1] = "QUARTER"; break;
-                        case "w": $match[1] = "WEEK"; break;
-                        default: $match[1] = "HOUR";
+                        case 'y': $match[1] = 'YEAR'; break;
+                        case 'm': $match[1] = 'MONTH'; break;
+                        case 'd': $match[1] = 'DAY'; break;
+                        case 'q': $match[1] = 'QUARTER'; break;
+                        case 'w': $match[1] = 'WEEK'; break;
+                        default: $match[1] = 'HOUR';
                     }
-                    if($match[2]=="-") {
+                    if($match[2]=='-') {
                         $value = 'DATE_SUB('.$value[0].', INTERVAL '.$match[3].' '.$match[1].')';
                     } else {
                         $value = 'DATE_ADD('.$value[0].', INTERVAL '.$match[3].' '.$match[1].') ';
@@ -277,64 +296,64 @@ class SQLBuilder {
                     $value = "'".$this->safeValue($value)."'";
                 }
                 break;
-            case "f=":
-            case "f<":
-            case "f<=":
-            case "f>":
-            case "f>=":
-            case "f<>":
-            case "f!=":
+            case 'f=':
+            case 'f<':
+            case 'f<=':
+            case 'f>':
+            case 'f>=':
+            case 'f<>':
+            case 'f!=':
                 $condition = substr($condition, 1);
                 break;
-            case "like":
-            case "like binary":
-            case "not like":
-            case "not like binary":
-                if(strpos($value, "%")!==false) {
+            case 'like':
+            case 'like binary':
+            case 'not like':
+            case 'not like binary':
+                if(strpos($value, '%')!==false) {
                     $value = "'".$this->safeValue($value)."'";
                 } else {
                     $value = "'%".$this->safeValue($value)."%'";
                 }
                 break;
-            case "rlike":
-            case "regexp":
-            case "rlike binary":
-            case "regexp binary":
-            case "not rlike":
-            case "not regexp":
-            case "not rlike binary":
-            case "not regexp binary":
+            case 'rlike':
+            case 'regexp':
+            case 'rlike binary':
+            case 'regexp binary':
+            case 'not rlike':
+            case 'not regexp':
+            case 'not rlike binary':
+            case 'not regexp binary':
                 $value = "'".$value."'";
                 break;
-            case "in":
-            case "nin":
-            case "not in":
-            case "not nin":
+            case 'in':
+            case 'nin':
+            case 'not in':
+            case 'not nin':
                 if(is_string($value)) {
                     $value = str_replace("'", '', $value);
                     $value = str_replace('"', '', $value);
-                    $value = str_replace(", ", ", ", $value);
-                    $value = explode(", ", $value);
+                    $value = str_replace(', ', ',', $value);
+                    $value = explode(',', $value);
                 }
                 if(strlen($condition)==2 || strlen($condition)==6) {
                     $value = array_map(array($this, 'safeValue'), $value);
                     $value = "('".implode("', '", $value)."')";
                 } else {
-                    $value = array_map("intval", $value);
-                    $value = "(".implode(", ", $value).")";
+                    $value = array_map('intval', $value);
+                    $value = '('.implode(',', $value).')';
                 }
-                $condition = str_replace("nin", "in", $condition);
+                $condition = str_replace('nin', 'in', $condition);
                 break;
-            case "is":
-            case "is not":
-                if(empty($value)) $value = "NULL";
+            case 'is':
+            case 'is not':
+                if(empty($value)) $value = 'NULL';
                 break;
-            case "!":
+            case '!':
                 $condition = '';
                 $value = '';
                 break;
             case null:
-                if(!preg_match("/^\(.+\)$/", $field)) {
+                if(!preg_match('/^\(.+\)$/', $field)) {
                     $condition = 'is not';
                     $value = 'NULL';
                 }
@@ -353,13 +372,14 @@ class SQLBuilder {
      * @return null|string|string[]
      */
     public function condition_multi($condition, $layer=0) {
+        if(empty($condition)) return '';
         $result = '';
         if(is_string($condition)) {
             $result .= $condition;
         }elseif(is_string($condition[0])) {
             $this->condition($condition[0], $condition[1], $condition[2]);
             $mode = isset($condition[3])?$condition[3]:'and';
-            if(!preg_match("/^\(.+\)$/", $condition[0])) {
+            if(!preg_match('/^\(.+\)$/', $condition[0])) {
                 $condition[0] = $this->dl.$condition[0].$this->dr;
             }
             return ' ' . $mode . ' ' . $condition[0] . ' ' . $condition[1] . ' ' . $condition[2];
@@ -394,11 +414,11 @@ class SQLBuilder {
             $condition = '';
             if(!empty($this->condition)) {
                 $org = $this->condition;
-                for($i=0, $m=count($this->condition);$i<$m;$i++) {
+                for($i=0,$m=count($this->condition);$i<$m;$i++) {
                     if($i>0) $condition .= ' '.$this->condition[$i][3];
                     if(empty($this->condition[$i][1])) {
                         if(!empty($this->idx)) $this->condition[$i][0] = preg_replace('/(\s|\()'.preg_quote($this->dl).'/', '\1'.$this->idx.'.'.$this->dl, $this->condition[$i][0]);
-                    } elseif(!preg_match("/^\(.+\)$/", $this->condition[$i][0])) {
+                    } elseif(!preg_match('/^\(.+\)$/', $this->condition[$i][0])) {
                         $this->condition[$i][0] = $this->dl.$this->condition[$i][0].$this->dr;
                         if(!empty($this->idx)) $this->condition[$i][0] = $this->dl.$this->idx.$this->dr.'.'.$this->condition[$i][0];
                     }
@@ -409,8 +429,11 @@ class SQLBuilder {
             $condition = preg_replace('@^\s*and*@', ' ', $condition);
             return $condition;
         } elseif(is_array($field)) {
+            if(empty($field)) return $this;
             $condition = '!';
-            if(is_string(end($field))) {
+            if(is_array($field[0]) && is_string(end($field))
+                ||
+                is_string($field[0]) && count($field)==4) {
                 $mode = array_pop($field);
             } else {
                 $mode = 'and';
@@ -420,11 +443,19 @@ class SQLBuilder {
             $this->condition = array();
             return;
         }
-        $this->condition($field, $condition, $value);
-
-        $mode = strtolower($mode);
-        if($mode!='and') $mode = 'or';
-        $this->condition[] = array($field, $condition, $value, $mode);
+        if($field!='') {
+            if(is_null($value) && $condition!='!') {
+                preg_match('#^(.+?)([\=<>]+)(.+)$#', $field, $match);
+                $mode = $condition;
+                $field = '('.$match[1].')';
+                $condition = 'f'.$match[2];
+                $value = $match[3];
+            }
+            $this->condition($field, $condition, $value);
+            $mode = strtolower($mode);
+            if($mode!='and') $mode = 'or';
+            $this->condition[] = array($field, $condition, $value, $mode);
+        }
         return $this;
     }
 
@@ -439,7 +470,7 @@ class SQLBuilder {
             $order = '';
             if(!empty($this->order)) {
                 $org = $this->order;
-                for($i=0, $m=count($this->order);$i<$m;$i++) {
+                for($i=0,$m=count($this->order);$i<$m;$i++) {
                     if($i>0 ) $order .= ', ';
                     if(!empty($this->idx)) $this->order[$i] = $this->dl.$this->idx.$this->dr.'.'.$this->order[$i];
                     $order .= $this->order[$i];
@@ -451,7 +482,15 @@ class SQLBuilder {
             $this->order = array();
             return;
         }
-        $the_order = $this->dl.$this->safeName($field).$this->dr;
+        if(is_array($field)) {
+            $field = $field[0];
+            $desc = $field[1];
+        }
+        if(preg_match('#^[\w\s]+\(.*\)$#', $field)) {
+            $the_order = $field;
+        } else {
+            $the_order = $this->dl.$this->safeName($field).$this->dr;
+        }
         if($desc) $the_order .= ' desc';
         $this->order[] = $the_order;
         return $this;
@@ -471,8 +510,16 @@ class SQLBuilder {
             $this->limit = '';
             return;
         }
-        $this->limit = intval($start);
-        if(is_numeric($count)) $this->limit = $this->limit . ', ' . $count;
+        if(is_numeric($start)) {
+            $this->limit = intval($start);
+            if(is_numeric($count)) $this->limit = $this->limit . ',' . $count;
+        } else {
+            if(is_string($start)) {
+                $start = preg_split('#[\s,]+#', $start);
+            }
+            $this->limit = intval($start[0]);
+            if(isset($start[1]) && is_numeric($start[1])) $this->limit = $this->limit . ',' . $start[1];
+        }
         return $this;
     }
 
@@ -483,8 +530,16 @@ class SQLBuilder {
      */
     public function field($field = null) {
         if(is_null($field) || $field=='select') {
-            if(empty($this->fields)) return '';
-            return empty($this->idx)?implode(', ', $this->fields):($this->dl.$this->idx.$this->dr.'.'.implode(', '.$this->dl.$this->idx.$this->dr.'.', $this->fields));
+            if(empty($this->fields)) return '*';
+            if(substr(strtolower($this->fields[0]),0,6)=='count(') return $this->fields[0];
+            if(!empty($this->idx)) {
+                for($i=0,$m=count($this->fields);$i<$m;$i++) {
+                    if(!preg_match('/^([a-z]\w+)\((.+)\)$/i', $this->fields[$i])) {
+                        $this->fields[$i] = $this->dl.$this->idx.$this->dr.'.'.$this->fields[$i];
+                    }
+                }
+            }
+            return implode(',', $this->fields);
         } elseif($field=='update') {
             if(empty($this->fields)) return '';
             $fields = array();
@@ -493,36 +548,67 @@ class SQLBuilder {
                 if(!empty($this->idx)) $key = $this->dl.$this->idx.$this->dr.'.'.$key;
                 if(is_array($value)) {
                     $value = $this->dl.$this->safeName($value[0]).$this->dr.'.'.$this->dl.$this->safeName($value[1]).$this->dr;
-                } elseif(is_null($value) || strtolower($value)=="null") {
-                    $value = "NULL";
-                } elseif(preg_match("/^(\+|\-)(\d+)$/", $value, $match)) {
+                } elseif(is_null($value) || strtolower($value)=='null') {
+                    $value = 'NULL';
+                } elseif(preg_match('/^(\+|\-)(\d+)$/', $value, $match)) {
                     $value = $key.$match[1].$match[2];
-                } elseif(preg_match("/^\(.+\)$/", $value)) {
-                    $value = preg_replace("/^\((.+)\)$/", '\1', $value);
+                } elseif(preg_match('/^\(.+\)$/', $value)) {
+                    $value = preg_replace('/^\((.+)\)$/', '\1', $value);
                 } else {
                     $value = "'".$this->safeValue($value)."'";
                 }
-                $fields[] = $key." = ".$value;
+                $fields[] = $key.'='.$value;
             }
-            return implode(', ', $fields);
+            return implode(',', $fields);
         } elseif($field=='[reset]') {
             $this->fields = array();
-            return;
+            return $this;
+        } elseif(is_string($field) && in_array(strtolower($field), ['all', 'distinct','distinctrow'])) {
+            $this->sel_prefix = $field;
+            return $this;
         }
-        if(is_string($field)) $field = explode(', ', str_replace(' ', '', $field));
+        if(func_num_args()>1) $field = func_get_args();
+        if(is_string($field)) $field = explode(',', preg_replace('#,\s+#', ',', $field));
         if(isset($field[0])) {
             for($i=count($field)-1;$i>=0;$i--) {
+                if(substr(strtolower($field[$i]),0,6)=='count(') {
+                    $this->fields = array($field[$i]);
+                    return $this;
+                }
                 if(is_array($field[$i])) {
                     if(!preg_match('/^\(.+\)$/', $field[$i][0])) $field[$i][0] = $this->dl.$this->safeName($field[$i][0]).$this->dr;
                     $field[$i] = $this->dl.$this->safeName($field[$i][0]).$this->dr.' as '.$this->dl.$this->safeName($field[$i][1]).$this->dr;
                 } else {
-                    if($field[$i]!='*') $field[$i] = $this->dl.$this->safeName($field[$i]).$this->dr;
+                    if(preg_match('/^([a-z]\w+)\((.+)\)$/i', $field[$i], $match)) {
+                        if(preg_match('/^[a-z]\w+$/', $match[2])) $match[2] = $this->dl.$match[2].$this->dr;
+                        $field[$i] = $match[1].'('.$match[2].')';
+                    } elseif(preg_match('/^([a-z]\w+)((:|=>)|\s+as\s+)([a-z]\w+)$/i', $field[$i], $match)) {
+                        $field[$i] = $this->dl.$this->safeName($match[1]).$this->dr.' as '.$this->dl.$this->safeName($match[4]).$this->dr;
+                    } elseif($field[$i]!='*') {
+                        $field[$i] = $this->dl.$this->safeName($field[$i]).$this->dr;
+                    }
                 }
             }
         } else {
             unset($field['submit']);
         }
         $this->fields = array_merge($this->fields, $field);
+        return $this;
+    }
+
+    /**
+     * 直接添加insert的插入值
+     * @return $this
+     */
+    public function values() {
+        $val = func_get_args();
+        if(count($val)>0) {
+            if(is_array($val[0])) {
+                $this->values = array_merge($this->values, $val);
+            } else {
+                $this->values[] = $val;
+            }
+        }
         return $this;
     }
 
@@ -535,6 +621,7 @@ class SQLBuilder {
         $idx = $this->idx;
         $this->idx = '';
         $sql = 'select ';
+        if(!empty($this->sel_prefix)) $sql = $sql.$this->sel_prefix.' ';
         if(empty($this->fields)) {
             $sql .= '*';
         } else {
@@ -570,14 +657,28 @@ class SQLBuilder {
             if(is_numeric($key) || strtolower($key) == 'submit') continue;
             if(is_null($value) || strtolower($value)=='null') {
                 $value = 'NULL';
-            } elseif(!preg_match('/^\w {3, 15}\(.*\)$/', $value)) {
+            } elseif(!preg_match('/^\w{3,15}\(.*\)$/', $value)) {
                 $value = "'".$this->safeValue($value)."'";
             }
             $fields[] = $this->dl.$this->safeName($key).$this->dr;
             $values[] = $value;
         }
-        if(!empty($fields)) $sql .= " (".implode(", ", $fields).")";
-        $sql .= " values (".implode(", ", $values).")";
+        for($i=0,$m=count($this->values);$i<$m;$i++) {
+            if(!is_array($this->values[$i])) continue;
+            for($j=0,$m2=count($this->values[$i]);$j<$m2;$j++) {
+                if(strtolower($this->values[$i][$j])=='null') {
+                    $this->values[$i][$j] = 'NULL';
+                } elseif(!preg_match('/^\w{3,15}\(.*\)$/', $this->values[$i][$j])) {
+                    $this->values[$i][$j] = "'".$this->safeValue($this->values[$i][$j])."'";
+                }
+            }
+            $this->values[$i] = '('.implode(',', $this->values[$i]).')';
+        }
+        if(!empty($fields)) $sql .= ' ('.implode(',', $fields).')';
+        $sql .= ' values ';
+        if(count($values)>0) $sql .= ' ('.implode(',', $values).')';
+        if(count($this->values)>0) $sql .= ','.implode(',', $this->values);
+        $sql = str_replace('values ,(', 'values (', $sql);
         return $sql;
     }
 

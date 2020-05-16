@@ -1,4 +1,4 @@
-<?php
+<?PHP
 interface interface_db {
     public function connect();
     public function selectDB($the_db);

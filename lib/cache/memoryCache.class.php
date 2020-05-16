@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Memory Cache Manager            *
@@ -143,4 +143,3 @@ class memoryCache implements interface_cache {
         }
     }
 }
-?>

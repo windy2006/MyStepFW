@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /*
 just put <!--lang_plugin_offical_test--> to anywhere u like
 */

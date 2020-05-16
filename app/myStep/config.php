@@ -1,6 +1,9 @@
-<?php
+<?PHP
 
 $setting = array();
+
+$setting['gen'] = array();
+$setting['gen']['cache_page'] = false;
 
 $setting['web'] = array();
 $setting['web']['minify'] = false;
@@ -10,4 +13,7 @@ $setting['template'] = array();
 $setting['template']['name'] = 'main';
 $setting['template']['path'] = 'template';
 $setting['template']['style'] = '';
+
+$setting['db'] = array();
+$setting['db']['auto'] = false;
 return $setting;

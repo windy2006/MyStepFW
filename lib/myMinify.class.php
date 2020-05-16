@@ -1,4 +1,4 @@
-<?php
+<?PHP
 /********************************************
 *                                           *
 * Name    : Functions for minify CSS or JS  *
@@ -16,8 +16,8 @@
  */
 class myMinify extends myBase {
     protected
-        $mode = null, 
-        $cache = '', 
+        $mode = null,
+        $cache = '',
         $content = '',
         $result = '';
 

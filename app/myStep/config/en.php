@@ -1,5 +1,16 @@
-<?php
+<?PHP
 $setting_detail = array();
+
+$setting_detail['gen'] = array(
+    'name' => '基本设置',
+    'list' => [
+        'cache_page' => array(
+            'name' => 'HTML Cache',
+            'describe' => 'Save page content into cache file',
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
+        ),
+    ]
+);
 
 $setting_detail['web'] = array(
     'name' => 'Website setting',
@@ -29,6 +40,17 @@ $setting_detail['template'] = array(
             'name' => 'Style',
             'describe' => 'Style for template',
             'type' => array('text', '_', '20')
+        ),
+    ]
+);
+
+$setting_detail['db'] = array(
+    'name' => 'Database Setting',
+    'list' => [
+        'auto' => array(
+            'name' => 'Auto Connect',
+            'describe' => 'Build DB Connection automatically',
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
         ),
     ]
 );

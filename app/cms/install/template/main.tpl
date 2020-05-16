@@ -11,8 +11,8 @@
     <link rel="Shortcut Icon" href="favicon.ico" />
     <!--page_start-->
     <link rel="stylesheet" media="screen" type="text/css" href="cache/script/myStep.css" />
-    <script language="JavaScript" src="cache/script/myStep.js"></script>
-    <script language="JavaScript" src="static/js/checkForm.js"></script>
+    <script type="application/javascript" src="cache/script/myStep.js"></script>
+    <script type="application/javascript" src="static/js/checkForm.js"></script>
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -31,9 +31,9 @@
 </div>
 
 <footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
-    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2019 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
+    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2020 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
-<script language="JavaScript" src="language/myStep/default"></script>
+<script type="application/javascript" src="language/myStep/default"></script>
 <!--page_end-->
 </body>
 </html>
