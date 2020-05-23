@@ -91,6 +91,44 @@ function formatDate($date='', $format='Y-m-d') {
 }
 
 /**
+ * 缩略链接
+ * @param $url
+ * @param int $max_length
+ * @return mixed
+ */
+function shortUrl($url, $max_length = 40) {
+    $url = preg_replace('#[&\?].*$#', '', $url);
+    $slices = parse_url($url);
+    $link = '';
+    $tail = '';
+    if(isset($slices['scheme'])) $link = $slices['scheme'].'://';
+    if(isset($slices['host'])) $link .= $slices['host'].'/';
+    if(strlen($link)>$max_length) return substr($link, 0, $max_length);
+    $break = false;
+    $slices = explode('/', trim($slices['path'], '/'));
+    while(count($slices)>0) {
+        $link_2 = '/'.array_pop($slices);
+        $link_1 = count($slices)>0 ? (array_shift($slices).'/') : '';
+        if(strlen($link.$link_2.$tail)>$max_length) {
+            $link .= '...'.$tail;
+            $break = true;
+            break;
+        } else {
+            $tail = $link_2.$tail;
+            if(strlen($link.$link_1.$tail)>$max_length) {
+                $link .= '...'.$tail;
+                $break = true;
+                break;
+            } else {
+                $link .= $link_1;
+            }
+        }
+    }
+    if(count($slices)==0 && !$break) $link .= trim($tail, '/');
+    return $link;
+}
+
+/**
  * 获取短网址
  * @param $url
  * @return bool|string

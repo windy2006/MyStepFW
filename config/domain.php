@@ -6,5 +6,4 @@ return array (
   'panel.mystep.com' => '/admin_cms/(.*?)',
   'api.mystep.com' => '/api/(\\w+)/(.*?)',
   'cms.mystep.com' => 'cms',
-  'test.mystep.com' => 'cms',
 );

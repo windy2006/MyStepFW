@@ -43,11 +43,12 @@ $t->assign('record_count', $counter);
 $db->build($s->db->pre.'sys_log')
     ->order($order, $order_type=='desc')
     ->limit($record_start, $page_size);
-if($order!='id') $db->build($s->db->pre.'sys_log')->order('id', ture);
+if($order!='id') $db->build($s->db->pre.'sys_log')->order('id', true);
 $db->select();
 while($record = $db->getRS()) {
 	s::htmlTrans($record);
 	$record['time'] = date('Y-m-d H:i:s', $record['time']);
+    $record['link_short'] = strlen($record['link'])>40 ? shortUrl($record['link']) : $record['link'];
 	$t->setLoop('record', $record);
 }
 $t->assign('order', $order);

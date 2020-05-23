@@ -17,6 +17,7 @@
 - getMicrotime($rate) - 获取微秒时间
 - getTimeDiff($time_start, $decimal, $micro) - 取得时间差
 - getDate_cn($date) - 获取中文日期
+- shortUrl($url, $max_length) - 缩略链接
 - tinyUrl($url) - 获取短网址
 - isMobile() - 判断是否为移动设备
 - isHttps() - 判断当前是否为SSL链接

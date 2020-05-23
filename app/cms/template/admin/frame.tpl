@@ -7,7 +7,7 @@
         <div class="dropdown-menu ml-3">
             <a class="dropdown-item" theme="default" href="#">默认主题</a>
             <a class="dropdown-item" theme="purple" href="#">紫色主题</a>
-            <a class="dropdown-item" theme="brown" href="#" target="_blank">棕色主题</a>
+            <a class="dropdown-item" theme="brown" href="#">棕色主题</a>
         </div>
         <ul id="main_nav" class="navbar-nav mr-auto mt-2 mt-lg-0"></ul>
     </div>
@@ -359,7 +359,7 @@ $(function(){
             alert(data.error+' - '+data.message);
         }
     });
-    $('iframe').attr('src', location.href.replace(/#.+$/, '')+'info');
+    $('iframe').attr('src', location.href.replace(/#.+$/, '')+'/info');
     $('#list_tab .arrow').hover(function(e){
         global.timer = setInterval(function(){
             setPos(e.target);

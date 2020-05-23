@@ -36,7 +36,7 @@
 				<td><!--record_id--></td>
 				<td><!--record_user--></td>
 				<td><!--record_group--></a></td>
-				<td class="text-left"><a href="<!--record_link-->" target="_blank"><!--record_link--></a></td>
+				<td class="text-left"><a href="<!--record_link-->" target="_blank"><!--record_link_short--></a></td>
 				<td><!--record_comment--></a></td>
 				<td><!--record_time--></td>
 			</tr>

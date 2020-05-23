@@ -49,6 +49,7 @@ class myRouter extends myBase {
         $this->setting = $setting;
         $this->route = $this->parseQuery();
         $this->query = $this->route['qstr'];
+        if(preg_match('#^/\w+$#', $this->query)) $this->query .= '/';
         $this->parse();
     }
 

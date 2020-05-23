@@ -18,7 +18,7 @@ switch($method) {
 		break;
 	case 'remove':
         cms::$log = $mystep->getLanguage('admin_web_template_remove');
-		if($idx=='default' || strpos($idx, 'admin')!==false) {
+		if(in_array($idx, ['admin', 'default', 'custom'])) {
 		    myStep::info('admin_web_template_remove_error');
 		}
 		f::del($tpl_path.$idx);

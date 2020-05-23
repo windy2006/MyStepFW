@@ -64,7 +64,7 @@ class cms extends myStep {
     public static function log() {
         global $db, $s, $group_info, $id;
         $link = 'http://'.r::svr('SERVER_NAME').r::svr('REQUEST_URI');
-        $link = str_replace('_ok', '', $link);
+        if(strpos($link, '_ok')) $link = r::svr('REFERER');
         if(!empty($id)) {
             $link = str_replace('&id=' . $id, '', $link);
             if (!preg_match('#/' . $id . '$#', $link)) $link .= '&id=' . $id;
