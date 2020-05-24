@@ -815,6 +815,7 @@ class myStep extends myController {
     public static function go() {
         global $s, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
         $s = new myConfig(CONFIG.'config.php');
+        if($s->gen->debug) self::setOp('reset');
         $host = myReq::server('HTTP_HOST');
         if(is_file(CONFIG.'domain.php')) {
             $domain = include(CONFIG.'domain.php');

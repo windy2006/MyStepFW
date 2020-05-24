@@ -14,8 +14,8 @@ if(!empty($id)) {
         myFile::mkdir(CACHE.'language');
     }
     if($id & 8) {
-        myFile::del(CACHE.'op');
-        myFile::mkdir(CACHE.'op');
+        myFile::del(CACHE.'data');
+        myFile::mkdir(CACHE.'data');
     }
     if($id & 16) {
         myFile::del(CACHE.'session');
@@ -29,18 +29,6 @@ if(!empty($id)) {
         myFile::del(CACHE.'app');
         myFile::mkdir(CACHE.'app');
     }
-    if($id & 128) {
-        myFile::del(CACHE.'setting');
-        myFile::mkdir(CACHE.'setting');
-    }
-    if($id & 256) {
-        myFile::del(CACHE.'data');
-        myFile::mkdir(CACHE.'data');
-    }
-    if($id & 512) {
-        myFile::del(CACHE.'page');
-        myFile::mkdir(CACHE.'page');
-    }
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");location.href=document.referrer;</script>');
 }
 $dirs = myFile::find('', CACHE, false, myFile::DIR);
@@ -48,13 +36,10 @@ $dirs = array_map(function ($v) {return basename($v);} , $dirs);
 $t->assign('script', 0);
 $t->assign('template', 0);
 $t->assign('language', 0);
-$t->assign('setting', 0);
-$t->assign('op', 0);
 $t->assign('session', 0);
 $t->assign('tmp', 0);
 $t->assign('app', 0);
 $t->assign('data', 0);
-$t->assign('page', 0);
 foreach($dirs as $k) {
     $t->assign($k, myFile::getSize(CACHE.$k));
 }

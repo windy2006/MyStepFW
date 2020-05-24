@@ -252,9 +252,7 @@ class plugin_update implements interface_plugin {
                 myFile::del(CACHE.'template');
                 myFile::del(CACHE.'language');
                 myFile::del(CACHE.'app');
-                myFile::del(CACHE.'setting');
                 myFile::del(CACHE.'data');
-                myFile::del(CACHE.'page');
                 if($mode==1) self::checkFile(ROOT, true, 0);
                 ob_clean();
                 echo myString::toJson($result, $s->gen->charset);

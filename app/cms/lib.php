@@ -334,7 +334,7 @@ function getLink($data, $mode='news') {
     }
     $link = \myStep::setURL($link);
     if(isset($data['web_id'])) $web = checkVal($website, 'web_id', $data['web_id']);
-    if(isset($web) && $web['web_id']!=$web_info['web_id']) {
+    if(isset($web) && is_array($web) && $web['web_id']!=$web_info['web_id']) {
         $link = '//'.$web['domain'].$link;
     }
     return $link;

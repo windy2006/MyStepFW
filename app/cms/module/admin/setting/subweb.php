@@ -26,6 +26,7 @@ switch($method) {
                 $db->query('drop table if exists '.$config->db->pre.'news_show');
                 $db->query('drop table if exists '.$config->db->pre.'news_detail');
                 $db->query('drop table if exists '.$config->db->pre.'news_tag');
+                $db->query('delete from '.$s->db->pre.'news_cat where web_id='.intval($id));
             } else {
                 $db->build($s->db->pre.'news_cat')
                     ->field(['web_id'=>1])
@@ -37,6 +38,8 @@ switch($method) {
                 $db->update();
             }
             f::del($cfg_file);
+            f::del(CACHE.'app/'.$info_app['app']);
+            f::del(CACHE.'template/'.$info_app['app']);
             $db->build($s->db->pre.'website')
                 ->where('web_id','n=',$id);
             $db->delete();
@@ -71,6 +74,8 @@ switch($method) {
             ->field($data);
         $db->replace();
         \app\cms\deleteCache('website');
+        f::del(CACHE.'app/'.$info_app['app']);
+        f::del(CACHE.'template/'.$info_app['app']);
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
 		break;
 	default:

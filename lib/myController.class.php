@@ -640,8 +640,7 @@ class myController extends myBase {
             'fast_shutdown' => 1,
             'validate_timestamps' => 1,
             'revalidate_freq' => 120,
-            'huge_code_pages' => 1,
-            'file_cache' => dirname(__DIR__) . '/cache/op/'
+            'huge_code_pages' => 1
         ));
 
         if ($set_plugin) $this->plugin();
@@ -703,7 +702,6 @@ class myController extends myBase {
                         foreach($setting as $k => $v) {
                             @ini_set('opcache.'.$k, $v);
                         }
-                        if(isset($setting['file_cache'])) myFile::mkdir($setting['file_cache']);
                     case $setting=='check':
                         opcache_invalidate($_SERVER['SCRIPT_FILENAME'], false);
                         if(($result=opcache_is_script_cached($_SERVER['SCRIPT_FILENAME']))===false)

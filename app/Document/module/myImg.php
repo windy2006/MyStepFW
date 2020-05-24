@@ -1,6 +1,4 @@
 <?PHP
-myStep::setOp('reset');
-
 /*
 //picture functions test
 $myImg = new myImg(PATH.'data/image/image.jpg');

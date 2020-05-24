@@ -100,22 +100,22 @@ switch($method) {
         break;
     case 'pack':
         if(!empty($idx) || is_dir(PLUGIN.$idx)) {
-            $pack_file = ROOT."cache/tmp/pack/".$idx.".plugin";
-            $mypack = $mystep->getInstance("myPacker", PLUGIN.$idx, $pack_file);
+            $pack_file = ROOT.'cache/tmp/pack/'.$idx.'.plugin';
+            $mypack = $mystep->getInstance('myPacker', PLUGIN.$idx, $pack_file);
             $mypack->pack();
             unset($mypack);
             myStep::file($pack_file);
         }
         break;
-    case "upload":
+    case 'upload':
         if(myReq::check('files')) {
-            $path_upload = CACHE."tmp";
+            $path_upload = CACHE.'tmp';
             $upload = new myUploader($path_upload, true);
             $upload->do(false);
             $result = $upload->getResult(0);
             if($result[0]['error'] == 0) {
-                $file = $path_upload."/".$result[0]['new_name'];
-                $mypack = $mystep->getInstance("myPacker", PLUGIN.strstr($result[0]['name'], '.', true).'/', $file);
+                $file = $path_upload.'/'.$result[0]['new_name'];
+                $mypack = $mystep->getInstance('myPacker', PLUGIN.strstr($result[0]['name'], '.', true).'/', $file);
                 $mypack->unpack();
                 unset($mypack);
                 myFile::del($file);
