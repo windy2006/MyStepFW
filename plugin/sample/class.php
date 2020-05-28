@@ -22,11 +22,13 @@ class plugin_sample implements interface_plugin {
         $dir = __DIR__;
         myFile::mkdir($dir.'/dir1');
         myFile::mkdir($dir.'/dir2');
+        myFile::del(CACHE.'script');
     }
     public static function uninstall() {
         $dir = __DIR__;
         myFile::del($dir.'/dir1');
         myFile::del($dir.'/dir2');
+        myFile::del(CACHE.'script');
     }
     public static function setPage($content) {
         return str_replace('<title>', '<title>插件调整(可关闭) - ', $content);
