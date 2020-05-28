@@ -20,6 +20,9 @@ return array (
     'page_error_module' => '所调用的功能模块不存在！',
     'page_error_plugin' => '所调用的插件存在问题，请确认其是否为标准格式！',
     'page_error_setting' => '应用不存在相关设置！',
+    'page_error_403' => '禁止访问！',
+    'page_error_404' => '调用文件（%s）不存在！',
+    'page_error_500' => '脚本执行时出错！',
     
     'plugin_active' => '激活',
     'plugin_deactive' => '停止',

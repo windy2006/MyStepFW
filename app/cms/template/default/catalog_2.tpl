@@ -21,7 +21,7 @@
                 <!--loop:end-->
             </ul>
             <div class="mb-3">
-                <!--news catalog="$catalog" limit="$limit" template="mixed" pos_img="3"-->
+                <!--news catalog="$catalog" limit="$limit" template="mixed" prefix="$prefix" pos_img="3"-->
             </div>
             <nav>
                 <ul class="pagination pagination-sm justify-content-center">

@@ -7,7 +7,7 @@ $format = array(
 $rule = array(
     array('/mySample/[any]', 'app\sample\route'),
     array('/mySample2/[any]', 'mystep::getModule'),
-    array('/sample/[camel]', array('app\sample\preCheck, 3', 'app\sample\routeTest')),
+    array('/sample/[camel]', array('app\sample\preCheck,3', 'app\sample\routeTest')),
 );
 //当前应用的数据接口
 $api = array(

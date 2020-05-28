@@ -150,13 +150,13 @@ class myController extends myBase {
         $m = count($argList);
         if ($m == 1) {
             $join = function ($content) {
-                return join(chr(10), $content);
+                return join(chr(10), $content).chr(10);
             };
             $tpl->assign('page', array_map($join, $this->page_content));
         } else {
             for ($i = 1; $i < $m; $i++) {
                 if (isset($this->page_content[$argList[$i]])) {
-                    $tpl->assign('page_' . $argList[$i], join(chr(10), $this->page_content[$argList[$i]]));
+                    $tpl->assign('page_' . $argList[$i], join(chr(10), $this->page_content[$argList[$i]]).chr(10));
                 }
             }
         }

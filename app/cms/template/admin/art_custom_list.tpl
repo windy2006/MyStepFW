@@ -1,7 +1,7 @@
 <div class="card border-bottom-0 bg-transparent mb-5" style="padding-top:50px;">
 	<div class="card-header bg-info text-white position-fixed w-100 title">
 		<i class="glyphicon glyphicon-circle-arrow-right"></i> <b><!--title--></b>
-		<a class="btn btn-primary btn-sm float-right py-0 border" href="add/?web_id=<!--web_id-->">添加分类</a>
+		<a class="btn btn-primary btn-sm float-right py-0 border" href="add/?web_id=<!--web_id-->">添加内容</a>
 	</div>
 	<div class="form-inline mx-auto">
 		<select class="form-control" name="web_id">

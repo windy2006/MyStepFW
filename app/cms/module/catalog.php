@@ -1,5 +1,5 @@
 <?PHP
-global $catalog, $page, $limit, $loop;
+global $catalog, $prefix, $page, $limit, $loop;
 $catalog = $info_app['path'][1]??'';
 $cat_info = false;
 if($catalog!='') {

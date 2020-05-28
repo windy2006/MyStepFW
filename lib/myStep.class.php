@@ -28,6 +28,8 @@
     $this->CSS($cache)                               // 生成整合CSS文件
     $this->addJS($file)                              // 添加页面脚本文件
     $this->JS($cache)                                // 整合页面脚本文件
+    $this->editorSetPlugin($code, $btn)              // 富文本编辑器功能扩展
+    $this->editorGetPlugin()                         // 生成编辑器插件缓存脚本
     self::info($msg, $url)                           // 信息提示，需先声明mystep类
     self::captcha($len, $scope)                      // 生成验证码
     self::language($module, $type)                   // JS语言包接口
@@ -56,6 +58,8 @@ class myStep extends myController {
         $plugin_ignore = ['ms_language', 'ms_setting', 'captcha'];
     public $setting;
     protected
+        $editor_plugin = [],
+        $editor_btn = [],
         $mem_start = 0,
         $time_start = 0,
         $time_css = 0,
@@ -255,6 +259,7 @@ class myStep extends myController {
      */
     public function end() {
         parent::end();
+        $this->editorGetPlugin();
         $query_count = $GLOBALS['db']->close();
         $time_exec = getTimeDiff($this->time_start);
         $mem_peak = memory_get_peak_usage();
@@ -408,7 +413,8 @@ class myStep extends myController {
         return $this;
     }
 
-    /**整合页面脚本文件
+    /**
+     * 整合页面脚本文件
      * @param string $cache
      * @param string $dummy
      * @return string|void
@@ -421,6 +427,46 @@ class myStep extends myController {
             $code = parent::JS(false);
             myFile::saveFile($cache, $code);
         }
+    }
+
+    /**
+     * 富文本编辑器功能添加
+     * @param $code
+     * @param string $btn
+     * @return $this
+     */
+    public function editorSetPlugin($code, $btn='') {
+        if(is_file($code)) $code = f::g($code);
+        $this->editor_plugin[] = $code;
+        if(!empty($btn)) $this->editor_btn[] = $btn;
+        return $this;
+    }
+
+    /**
+     * 生成编辑器插件缓存脚本
+     * @return $this
+     */
+    public function editorGetPlugin() {
+        global $info_app;
+        $cache = CACHE.'script/editor_plugin_'.$info_app['app'].'.js';
+        if(!is_file($cache)) {
+            $content = implode(chr(10), $this->editor_plugin);
+            $btn = implode(',', $this->editor_btn);
+            $content = <<<code
+tinymce.create('tinymce.plugins.myStep', {
+    init : function(ed, url) {
+        {$content}
+    },
+    createControl : function(n, cm) {
+        return null;
+    },
+});
+tinymce.PluginManager.add('myStep', tinymce.plugins.myStep);
+global.editor_btn = '{$btn}';
+code;
+            f::s($cache, $content);
+        }
+        return $this;
     }
 
     /**
@@ -706,6 +752,27 @@ class myStep extends myController {
     }
 
     /**
+     * 处理头信息
+     * @param $idx
+     * @param string $para
+     * @param bool $exit
+     */
+    public static function header($idx, $para = '', $exit = true) {
+        global $mystep;
+        switch($idx) {
+            case '404':
+                myStep::info(sprintf($mystep->getLanguage('page_error_404'), r::svr('REQUEST_URI')));
+                break;
+            case '403':
+            case '500':
+                myStep::info('page_error_'.$idx);
+                break;
+            default:
+                parent::header($idx, $para, $exit);
+        }
+    }
+
+    /**
      * 链接处理
      * @param $url
      * @return string
@@ -904,7 +971,7 @@ class myStep extends myController {
         }
         $mystep->addJS(STATICS.'js/global.js');
         $mystep->addJS(PATH.'asset/function.js');
-        $mystep->addJS(PATH.'asset'.$s->template->style.'/function.js');
+        $mystep->addJS(PATH.'asset/'.$s->template->style.'/function.js');
         $mystep->addJS('
 $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
     $.getScript("'.ROOT_WEB.'index.php?ms_language/'.$info_app['app'].'/"+setting.language);

@@ -669,6 +669,9 @@ function buildSQL($paras) {
     if(isset($paras['condition'])) {
         $db->build($tbl)->where($paras['condition'], 'and');
     }
+    if(isset($paras['prefix']) && !empty($paras['prefix'])) {
+        $db->build($tbl)->where('subject', 'like', '['.$paras['prefix'].']%', 'and');
+    }
     $db->build($tbl)->where([
             ['expire', 'is', null],
             ['expire', 'f>', 'now()', 'or']

@@ -20,6 +20,9 @@ return array (
     'page_error_module' => 'Cannot find the specified module.',
     'page_error_plugin' => 'Unusable plugin, please confirm it with standard format.',
     'page_error_setting' => 'The Application need not to set.',
+    'page_error_403' => 'The specified file or directory is forbidden to you!',
+    'page_error_404' => 'File (%s) cannot be found!',
+    'page_error_500' => 'Error occurs during executing!',
 
     'plugin_active' => 'Active',
     'plugin_deactive' => 'Deactive',

@@ -42,31 +42,31 @@ jQuery.event.addProp("dataTransfer");
         result = [];
     let template = {
         'main' :    '<div id="uploader" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">\n' +
-        '    <div class="modal-dialog modal-dialog-scrollable" role="document">\n' +
-        '        <div class="modal-content">\n' +
-        '            <div class="modal-header py-0 bg-light">\n' +
-        '                <h4 class="modal-title"><span class="glyphicon glyphicon-upload"></span> <b>Power Uploader</b></h4>\n' +
-        '                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n' +
-        '                    <span aria-hidden="true">&times;</span>\n' +
-        '                </button>\n' +
-        '            </div>\n' +
-        '            <div class="modal-body"></div>\n' +
-        '            <div class="modal-footer py-2"></div>\n' +
-        '        </div>\n' +
-        '    </div>\n' +
-        '</div>',
+                    '    <div class="modal-dialog modal-dialog-scrollable" role="document">\n' +
+                    '        <div class="modal-content">\n' +
+                    '            <div class="modal-header py-0 bg-light">\n' +
+                    '                <h4 class="modal-title"><span class="glyphicon glyphicon-upload"></span> <b>Power Uploader</b></h4>\n' +
+                    '                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n' +
+                    '                    <span aria-hidden="true">&times;</span>\n' +
+                    '                </button>\n' +
+                    '            </div>\n' +
+                    '            <div class="modal-body"></div>\n' +
+                    '            <div class="modal-footer py-2"></div>\n' +
+                    '        </div>\n' +
+                    '    </div>\n' +
+                    '</div>',
         'file' :    '<div data-idx="" class="input-group mb-3">\n' +
-        '    <div class="input-group-prepend">\n' +
-        '        <span class="input-group-text">文件</span>\n' +
-        '    </div>\n' +
-        '    <div class="custom-file">\n' +
-        '        <label><input type="file" class="custom-file-input" name="files[]" />\n' +
-        '        <span class="custom-file-label nowrap" data-browse="浏览">点击选取需上传的文件</span></label>\n' +
-        '    </div>\n' +
-        '</div>\n',
+                    '    <div class="input-group-prepend">\n' +
+                    '        <span class="input-group-text">文件</span>\n' +
+                    '    </div>\n' +
+                    '    <div class="custom-file">\n' +
+                    '        <label><input type="file" class="custom-file-input" name="files[]" />\n' +
+                    '        <span class="custom-file-label nowrap" data-browse="浏览">点击选取需上传的文件</span></label>\n' +
+                    '    </div>\n' +
+                    '</div>\n',
         'process' : '<div data-idx="" class="progress mb-3">\n' +
-        '  <div class="progress-bar progress-bar-striped progress-bar-animated text-left p-2" role="progressbar" style="width:0"></div>\n' +
-        '</div>\n',
+                    '  <div class="progress-bar progress-bar-striped progress-bar-animated text-left p-2" role="progressbar" style="width:0"></div>\n' +
+                    '</div>\n',
         'btn_close' :'<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> 关闭 </button>',
         'btn_upload':'<button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-floppy-open"></span> 上传 </button>',
         'btn_add'   :'<button type="button" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-plus-sign"></span> 增加 </button>',

@@ -13,6 +13,7 @@
 let global = {};
 global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
 global.root_fix = global.root_fix.replace(/\/+/g, '/');
+global.editor_btn = '';
 
 //获取当前路径（可自定义目录层级）
 function getPath(lvl) {

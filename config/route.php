@@ -24,7 +24,7 @@ $rule_list = array (
       0 => '/sample/[camel]',
       1 => 
       array (
-        0 => 'app\\sample\\preCheck, 3',
+        0 => 'app\\sample\\preCheck,3',
         1 => 'app\\sample\\routeTest',
       ),
     ),
@@ -36,7 +36,7 @@ $rule_list = array (
       0 => '/admin_cms/[any]',
       1 => 
       array (
-        0 => 'app\\cms\\installCheck, index',
+        0 => 'app\\cms\\installCheck,index',
         1 => 'app\\cms\\logCheck',
         2 => 'myStep::getModule',
       ),
@@ -94,6 +94,11 @@ $rule_list = array (
         0 => 'app\\myStep\\logCheck',
         1 => 'myStep::getModule',
       ),
+    ),
+    6 =>
+    array (
+      0 => '/error/[int]',
+      1 => 'myStep::header,$1',
     ),
   ),
 );

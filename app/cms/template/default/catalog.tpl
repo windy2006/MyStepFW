@@ -21,7 +21,7 @@
                 <!--loop:end-->
             </ul>
             <div class="news_list mb-3 border">
-                <!--news catalog="$catalog" show_cat="y" limit="$limit" class="item" loop="$loop" template="simple"-->
+                <!--news catalog="$catalog" show_cat="y" limit="$limit" class="item" loop="$loop" prefix="$prefix" template="simple"-->
             </div>
             <nav>
                 <ul class="pagination pagination-sm justify-content-center">

@@ -218,6 +218,9 @@ class myRouter extends myBase {
                     $each = str_replace(' ', '', $each);
                     $each = explode(',', $each);
                     $method = array_shift($each);
+                    foreach($each as $k => $v) {
+                        if(preg_match('#^\$(\d+)$#', $v, $m)) $each[$k] = $match[$m[1]-1] ?? $v;
+                    }
                     array_push($each, $flag);
                     if(is_callable($method)) {
                         $flag = call_user_func_array($method, $each);
@@ -239,6 +242,9 @@ class myRouter extends myBase {
                 } else {
                     $paras = explode(',', $rule['method']);
                     $method = array_shift($paras);
+                    foreach($paras as $k => $v) {
+                        if(preg_match('#^\$(\d+)$#', $v, $m)) $paras[$k] = $match[$m[1]-1] ?? $v;
+                    }
                 }
                 $paras = array_merge($paras, $match);
                 if(is_callable($method)) {

@@ -21,7 +21,7 @@
                 <!--loop:end-->
             </ul>
             <div class="mb-3">
-                <!--news catalog="$catalog" class="row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4" limit="$limit" template="gallery"-->
+                <!--news catalog="$catalog" class="row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4" prefix="$prefix" limit="$limit" template="gallery"-->
             </div>
             <nav>
                 <ul class="pagination pagination-sm justify-content-center">
