@@ -23,6 +23,7 @@
 class myConfig extends myBase {
     protected
         $file = '',
+        $construction = '',
         $type = '',
         $setting = array();
 
@@ -34,6 +35,17 @@ class myConfig extends myBase {
         $this->file = myFile::realPath($file);
         $this->type = strtolower(pathinfo($this->file, PATHINFO_EXTENSION));
         $this->setting = $this->load($this->file, true);
+        $path = dirname($this->file);
+        $list = [
+            $path.'/config/default.php',
+            $path.'/construction/default.php',
+        ];
+        foreach($list as $k) {
+            if(is_file($k)) {
+                $this->makeConstruction($k);
+                break;
+            }
+        }
     }
 
     /**
@@ -124,6 +136,39 @@ class myConfig extends myBase {
     }
 
     /**
+     * 生成配置信息
+     * @param $file
+     */
+    public function makeConstruction($file) {
+        $construction_file = dirname($file).'/construction.php';
+        if(is_file($construction_file)) {
+            $this->construction = $construction_file;
+        } else {
+            if(is_file($file)) {
+                $detail = require($file);
+                $construction = [];
+                if(isset($detail['name']) && isset($detail['list'])) {
+                    foreach($detail['list'] as $k => $v) {
+                        $construction[$k] = $v['type'][0];
+                    }
+                } else {
+                    foreach($detail as $k0 => $v0) {
+                        $construction[$k0] = [];
+                        foreach($v0['list'] as $k => $v) {
+                            $construction[$k0][$k] = $v['type'][0];
+                        }
+                    }
+                }
+                $result = '<?PHP'.chr(10);
+                $result .= myString::toScript($construction, 'construction');
+                $result .= 'return $construction;';
+                myFile::saveFile($construction_file, $result);
+                $this->construction = $construction_file;
+            }
+        }
+    }
+
+    /**
      * 读取配置文件并转化为类对象
      * @param string $file
      * @param bool $return_object
@@ -182,31 +227,72 @@ class myConfig extends myBase {
      * 批量更新所有设置
      * @param $setting
      * @param string $idx
-     * @return array
+     * @param bool $override
+     * @return array|stdClass
      */
-    public function set($setting, $idx = '') {
+    public function set($setting, $idx = '', $override = false) {
+        if(is_bool($idx)) {
+            $override = $idx;
+            $idx = '';
+        }
         $item = $this->setting;
+        $construction = require($this->construction);
+        $construction = self::a2o($construction);
         if(!empty($idx)) {
             $keys = explode('.', $idx);
             foreach ($keys as $key) {
                 $item = $item->$key ?? (new stdClass());
+                $construction = $construction->$key ?? 'text';
             }
             $idx .= '.';
         }
-        foreach($setting as $k => $v) {
-            if(preg_match('/_pwd_r$/', $k)) continue;
-            if(is_array($v)) {
-                if(isset($v[0])) {
-                    $item->$k = implode(',', $v);
+        if($override) {
+            $item = self::o2a($item);
+            foreach($item as $k => $v) {
+                if(isset($setting[$k])) {
+                    if(is_array($v) && is_array($setting[$k])) {
+                        $item[$k] = $this->set($setting[$k], $idx.$k, true);
+                    } else {
+                        if(preg_match('#^password(_(\w+))?$#', $construction->$k, $match)) {
+                            if(!empty($setting[$k])) {
+                                if(isset($match[2])) $setting[$k] = $match[2]($setting[$k]);
+                                $item[$k] = $setting[$k];
+                            }
+                        } else {
+                            if(is_array($setting[$k])) $setting[$k] = implode(',', $setting[$k]);
+                            if($setting[$k]=='false') $setting[$k]=false;
+                            elseif($setting[$k]=='true') $setting[$k]=true;
+                            elseif(is_numeric($setting[$k])) $setting[$k] = $setting[$k] + 0;
+                            $item[$k] = $setting[$k];
+                        }
+                    }
                 } else {
-                    $item->$k = $this->set($v, $idx.$k);
+                    $item[$k] = '';
                 }
-            } else {
-                if(empty($v) && isset($item->$k)) continue;
-                if($v=='false') $v=false;
-                elseif($v=='true') $v=true;
-                elseif(is_numeric($v)) $v = $v + 0;
-                $item->$k = $v;
+            }
+            if($idx=='') $this->setting = self::a2o($item);
+        } else {
+            foreach($setting as $k => $v) {
+                if(preg_match('/_pwd_r$/', $k)) continue;
+                if(is_array($v)) {
+                    if(isset($v[0])) {
+                        $item->$k = implode(',', $v);
+                    } else {
+                        $item->$k = $this->set($v, $idx.$k);
+                    }
+                } else {
+                    if(substr($construction->$k,0, 8)=='password') {
+                        if(!empty($setting[$k])) {
+                            if($construction->$k=='password_md5') $v = md5($v);
+                            $item->$k = $v;
+                        }
+                    } else {
+                        if($v=='false') $v=false;
+                        elseif($v=='true') $v=true;
+                        elseif(is_numeric($v)) $v = $v + 0;
+                        $item->$k = $v;
+                    }
+                }
             }
         }
         return $item;
@@ -245,6 +331,7 @@ return '.var_export($setting, true).';';
             $file = $this->file;
             if($type!=$this->type) $file = preg_replace('/'.$this->type.'$/i', $type, $file);
         }
+        myFile::del($this->construction);
         return myFile::saveFile($file, $result);
     }
 
@@ -309,6 +396,7 @@ return '.var_export($setting, true).';';
                     $item['html'] = '<textarea name="setting['.$k.']" wrap="off" rows="'.$v['type'][2].'"'.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).'>'.$the_value.'</textarea>';
                     break;
                 case 'password':
+                case 'password_md5':
                     $item['describe'] = '';
                     $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'" name="setting['.$k.']" value="" maxlength="'.$v['type'][2].'" />';
                     $result[] = $item;

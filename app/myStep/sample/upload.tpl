@@ -1,4 +1,4 @@
-﻿<style>
+<style>
     #list_file a {
         display:inline-block;
         border: 1px #999 solid;

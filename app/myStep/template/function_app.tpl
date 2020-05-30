@@ -1,4 +1,4 @@
-﻿<div class="card w-100 mb-3 mb-sm-2">
+<div class="card w-100 mb-3 mb-sm-2">
     <div class="card-header bg-info text-white">
         <b><span class="glyphicon glyphicon-cog"></span> 应用设置</b>
     </div>

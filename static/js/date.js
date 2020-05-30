@@ -1,4 +1,4 @@
-﻿function CalConv() {
+function CalConv() {
 	var FIRSTYEAR = 1998;
 	var LASTYEAR = 2031;
 	var today = new Date();

@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 return array (
     'open' => 'Open',
     'close' => 'Closed',

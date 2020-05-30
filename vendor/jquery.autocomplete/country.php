@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $country = array(
     array('阿富汗', 'Afghanistan', 'AF'),
     array('奥兰群岛', 'Aland Islands', 'AX'),

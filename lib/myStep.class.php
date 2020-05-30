@@ -260,7 +260,7 @@ class myStep extends myController {
     public function end() {
         parent::end();
         $this->editorGetPlugin();
-        $query_count = $GLOBALS['db']->close();
+        $query_count = is_null($GLOBALS['db']) ? 0 : $GLOBALS['db']->close();
         $time_exec = getTimeDiff($this->time_start);
         $mem_peak = memory_get_peak_usage();
         unset($GLOBALS['db'], $GLOBALS['cache']);
@@ -464,7 +464,7 @@ tinymce.create('tinymce.plugins.myStep', {
 tinymce.PluginManager.add('myStep', tinymce.plugins.myStep);
 global.editor_btn = '{$btn}';
 code;
-            f::s($cache, $content);
+            myFile::saveFile($cache, $content);
         }
         return $this;
     }
@@ -810,7 +810,7 @@ code;
         } else {
             $url = self::setURL($url);
         }
-        $GLOBALS['db']->close();
+        if(!is_null($GLOBALS['db'])) $GLOBALS['db']->close();
         unset($GLOBALS['db'], $GLOBALS['cache']);
         header('location: ' . $url, true, $code);
         exit;
@@ -820,6 +820,7 @@ code;
      * 框架变量初始化
      */
     public static function init() {
+        if(count(ob_list_handlers())) ob_end_clean();
         $class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
         if(empty($class) || !is_dir($class[0]['path'])) {
             $old_root = empty($class) ? '' : preg_replace('#lib/$#', '', $class[0]['path']);
@@ -862,16 +863,14 @@ code;
             'exit_on_error' =>  false
         ));
 
+        $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
+        $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
+        if(strpos($path, 'static')===0) myController::file($the_file);
+
         if(is_file(CONFIG.'config.php')) {
             self::go();
         } else {
-            $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
-            $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
-            if(strpos($path, 'static')===0) {
-                myController::file($the_file);
-            } else {
-                require(APP.'myStep/module/config.php');
-            }
+            require(APP.'myStep/module/config.php');
         }
         return;
     }

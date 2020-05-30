@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 $router = new myRouter();
 $router->format('hex', '[a-fA-F0-9]+')
        ->rule('/test/[any]/[str]/[hex]/[yyy]/[int]', function() {

@@ -1,4 +1,4 @@
-﻿<div class="card w-100 mb-5 mb-sm-2">
+<div class="card w-100 mb-5 mb-sm-2">
 	<div class="card-body p-0">
 		<textarea id="code" class="w-100" title="highlight code">程序初始化，请稍候！</textarea>
 	</div>

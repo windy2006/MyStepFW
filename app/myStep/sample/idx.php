@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 return array(
     'style' => '页面样式',
     'form' => '表单元素',

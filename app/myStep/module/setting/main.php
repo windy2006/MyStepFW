@@ -7,12 +7,11 @@ if(!empty($app)) {
     if(!is_file($file)) myFile::copy(CONFIG.'config.php', $file);
 } else {
     $file = CONFIG.'config.php';
-    $builder = CONFIG.'construct/'.$s->gen->language.'.php';
+    $builder = CONFIG.'construction/'.$s->gen->language.'.php';
 }
 $config = new myConfig($file);
 if(myReq::check('post')) {
-    if(empty($app) && !empty($_POST['setting']['gen']['s_pwd'])) $_POST['setting']['gen']['s_pwd'] = md5($_POST['setting']['gen']['s_pwd']);
-    $config->set($_POST['setting']);
+    $config->set($_POST['setting'], true);
     $config->save('php');
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }

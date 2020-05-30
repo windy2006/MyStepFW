@@ -1,4 +1,4 @@
-﻿document.write(" <a class=\"my-lang\" id=\"StranLink\" title=\"以繁体版浏览网站\">繁体版</a>");
+document.write(" <a class=\"my-lang\" id=\"StranLink\" title=\"以繁体版浏览网站\">繁体版</a>");
 //模仿语言包式的简繁转换功能插件！
 var Default_isFT = 0    //默认是否繁体，0-简体，1-繁体
 var StranIt_Delay = 500 //翻译延时毫秒（设这个的目的是让网页先流畅的显现出来）

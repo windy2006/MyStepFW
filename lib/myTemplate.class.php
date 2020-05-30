@@ -68,7 +68,7 @@ class myTemplate extends myBase {
      */
     public function setTplPara($setting) {
         if(!is_array($setting)) $setting = array();
-        if(!isset($setting['name'])) $setting['name'] = '';
+        if(!isset($setting['name'])) $setting['name'] = 'main';
         if(!isset($setting['style'])) $setting['style'] = '';
         if(!isset($setting['path'])) $setting['path'] = './';
         if(!isset($setting['path_compile'])) $setting['path_compile'] = './complied';
@@ -596,20 +596,14 @@ mytpl;
                 ob_start();
                 include($this->compileTemplate());
                 $content = ob_get_contents();
-                if(count(ob_list_handlers())>0) ob_end_clean();
+                ob_end_clean();
             } else {
-                if(ob_get_length()) {
-                    $temp = ob_get_contents();
-                    if(count(ob_list_handlers())>0) ob_clean();
-                    include($this->compileTemplate());
-                    $content = ob_get_contents();
-                    if(count(ob_list_handlers())>0) ob_clean();
-                    echo $temp;
-                } else {
-                    include($this->compileTemplate());
-                    $content = ob_get_contents();
-                    if(count(ob_list_handlers())>0) ob_clean();
-                }
+                $temp = ob_get_contents();
+                ob_clean();
+                include($this->compileTemplate());
+                $content = ob_get_contents();
+                ob_clean();
+                echo $temp;
             }
             if($minify) {
                 $content = str_replace('//<![CDATA[', '', $content);

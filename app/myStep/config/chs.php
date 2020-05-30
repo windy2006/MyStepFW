@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 $setting_detail = array();
 
 $setting_detail['gen'] = array(

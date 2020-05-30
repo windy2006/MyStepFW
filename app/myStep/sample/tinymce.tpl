@@ -1,4 +1,4 @@
-﻿<div class="card w-100 mb-5 mb-sm-2">
+<div class="card w-100 mb-5 mb-sm-2">
 	<div class="card-body p-0">
 		<textarea id="content" name="content" style="width:100%; height:400px;">
 &lt;!DOCTYPE html&gt;

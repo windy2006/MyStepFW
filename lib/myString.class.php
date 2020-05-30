@@ -123,10 +123,10 @@ class myString {
         } else {
             $charset_str = self::charset($str);
             if($charset!=$charset_str) {
-                if(function_exists('iconv')) {
-                    $str = iconv($charset_str, $charset.'//TRANSLIT//IGNORE', $str);
-                } else {
+                if(function_exists('mb_convert_encoding')) {
                     $str = mb_convert_encoding($str, $charset, 'UTF-8,GBK');
+                } elseif(function_exists('iconv')) {
+                    $str = iconv($charset_str, $charset.'//TRANSLIT//IGNORE', $str);
                 }
             }
         }

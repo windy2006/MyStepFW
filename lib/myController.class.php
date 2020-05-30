@@ -656,7 +656,7 @@ class myController extends myBase {
         $this->pushAddedContent($tpl);
         $tpl->assign('lng', $this->language);
         $tpl->regTag($this->func_tag);
-        if (count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
+        if(count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
         $page = $tpl->render((func_num_args()==3 ? func_get_arg(2) : ''), false, $minify);
         echo $this->run('page', false, $page);
         unset($tpl);

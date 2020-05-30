@@ -130,10 +130,6 @@ input:hover {
     list-style-type: none;
 }
 
-.reset li {
-    background-image: url();
-}
-
 .watermark {
     position: absolute;
     display: block;
@@ -213,16 +209,6 @@ input:hover {
     background-color: #ffffff;
 }
 
-.showImage .ole_show .forward {
-    right: 0px;
-    cursor: url("/images/right.cur"), w-resize;
-}
-
-.showImage .ole_show .back {
-    left: 0px;
-    cursor: url("/images/left.cur"), w-resize;
-}
-
 .showImage .ole_list {
     position: relative;
     background-color: #eeeeee;
@@ -251,7 +237,6 @@ input:hover {
     display: block;
     height: 36px;
     width: 37px;
-    background: url("/images/arrow.png") no-repeat 0 0;
     text-indent: -999px;
     position: absolute;
     top: 30px;
@@ -385,16 +370,14 @@ input:hover {
     width: 40px;
     height: 24px;
     overflow: hidden;
-    border: 0px;
-    background-image: url();
+    border: 0;
 }
 
 #login .submit {
     width: 40px;
     height: 24px;
     overflow: hidden;
-    border: 0px;
-    background-image: url();
+    border: 0;
 }
 
 #login a {

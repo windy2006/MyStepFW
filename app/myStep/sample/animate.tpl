@@ -1,4 +1,4 @@
-﻿<link rel="stylesheet" media="screen" type="text/css" href="vendor/animate/animate.css" />
+<link rel="stylesheet" media="screen" type="text/css" href="vendor/animate/animate.css" />
 <style>
 	.mega {
 		font-size: 6rem;

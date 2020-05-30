@@ -1,4 +1,4 @@
-﻿<div class="card w-100 mb-5 mb-sm-2">
+<div class="card w-100 mb-5 mb-sm-2">
 	<div id="grid" class="card-body">
         <div class="grid-item">1.Normal</div>
         <div class="grid-item grid-item--width2 grid-item--height2">2.w2,h2</div>

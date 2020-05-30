@@ -1,4 +1,4 @@
-﻿<div class="card w-100 mb-5 mb-sm-2">
+<div class="card w-100 mb-5 mb-sm-2">
 	<div class="card-body text-center">
         <div id="pic_container" style="display:none;">
             <img title="风景 1" src="https://up.enterdesk.com/edpic/9c/14/8c/9c148c3484d58df3a64cc39929e46966.jpg" alt="" />
