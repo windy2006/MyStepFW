@@ -277,7 +277,8 @@ class myRouter extends myBase {
                 }
             }
         }
-        if(empty($p[0]) || !is_dir(APP.$p[0])) {
+        if(empty($p[0])) array_shift($p);
+        if(count($p)==0 || !is_dir(APP.$p[0])) {
             $this->info['app'] = $setting['default_app'];
         } else {
             $this->info['app'] = array_shift($p);

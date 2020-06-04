@@ -71,12 +71,14 @@ $(function(){
     $('#rule_list').find('button').click(function(){
         let obj = $(this).parentsUntil('tr').parent();
         $(this).parentsUntil('tr').parent().remove();
+        global.alert_leave = true;
     });
     $('button[func=add]').click(function(){
         $('#tpl').clone().attr('id', null).removeClass('d-none').appendTo('#rule_list')
             .find('button').click(function(){
                 $(this).parentsUntil('tr').parent().remove();
             });
+        global.alert_leave = true;
     });
 })
 </script>

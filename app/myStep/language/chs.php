@@ -7,6 +7,7 @@ return array (
     'unknown' => '未知',
     'app_missing' => '未发现所调用的应用！',
     'error_para' => '重要参数无法获得，请检查数据是否正常！',
+    'alert_leave' => '当前页面改变尚未提交，是否确认离开？',
 
     'page_main' => '首页',
     'page_update' => '最新更新',
@@ -42,7 +43,8 @@ return array (
     'login_captcha_msg' => '请输入右边字符',
     'login_refresh' => '刷新',
     'login_ok' => '登录成功！',
-    'login_error' => '登录错误，错误的校验码、用户名或密码！',
+    'login_error_captcha' => '验证码错误',
+    'login_error' => '登录错误，错误的用户名或密码！',
     'login_logout' => '您已经成功退出系统登录！',
 
     'setting_done' => '配置文件已更新！',

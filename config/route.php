@@ -7,6 +7,19 @@ $format_list = array (
 );
 
 $rule_list = array (
+  'CMS' => 
+  array (
+    0 => 
+    array (
+      0 => '/admin_cms/[any]',
+      1 => 
+      array (
+        0 => 'app\\CMS\\installCheck,index',
+        1 => 'app\\CMS\\logCheck',
+        2 => 'myStep::getModule',
+      ),
+    ),
+  ),
   'Sample' => 
   array (
     0 => 
@@ -44,19 +57,6 @@ $rule_list = array (
     array (
       0 => '/pack/[any]',
       1 => 'plugin_update::pack',
-    ),
-  ),
-  'CMS' => 
-  array (
-    0 => 
-    array (
-      0 => '/admin_cms/[any]',
-      1 => 
-      array (
-        0 => 'app\\CMS\\installCheck,index',
-        1 => 'app\\CMS\\logCheck',
-        2 => 'myStep::getModule',
-      ),
     ),
   ),
   'myStep' => 
@@ -104,6 +104,12 @@ $rule_list = array (
 );
 
 $api_list = array (
+  'CMS' => 
+  array (
+    'user' => 'app\\CMS\\getUserInfo',
+    'get' => 'app\\CMS\\getData',
+    'attachment' => 'app\\CMS\\getAttachment',
+  ),
   'Sample' => 
   array (
     'sample' => 'app\\sample\\api',
@@ -123,12 +129,6 @@ $api_list = array (
     'check' => 'plugin_update::remote',
     'update' => 'plugin_update::remote',
     'download' => 'plugin_update::remote',
-  ),
-  'CMS' => 
-  array (
-    'user' => 'app\\CMS\\getUserInfo',
-    'get' => 'app\\CMS\\getData',
-    'attachment' => 'app\\CMS\\getAttachment',
   ),
 );
 

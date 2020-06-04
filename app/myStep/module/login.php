@@ -6,7 +6,6 @@ if(r::svr('QUERY_STRING')=='out') {
 } elseif(r::s('ms_user')!='') {
     myStep::redirect($app_root);
 } elseif(!is_null($captcha = r::p('captcha'))) {
-    $err_no = 0;
     if(strtolower($captcha) == strtolower(r::s('captcha'))) {
         $usr = r::p('username');
         $pwd = r::p('password');
@@ -19,13 +18,11 @@ if(r::svr('QUERY_STRING')=='out') {
                 r::s('url', null);
             }
             myStep::info('login_ok', $url);
-        } else {
-            $err_no = 2;
         }
     } else {
-        $err_no = 1;
+        myStep::info($mystep->getLanguage('login_error_captcha'));
     }
-    myStep::info($mystep->getLanguage('login_error').'(Error No: '.$err_no.')', $app_root.'login');
+    myStep::info($mystep->getLanguage('login_error'), $app_root.'login');
 }
 $tpl_setting['name'] = 'login';
 $t = new myTemplate($tpl_setting);

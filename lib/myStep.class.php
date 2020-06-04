@@ -454,7 +454,7 @@ class myStep extends myController {
             $btn = implode(',', $this->editor_btn);
             $content = <<<code
 tinymce.create('tinymce.plugins.myStep', {
-    init : function(ed, url) {
+    init : function(editor, url) {
         {$content}
     },
     createControl : function(n, cm) {

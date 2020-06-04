@@ -137,6 +137,12 @@ JS变量：
 相关变量是通过脚本在页面被调取时动态生成，在调用时建议在onload事件或jQuery的$(function(){<!--code-->})中调用
 - language - 调用系统语言设置（可自动扩展app语言包）
 - setting - 调用系统设置（包括：language，router，debug，app，path_root，path_app，url_fix，url_prefix，url_prefix_app等信息，可通过APP设置重的 $setting['js'] 扩充）
+- global - 全局变量，可在任何函数内部调用，可随意扩种，已包含以下子参数：
+   - global.root - 针对rewrite、pathinfo和querystring模式下的根路径
+   - global.root_fix - 配合setURL，用于页面链接的自适应调整
+   - global.editor_btn - 针对tinyMCE编辑器的按钮扩展
+   - global.alert_leave - 在含表单的页面，如果内容发生变更，且通过非提交方式离开页面的话，将此变量设置为 true，即可出现警告
+   - global.timer - 用于计时器的返回值记录（非强占，可灵活调用）
 
 JS函数：
 --------

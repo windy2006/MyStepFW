@@ -6,26 +6,101 @@ $this->regTag('test_tag', function() {return 'Plugin tag test.';});
 $this->setLanguage(['test_lng'=>'模版语言测试']);
 $this->setFunction('page', 'plugin_sample::setPage');
 $this->editorSetPlugin('
-			ed.addButton("button_1", {
-				text : "按钮1",
-				title : "插入测试文字",
-				onclick : function() {
-					ed.selection.setContent("[测试文字]");
-				}
-			});
-        ', 'button_1');
-$this->editorSetPlugin('
-			ed.addCommand( "button_cmd", function() {
-				var selected_text = ed.selection.getContent();
+			editor.addCommand( "test_cmd", function() {
+				var selected_text = editor.selection.getContent();
 				var return_text = "";
 				return_text = "<h1>" + selected_text + "</h1>";
-				ed.execCommand("mceInsertContent", 0, return_text);
+				editor.execCommand("mceInsertContent", 0, return_text);
 			});
         ');
 $this->editorSetPlugin('
-			ed.addButton("button_2", {
-				text : "按钮2",
-				title : "变为大字",
-				cmd: "button_cmd"
+			editor.addButton("test_button", {
+				text : "按钮",
+				title : "插入测试文字",
+				cmd: "test_cmd"
 			});
-        ', 'button_2');
+        ', 'test_button');
+$this->editorSetPlugin('
+            editor.addButton( "test_list", {
+                text: "下拉选单",
+                icon: false,
+                type: "menubutton",
+                menu: [
+                    {
+                        text: "主菜单1",
+                        menu: [
+                            {
+                                text: "子菜单1",
+                                onclick: function() {
+                                    alert("选中子菜单1");
+                                }
+                            },
+                            {
+                                text: "子菜单2",
+                                onclick: function() {
+                                    alert("选中子菜单2");
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        text: "主菜单2",
+                        menu: [
+                            {
+                                text: "子菜单3",
+                                onclick: function() {
+                                    alert("选中子菜单3");
+                                }
+                            },
+                            {
+                                text: "子菜单3",
+                                onclick: function() {
+                                    alert("选中子菜单3");
+                                }
+                            }
+                        ]
+                    }
+                ]
+            });
+        ', 'test_list');
+$this->editorSetPlugin('
+            editor.addButton( "test_dialog", {
+                text: "对话框",
+                icon: false,
+                onclick: function() {
+                    editor.windowManager.open( {
+                        title: "自定义对话框",
+                        body: [
+                            {
+                                type: "textbox",
+                                name: "textbox_1",
+                                label: "单行文本",
+                                value: "30"
+                            },
+                            {
+                                type: "textbox",
+                                name: "textbox_2",
+                                label: "多行文本",
+                                value: "随便写点啥吧\n\n可以换行",
+                                multiline: true,
+                                minWidth: 300,
+                                minHeight: 100
+                            },
+                            {
+                                type: "listbox",
+                                name: "listbox",
+                                label: "下拉选单",
+                                "values": [
+                                    {text: "选项 1", value: "1"},
+                                    {text: "选项 2", value: "2"},
+                                    {text: "选项 3", value: "3"}
+                                ]
+                            }
+                        ],
+                        onsubmit: function( e ) {
+                            editor.insertContent( "<br /><br />单行文本：" + e.data.textbox_1 + "<br />多行文本：" + e.data.textbox_2 + "<br />下拉选单：" + e.data.listbox);
+                        }
+                    });
+                }
+            });
+        ', 'test_dialog');

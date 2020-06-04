@@ -82,6 +82,7 @@ $('#plugin').on('show.bs.modal', function (event) {
         }
         $('#'+app).val(result);
         modal.modal('hide');
+        global.alert_leave = true;
     });
 })
 

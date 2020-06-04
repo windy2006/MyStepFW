@@ -278,12 +278,24 @@ class myException extends ErrorException {
         $title = 'MyStep Error: '.self::$err_last['Type'];
         unset(self::$err_last['Type']);
         $root = ROOT_WEB;
-        if(ob_get_length()!==false) ob_clean();
-        echo <<<mystep
+        //if(ob_get_length()!==false) ob_clean();
+        if(ob_get_length()==0) {
+            echo <<<mystep
+<html>
+<head>
+<title>Error</title>
 <base href="{$root}" />
 <link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
 <link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
-<div style='line-height:24px;border:#999 1px solid;white-space:nowrap;overflow:hidden;'>
+<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
+<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+</head>
+
+mystep;
+        }
+        echo <<<mystep
+<div style='line-height:24px;border:1px #999 solid;white-space:nowrap;overflow:hidden;margin-bottom: 10px;'>
     <div style='background-color:#999;color:#FFF'>&nbsp;<strong>{$title}</strong></div>
 
 mystep;
@@ -292,7 +304,7 @@ mystep;
             $color = ($color=='#fff')?'#eee':'#fff';
             if($k == 'Trace') {
                 $cur_item = array();
-                $cur_item[] = '<pre>';
+                $cur_item[] = '<pre style="margin:0;">';
                 for($i=0,$m=count($v);$i<$m;$i++) {
                     $cur_item[] = chr(9).($i+1).'. '.$v[$i]['file'].' (line:'.$v[$i]['line'].', function:'.$v[$i]['function'].')';
                 }
@@ -304,7 +316,7 @@ mystep;
                     $keys = array_keys($v);
                     if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].'">';
                     foreach($v as $k1 => $v1) {
-                        if($v1=='//') $v1='//Blank Line';
+                        if($v1=='//') $v1='/* ----------- */';
                         $cur_item[] = trim(htmlspecialchars($v1), chr(13).chr(10));
                     }
                     if($k=='Code') $cur_item[] = '</pre>';
@@ -316,12 +328,7 @@ mystep;
             }
             echo '<div style="background-color:'.$color.'">&nbsp;<strong>'.$k.': </strong>'.str_replace(chr(9), ' &nbsp; &nbsp;', $v).'</div>'.chr(10);
         }
-        echo <<<mystep
-</div>
-<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
-<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
-<script type="text/javascript">SyntaxHighlighter.all();</script>
-mystep;
+        echo '</div>';
         return true;
     }
 

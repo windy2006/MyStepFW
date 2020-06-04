@@ -14,6 +14,7 @@ let global = {};
 global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
 global.root_fix = global.root_fix.replace(/\/+/g, '/');
 global.editor_btn = '';
+global.alert_leave = false;
 
 //获取当前路径（可自定义目录层级）
 function getPath(lvl) {
@@ -544,3 +545,22 @@ function setURL(prefix=global.root_fix, context=window.document.body) {
 	}
 	return true;
 }
+
+$(window).bind('beforeunload',function(e){
+	if(global.alert_leave!==false) {
+		let msg = 'Some changes have not been submit, are you sure to leave?';
+		if(typeof(global.alert_leave)==='string') {
+			msg = global.alert_leave;
+		} else if(typeof(language.alert_leave)==='undefined') {
+			msg = language.alert_leave;
+		}
+		let e = window.event||e;
+		e.returnValue = msg;
+		return msg;
+	}
+});
+$(function(){
+	$('form').submit(function(){
+		$(window).unbind('beforeunload');
+	});
+});

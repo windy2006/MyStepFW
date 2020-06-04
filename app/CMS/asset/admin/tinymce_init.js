@@ -44,9 +44,10 @@ let setting_tinymce = {
         font_formats: "微软雅黑='微软雅黑';宋体='宋体';黑体='黑体';仿宋='仿宋';楷体='楷体';隶书='隶书';幼圆='幼圆';Arial='Arial';Arial Black='Arial Black';Times New Roman='Times New Roman';Impact='Impact';Webdings='Webdings';Wingdings='Wingdings';",
 };
 if(typeof(setting_tinymce_ext)!='undefined') $.extend(setting_tinymce, setting_tinymce_ext);
+if(typeof(setting_tinymce_btn)!='undefined') setting_tinymce.toolbar2 += ',|,'+setting_tinymce_btn;
 tinymce.create('tinymce.plugins.myStep_cms', {
-    init : function(ed, url) {
-        ed.addButton('change', {
+    init : function(editor, url) {
+        editor.addButton('change', {
             title : 'Div/P 模式切换',
             image : global.root + 'static/images/div.png',
             onclick : function() {
@@ -59,7 +60,7 @@ tinymce.create('tinymce.plugins.myStep_cms', {
                 tinyMCE.activeEditor.setContent(content);
             }
         });
-        ed.addButton('format', {
+        editor.addButton('format', {
             title : '代码清理',
             image : global.root + 'static/images/format.png',
             onclick : function() {
@@ -83,7 +84,7 @@ tinymce.create('tinymce.plugins.myStep_cms', {
                 tinyMCE.activeEditor.setContent(content);
             }
         });
-        ed.addButton('upload', {
+        editor.addButton('upload', {
             title : '附件管理',
             image : global.root + 'static/images/file.gif',
             onclick : function(e) {
@@ -145,11 +146,11 @@ tinymce.create('tinymce.plugins.myStep_cms', {
                 $('#attachment').modal("show");
             }
         });
-        ed.on('dragover',function(e){
+        editor.on('dragover',function(e){
             $('#cover').show().text('松开鼠标以上传！');
         });
-        ed.on('init', function(){
-            ed.dom.loadCSS(global.root + "static/css/tinymce.css");
+        editor.on('init', function(){
+            editor.dom.loadCSS(global.root + "static/css/tinymce.css");
         });
     },
     createControl : function(n, cm) {

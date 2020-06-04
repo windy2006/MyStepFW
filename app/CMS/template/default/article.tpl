@@ -26,11 +26,11 @@
 					</select>
 				</div>
 				<div id="content" class="py-3">
-					<img src="<!--record_image-->" class="news_img" />
+					<img src="<!--record_image-->" class="news_img d-none d-md-block" />
 					<!--record_content-->
 				</div>
 			</div>
-			<div class="row">
+			<div class="row px-3">
 				文章标签：
 				<!--loop:start key="tag"-->
 				<a class="mr-3" href="<!--tag_link-->"><!--tag_name--></a>

@@ -7,6 +7,7 @@ return array (
     'unknown' => 'Unknown',
     'app_missing' => 'The specified APP cannot be found!',
     'error_para' => 'Import data is missing, check the database please!',
+    'alert_leave' => 'Some changes have not been submit, are you sure to leave?',
 
     'page_main' => 'Main',
     'page_update' => 'News Update',
@@ -42,7 +43,8 @@ return array (
     'login_captcha_msg' => 'Please input the string on the right image',
     'login_refresh' => 'Reflesh',
     'login_ok' => 'Login Successfully',
-    'login_error' => 'Login failed, wrong username, password or captcha',
+    'login_error' => 'Login failed, wrong username or password',
+    'login_error_captcha' => 'Wrong captcha!',
     'login_logout' => 'Logout Successfully',
 
     'setting_done' => 'Setting Updated!',

@@ -22,22 +22,23 @@ if(myReq::check('post')) {
     $data = r::p('[ALL]');
     switch($tpl_setting['name']) {
         case 'login':
-            $err_no = 0;
             if(strtolower($data['captcha']) == strtolower(r::s('captcha'))) {
                 $usr = r::p('username');
                 $pwd = r::p('password');
                 if(($result = $mystep->login($usr, $pwd))===2) {
                     r::setCookie('ms_cms_user', $usr.chr(9).md5($pwd), $data['expire']);
                     myStep::info('login_ok', ROOT_WEB.$info_app['app']);
-                } else {
-                    $err_no = 2;
                 }
             } else {
-                $err_no = 1;
+                myStep::info($mystep->getLanguage('login_error_captcha'));
             }
-            myStep::info($mystep->getLanguage('login_error').'(Error No: '.$err_no.')', ROOT_WEB.$info_app['app'].'/user/login');
+            myStep::info($mystep->getLanguage('login_error'), ROOT_WEB.$info_app['app'].'/user/login');
             break;
         case 'register':
+            if(strtolower($data['captcha']) != strtolower(r::s('captcha'))) {
+                myStep::info('login_error_captcha', ROOT_WEB.$info_app['app']);
+            }
+            unset($data['captcha']);
             $db->build($s->db->pre.'users')->field('user_id')->where('username','=',$data['username']);
             if($db->result()!==false) {
                 myStep::info(sprintf($mystep->getLanguage('admin_user_detail_error2'), $data['username']));

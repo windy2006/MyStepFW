@@ -59,7 +59,6 @@ function tinymceInit(obj){
 		},
 		*/
 		// Custom settings
-		//content_css : setting.path_root+"vendor/tinymce/editor.css",
 		content_css : setting.path_root+"static/css/bootstrap.css",
 		convert_urls: false,
 		remove_script_host: false,

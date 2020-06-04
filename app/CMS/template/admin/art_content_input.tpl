@@ -345,27 +345,38 @@ $(function(){
 	$('select[name=web_id]').trigger('change');
 	global.root_fix += 'article/content/';
 });
+function setHighlight(editor, brush) {
+	let sel = editor.selection.getContent();
+	let str = sel.replace(/<.+?>/g, '');
+	if(str.length>0) {
+		if(/^<pre class="highlight brush:(.+?)">(.+?)<\/pre>$/ism.test(sel)) {
+			str = RegExp.$2;
+		}
+		str = '<pre class="highlight brush:'+brush+'" data-type="'+brush+'">'+str+'</pre>';
+	}
+	editor.execCommand('mceInsertContent',false,str);
+}
 let setting_tinymce_ext = {
-	setup : function(ed) {
-		ed.addButton('subtitle', {
+	setup : function(editor) {
+		editor.addButton('subtitle', {
 			title : '分页标题设置',
 			image : '<!--path_root-->static/images/subtitle.gif',
 			onclick : function() {
-				let sel = ed.selection.getContent();
-				let str = ed.selection.getContent({format : 'text'});
+				let sel = editor.selection.getContent();
+				let str = editor.selection.getContent({format : 'text'});
 				if(str.length>0 && !/^(<(\w+)>)?<span class=\"mceSubtitle\">(.+)<\/span>(<\/\2>)?$/i.test(sel)) {
 					str = '<span class="mceSubtitle">'+str+'</span>';
 				}
-				ed.execCommand('mceInsertContent',false,str);
+				editor.execCommand('mceInsertContent',false,str);
 			}
 		});
-		ed.on('click', function(e) {
+		editor.on('click', function(e) {
 			e = e.target;
-			if (e.nodeName === 'SPAN' && ed.dom.hasClass(e, "mceSubtitle")) {
-				ed.selection.select(e);
+			if (e.nodeName === 'SPAN' && editor.dom.hasClass(e, "mceSubtitle")) {
+				editor.selection.select(e);
 			}
 		});
-		ed.on('dblclick', function(e) {
+		editor.on('dblclick', function(e) {
 			e = e.target;
 			if(e.nodeName === 'IMG' && $id("image")!=null) {
 				if(confirm("是否将 "+e.src+" 设定为新闻标题图?")) {
@@ -377,8 +388,49 @@ let setting_tinymce_ext = {
 				}
 			}
 		});
+		editor.addButton( 'highlight', {
+			text: '高亮代码',
+			title : '代码高亮显示',
+			icon: false,
+			type: 'menubutton',
+			menu: [{
+					text: 'PHP',
+					onclick: function() {
+						setHighlight(editor, 'php');
+					}
+				}, {
+					text: 'HTML',
+					onclick: function() {
+						setHighlight(editor, 'html');
+					}
+				}, {
+					text: 'CSS',
+					onclick: function() {
+						setHighlight(editor, 'css');
+					}
+				}, {
+					text: 'JAVASCRIPT',
+					onclick: function() {
+					setHighlight(editor, 'javascript');
+				}
+			}],
+			onPostRender: function() {
+				let ctrl = this;
+				editor.on('click', function(e) {
+					e = e.target;
+					if (e.nodeName === 'PRE' && editor.dom.hasClass(e, "highlight")) {
+						let cls = e.getAttribute('class').replace(/^.+brush:(.+)$/, '$1');
+						editor.selection.select(e);
+						ctrl.text(cls.toUpperCase());
+					} else {
+						ctrl.text('高亮代码');
+					}
+				});
+			}
+		});
 	}
 };
+let setting_tinymce_btn = 'pagebreak,subtitle,highlight';
 </script>
 <script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
 <script type="application/javascript" src="app/CMS/asset/admin/tinymce_init.js"></script>
