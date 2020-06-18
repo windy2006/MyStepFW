@@ -18,7 +18,7 @@ switch($method) {
     case 'delete':
         cms::$log = $mystep->getLanguage('admin_art_catalog_delete');
         function multiDelData($cat_id) {
-            global $db, $s;
+            global $db, $s, $web_info;
             $db->build($s->db->pre.'news_cat')
                 ->where('cat_id', 'n=', $cat_id);
             $db->delete();

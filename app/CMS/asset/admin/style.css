@@ -1,5 +1,5 @@
 #main {
-    padding:5px 0px;
+    padding:5px 0;
 }
 #list {
     width:200px;
@@ -282,6 +282,7 @@
     -ms-transition:all 0.2s ease-in;
     -o-transition:all 0.2s ease-in;
     transition:all 0.2s ease-in;
+    transform:rotate(90deg);
 }
 
 .sidebar .nav .nav-item .nav-link i.menu-arrow[aria-expanded="true"] {
@@ -293,7 +294,7 @@
     -o-transform:rotate(180deg);
     -ms-transform:rotate(180deg);
     -webkit-transform:rotate(180deg);
-    transform:rotate(180deg);
+    transform:rotate(0deg);
 }
 
 .sidebar .nav .nav-item.active > .nav-link {

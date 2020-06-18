@@ -30,7 +30,7 @@
 <!--setting_content-->
 <!--loop:end-->
                 </tbody>
-                <tfoot class="position-fixed bg-white border-top">
+                <tfoot id="tfoot">
                 <tr class="float-right">
                     <td colspan="2" class="p-3 border-0">
                         <button class="btn btn-primary btn-sm mr-3" type="button" func="add"> 添 加 </button>
@@ -47,14 +47,6 @@
 <script type="application/javascript">
 let list = <!--list-->;
 let rule_list = <!--rule_list-->;
-function setPosition() {
-    $("#main").css('padding-bottom', 70);
-    $("tfoot").css({'right':0, 'bottom':40});
-    $("tfoot").width($("#main").width()+20);
-    $("tfoot").height($(window).width()>530?60:80);
-}
-$(window).resize(setPosition);
-$(setPosition);
 $(function(){
     let obj = null;
     for(let i=0,m=list.length;i<m;i++) {

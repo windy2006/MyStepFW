@@ -161,6 +161,7 @@ return array (
     'admin_web_subweb_title' => 'Sub-website List',
     'admin_web_subweb_same_idx' => 'The specified index has been exists!',
     'admin_web_subweb_error' => 'The specified Sub-website cannot be found!',
+    'admin_web_subweb_domain' => 'The specified domain has been setted!',
 
     'admin_web_template_delete' => 'Delete Template File',
     'admin_web_template_add' => 'Add Template',

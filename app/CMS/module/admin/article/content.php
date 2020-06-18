@@ -68,6 +68,31 @@ switch($method) {
         $data = r::p('[ALL]');
         if(empty($data['active'])) unset($data['active']);
         if(empty($data['expire'])) unset($data['expire']);
+        if($method=='add_ok' && isset($data['independent_article'])) {
+            $cat = [];
+            $cat['cat_id'] = 0;
+            $cat['web_id'] = $data['web_id'];
+            $cat['pid'] = $data['cat_id'];
+            $cat['name'] = $data['subject'];
+            $cat['idx'] = $data['subject'];
+            $cat['keyword'] = $data['subject'];
+            $cat['comment'] = $data['subject'];
+            $cat['prefix'] = '';
+            $cat['image'] = $data['image'];
+            $cat['view_lvl'] = 0;
+            $cat['type'] = 0;
+            $cat['show'] = 7;
+            $cat['link'] = '';
+            $db->build($s->db->pre.'news_cat')->field('max(`order`)');
+            $cat['order'] = 1 + $db->result();
+            $db->build($s->db->pre.'news_cat')
+                ->field($cat);
+            $db->insert();
+            $data['cat_id'] = $db->getInsertId();
+            \app\CMS\deleteCache('news_cat');
+            $cache->func('\app\CMS\setCatList', [$news_cat], null);
+            unset($data['independent_article']);
+        }
 
         $multi_cata = $data['multi_cata'];
         unset($data['multi_cata']);
@@ -170,6 +195,13 @@ switch($method) {
             $db->build($web_info['setting']->db->pre.'news_show')->field($data);
             $db->insert();
             $id = $db->getInsertId();
+            $data['news_id'] = $id;
+            if(isset($cat)) {
+                $db->build($s->db->pre.'news_cat')
+                    ->field(['link'=>\app\CMS\getLink($data)])
+                    ->where('cat_id', 'n=', $data['cat_id']);
+                $db->update();
+            }
         } else {
             cms::$log = $mystep->getLanguage('admin_art_content_edit');
             unset($data['news_id']);

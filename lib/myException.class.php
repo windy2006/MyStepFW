@@ -143,9 +143,11 @@ class myException extends ErrorException {
         if(is_array($err_msg)) $err_msg = implode(chr(10), $err_msg);
         $cur_err = array();
         $cur_err['Type'] = $err_no.' - '.($err_type[$err_no] ?? 'Unkown error');
+        $cur_err['IP'] = myReq::ip();
         $cur_err['Info'] = $err_msg;
         $cur_err['Time'] = date('Y-m-d H:i:s');
-        $cur_err['URL'] = 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on')?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];;
+        $cur_err['URL'] = 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on')?'s':'').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+        $cur_err['Query'] = myReq::server('query_string');
         $cur_err['File'] = str_replace($root, '', $err_file);
         $cur_err['Line'] = $err_line;
         $cur_err['Code'] = self::getLines($err_file, $err_line);

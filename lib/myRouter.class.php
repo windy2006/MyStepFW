@@ -164,7 +164,7 @@ class myRouter extends myBase {
      * @return bool
      */
     public function check() {
-        if(preg_match('@^/[A-Z]@', $this->query)) return false;
+        if(!defined('URL_FIX') && preg_match('@^/[A-Z]@', $this->query)) return false;
         $url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
         $rule = '';
         $fix_mode = true;

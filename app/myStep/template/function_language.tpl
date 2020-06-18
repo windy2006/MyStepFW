@@ -41,7 +41,7 @@
                 </tr>
 <!--loop:end-->
             </table>
-            <div id="footer" class="position-fixed bg-white border-top text-right py-3" style="z-index: 5;">
+            <div id="tfoot">
                 <button class="btn btn-primary btn-sm mr-3" type="submit"> 提 交 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="button" onclick="history.go(-1)"> 返 回 </button>
@@ -83,18 +83,10 @@
 
 <script type="application/javascript">
 $(function() {
-    setPosition();
-    $(window).resize(setPosition);
     $('form').on('reset', function(){
        location.reload();
     });
 });
-function setPosition() {
-    $("#main").css('padding-bottom', 70);
-    $("#footer").css({'right':0, 'bottom':10});
-    $("#footer").width($("#main").width()+20);
-    $("#footer").height($(window).width()>530?60:80);
-}
 function goto(type) {
     let url = location.href.replace(/&type\=\w+/, '');
     location.href = url + '&type=' + type;

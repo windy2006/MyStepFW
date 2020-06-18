@@ -301,6 +301,7 @@ function getList(data) {
         if(typeof data[i].link ==='undefined' || data[i].link==='') {
             data[i].link = 'article/content/?cat_id='+data[i].cat_id;
         }
+        data[i].link = '<!--path_admin-->article/content/?cat_id='+data[i].cat_id;
         if(list_web!==',all,' && list_web.indexOf(','+data[i].web_id+',')===-1) continue;
         data[i].icon = 'fa fa-caret-right';
         sub = $('\n' +

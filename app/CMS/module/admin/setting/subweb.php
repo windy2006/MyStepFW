@@ -43,6 +43,9 @@ switch($method) {
             $db->build($s->db->pre.'website')
                 ->where('web_id','n=',$id);
             $db->delete();
+            $domain = include(CONFIG.'domain.php');
+            unset($domain[$web_current['domain']]);
+            myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
             \app\CMS\deleteCache('website');
         }
         cms::redirect();
@@ -57,6 +60,7 @@ switch($method) {
         $setting = $data['setting'];
         unset($data['setting']);
         $data['name'] = $setting['web']['title'];
+        $domain = include(CONFIG.'domain.php');
         if($method=='add_ok') {
             if(($tmp = \app\CMS\checkVal($website, 'idx', $data['idx']))!==false) {
                 myStep::info('admin_web_subweb_same_idx');
@@ -66,7 +70,14 @@ switch($method) {
                 $strReplace = array($s->db->name, $setting['db']['pre'], $s->db->charset, $data['domain'], $data['idx']);
                 $info = $db->file(PATH.'module/admin/subweb.sql', $strFind, $strReplace);
             }
+        } else {
+            unset($domain[$web_current['domain']]);
         }
+        if(isset($domain[$data['domain']])) {
+            mystep::info('admin_web_subweb_domain');
+        }
+        $domain[$data['domain']] = 'CMS';
+        myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
         $config = new myConfig(PATH.'website/config_'.$data['idx'].'.php');
         $config->set($setting);
         $config->save('php');

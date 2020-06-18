@@ -35,7 +35,7 @@
 </header>
 <!--main-->
 <footer class="footer fixed-bottom">
-    <!--info idx="footer"-->
+    <!--info idx="copyright"-->
 </footer>
 <!--page_end-->
 </body>
@@ -52,7 +52,8 @@ $(function(){
             obj.addClass('dropdown-toggle').attr('data-toggle','dropdown').parent().addClass('dropdown');
             for(let j=0,n=news_cat[idx].sub.length;j<n;j++) {
                 if((news_cat[idx].sub[j].show & 1) === 0) continue;
-                list.append('<a class="dropdown-item" href="catalog/'+news_cat[idx].sub[j].idx+'">'+news_cat[idx].sub[j].name+'</a>');
+                if(news_cat[idx].sub[j].link.length===0) news_cat[idx].sub[j].link = 'catalog/' + news_cat[idx].sub[j].idx;
+                list.append('<a class="dropdown-item" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
                 obj.parent().append(list);
             }
             setURL('<!--url_prefix_app-->', obj.parent());

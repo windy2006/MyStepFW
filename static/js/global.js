@@ -546,6 +546,25 @@ function setURL(prefix=global.root_fix, context=window.document.body) {
 	return true;
 }
 
+//滚动至锚点
+function gotoAnchor(theAnchor = '') {
+	if(global.timer) return;
+	theAnchor = theAnchor.replace('#', '');
+	let obj = $('a[name="'+theAnchor+'"],a[id="'+theAnchor+'"]');
+	let top = 0;
+	if(obj.length>0) {
+		top = $(obj.get(0)).offset().top - 70;
+	}
+	let timer = Math.abs($('html').scrollTop() - top);
+	if(timer>1000) timer = 1000;
+	global.timer = true;
+	$('html').animate({scrollTop: top}, timer, function(){
+		//location.href = location.pathname + '#' + theAnchor;
+		global.timer = false;
+	});
+	return false;
+}
+
 $(window).bind('beforeunload',function(e){
 	if(global.alert_leave!==false) {
 		let msg = 'Some changes have not been submit, are you sure to leave?';
@@ -554,13 +573,24 @@ $(window).bind('beforeunload',function(e){
 		} else if(typeof(language.alert_leave)==='undefined') {
 			msg = language.alert_leave;
 		}
-		let e = window.event||e;
+		let e = window.event || e;
 		e.returnValue = msg;
 		return msg;
 	}
 });
+
 $(function(){
+	//如页面发生改动，在离开时提示
 	$('form').submit(function(){
 		$(window).unbind('beforeunload');
+	});
+	//修正页面设置base-url造成的锚点定位
+	$('a').on('click', function(){
+		let link = $(this).attr('href');
+		if(link.length>1 && link.indexOf('#')===0 && $(this).attr('data-toggle')===null) {
+			gotoAnchor(link);
+			//location.href = location.pathname + link;
+			return false;
+		}
 	});
 });

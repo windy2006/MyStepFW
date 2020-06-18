@@ -1,4 +1,5 @@
 body {padding:8px;}
 span.mceSubtitle {font-weight:bold;background-color:#ffff99;}
-pre.highlight {position:relative;padding:25px 5px 5px 5px;border:1px #CCCCCC solid;background-color: #EEEEEE;}
-pre.highlight:before{content:attr(data-type);text-transform:uppercase;font-weight:bold;position:absolute;top:0;left:5px;}
+blockquote, pre.highlight {position:relative;padding:25px 5px 5px 5px;border:1px #CCCCCC solid;background-color: #EEEEEE;}
+blockquote:before, pre.highlight:before {content:attr(data-type);text-transform:uppercase;font-weight:bold;position:absolute;top:0;left:5px;}
+blockquote:before {content:'〝〞';font-size:32px;left:-10px;opacity:0.4;}

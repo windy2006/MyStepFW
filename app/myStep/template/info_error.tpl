@@ -10,7 +10,7 @@
 				<td><!--err_content--></td>
 			</tr>
 			<!--loop:end-->
-			<tfoot class="position-fixed bg-white border-top">
+			<tfoot id="tfoot">
 			<tr class="float-right">
 				<td class="p-3 border-0">
 					<a class="btn btn-primary btn-sm <!--err_output-->" href="manager/error?m=clean" /> 清空数据 </a> &nbsp;
@@ -21,14 +21,3 @@
 		</table>
 	</div>
 </div>
-
-<script type="application/javascript">
-    function setPosition() {
-        $("#main").css('padding-bottom', 80);
-        $("tfoot").css({'right':0, 'bottom':40});
-        $("tfoot").width($("#main").width()+20);
-        $("tfoot").height($(window).width()>530?60:80);
-    }
-    $(window).resize(setPosition);
-    $(setPosition);
-</script>

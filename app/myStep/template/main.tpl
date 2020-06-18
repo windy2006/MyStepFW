@@ -124,6 +124,17 @@ function resizeMain() {
     }
 }
 $(window).resize(resizeMain);
+function setPosition() {
+    $("#main").css('padding-bottom', 70);
+    $("#tfoot").css({'right':0, 'bottom':40});
+    $("#tfoot").width($("#main").width()+20);
+    $("#tfoot").height($(window).width()>530?60:80);
+    if($("#tfoot").is('div')) {
+        $("#tfoot").height('auto').addClass('text-right py-3');
+    }
+}
+$(window).resize(setPosition);
+$(setPosition);
 </script>
 </body>
 </html>

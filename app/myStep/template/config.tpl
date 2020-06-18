@@ -87,7 +87,6 @@ function setPosition() {
     $("tfoot").height($(window).width()>530?60:80);
 }
 $(window).resize(setPosition);
-$(setPosition);
 $('[data-toggle="tooltip"]').tooltip();
 $(function(){
     let srv = '<!--server-->';
@@ -98,6 +97,7 @@ $(function(){
     } else {
         alert("检测到您的服务系统为'"+svr+"'，路径模式设定为'query_string'模式，建议改为'rewrite'模式。\nNginx可以根据根目录下的对应文件设置，其他系统可以参考对应设置。");
     }
+    setPosition();
 });
 </script>
 </html>

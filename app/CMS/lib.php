@@ -345,8 +345,11 @@ function getLink($data, $mode='news') {
     $link = ROOT_WEB;
     if(!defined('URL_FIX')) $link .= $info_app['app'].'/';
     if(isset($data['cat_id']))  {
-        $cat = checkVal($news_cat_plat, 'cat_id', $data['cat_id']);
-        $data['web_id'] = $cat['web_id'];
+        if($cat = checkVal($news_cat_plat, 'cat_id', $data['cat_id'])) {
+            $data['web_id'] = $cat['web_id'];
+        } else {
+            unset($cat);
+        }
     }
     switch($mode) {
         case 'news':

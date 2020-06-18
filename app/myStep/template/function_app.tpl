@@ -32,7 +32,7 @@
                 </tr>
             </table>
 <!--loop:end-->
-            <div id="footer" class="position-fixed bg-white border-top text-right py-3" style="z-index: 5;">
+            <div id="tfoot">
                 <button class="btn btn-primary btn-sm mr-3" type="submit"> 重新应用所有路由信息 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
             </div>
@@ -85,8 +85,6 @@ $('#plugin').on('show.bs.modal', function (event) {
         global.alert_leave = true;
     });
 })
-
-
 $(function() {
     $.setCSS('vendor/codemirror/lib/codemirror.css');
     $.setJS([
@@ -113,17 +111,8 @@ $(function() {
             editor.setSize('auto', 'auto');
         });
     });
-    setPosition();
-    $(window).resize(setPosition);
     $('form').on('reset', function(){
        location.reload();
     });
 });
-
-function setPosition() {
-    $("#main").css('padding-bottom', 70);
-    $("#footer").css({'right':0, 'bottom':10});
-    $("#footer").width($("#main").width()+20);
-    $("#footer").height($(window).width()>530?60:80);
-}
 </script>

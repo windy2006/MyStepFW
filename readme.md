@@ -98,7 +98,7 @@ myController类为核心控制类，具体用法请参加功能类文档，其�
 - setOp方法 - OPcache设置与调用
 - regClass方法 - 设置类自动载入规则
 - setAlias方法 - 设置类调用别名
-- header方法 - 返回指定的相应头
+- header方法 - 返回指定的响应头（可以编码或指定的索引，具体参见源代码）
 
 核心类：
 --------
@@ -164,6 +164,7 @@ JS函数：
 - reportError(msg, url, line) - 错误信息处理  
 - checkSetting() - 通过在需要调用检language, setting变量的函数开始加上"if(!checkSetting()) return;"（参考global.js中setURL函数的用法）来保证对应函数执行时可调用系统变量
 - setURL(prefix) - 配合域名绑定模式和路由模式，智能处理页面内链接
+- gotoAnchor(theAnchor) - 滚动至对应的锚点
 - 对象方法扩展 - 针对 String，Data，Number，Array 等对象
    - string.blen - 返回某字符串的二进制长度
    - string.trim - 去除字符串首尾空字符

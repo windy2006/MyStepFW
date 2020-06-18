@@ -451,7 +451,7 @@ class myStep extends myController {
         $cache = CACHE.'script/editor_plugin_'.$info_app['app'].'.js';
         if(!is_file($cache)) {
             $content = implode(chr(10), $this->editor_plugin);
-            $btn = implode(',', $this->editor_btn);
+            $btn = implode(' ', $this->editor_btn);
             $content = <<<code
 tinymce.create('tinymce.plugins.myStep', {
     init : function(editor, url) {

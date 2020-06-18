@@ -21,7 +21,7 @@
 				<input type="hidden" name="news_id" value="<!--record_news_id-->" />
 				<input type="hidden" name="pages" value="<!--record_pages-->" />
 				<input type="hidden" name="back_url" value="<!--back_url-->" />
-				<select name="cat_id" class="custom-select" need="" />
+				<select name="cat_id" class="custom-select">
 					<option value="">请选择</option>
 					<!--loop:start key="catalog"-->
 					<option value="<!--catalog_cat_id-->" web_id="<!--catalog_web_id-->" view_lvl="<!--catalog_view_lvl-->" <!--catalog_selected-->><!--catalog_name--></option>
@@ -70,7 +70,7 @@
 					<span class="input-group-text item-name">文章图示</span>
 				</div>
 				<input id="image" name="image" class="form-control" type="text" maxlength="150" value="<!--record_image-->" />
-				<div class="input-group-append" id="button-addon4">
+				<div class="input-group-append">
 					<button id="upload" class="btn btn-light btn-outline-secondary" type="button" data-title="请选择需要上传的图示文件">上传</button>
 					<button class="btn btn-light btn-outline-secondary" type="button" name="image">插入</button>
 				</div>
@@ -134,7 +134,8 @@
 					<span class="input-group-text item-name">主要内容</span>
 				</div>
 				<div class="form-control">
-					<label><input name="get_remote_file" type="checkbox" value="1" <!--get_remote_file--> /> 自动复制外网图片到本地</label> &nbsp; &nbsp;
+					<label><input name="get_remote_file" type="checkbox" value="1" <!--get_remote_file--> /> 自动复制外网图片到本地 &nbsp; &nbsp; &nbsp; &nbsp;</label>
+					<label><input name="independent_article" type="checkbox" value="1" /> 独立栏目文章 &nbsp; &nbsp; &nbsp; &nbsp;</label>
 					<label><input type="checkbox" id="show_cat" /> 更多选项</label>
 				</div>
 			</div>
@@ -180,16 +181,21 @@
 </div>
 <script type="text/javascript">
 let news_id = "<!--news_id-->";
-let cat_sub_list = new Array();
+let cat_sub_list = [];
 <!--loop:start key="cat_sub"-->
 cat_sub_list['<!--cat_sub_cat_id-->'] = "<!--cat_sub_prefix-->";
 <!--loop:end-->
 $('.cat_ext').hide();
 function myChecker(theForm) {
-    if(theForm.describe.value=="") getDescribe();
-    if(theForm.link.value!="" && $id("content").value=="") {
+    if(theForm.describe.value==="") getDescribe();
+    if(theForm.link.value!=="" && $id("content").value==="") {
         $id("content").value = theForm.link.value;
     }
+    if(theForm.cat_id.value==='' && !theForm.independent_article.checked) {
+    	alert("请选择文章所属栏目！");
+		theForm.cat_id.focus();
+    	return false;
+	}
     let flag = true;
     let theLen = theForm.describe.value.blen();
     if(theLen>240) {
@@ -341,21 +347,11 @@ $(function(){
 	}
     if('<!--method-->'==='edit') {
 		$('select[name=web_id]').prop('disabled', true).parent().hide();
+		$('input[name=independent_article]').parent().remove();
 	}
 	$('select[name=web_id]').trigger('change');
 	global.root_fix += 'article/content/';
 });
-function setHighlight(editor, brush) {
-	let sel = editor.selection.getContent();
-	let str = sel.replace(/<.+?>/g, '');
-	if(str.length>0) {
-		if(/^<pre class="highlight brush:(.+?)">(.+?)<\/pre>$/ism.test(sel)) {
-			str = RegExp.$2;
-		}
-		str = '<pre class="highlight brush:'+brush+'" data-type="'+brush+'">'+str+'</pre>';
-	}
-	editor.execCommand('mceInsertContent',false,str);
-}
 let setting_tinymce_ext = {
 	setup : function(editor) {
 		editor.addButton('subtitle', {
@@ -388,49 +384,9 @@ let setting_tinymce_ext = {
 				}
 			}
 		});
-		editor.addButton( 'highlight', {
-			text: '高亮代码',
-			title : '代码高亮显示',
-			icon: false,
-			type: 'menubutton',
-			menu: [{
-					text: 'PHP',
-					onclick: function() {
-						setHighlight(editor, 'php');
-					}
-				}, {
-					text: 'HTML',
-					onclick: function() {
-						setHighlight(editor, 'html');
-					}
-				}, {
-					text: 'CSS',
-					onclick: function() {
-						setHighlight(editor, 'css');
-					}
-				}, {
-					text: 'JAVASCRIPT',
-					onclick: function() {
-					setHighlight(editor, 'javascript');
-				}
-			}],
-			onPostRender: function() {
-				let ctrl = this;
-				editor.on('click', function(e) {
-					e = e.target;
-					if (e.nodeName === 'PRE' && editor.dom.hasClass(e, "highlight")) {
-						let cls = e.getAttribute('class').replace(/^.+brush:(.+)$/, '$1');
-						editor.selection.select(e);
-						ctrl.text(cls.toUpperCase());
-					} else {
-						ctrl.text('高亮代码');
-					}
-				});
-			}
-		});
 	}
 };
-let setting_tinymce_btn = 'pagebreak,subtitle,highlight';
+let setting_tinymce_btn = 'pagebreak subtitle highlight';
 </script>
 <script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
 <script type="application/javascript" src="app/CMS/asset/admin/tinymce_init.js"></script>

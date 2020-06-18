@@ -162,6 +162,7 @@ return array(
     'admin_web_subweb_title' => '网站列表',
     'admin_web_subweb_same_idx' => '指定的索引已存在！',
     'admin_web_subweb_error' => '指定 ID 的网站不存在！',
+    'admin_web_subweb_domain' => '指定的域名已存在！',
 
     'admin_web_template_delete' => '删除模板文件',
     'admin_web_template_add' => '模板添加',

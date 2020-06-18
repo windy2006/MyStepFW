@@ -91,5 +91,6 @@ if(!empty($info_app['path'][1]) && is_dir(PATH.'module/admin/'.$info_app['path']
     $t->assign('groupname', $group_info['name']);
     $t->assign('list_func', $group_info['power_func']);
     $t->assign('list_web', $group_info['power_web']);
+    $t->assign('path_admin', $path_admin);
     $content = $mystep->render($t);
 }
