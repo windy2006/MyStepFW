@@ -5,8 +5,13 @@ if(is_file(PATH.'config.php')) {
 global $mystep, $s, $router, $info_app;
 $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
 $tpl = new myTemplate($tpl_setting, $tpl_cache);
-$info_app['path'][0] = 'install';
+if($info_app['path'][0]!='install') {
+    $info_app['path'][0] = 'install';
+    $info_app['path'][1] = 0;
+}
 if(!isset($info_app['path'][1])) $info_app['path'][1] = 0;
+if($info_app['path'][1]>0 && !myReq::check('post')) $info_app['path'][1] = 0;
+
 reset:
 $tpl_setting['name'] = implode('_', $info_app['path']);
 $t = new myTemplate($tpl_setting, false, true);

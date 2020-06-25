@@ -7,6 +7,9 @@
         <!--loop:end-->
 	</DIV>
 	<DIV class="text-right mt-3">
-		<button class="btn btn-info" type="button" onclick="location.href='CMS/install/4'">下一步</button>
+		<FORM method="post" action="CMS/install/4">
+			<input type="hidden" name="step" value="4" />
+			<button class="btn btn-info" type="submit">下一步</button>
+		</FORM>
 	</DIV>
 </DIV>

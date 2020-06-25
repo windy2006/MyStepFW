@@ -323,6 +323,7 @@ function debug_show() {
     echo '</pre>';
 }
 function debug() {
+    getOB(true);
     call_user_func_array('debug_show', func_get_args());
     exit;
 }

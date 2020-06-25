@@ -7,8 +7,8 @@ $this->setLanguage(['test_lng'=>'模版语言测试']);
 $this->setFunction('page', 'plugin_sample::setPage');
 $this->editorSetPlugin('
 			editor.addCommand( "test_cmd", function() {
-				var selected_text = editor.selection.getContent();
-				var return_text = "";
+				let selected_text = editor.selection.getContent();
+				let return_text = "";
 				return_text = "<h1>" + selected_text + "</h1>";
 				editor.execCommand("mceInsertContent", 0, return_text);
 			});

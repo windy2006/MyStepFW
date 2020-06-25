@@ -122,7 +122,7 @@
     user-select:none;
 }
 #list_tab a.nav-link {
-    border-radius:10px 10px 0px 0px;
+    border-radius:10px 10px 0 0;
     border:1px solid #CCCCCC;
     background-color:#DDDDDD;
 }
@@ -143,26 +143,26 @@
     background-color:#FFFFFF;
 }
 #list_tab .arrow {
-    color:rgb(0,0,0,0.2);
+    color:rgba(0,0,0,0.2);
     font-size:32px;
     cursor:pointer;
     display:none;
     z-index:100;
 }
 #list_tab .arrow:hover {
-    color:rgb(0,0,0,0.6);
+    color:rgba(0,0,0,0.6);
 }
 #list_tab .left {
-    left:0px;
+    left:0;
 }
 #list_tab .right {
-    right:0px;
+    right:0;
 }
 
 /* Sidebar */
 #sidebar {
     position:absolute;
-    top:0px;
+    top:0;
 }
 #list .sidebar-go {
     position:absolute;
@@ -194,7 +194,6 @@
     box-shadow:none;
     -webkit-box-shadow:none;
     -moz-box-shadow:none;
-    -ms-box-shadow:none;
     border-right:1px solid #e3e3e3;
 }
 .sidebar a {
@@ -270,7 +269,7 @@
 
 .sidebar .nav .nav-item .nav-link i.menu-arrow:before {
     content:"\f13a";
-    font-family:"FontAwesome";
+    font-family: "FontAwesome", serif;
     font-style:normal;
     display:block;
     font-size:1rem;
@@ -331,7 +330,7 @@
 
 .sidebar .nav.sub-menu .nav-item .nav-link {
     color:#656565;
-    padding:0.3rem 0rem;
+    padding:0.3rem 0;
     position:relative;
     font-size:1rem;
     line-height:1;

@@ -35,7 +35,7 @@
 <!--setting_content-->
 <!--loop:end-->
                 </tbody>
-                <tfoot class="position-fixed bg-white border-top">
+                <tfoot id="tfoot">
                 <tr class="float-right">
                     <td colspan="2" class="p-3 border-0">
                         <button class="btn btn-primary btn-sm mr-3" type="submit"> 提 交 </button>
@@ -47,7 +47,6 @@
         </form>
     </div>
 </div>
-
 <script type="application/javascript">
 function setSection(sect) {
     if(sect=='') {

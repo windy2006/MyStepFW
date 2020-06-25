@@ -29,6 +29,7 @@
 </DIV>
 <DIV class="text-right mt-3 mb-5">
 	<FORM method="post" action="CMS/install/1">
+		<input type="hidden" name="step" value="1" />
 		<button class="btn btn-info" type="submit">我同意</button>&emsp;
 		<button class="btn btn-info" type="button" onclick="location.href='about:blank'">我不同意</button>
 	</FORM>

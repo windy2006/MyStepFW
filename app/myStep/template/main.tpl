@@ -41,11 +41,9 @@
         </div>
     </div>
 </div>
-
 <footer class="border-top text-center fixed-bottom bg-light pt-2 font-sm" style="max-height:60px;overflow:hidden;">
     <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2020 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
-<!--page_end-->
 <script type="application/javascript">
 if(self!=top) top.location.href = location.href;
 $.get('app/myStep/menu.json?'+(new Date()).getTime(), function(data) {
@@ -136,5 +134,6 @@ function setPosition() {
 $(window).resize(setPosition);
 $(setPosition);
 </script>
+<!--page_end-->
 </body>
 </html>

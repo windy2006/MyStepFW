@@ -480,6 +480,31 @@ mytpl;
     return str_replace($block, $result, $tpl_content);
 }
 
+function parseNewsNext(\myTemplate &$tpl, &$tag_attrs = array()) {
+    global $s, $db;
+    if(!isset($tag_attrs['id'])) return '';
+    if(!isset($tag_attrs['mode'])) $tag_attrs['mode'] = 'next';
+    $result = <<<'mytpl'
+<?php
+$db->build($s->db->pre_sub.'news_show')
+    ->field('news_id,subject')
+    ->limit(1);
+if(isset($tag_attrs['catalog'])) {
+    $db->build($s->db->pre_sub.'news_show')->where('cat_id', 'n=', $tag_attrs['catalog']);
+}
+if($tag_attrs['mode']=='next') {
+    $db->build($s->db->pre_sub.'news_show')->where('news_id', 'n>', $tag_attrs['id'])->order('news_id');
+} else {
+    $db->build($s->db->pre_sub.'news_show')->where('news_id', 'n<', $tag_attrs['id'])->order('news_id', true);
+}
+if($news = $db->record()) {
+    echo '<a href="'.app\CMS\getLink($news).'">'.$news['subject'].'</a>';
+}
+?>
+mytpl;
+    return $result;
+}
+
 function parseInfo(\myTemplate &$tpl, &$tag_attrs = array()) {
     global $s, $db, $web_info;
     $result = '';

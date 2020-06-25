@@ -214,6 +214,7 @@ class myStep extends myController {
             $this->setAddedContent('start', '<script type="application/javascript" src="'.ROOT_WEB.'cache/script/'.basename($this->setting->js).'"></script>');
             $this->setAddedContent('start', '<script type="application/javascript">global.root="'.ROOT_WEB.'";</script>');
         }
+        $this->setAddedContent('end', '<script type="application/javascript">$(ms_func_run);</script>');
         parent::show($tpl, $this->setting->web->minify, 's,db,cache,mystep');
     }
 

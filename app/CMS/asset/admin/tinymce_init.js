@@ -54,49 +54,51 @@ let setting_tinymce = {
 };
 tinymce.create('tinymce.plugins.myStep_cms', {
     init : function(editor, url) {
+        editor.addCommand("ms_format", function() {
+            let content = editor.getContent();
+            let tag = 'div';
+            if(content.indexOf("<div")===-1) {
+                content = content.replace(/(<br(\s\/)?>)+/ig, "</p><p>");
+                content = content.replace(/<p(.*?)>[\xa0\r\n\s\u3000]+/ig, "<p$1>");
+                content = content.replace(/<\/p><p/g, "<\/p>\n<p");
+                tag = 'p';
+            } else {
+                content = content.replace(/(<br(\s\/)?>)+/ig, "</div><div>");
+                content = content.replace(/<div(.*?)>[\xa0\r\n\s\u3000]+/ig, "<div$1>");
+                content = content.replace(/<\/div><div/g, "<\/div>\n<div");
+            }
+            content = content.replace(/mso-[^;]+?;/ig, "");
+            content = content.replace(/[\xa0]/g, "");
+            content = content.replace(/<\/td>/g, "&nbsp;</td>");
+            content = content.replace(/(<a id=.+>)(<\/a>)/g, "$1&nbsp;$2");
+            while(content.search(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/g, "<!-- pagebreak -->");
+            while(content.search(/<(\w+)[^>]*>[\s\r\n]*<\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*>[\s\r\n]*<\/\1>[\r\n\s]*/g, "");
+            while(content.search(/<\/(\w+)><\1([^>]*)>/g)!==-1) content = content.replace(/<\/(\w+)><\1([^>]*)>/g, "");
+            content = content.replace(/  /g, String.fromCharCode(160)+" ");
+            content += "<"+tag+"></"+tag+">";
+            editor.setContent(content);
+        });
+        editor.addCommand("ms_change", function() {
+            let content = editor.selection.getContent();
+            if(content.length===0) {
+                content = editor.getContent();
+                editor.execCommand("SelectAll");
+            }
+            if(content.indexOf("<div")===-1) {
+                content = content.replace(/<p(.*?)>(.+?)<\/p>/imsg, "<div$1>$2</div>");
+                content += "<p></p>";
+            } else {
+                content = content.replace(/<div(.*?)>(.+?)<\/div>/imsg, "<p$1>$2</p>");
+                content += "<div></div>";
+            }
+            editor.execCommand("mceInsertContent", false, content);
+            content = editor.getContent().replace(/(<\/?\w+>)[\r\n\s]*\1/g, "$1");
+            editor.setContent(content);
+        });
         editor.addButton('change', {
             title : 'Div/P 模式切换',
             image : global.root + 'static/images/div.png',
-            onclick : function() {
-                let content = editor.selection.getContent();
-                if(content.length===0) {
-                    content = editor.getContent();
-                    editor.execCommand("SelectAll");
-                }
-                if(content.indexOf("<div")===-1) {
-                    content = content.replace(/<p(.*?)>(.+?)<\/p>/imsg, "<div$1>$2</div>");
-                } else {
-                    content = content.replace(/<div(.*?)>(.+?)<\/div>/imsg, "<p$1>$2</p>");
-                }
-                editor.execCommand("mceInsertContent", false, content);
-                content = editor.getContent().replace(/(<\/?\w+>)[\r\n\s]*\1/g, "$1");
-                editor.setContent(content);
-            }
-        });
-        editor.addButton('format', {
-            title : '代码清理',
-            image : global.root + 'static/images/format.png',
-            onclick : function() {
-                let content = editor.getContent();
-                if(content.indexOf("<div")===-1) {
-                    content = content.replace(/(<br(\s\/)?>)+/ig, "</p><p>");
-                    content = content.replace(/<p(.*?)>[\xa0\r\n\s\u3000]+/ig, "<p$1>");
-                    content = content.replace(/<\/p><p/g, "<\/p>\n<p");
-                } else {
-                    content = content.replace(/(<br(\s\/)?>)+/ig, "</div><div>");
-                    content = content.replace(/<div(.*?)>[\xa0\r\n\s\u3000]+/ig, "<div$1>");
-                    content = content.replace(/<\/div><div/g, "<\/div>\n<div");
-                }
-                content = content.replace(/mso-[^;]+?;/ig, "");
-                content = content.replace(/[\xa0]/g, "");
-                content = content.replace(/<\/td>/g, "&nbsp;</td>");
-                content = content.replace(/(<a id=.+>)(<\/a>)/g, "$1&nbsp;$2");
-                while(content.search(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/g, "<!-- pagebreak -->");
-                while(content.search(/<(\w+)[^>]*>[\s\r\n]*<\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*>[\s\r\n]*<\/\1>[\r\n\s]*/g, "");
-                while(content.search(/<\/(\w+)><\1([^>]*)>/g)!==-1) content = content.replace(/<\/(\w+)><\1([^>]*)>/g, "");
-                content = content.replace(/  /g, String.fromCharCode(160)+" ");
-                editor.setContent(content);
-            }
+            cmd : 'ms_change'
         });
         editor.addButton('upload', {
             title : '附件管理',
@@ -179,11 +181,16 @@ tinymce.create('tinymce.plugins.myStep_cms', {
                 let ctrl = this;
                 editor.on('click', function(e) {
                     e = e.target;
+                    c(e.nodeName);
+                    if(e.nodeName === 'CODE') e = e.parentNode;
+                    c(editor.dom.hasClass(e, "highlight"));
                     if (e.nodeName === 'PRE' && editor.dom.hasClass(e, "highlight")) {
-                        let cls = e.getAttribute('class').replace(/^.+brush:(.+)$/, '$1');
+                        let type = e.getAttribute('data-lng').toLocaleLowerCase();
                         editor.selection.select(e);
-                        ctrl.value(cls.toLocaleLowerCase());
+                        ctrl.value(type);
+                        ctrl.text(type.toUpperCase());
                     } else {
+                        ctrl.value('');
                         ctrl.text('高亮代码');
                     }
                 });
@@ -202,7 +209,7 @@ tinymce.create('tinymce.plugins.myStep_cms', {
 });
 tinymce.PluginManager.add('myStep_cms', tinymce.plugins.myStep_cms);
 $.getScript(global.root+'cache/script/editor_plugin_cms.js', function(){
-    global.editor_btn += ' upload change format'
+    global.editor_btn += ' upload change'
     if(typeof(setting_tinymce_ext)!='undefined') $.extend(setting_tinymce, setting_tinymce_ext);
     if(typeof(setting_tinymce_btn)!='undefined') setting_tinymce.toolbar2 += ' | '+setting_tinymce_btn;
     setting_tinymce.toolbar2 = global.editor_btn + ' | ' + setting_tinymce.toolbar2;
@@ -214,21 +221,22 @@ function insertContent(str) {
 function setHighlight(editor, brush) {
     let sel = editor.selection.getContent();
     if(sel.length===0) return;
-    let str = sel.replace(/<br.*?>/g, '\n');
-    str = str.replace(/\s\s/g, '&emsp;&emsp;');
-    str = str.replace(/<.+?>/g, '');
-    if(str.length>0) {
-        if(/^<pre class="highlight brush:(.+?)">(.+?)<\/pre>$/ism.test(sel)) {
-            str = RegExp.$2;
-        }
-        if(brush!=='') {
-            str = '<pre class="highlight brush:'+brush+'" data-type="'+brush+'">\n'+str+'\n</pre>';
-            str += '<div></div>';
-        } else {
-            str = '<div>' + str.replace(/\n+/g, '</div><div>') + '</div>';
-        }
-        editor.execCommand('mceInsertContent',false, str);
+    let str = sel.replace(/<.+?>/g, '');
+    if(str.length===0) return;
+    if(/^<pre class="highlight".+?><code.+?>(.+?)<\/code><\/pre>$/ism.test(sel)) {
+        str = RegExp.$1;
     }
+    str = str.replace(/<br.*?>/g, '\n');
+    str = str.replace(/<.+?>/g, '');
+    str = str.replace(/\n\s(.)/g, '\n  $1');
+    str = str.replace(/ /g, '&nbsp;');
+    if(brush!=='') {
+        str = '<pre class="highlight" data-lng="'+brush+'"><code class="language-'+brush+'">'+str+'<\/code></pre>';
+    } else {
+        str = '<div>' + str.replace(/\n+/g, '</div>\n<div>') + '</div>';
+    }
+    str += '\n<div></div>\n';
+    editor.execCommand('mceInsertContent',false, str);
 }
 function uploadInit() {
     if(!checkSetting()) return;

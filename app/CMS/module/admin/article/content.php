@@ -333,7 +333,7 @@ function build_page($method) {
 		    myStep::info('admin_art_content_error');
 		}
         s::htmlTrans($record);
-		$tpl->assign('record',$record);
+		$tpl->assign('record', $record);
 		$cat_id = $record['cat_id'];
 		$content = array();
         $db->build($web_info['setting']->db->pre.'news_detail')
@@ -374,12 +374,21 @@ function build_page($method) {
 	//catalog select
 	if(empty($web_info['web_id'])) $web_info['web_id']=1;
 	for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
-	    if(!checkPower('web', $news_cat_plat[$i]['web_id']) || !empty($news_cat_plat[$i]['link'])) continue;
+	    if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
         $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
         $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
         $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));
-        $tpl->setLoop('catalog', array('cat_id'=>$news_cat_plat[$i]['cat_id'], 'web_id'=>$news_cat_plat[$i]['web_id'], 'name'=>$news_cat_plat[$i]['name'], 'view_lvl'=>$news_cat_plat[$i]['view_lvl'], 'selected'=>($cat_id==$news_cat_plat[$i]['cat_id']?'selected':'')));
-		$tpl->setLoop('cat_sub', array('cat_id'=>$news_cat_plat[$i]['cat_id'], 'prefix'=>$news_cat_plat[$i]['prefix']));
+        $tpl->setLoop('catalog', array(
+            'cat_id'=>$news_cat_plat[$i]['cat_id'],
+            'web_id'=>$news_cat_plat[$i]['web_id'],
+            'name'=>$news_cat_plat[$i]['name'],
+            'view_lvl'=>$news_cat_plat[$i]['view_lvl'],
+            'selected'=>(($cat_id==$news_cat_plat[$i]['cat_id'])?'selected':'')
+        ));
+		$tpl->setLoop('cat_sub', array(
+		    'cat_id'=>$news_cat_plat[$i]['cat_id'],
+            'prefix'=>$news_cat_plat[$i]['prefix']
+        ));
 	}
 	$tpl->assign('get_remote_file', $s->content->get_remote_img?'checked':'');
 	$tpl->assign('method', $method);

@@ -60,4 +60,16 @@ $setting_detail['db'] = array(
     ]
 );
 
+$setting_detail['watermark'] = array(
+    'name' => '水印设置',
+    'list' => [
+        'mode' => array(
+            'name' => '水印模式',
+            'describe' => '是否在文章内容或图片上添加水印',
+            'type' => array('checkbox', array('文章水印'=>1, '图片水印'=>2))
+        )
+    ]
+);
+
+
 return $setting_detail;

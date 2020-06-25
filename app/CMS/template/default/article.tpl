@@ -43,6 +43,14 @@
 					<!--loop:end-->
 				</ul>
 			</nav>
+			<div class="row">
+				<div class="col">
+					上一篇：<!--news_next id='$id' mode='prev'-->
+				</div>
+				<div class="col text-right">
+					下一篇：<!--news_next id='$id'-->
+				</div>
+			</div>
 		</div>
 		<div class="col-12 col-lg-4 p-0 pl-lg-3">
 			<div class="card">

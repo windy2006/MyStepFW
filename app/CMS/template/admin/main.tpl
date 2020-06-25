@@ -12,8 +12,6 @@
 </head>
 <body class="bg-transparent">
 <!--main-->
-<!--page_end-->
-</body>
 <script type="application/javascript">
 let p = window.parent;
 $('html').bind('keydown',function(e){
@@ -99,4 +97,6 @@ $(function(){
     }
 });
 </script>
+<!--page_end-->
+</body>
 </html>

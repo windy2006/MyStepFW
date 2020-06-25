@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>迈思框架指南 Guide for MyStep Framework</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="windows-Target" content="_top" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="mystep,framework,free" />
+    <meta name="description" content="开源PHP框架系统" />
+    <base href="/" />
+    <link rel="Shortcut Icon" href="favicon.ico" />
+    <link rel="stylesheet" media="screen" type="text/css" href="/cache/script/CMS_guide.css" />
+    <script type="application/javascript" src="/cache/script/myStep_.js"></script>
+    <script type="application/javascript">global.root="/";</script>
+</head>
+<body class="py-5">
+<header class="navbar navbar-expand-sm navbar-dark bd-navbar fixed-top">
+    <a class="btn navbar-brand d-inline-block mr-3" href="#" onclick="return false;"><b>迈思指南</b></a>
+    <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav" aria-expanded="false">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse collapse" id="nav">
+        <ul id="top_nav" class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-info-sign"></span> 信息</a>
+                <div class="dropdown-menu dropdown-menu-left">
+                    <a class="dropdown-item active" href="/manager">基本信息</a>
+                    <a class="dropdown-item" href="/manager/db">数据库信息</a>
+                    <a class="dropdown-item" href="/manager/php">PHP信息</a>
+                    <a class="dropdown-item" href="/manager/phpinfo">phpinfo()</a>
+                    <a class="dropdown-item" href="/manager/error">错误日志</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span> 设置</a>
+                <div class="dropdown-menu dropdown-menu-left">
+                    <a class="dropdown-item" href="/manager/setting/">参数设置</a>
+                    <a class="dropdown-item" href="/manager/setting/class">类加载设置</a>
+                    <a class="dropdown-item" href="/manager/setting/domain">域名绑定</a>
+                    <a class="dropdown-item" href="/manager/setting/execute">代码测试</a>
+                </div>
+            </li>
+        </ul>
+        <form action="">
+            <input id="search_input" type="text" class="form-control search-query" placeholder="检索" />
+        </form>
+    </div>
+</header>
+<div class="container-fluid">
+    <div class="row" style="min-height:600px;">
+        <div id="list">
+            <div class="position-fixed" style="top:60px;width:200px;">
+                <ul id="side_nav" class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"  data-toggle="collapse" href="#cat_1"><span class="glyphicon glyphicon-info-sign"></span> 信息</a>
+                        <i class="nav-arrow" data-toggle="collapse" href="#cat_1"></i>
+                        <div class="collapse" id="cat_1">
+                            <a class="dropdown-item" href="/manager">基本信息</a>
+                            <a class="dropdown-item" href="/manager/db">数据库信息</a>
+                            <a class="dropdown-item" href="/manager/php">PHP信息</a>
+                            <a class="dropdown-item" href="/manager/phpinfo">phpinfo()</a>
+                            <a class="dropdown-item" href="/manager/error">错误日志</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"  data-toggle="collapse" href="#cat_2"><span class="glyphicon glyphicon-wrench"></span> 设置</a>
+                        <i class="nav-arrow" data-toggle="collapse" href="#cat_2"></i>
+                        <div class="collapse" id="cat_2">
+                            <a class="dropdown-item" href="/manager/setting/">参数设置</a>
+                            <a class="dropdown-item" href="/manager/setting/class">类加载设置</a>
+                            <a class="dropdown-item" href="/manager/setting/domain">域名绑定</a>
+                            <a class="dropdown-item" href="/manager/setting/execute">代码测试</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="main" class="border-left">
+            <div class="mb-3 h-75">
+                <div class="title">标题标题</div>
+                <nav aria-label="breadcrumb" class="w-100">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Library</li>
+                        <li class="breadcrumb-item active" aria-current="page">Library</li>
+                    </ol>
+                </nav>
+                <div id="content" class="py-3">
+                    <h4>Highlight - 1<a id="p1"></a> </h4>
+                    <h5>CSS<a id="p1.1"></a> </h5>
+                    <div>
+<pre class="highlight brush:css" data-lng="css">#side_nav li.nav-item i.nav-arrow[aria-expanded="true"]:before {
+ transform:rotate(-90deg);
+}
+.breadcrumb {
+ background-color: transparent;
+ border-bottom: 1px grey solid;
+}
+</pre>
+                    </div>
+                    <h5>HTML<a id="p1.2"></a> </h5>
+                    <pre class="highlight brush:html" data-lng="html">&lt;nav aria-label="breadcrumb"&gt;
+  &lt;ol class="breadcrumb"&gt;
+    &lt;li class="breadcrumb-item"&gt;&lt;a href="#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="breadcrumb-item active" aria-current="page"&gt;Library&lt;/li&gt;
+    &lt;li class="breadcrumb-item active" aria-current="page"&gt;Library&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/nav&gt;
+</pre>
+                    <hr />
+                    <h4>Highlight - 2<a id="p2"></a> </h4>
+                    <h5>PHP<a id="p2.1"></a> </h5>
+                    <pre class="highlight brush:php" data-lng="php">if(version_compare(PHP_VERSION, '7.0.0', '&lt;'))
+die('MyStep Framework can only run under PHP 7.0 or upper version!');
+
+define('ROOT', str_replace(DIRECTORY_SEPARATOR, '/', __DIR__).'/');
+
+require_once(LIB.'myStep.class.php');
+myStep::init();
+</pre>
+                    <h5>Javascritp<a id="p2.2"></a> </h5>
+                    <pre class="highlight brush:javascript" data-lng="javascript">//获取当前路径（可自定义目录层级）
+function getPath(lvl) {
+  let hostname = location.hostname;
+  let pathname = location.pathname;
+  let contextPath = pathname.split("/");
+  let port = location.port;
+  let protocol = location.protocol;
+  if(port!=='') port = ':' + port;
+  if(isNaN(lvl)) lvl = 0;
+  return protocol + "//" + hostname + port + contextPath.slice(0,lvl+1).join('/');
+}
+</pre>
+                </div>
+                <div id="side_cat">
+                    <div id="cat_list" class="position-sticky">
+                        <div class="side-bar">
+                            <span class="fa fa-circle start"></span>
+                            <span class="fa fa-circle end"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="border-top text-center fixed-bottom bg-light pt-2 font-sm" style="max-height:60px;overflow:hidden;">
+    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2020 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
+</footer>
+<script type="application/javascript">
+if(self!==top) top.location.href = location.href;
+$('#list').mousewheel(function(e){
+    let obj = $('#list > div');
+    let top = parseInt(obj.css('top'));
+    let step = 8;
+    if(e.deltaY<0) {
+        if(obj.height()+top>$(window).height()-$('header').height()) {
+            obj.css('top', top-step);
+        }
+    } else {
+        if(top<60) {
+            if(top-60>-step) step = -top;
+            obj.css('top', top+step);
+        }
+    }
+    e.stopPropagation();
+    return false;
+});
+function resizeMain() {
+    $('#main').css('min-height', 0);
+    $('#main').css('min-height', $(document).height()-80);
+    if(navigator.userAgent.indexOf(".NET") != -1) {
+        let top = ($('#list').css('display')=='none') ? '0px' : '65px';
+        $('#main').parent().css('padding-top', top);
+    }
+}
+$(window).resize(resizeMain);
+$(function(){
+    $('#list .collapse').on('show.bs.collapse', function () {
+        $('.nav-arrow[aria-expanded=true]').each(function(){
+            $(this).attr('aria-expanded','false');
+            $(this).next().collapse('hide');
+        });
+    })
+    $('body').click(function(e){
+        if($(e.target).parents('header').length) return;
+        $('header > .collapse').collapse('hide');
+    });
+
+    let anchor_list = $("a[id^=p]");
+    let cat_html = '<ul>';
+    let cur_lvl = 1;
+    for(let i=0,m=anchor_list.length;i<m;i++) {
+        let obj = $(anchor_list.get(i));
+        let cur_idx = obj.attr('id').replace('p', '').split('.');
+        obj.addClass('anchor').attr('href', '#'+obj.attr('id'));
+        obj.parent().addClass('sub_title').addClass('level_'+cur_idx.length);
+        if(cur_idx.length > cur_lvl) {
+            cat_html += '<ul>';
+        } else if(cur_idx.length < cur_lvl) {
+            cat_html += '</li></ul></li>';
+        } else {
+            if(i>0) cat_html += '</li>';
+        }
+        cur_lvl = cur_idx.length;
+        cat_html += '<li><a href="#'+obj.attr('id')+'">'+('&emsp;').repeat(cur_lvl)+cur_idx.join('.')+'&emsp;'+obj.parent().text()+'</a>';
+    }
+    cat_html += ('</li></ul>').repeat(cur_lvl-1);
+    cat_html += '</li></ul>';
+    $('#cat_list').html($('#cat_list').html()+cat_html);
+
+    $('#cat_list a').on('click', function(){
+        gotoAnchor($(this).attr('href'));
+        return false;
+    });
+    $("#cat_list a:first").addClass('active');
+    $(window).scroll(function(){
+        let offset_top = 220;
+        let the_top = $("html").scrollTop();
+        $("#cat_list a").removeClass('active');
+        for(let i=anchor_list.length-1;i>=0;i--) {
+            if(the_top+offset_top>=$(anchor_list.get(i)).offset().top) {
+                $("#cat_list a[href='#"+anchor_list.get(i).id+"']").addClass('active');
+                break;
+            }
+        }
+    });
+    let the_link = '/manager/php';
+    let obj = $('#side_nav a[href$="'+the_link+'"]');
+    if(obj.length>0) {
+        obj.addClass('active').css('color','white');
+        obj.parent().collapse('show');
+    }
+})
+</script>
+</body>
+<link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
+<link href="vendor/syntaxhighlighter/styles/shThemeRDark.css" rel="stylesheet" type="text/css">
+<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
+<script src="vendor/syntaxhighlighter/shAutoloader.js" type="text/javascript"></script>
+<script type="text/javascript">
+    SyntaxHighlighter.autoloader(
+        'javascript  vendor/syntaxhighlighter/shBrushJScript.js',
+        'css    vendor/syntaxhighlighter/shBrushCss.js',
+        'html    vendor/syntaxhighlighter/shBrushXml.js',
+        'php    vendor/syntaxhighlighter/shBrushPhp.js',
+    );
+    SyntaxHighlighter.all();
+</script>
+</html>

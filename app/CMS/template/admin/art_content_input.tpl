@@ -206,6 +206,7 @@ function myChecker(theForm) {
 	if(theLen>50 || theLen===0) {
 		$("#keyword").val($('#subject').val());
 	}
+	tinyMCE.editors[0].execCommand('ms_format');
     return flag;
 }
 function getKeyword() {
@@ -216,7 +217,6 @@ function getKeyword() {
             $("#keyword").val(data);
         }, "text");
     }
-    return;
 }
 function getDescribe() {
 	let obj = $("textarea[name=describe]");
@@ -236,7 +236,6 @@ function getDescribe() {
 		result += "……";
 	}
     obj.val(result);
-	return;
 }
 function setPrefix(cat_id) {
     if(cat_id==null || typeof(cat_id)=="undefined") cat_id = $("#select[name=cat_id]").value;
@@ -246,7 +245,7 @@ function setPrefix(cat_id) {
 		prefix.disabled = true;
         return;
     }
-    let the_list = new Array();
+    let the_list = [];
     prefix.innerHTML = "";
     prefix.options.add(new Option("无前缀", "", false, false));
     if(typeof(cat_sub_list[cat_id])!=='undefined' && cat_sub_list[cat_id].length>0) {
@@ -258,7 +257,6 @@ function setPrefix(cat_id) {
     } else {
         prefix.disabled = true;
     }
-    return;
 }
 $(function(){
 	$('#show_cat').click(function(){
@@ -272,7 +270,6 @@ $(function(){
 		if(prefix.length>1) {
 			obj.value = "[" + prefix + "]" + obj.value;
 		}
-		return;
 	});
     $('#cat_id').change(function(){
         setPrefix(this.value);

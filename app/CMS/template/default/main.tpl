@@ -37,8 +37,6 @@
 <footer class="footer fixed-bottom">
     <!--info idx="copyright"-->
 </footer>
-<!--page_end-->
-</body>
 <script type="application/javascript">
 let news_cat = <!--news_cat-->;
 $(function(){
@@ -50,15 +48,16 @@ $(function(){
         if(typeof news_cat[idx].sub != 'undefined') {
             let list = $('<div class="dropdown-menu"></div>').css('margin-top',1);
             obj.addClass('dropdown-toggle').attr('data-toggle','dropdown').parent().addClass('dropdown');
+            obj = obj.parent();
             for(let j=0,n=news_cat[idx].sub.length;j<n;j++) {
                 if((news_cat[idx].sub[j].show & 1) === 0) continue;
                 if(news_cat[idx].sub[j].link.length===0) news_cat[idx].sub[j].link = 'catalog/' + news_cat[idx].sub[j].idx;
                 list.append('<a class="dropdown-item" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
-                obj.parent().append(list);
             }
-            setURL('<!--url_prefix_app-->', obj.parent());
+            obj.append(list);
+            setURL('<!--url_prefix_app-->', obj);
         }
-        obj.parent().hover(function(){
+        obj.hover(function(){
             $(this).addClass('show');
             $(this).find('div.dropdown-menu').addClass('show');
         }, function(){
@@ -67,7 +66,7 @@ $(function(){
         });
     }
     $.get("<!--url_prefix-->api/CMS/user", function(user_info){
-        if(user_info.name!='') {
+        if(user_info.name!=='') {
             $('#user_info').html('<li class="nav-item" title="'+user_info.group+'"><a class="nav-link text-white" href="<!--url_prefix_app-->user/profile"><span class="glyphicon glyphicon-user"></span> '+user_info.name+'</a></li>\n' +
                 '            <li class="nav-item"><a class="nav-link text-white" href="<!--url_prefix_app-->user/logout"><span class="glyphicon glyphicon-log-out"></span> 退出</a></li>');
         };
@@ -75,4 +74,6 @@ $(function(){
     setURL();
 });
 </script>
+<!--page_end-->
+</body>
 </html>

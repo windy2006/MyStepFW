@@ -1,5 +1,6 @@
 <?PHP
 $mystep->regTag('news', 'app\CMS\parseNews');
+$mystep->regTag('news_next', 'app\CMS\parseNewsNext');
 $mystep->regTag('info', 'app\CMS\parseInfo');
 $mystep->regTag('link', 'app\CMS\parseLink');
 $mystep->regTag('tag', 'app\CMS\parseTag');
@@ -20,6 +21,9 @@ if($tpl_cache) {
 $tpl = new myTemplate($tpl_setting, $tpl_cache);
 if(!in_array($module, ['article','tag','user'])) $mystep->checkCache($tpl);
 require(PATH.'module/'.$module.'.php');
+if(is_file(PATH.'template/'.$tpl_setting['style'].'/module/'.$module.'.php')) {
+    require(PATH.'template/'.$tpl_setting['style'].'/module/'.$module.'.php');
+}
 for($i=0,$m=count($news_cat);$i<$m;$i++) {
     if(($news_cat[$i]['show'] & 1) == 0) continue;
     if($news_cat[$i]['web_id'] != $web_info['web_id']) continue;

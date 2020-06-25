@@ -2,7 +2,7 @@
  *                                                *
  * Author  : Windy_sk                             *
  * Create  : 2003-05-03                           *
- * Modified: 2004-1-9                             *
+ * Modified: 2020-6-21                            *
  * Email   : windy2006@gmail.com                  *
  * HomePage: www.mysteps.cn                       *
  * Notice  : U Can Use & Modify it freely,        *
@@ -11,10 +11,12 @@
  **************************************************/
 
 let global = {};
+global.root = '/';
 global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
 global.root_fix = global.root_fix.replace(/\/+/g, '/');
 global.editor_btn = '';
 global.alert_leave = false;
+global.func = [];
 
 //获取当前路径（可自定义目录层级）
 function getPath(lvl) {
@@ -565,6 +567,32 @@ function gotoAnchor(theAnchor = '') {
 	return false;
 }
 
+//注册需要页面载入后运行的函数
+function ms_func_reg(func) {
+	if(typeof(func)!=='function') return;
+	global.func.push(func);
+}
+
+//运行于所有页面载入之后的函数
+function ms_func_run(){
+	//如页面发生改动，在离开时提示
+	$('form').submit(function(){
+		$(window).unbind('beforeunload');
+	});
+	//修正页面设置base-url造成的锚点定位
+	$('a[href^="#"]').on('click', function(){
+		let link = $(this).attr('href');
+		if($(this).attr('data-toggle')==null) {
+			gotoAnchor(link);
+			//location.href = location.pathname + link;
+			return false;
+		}
+	});
+	for(let i in global.func) {
+		global.func[i]();
+	}
+}
+
 $(window).bind('beforeunload',function(e){
 	if(global.alert_leave!==false) {
 		let msg = 'Some changes have not been submit, are you sure to leave?';
@@ -577,20 +605,4 @@ $(window).bind('beforeunload',function(e){
 		e.returnValue = msg;
 		return msg;
 	}
-});
-
-$(function(){
-	//如页面发生改动，在离开时提示
-	$('form').submit(function(){
-		$(window).unbind('beforeunload');
-	});
-	//修正页面设置base-url造成的锚点定位
-	$('a').on('click', function(){
-		let link = $(this).attr('href');
-		if(link.length>1 && link.indexOf('#')===0 && $(this).attr('data-toggle')===null) {
-			gotoAnchor(link);
-			//location.href = location.pathname + link;
-			return false;
-		}
-	});
 });

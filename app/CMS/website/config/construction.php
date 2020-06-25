@@ -16,4 +16,7 @@ $construction['template']['style'] = 'text';
 
 $construction['db'] = array();
 $construction['db']['pre'] = 'text';
+
+$construction['watermark'] = array();
+$construction['watermark']['mode'] = 'checkbox';
 return $construction;

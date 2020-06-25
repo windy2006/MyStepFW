@@ -16,4 +16,7 @@ $setting['template']['style'] = 'default';
 
 $setting['db'] = array();
 $setting['db']['pre'] = 'cms_';
+
+$setting['watermark'] = array();
+$setting['watermark']['mode'] = 2;
 return $setting;

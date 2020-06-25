@@ -42,10 +42,10 @@ $setting['expire']['tag'] = 86400;
 $setting['expire']['article'] = 604800;
 
 $setting['watermark'] = array();
-$setting['watermark']['mode'] = '1,2';
+$setting['watermark']['mode'] = 2;
 $setting['watermark']['txt'] = 'MyStep CMS';
 $setting['watermark']['img'] = 'static/images/logo.png';
-$setting['watermark']['position'] = 1;
+$setting['watermark']['position'] = 3;
 $setting['watermark']['img_rate'] = 4;
 $setting['watermark']['txt_font'] = 'static/fonts/font.ttc';
 $setting['watermark']['txt_fontsize'] = 12;

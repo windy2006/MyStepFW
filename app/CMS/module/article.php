@@ -1,4 +1,5 @@
 <?PHP
+global $id;
 if(!isset($info_app['path'][2]) && is_numeric($info_app['path'][1])) {
     $id = $info_app['path'][1];
 } else {
@@ -57,17 +58,20 @@ if(is_numeric($page)) {
 } else {
     $record = $records[0];
     $sub_title = [$record['sub_title']];
-    $record['content'] = '<div class="block"><a name="content_0"></a>
+    $record['content'] = preg_replace('#<a id="p(.+?)"#', '<a id="p1-\1"', $record['content']);
+    $record['content'] = '<div class="block"><a id="content_0"></a>
 <div class="sub-title">'.$record['sub_title'].'</div>
 '.$record['content'].'
 </div>';
     for($i=1,$m=count($records);$i<$m;$i++) {
         $sub_title[] = $records[$i]['sub_title'];
-        $record['content'] .= '<div class="block"><a name="content_0"></a>
+        $records[$i]['content'] = preg_replace('#<a id="p(.+?)"#', '<a id="p'.($i+1).'-\1"', $records[$i]['content']);
+        $record['content'] .= '<hr /><div class="block"><a id="content_'.$i.'"></a>
 <div class="sub-title">'.$records[$i]['sub_title'].'</div>
 '.$records[$i]['content'].'
 </div>';
     }
+    $record['sub_title'] = '';
 }
 unset($records);
 
@@ -106,8 +110,7 @@ while($pid>0) {
 for($i=count($path_list)-1;$i>=0;$i--) {
     $t->setLoop('cat_list', $path_list[$i]);
 }
-
-$t->assign('multi_page', $page_count>1?'':'d-none');
+$t->assign('multi_page', ($page_count>1)?'':'d-none');
 for($i=0,$m=count($sub_title); $i<$m; $i++) {
     $link = preg_replace('#[&?].*$#','', r::svr('REQUEST_URI')).'&page='.($i+1);
     $t->setLoop('page', array('link'=>$link, 'no'=>($i+1), 'active'=>(($page==$i+1) ? 'active' : '')));

@@ -21,3 +21,6 @@
 		</table>
 	</div>
 </div>
+<script type="text/javascript">
+	$.vendor('highlight',{callback:()=>highlight(2, 'Eclipse')});
+</script>

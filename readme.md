@@ -143,6 +143,7 @@ JS变量：
    - global.editor_btn - 针对tinyMCE编辑器的按钮扩展
    - global.alert_leave - 在含表单的页面，如果内容发生变更，且通过非提交方式离开页面的话，将此变量设置为 true，即可出现警告
    - global.timer - 用于计时器的返回值记录（非强占，可灵活调用）
+   - global.func - 页面载入后所需运行的函数组
 
 JS函数：
 --------
@@ -165,6 +166,8 @@ JS函数：
 - checkSetting() - 通过在需要调用检language, setting变量的函数开始加上"if(!checkSetting()) return;"（参考global.js中setURL函数的用法）来保证对应函数执行时可调用系统变量
 - setURL(prefix) - 配合域名绑定模式和路由模式，智能处理页面内链接
 - gotoAnchor(theAnchor) - 滚动至对应的锚点
+- ms_func_reg(function) - 注册需要页面载入后运行的函数
+- ms_func_run() - 运行于所有页面载入之后的函数（框架自动在page_end处运行）
 - 对象方法扩展 - 针对 String，Data，Number，Array 等对象
    - string.blen - 返回某字符串的二进制长度
    - string.trim - 去除字符串首尾空字符

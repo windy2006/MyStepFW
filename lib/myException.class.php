@@ -236,7 +236,7 @@ class myException extends ErrorException {
                 } elseif(is_array($v)) {
                     $cur_item = array();
                     foreach($v as $k1 => $v1) {
-                        if($v1 == '//') continue;
+                        if($v1 == '//') $v1 = '';
                         $cur_item[] = chr(9).$k1.'.'.trim($v1, "\r\n");
                     }
                     $v = chr(10).implode(chr(10), $cur_item);
@@ -287,10 +287,10 @@ class myException extends ErrorException {
 <head>
 <title>Error</title>
 <base href="{$root}" />
-<link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
-<link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
-<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
-<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
+<link href="vendor/highlight/syntaxhighlighter/styles/shCoreDefault.css" rel="stylesheet" type="text/css">
+<script src="vendor/highlight/syntaxhighlighter/scripts/XRegExp.js" type="text/javascript"></script>
+<script src="vendor/highlight/syntaxhighlighter/scripts/shCore.js" type="text/javascript"></script>
+<script src="vendor/highlight/syntaxhighlighter/scripts/shBrushPhp.js" type="text/javascript"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
 </head>
 
@@ -316,7 +316,7 @@ mystep;
                 $cur_item = array();
                 if(!empty($v)) {
                     $keys = array_keys($v);
-                    if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].'">';
+                    if($k=='Code') $cur_item[] = '<pre class="brush:php;first-line:'.$keys[0].';highlight:'.self::$err_last['Line'].';toolbar:false;">';
                     foreach($v as $k1 => $v1) {
                         if($v1=='//') $v1='/* ----------- */';
                         $cur_item[] = trim(htmlspecialchars($v1), chr(13).chr(10));

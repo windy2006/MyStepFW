@@ -60,4 +60,15 @@ $setting_detail['db'] = array(
     ]
 );
 
+$setting_detail['watermark'] = array(
+    'name' => 'Watermark Setting',
+    'list' => [
+        'mode' => array(
+            'name' => 'Mode',
+            'describe' => 'Add Watermark to artile content or images',
+            'type' => array('checkbox', array('checkbox', array('Text'=>1, 'Image'=>2)))
+        ),
+    ]
+);
+
 return $setting_detail;
