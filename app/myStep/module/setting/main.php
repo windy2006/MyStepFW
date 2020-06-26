@@ -11,7 +11,7 @@ if(!empty($app)) {
 }
 $config = new myConfig($file);
 if(myReq::check('post')) {
-    $config->set($_POST['setting'], true);
+    $config->set($_POST['setting']);
     $config->save('php');
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }

@@ -369,6 +369,7 @@ $(function(){
         clearInterval(global.timer);
     });
     $('#sidebar').mousewheel(function(e){
+        if($('#sidebar').height() > $('#sidebar .nav').height()) return;
         let obj = $(this);
         let top = obj.position().top;
         let step = 5;

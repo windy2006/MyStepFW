@@ -149,13 +149,22 @@ class myConfig extends myBase {
                 $construction = [];
                 if(isset($detail['name']) && isset($detail['list'])) {
                     foreach($detail['list'] as $k => $v) {
-                        $construction[$k] = $v['type'][0];
+                        if(preg_match('#^password(_(\w+))?$#', $v['type'][0], $match)) {
+                            $v['type'][0] = 'password';
+                        }
+                        if(!isset($construction[$v['type'][0]])) $construction[$v['type'][0]] = [];
+                        $construction[$v['type'][0]][] = $k;
+                        if(isset($match[2])) $construction[$v['type'][0]]['func'][$k] = $match[2];
                     }
                 } else {
                     foreach($detail as $k0 => $v0) {
-                        $construction[$k0] = [];
                         foreach($v0['list'] as $k => $v) {
-                            $construction[$k0][$k] = $v['type'][0];
+                            if(preg_match('#^password(_(\w+))?$#', $v['type'][0], $match)) {
+                                $v['type'][0] = 'password';
+                            }
+                            if(!isset($construction[$v['type'][0]])) $construction[$v['type'][0]] = [];
+                            $construction[$v['type'][0]][] = $k0.'.'.$k;
+                            if(isset($match[2])) $construction[$v['type'][0]]['func'][$k0.'.'.$k] = $match[2];
                         }
                     }
                 }
@@ -227,71 +236,50 @@ class myConfig extends myBase {
      * 批量更新所有设置
      * @param $setting
      * @param string $idx
-     * @param bool $override
+     * @param bool $check
      * @return array|stdClass
      */
-    public function set($setting, $idx = '', $override = false) {
-        if(is_bool($idx)) {
-            $override = $idx;
-            $idx = '';
+    public function set($setting, $idx = '', $check = true) {
+        $construction = require($this->construction);
+        if($check) {
+            foreach($construction['checkbox'] as $v) {
+                $s =& $setting;
+                $v = explode('.', $v);
+                foreach($v as $v1) {
+                    if(!isset($s[$v1])) $s[$v1] = [];
+                    $s =& $s[$v1];
+                }
+                unset($s);
+            }
         }
         $item = $this->setting;
-        $construction = require($this->construction);
-        $construction = self::a2o($construction);
         if(!empty($idx)) {
             $keys = explode('.', $idx);
             foreach ($keys as $key) {
                 $item = $item->$key ?? (new stdClass());
-                $construction = $construction->$key ?? 'text';
             }
             $idx .= '.';
         }
-        if($override) {
-            $item = self::o2a($item);
-            foreach($item as $k => $v) {
-                if(isset($setting[$k])) {
-                    if(is_array($v) && is_array($setting[$k])) {
-                        $item[$k] = $this->set($setting[$k], $idx.$k, true);
-                    } else {
-                        if(preg_match('#^password(_(\w+))?$#', $construction->$k, $match)) {
-                            if(!empty($setting[$k])) {
-                                if(isset($match[2])) $setting[$k] = $match[2]($setting[$k]);
-                                $item[$k] = $setting[$k];
-                            }
-                        } else {
-                            if(is_array($setting[$k])) $setting[$k] = implode(',', $setting[$k]);
-                            if($setting[$k]=='false') $setting[$k]=false;
-                            elseif($setting[$k]=='true') $setting[$k]=true;
-                            elseif(is_numeric($setting[$k])) $setting[$k] = $setting[$k] + 0;
-                            $item[$k] = $setting[$k];
-                        }
-                    }
+        foreach($setting as $k => $v) {
+            if(preg_match('/_pwd_r$/', $k)) continue;
+            if(is_array($v)) {
+                if(isset($v[0]) || empty($v)) {
+                    $item->$k = implode(',', $v);
                 } else {
-                    $item[$k] = '';
+                    $item->$k = $this->set($v, $idx.$k, false);
                 }
-            }
-            if($idx=='') $this->setting = self::a2o($item);
-        } else {
-            foreach($setting as $k => $v) {
-                if(preg_match('/_pwd_r$/', $k)) continue;
-                if(is_array($v)) {
-                    if(isset($v[0])) {
-                        $item->$k = implode(',', $v);
-                    } else {
-                        $item->$k = $this->set($v, $idx.$k);
-                    }
-                } else {
-                    if(substr($construction->$k,0, 8)=='password') {
-                        if(!empty($setting[$k])) {
-                            if($construction->$k=='password_md5') $v = md5($v);
-                            $item->$k = $v;
-                        }
-                    } else {
-                        if($v=='false') $v=false;
-                        elseif($v=='true') $v=true;
-                        elseif(is_numeric($v)) $v = $v + 0;
+            } else {
+                if(isset($construction['password']) && in_array($idx.$k, $construction['password'])) {
+                    if(!empty($setting[$k])) {
+                        if(isset($construction['password']['func'][$idx.$k]) && function_exists($construction['password']['func'][$idx.$k]))
+                            $v = $construction['password']['func'][$idx.$k]($v);
                         $item->$k = $v;
                     }
+                } else {
+                    if($v=='false') $v=false;
+                    elseif($v=='true') $v=true;
+                    elseif(is_numeric($v)) $v = $v + 0;
+                    $item->$k = $v;
                 }
             }
         }
