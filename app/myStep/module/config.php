@@ -2,7 +2,6 @@
 if(myReq::check('post')) {
     $config = new myConfig(CONFIG.'config.php');
     $setting = myReq::post('setting');
-    $setting['gen']['s_pwd'] = md5($setting['gen']['s_pwd']);
     $config->set($setting);
     $config->save('php');
     myController::redirect();
@@ -16,7 +15,7 @@ $tpl_setting = array(
 $t = new myTemplate($tpl_setting);
 
 $file = CONFIG.'config_default.php';
-$builder = CONFIG.'construct/default.php';
+$builder = CONFIG.'construction/default.php';
 $config = new myConfig($file);
 $config->cookie->domain = myReq::server('HTTP_HOST');
 

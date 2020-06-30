@@ -134,9 +134,9 @@
 					<span class="input-group-text item-name">主要内容</span>
 				</div>
 				<div class="form-control">
-					<label><input name="get_remote_file" type="checkbox" value="1" <!--get_remote_file--> /> 自动复制外网图片到本地 &nbsp; &nbsp; &nbsp; &nbsp;</label>
+					<label><input type="checkbox" id="show_cat" /> 更多选项 &nbsp; &nbsp; &nbsp; &nbsp;</label>
 					<label><input name="independent_article" type="checkbox" value="1" /> 独立栏目文章 &nbsp; &nbsp; &nbsp; &nbsp;</label>
-					<label><input type="checkbox" id="show_cat" /> 更多选项</label>
+					<label><input name="get_remote_file" type="checkbox" value="1" <!--get_remote_file--> /> 自动复制外网图片到本地 &nbsp; &nbsp; &nbsp; &nbsp;</label>
 				</div>
 			</div>
 			<div class="input-group mb-2">

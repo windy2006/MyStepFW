@@ -22,9 +22,9 @@ function getAttachment() {
     $file = array_pop($info_app['path']);
     $idx = explode('.', $file);
     $path = FILE.date($s->upload->path_mode, $idx[0]);
-    $s->watermark->mode = explode(',', $s->watermark->mode);
-    $s->watermark->mode = array_sum($s->watermark->mode);
     if(is_file($path.$file)) {
+        $s->watermark->mode = explode(',', $s->watermark->mode);
+        $s->watermark->mode = array_sum($s->watermark->mode);
         if(($s->watermark->mode & 2) && in_array(strtolower($idx[2]), ['png','jpg'])) {
             $cache = CACHE.'app/CMS/img/'.date($s->upload->path_mode, $idx[0]).$file;
             if(!is_file($cache)) {
@@ -40,7 +40,18 @@ function getAttachment() {
             }
             \myStep::file($cache);
         } else {
-            \myStep::file($path.$file);
+            $name = '';
+            if(is_file($path.'log.txt')) {
+                $list = file($path.'log.txt');
+                for($i=0,$m=count($list);$i<$m;$i++) {
+                    if(strpos($list[$i], $file)===0) {
+                        $list[$i] = explode('::', $list[$i]);
+                        $name = $list[$i][1];
+                        break;
+                    }
+                }
+            }
+            \myStep::file($path.$file, $name);
         }
     } else {
         \myController::header('404');

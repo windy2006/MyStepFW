@@ -156,6 +156,7 @@ JS函数：
 - openDialog(url, width, height, mode) - 开启模态窗口
 - openWindow(url,width,height) - 新开窗口
 - sleep(the_time) - 程序终端指定时间
+- copy(obj) - 复制某一页面元素内容（value或innerText）或者一个字符串
 - rndNum(min,max) - 生成指定范围内的随机数字
 - rndStr(len, t_lst, c_lst) - 生成随机字符串（可自定义采样内容）
 - watermark(obj, rate, copyright, char_c, jam_tag) - 添加字符串水印

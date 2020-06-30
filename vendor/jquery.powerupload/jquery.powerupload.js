@@ -13,7 +13,7 @@ jQuery.event.addProp("dataTransfer");
             max_files: 1,
             max_file_size: 10, // MBs
             data: {},
-            mode: 'drop', // drop or browse
+            mode: 'drop', // browse, drop or paste
             errors: [],
             drop: dummy,
             file: dummy,
@@ -74,28 +74,34 @@ jQuery.event.addProp("dataTransfer");
 
     $.fn.powerUpload = function(options) {
         opts = $.extend( {}, default_opts, options );
+        switch(opts.mode) {
+            case 'paste':
+                opts.max_files = 1;
+                this.bind('paste', paste);
+                break;
+            case 'drop':
+                this.bind('drop', drop)
+                    .bind('dragenter', dragEnter)
+                    .bind('dragover', dragOver)
+                    .bind('dragleave', dragLeave)
+                    .bind('paste', paste);
+                $(document).bind('drop', docDrop)
+                    .bind('dragenter', docEnter)
+                    .bind('dragover', docOver)
+                    .bind('dragleave', docLeave);
+                break;
+            default:
+                $(this).click(function(){
+                    reset(this);
+                    getTpl('browse');
+                });
+                template.file = $(template.file);
+                template.file.find('input[type=file]').change(function(){
+                    $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
+                });
+        }
         this.addClass('upload');
         this.data('upload', opts);
-        if(opts.mode==='drop') {
-            this.bind('drop', drop)
-                .bind('dragenter', dragEnter)
-                .bind('dragover', dragOver)
-                .bind('dragleave', dragLeave)
-                .bind('paste', paste);
-            $(document).bind('drop', docDrop)
-                .bind('dragenter', docEnter)
-                .bind('dragover', docOver)
-                .bind('dragleave', docLeave);
-        } else {
-            $(this).click(function(){
-                reset(this);
-                getTpl('browse');
-            });
-            template.file = $(template.file);
-            template.file.find('input[type=file]').change(function(){
-                $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
-            });
-        }
     };
 
     function reset(obj) {
@@ -108,8 +114,8 @@ jQuery.event.addProp("dataTransfer");
         reject_list = [];
         if(typeof obj!="undefined") {
             obj = $(obj);
-            while(!obj.hasClass('upload')) obj = obj.parent();
-            opts = obj.data('upload');
+            if(!obj.hasClass('upload')) obj = obj.parentsUntil('.upload').parent();
+            if(obj.length>0 && obj.data('upload')!=null) opts = obj.data('upload');
         }
     }
 
@@ -192,9 +198,9 @@ jQuery.event.addProp("dataTransfer");
 
     function paste(e) {
         reset(e.target);
-        opts.paste(e);
+        if(opts.paste(e)===false) return;
         if((/webkit/i).test(navigator.userAgent)) {
-            e = e.originalEvent;
+            e = e.originalEvent || e;
             files = e.clipboardData.files;
             let items = e.clipboardData.items;
             if(items.length > 0) {

@@ -11,7 +11,7 @@
  **************************************************/
 
 let global = {};
-global.root = '/';
+global.root = $('base').attr('href');
 global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
 global.root_fix = global.root_fix.replace(/\/+/g, '/');
 global.editor_btn = '';
@@ -202,6 +202,30 @@ function sleep(the_time) {
 	let over_time = new Date(new Date().getTime() + the_time);
 	while(over_time > new Date()) {}
 }
+
+//复制某一页面元素内容（value或innerText）或者一个字符串
+function copy(obj) {
+	let value = '';
+	if(typeof obj === 'string' && /^(#|.)\w+$/.test(obj) === false) {
+		value = obj;
+	} else {
+		obj = $(obj)
+		if(obj.length>0) {
+			value = obj.attr('data-copy');
+			if(typeof value === 'undefined') {
+				value = obj.val();
+			}
+			if(typeof value === 'undefined' || value === '') {
+				value = obj.text();
+			}
+		}
+	}
+	obj = $('<textarea>').val(value).appendTo('body').select();
+	let flag = document.execCommand('copy');
+	obj.remove();
+	return flag;
+}
+
 
 //随机数字
 function rndNum(min,max){

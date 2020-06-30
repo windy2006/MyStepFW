@@ -212,7 +212,6 @@ class myStep extends myController {
         if(gettype($this->setting->js)=='string') {
             $this->JS($this->setting->js);
             $this->setAddedContent('start', '<script type="application/javascript" src="'.ROOT_WEB.'cache/script/'.basename($this->setting->js).'"></script>');
-            $this->setAddedContent('start', '<script type="application/javascript">global.root="'.ROOT_WEB.'";</script>');
         }
         $this->setAddedContent('end', '<script type="application/javascript">$(ms_func_run);</script>');
         parent::show($tpl, $this->setting->web->minify, 's,db,cache,mystep');
@@ -675,7 +674,6 @@ code;
                 $ext = strtolower(strrchr($upload->result[0]['name'], '.'));
                 $name = str_replace($ext, '', $upload->result[0]['name']);
                 $upload->result[0]['name'] = myString::substr($name, 0, 80).$ext;
-                $upload->result[0]['new_name'] = str_replace('.upload', '', $upload->result[0]['new_name']);
                 myFile::saveFile($path.'/log.txt', $upload->result[0]['new_name'].'::'.$upload->result[0]['name'].'::'.chr(10), 'a');
             }
             $result = $upload->result[0];
@@ -866,7 +864,8 @@ code;
 
         $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
         $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
-        if(strpos($path, 'static')===0) myController::file($the_file);
+        $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
+        if(strpos($path, 'static')===0 || in_array($ext, ['js','css'])) myController::file($the_file);
 
         if(is_file(CONFIG.'config.php')) {
             self::go();

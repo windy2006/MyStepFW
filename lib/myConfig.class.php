@@ -241,7 +241,7 @@ class myConfig extends myBase {
      */
     public function set($setting, $idx = '', $check = true) {
         $construction = require($this->construction);
-        if($check) {
+        if($check && isset($construction['checkbox'])) {
             foreach($construction['checkbox'] as $v) {
                 $s =& $setting;
                 $v = explode('.', $v);
