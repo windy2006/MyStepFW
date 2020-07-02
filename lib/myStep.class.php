@@ -159,11 +159,8 @@ class myStep extends myController {
         global $cache, $db;
         if(is_null($cache)) {
             switch($this->setting->gen->cache_mode) {
-                case 'memoryCache':
-                    $cache_setting = myCache::o2a($this->setting->memcached);
-                    break;
                 case 'myCache_MySQL':
-                    $cache_setting = myCache::o2a($this->setting->db);
+                    $cache_setting = myConfig::o2a($this->setting->db);
                     break;
                 default:
                     $cache_setting = CACHE.'data';

@@ -49,6 +49,17 @@ class myConfig extends myBase {
     }
 
     /**
+     * 获取全部设置
+     * @param bool $arr
+     * @return array
+     */
+    public function get($arr = true) {
+        $setting = $this->setting;
+        if($arr) $setting = self::o2a($setting);
+        return $setting;
+    }
+
+    /**
      * 处理变量链式调用方法
      * @param $idx
      * @return mixed

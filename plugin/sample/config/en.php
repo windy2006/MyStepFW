@@ -29,7 +29,7 @@ return array(
         ),
         'para_6' => array(
             'name' => 'Password test',
-            'name' => 'Re-input',
+            'name2' => 'Re-input',
             'describe' => 'Input the same password twice, 15 characters as max',
             'type' => array("password", "", "15")
         ),

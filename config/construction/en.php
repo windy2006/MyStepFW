@@ -22,7 +22,7 @@ $setting_detail['gen'] = array(
         'cache_mode' => array(
             'name' => 'Cache Mode',
             'describe' => 'Open the cache mode to reduce the db query',
-            'type' => array('select', array('File Mode'=>'File', 'DB Mode'=>'MySQL', 'MemCached'=>'memoryCache'))
+            'type' => array('select', array('File Mode'=>'File', 'DB Mode'=>'MySQL'))
         ),
         'cache_page' => array(
             'name' => 'HTML Cache',
@@ -308,42 +308,6 @@ $setting_detail['db'] = array(
             'name' => 'Table Prefix',
             'describe' => 'The prefix of all offical website tables',
             'type' => array('text', 'alpha', '10')
-        ),
-    ]
-);
-
-$setting_detail['memcached'] = array(
-    'name' => 'Memory Cache Setting',
-    'list' => [
-        'server' => array(
-            'name' => 'Server host',
-            'describe' => 'Memcache Host Address (IP:PORT)',
-            'type' => array('text', false, '40')
-        ),
-        'expire' => array(
-            'name' => 'Expire Period',
-            'describe' => 'How long will Memcache expire, in second',
-            'type' => array('text', 'digital', '8')
-        ),
-        'persistent' => array(
-            'name' => 'Persistent Connect',
-            'describe' => 'Use Persistant Connect or not',
-            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
-        ),
-        'weight' => array(
-            'name' => 'Server Weight',
-            'describe' => 'Memcache Host Weight',
-            'type' => array('text', 'digital', '2')
-        ),
-        'timeout' => array(
-            'name' => 'Timeout time',
-            'describe' => 'Memcache Server connect timeout time (in second)',
-            'type' => array('text', 'digital', '2')
-        ),
-        'retry_interval' => array(
-            'name' => 'Retry Interval',
-            'describe' => 'Memcache Retry frequency (in second)',
-            'type' => array('text', 'digital', '2')
         ),
     ]
 );

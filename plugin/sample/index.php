@@ -53,9 +53,9 @@ $this->editorSetPlugin('
                                 }
                             },
                             {
-                                text: "子菜单3",
+                                text: "子菜单4",
                                 onclick: function() {
-                                    alert("选中子菜单3");
+                                    alert("选中子菜单4");
                                 }
                             }
                         ]

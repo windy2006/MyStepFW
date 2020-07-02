@@ -22,7 +22,7 @@ $setting_detail['gen'] = array(
         'cache_mode' => array(
             'name' => '数据缓存',
             'describe' => '开启数据缓存，减少数据重复查询，以提高效率',
-            'type' => array('select', array('文件缓存'=>'File', '数据库缓存'=>'MySQL', 'MemCached'=>'memoryCache'))
+            'type' => array('select', array('文件缓存'=>'File', '数据库缓存'=>'MySQL'))
         ),
         'cache_page' => array(
             'name' => '页面缓存',
@@ -308,42 +308,6 @@ $setting_detail['db'] = array(
             'name' => '数据表前缀',
             'describe' => '用于区分本系统数据表与其他数据表数据表前缀',
             'type' => array('text', 'alpha', '10')
-        ),
-    ]
-);
-
-$setting_detail['memcached'] = array(
-    'name' => 'MemCached缓存设置',
-    'list' => [
-        'server' => array(
-            'name' => '服务器',
-            'describe' => 'IP:PORT',
-            'type' => array('text', false, '40')
-        ),
-        'expire' => array(
-            'name' => '过期时间',
-            'describe' => '秒',
-            'type' => array('text', 'digital', '8')
-        ),
-        'persistent' => array(
-            'name' => '持续连接',
-            'describe' => '在使用较频繁时推荐',
-            'type' => array('radio', array('开启'=>'true', '关闭'=>'false'))
-        ),
-        'weight' => array(
-            'name' => '权重',
-            'describe' => '服务器权重',
-            'type' => array('text', 'digital', '2')
-        ),
-        'timeout' => array(
-            'name' => '超时时间',
-            'describe' => '秒',
-            'type' => array('text', 'digital', '2')
-        ),
-        'retry_interval' => array(
-            'name' => '重试频率',
-            'describe' => '失败重试频率（秒）',
-            'type' => array('text', 'digital', '2')
         ),
     ]
 );

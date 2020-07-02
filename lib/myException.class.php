@@ -280,7 +280,7 @@ class myException extends ErrorException {
         $title = 'MyStep Error: '.self::$err_last['Type'];
         unset(self::$err_last['Type']);
         $root = ROOT_WEB;
-        //if(ob_get_length()!==false) ob_clean();
+        if(self::$exit_on_error && ob_get_length()!==false) ob_clean();
         if(ob_get_length()==0) {
             echo <<<mystep
 <html>
