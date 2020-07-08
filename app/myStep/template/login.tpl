@@ -28,7 +28,7 @@
                     <h5 class="text-white card-title m-0"><span class="glyphicon glyphicon-blackboard"></span> <!--lng_page_login--></h5>
                 </div>
                 <div class="card-body">
-                    <form action="<!--url_prefix-->manager/login" method="post" onsubmit="return checkForm(this)">
+                    <form action="<!--path_admin-->/login" method="post" onsubmit="return checkForm(this)">
                         <div class="input-group mb-2">
                             <div class="input-group-prepend">
                                 <div class="input-group-text"><span class="glyphicon glyphicon-user"></span> &nbsp; <!--lng_login_username--></div>

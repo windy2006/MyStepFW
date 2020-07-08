@@ -35,20 +35,10 @@ if(empty($module)) {
             } elseif (is_file(PATH . 'module/' . $module . '.php')) {
                 $tpl_setting['name'] = 'sample';
                 $tpl_sub = new myTemplate($tpl_setting, false);
-                $mystep->setAddedContent('start', '
-<link href="vendor/syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css">
-<link href="vendor/syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css">
-                ');
-                $mystep->setAddedContent('end', '
-<script src="vendor/syntaxhighlighter/shCore.js" type="text/javascript"></script>
-<script src="vendor/syntaxhighlighter/shBrushPhp.js" type="text/javascript"></script>
-<script type="text/javascript">SyntaxHighlighter.all();</script>
-                ');
                 ob_clean();
                 include(PATH . 'module/' . $module . '.php');
                 $content = ob_get_contents();
                 ob_clean();
-
                 $tpl_sub->assign('name', $module);
                 $tpl_sub->assign('code', htmlspecialchars(f::g(PATH . 'module/' . $module . '.php')));
                 $tpl_sub->assign('sample', $content);

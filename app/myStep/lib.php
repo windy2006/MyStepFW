@@ -5,7 +5,7 @@ function logCheck($show = true) {
     $user = \r::s('ms_user');
     if(empty($user)) {
         $url = \r::svr('REQUEST_URI');
-        if(\r::s('url')=='' && !preg_match('#manager/$#', $url)) \r::s('url', $url);
+        if(\r::s('url')=='' && !preg_match('#console/$#', $url)) \r::s('url', $url);
         if($show) \myStep::getModule('login');
         return false;
     }

@@ -43,15 +43,20 @@ if($module=='phpinfo') {
             array_pop($err_lst);
             $err_msg = sprintf($mystep->getLanguage('page_error_info'), count($err_lst));
             for($i=count($err_lst)-1; $i>=0; $i--) {
-                if(preg_match('#Code: (.+?)[\r\n]+Trace:#ms', $err_lst[$i], $match)) {
+                if(preg_match('#Code:\s*(.+?)[\r\n]+Trace:#ms', $err_lst[$i], $match)) {
                     $code = $match[1];
-                    preg_match('#^\s+(\d+)#', $code, $match);
-                    $start = $match[1];
-                    preg_match('#Line: (\d+)#', $err_lst[$i], $match);
-                    $line = $match[1];
-                    $err_lst[$i] = str_replace($code, '!!code!!', $err_lst[$i]);
-                    $code = preg_replace('#\t\d+\.#', '', $code);
-                    $code = '<pre class="brush:php;first-line:'.$start.';highlight:'.$line.'">'.$code.'</pre>';
+                    if(preg_match('#^\s*(\d+)#', $code, $match)) {
+                        $start = $match[1];
+                        preg_match('#Line: (\d+)#', $err_lst[$i], $match);
+                        $line = $match[1];
+                        $err_lst[$i] = str_replace($code, '!!code!!', $err_lst[$i]);
+                        $err_lst[$i] = preg_replace('#[\r\n\s]+!!code!!#', '!!code!!', $err_lst[$i]);
+                        $code = preg_replace('#\t?\d+\.#', '', $code);
+                        $code = htmlspecialchars($code);
+                        $code = '<pre class="brush:php;first-line:'.$start.';highlight:'.$line.'">'.$code.'</pre>';
+                    } else {
+                        unset($code);
+                    }
                 }
                 $err_lst[$i] = htmlspecialchars($err_lst[$i]);
                 $err_lst[$i] = preg_replace("/\n+/", "\n", $err_lst[$i]);
@@ -72,4 +77,5 @@ if($module=='phpinfo') {
 } else {
     $t->allow_script = true;
 }
+$t->assign('path_admin', $app_root);
 $content = $mystep->render($t);

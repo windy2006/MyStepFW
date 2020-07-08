@@ -12,6 +12,7 @@ if(is_file($script)) {
 } else {
     myStep::info('page_error_module');
 }
+$t->assign('path_admin', $app_root);
 $content = $mystep->render($t);
 $mystep->setAddedContent('end', '
 <script type="application/javascript" src="static/js/checkForm.js"></script>

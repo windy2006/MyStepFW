@@ -19,7 +19,7 @@
                                 </select>
                             </div><div class='col-6'>
                                 <b>应用选取：</b>
-                                <select class="custom-select custom-select-sm is-valid my-1 w-50" onchange="location.href=setting.url_prefix+'manager/setting/'+this.value">
+                                <select class="custom-select custom-select-sm is-valid my-1 w-50" onchange="location.href='<!--path_admin-->/setting/'+this.value">
                                     <option value="">主框架设置</option>
 <!--loop:start key="app"-->
                                     <option value="<!--app_name-->" <!--app_selected-->><!--app_name--></option>

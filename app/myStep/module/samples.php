@@ -19,6 +19,7 @@ foreach($list as $k => $v) {
 
 $t->assign('title', $title);
 $t->assign('main', $content);
+$t->assign('path_admin', $app_root);
 $content = $t->render('s', false);
 
-$tpl->assign('path', '/sample');
+$tpl->assign('path', '/samples');

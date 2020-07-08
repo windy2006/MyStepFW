@@ -26,7 +26,7 @@
     </div>
     <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link" href="manager/login?out"><span class="glyphicon glyphicon-log-out"></span> <!--lng_page_logout--></a>
+            <a class="nav-link" href="<!--path_admin-->/login?out"><span class="glyphicon glyphicon-log-out"></span> <!--lng_page_logout--></a>
         </li>
     </ul>
 </header>

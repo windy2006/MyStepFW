@@ -47,4 +47,5 @@ foreach($list as $v) {
     }
 }
 $t->assign('server', myReq::server('SERVER_SOFTWARE'));
+$t->assign('path_admin', $app_root);
 $t->render();

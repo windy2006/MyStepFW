@@ -19,16 +19,7 @@
     <span class="glyphicon glyphicon-arrow-up"></span>
 </div>
 <script type="application/javascript">
-    $.setCSS([
-        'vendor/syntaxhighlighter/shCore.css',
-        'vendor/syntaxhighlighter/shThemeDefault.css'
-    ]);
-    $.setJS([
-        "vendor/syntaxhighlighter/shCore.js",
-        "vendor/syntaxhighlighter/shBrushPhp.js",
-    ], true, function() {
-        SyntaxHighlighter.all();
-    });
+$.vendor('highlight',{callback:()=>highlight(0)});
 </script>
 <!--page_end-->
 </body>

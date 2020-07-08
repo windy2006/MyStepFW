@@ -11,3 +11,6 @@
 <div style="width:96%;max-height:400px;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
     <!--sample-->
 </div>
+<script type="application/javascript">
+$.vendor('highlight',{callback:()=>highlight(0)});
+</script>

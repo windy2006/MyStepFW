@@ -4,7 +4,7 @@
 	</div>
 	<div class="p-3 text-center pb-0">
 		<!--loop:start key='idx'-->
-		<a href="manager/sample/<!--idx_0-->"  class="btn btn-info btn-sm ml-2 mb-2"><!--idx_1--></a>
+		<a href="console/samples/<!--idx_0-->"  class="btn btn-info btn-sm ml-2 mb-2"><!--idx_1--></a>
 		<!--loop:end-->
 	</div>
 </div>

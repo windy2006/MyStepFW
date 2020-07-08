@@ -10,7 +10,7 @@
                     <td width="80">所在目录</td>
                     <td data-toggle="tooltip" data-placement="bottom" title="框架会自动读取此目录下面的类脚本"><input type="text" class="form-control" name="path[]" value="<!--class_path-->" need="" /></td>
                     <td rowspan="3" class="align-middle text-center" width="80">
-                        <a class="btn btn-info" href="manager/setting/alias/<!--class_id-->">查看</a><br /><br />
+                        <a class="btn btn-info" href="<!--path_admin-->/setting/alias/<!--class_id-->">查看</a><br /><br />
                         <a class="btn btn-info" name="btn_del" href="#">删除</a>
                     </td>
                 </tr>

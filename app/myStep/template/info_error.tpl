@@ -13,8 +13,8 @@
 			<tfoot id="tfoot">
 			<tr class="float-right">
 				<td class="p-3 border-0">
-					<a class="btn btn-primary btn-sm <!--err_output-->" href="manager/error?m=clean" /> 清空数据 </a> &nbsp;
-					<a class="btn btn-primary btn-sm <!--err_output-->" href="manager/error?m=download" /> 保存数据 </a>
+					<a class="btn btn-primary btn-sm <!--err_output-->" href="<!--path_admin-->/error?m=clean" /> 清空数据 </a> &nbsp;
+					<a class="btn btn-primary btn-sm <!--err_output-->" href="<!--path_admin-->/error?m=download" /> 保存数据 </a>
 				</td>
 			</tr>
 			</tfoot>

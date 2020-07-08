@@ -51,7 +51,7 @@
 $(function(){
     $('button').click(function(){
         loadingShow("缓存清理中，请耐心等待本信息消失！");
-        location.href = 'manager/function/cache/?id='+this.value;
+        location.href = '<!--path_admin-->/function/cache/?id='+this.value;
     });
 });
 </script>

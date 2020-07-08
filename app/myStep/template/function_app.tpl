@@ -10,8 +10,8 @@
                     <td width="100"><b>应用名称：</b></td>
                     <td>
                         <!--app_name--> <!--app_app--> （V<!--app_ver-->）
-                        <a href="manager/setting/<!--app_app-->">【设置】</a>
-                        <a href="manager/function/language?app=<!--app_app-->">【语言】</a>
+                        <a href="<!--path_admin-->/setting/<!--app_app-->">【设置】</a>
+                        <a href="<!--path_admin-->/function/language?app=<!--app_app-->">【语言】</a>
                         <a href="#" data-toggle="modal" data-target="#plugin" data-app="<!--app_app-->">【插件】</a>
                         <a href="<!--app_app-->" target="_blank">【查看】</a>
                         <input type="hidden" name="plugin[]" id="<!--app_app-->" value="<!--app_plugin-->" />

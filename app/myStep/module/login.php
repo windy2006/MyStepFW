@@ -26,5 +26,6 @@ if(r::svr('QUERY_STRING')=='out') {
 }
 $tpl_setting['name'] = 'login';
 $t = new myTemplate($tpl_setting);
+$t->assign('path_admin', $app_root);
 $mystep->show($t);
 $mystep->end();
