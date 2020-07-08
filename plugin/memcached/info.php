@@ -1,9 +1,11 @@
 <?PHP
+global $mystep;
+$mystep->setLanguagePack(dirname(__FILE__).'/language/', $mystep->setting->gen->language);
 return array(
-    'name' => 'MemCached缓存插件',
+    'name' => $mystep->getLanguage('plugin_manager_info_name'),
     'idx' => basename(realpath(__DIR__)),
     'ver' => '1.0',
-    'intro' => '开启 MemCached 缓存功能',
-    'copyright' => '版权所有 2019 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
-    'description' => '设置<i>MemCached</i>缓存',
+    'intro' => $mystep->getLanguage('plugin_manager_info_intro'),
+    'copyright' => $mystep->getLanguage('plugin_manager_info_copyright'),
+    'description' => $mystep->getLanguage('plugin_manager_info_description'),
 );
