@@ -480,7 +480,7 @@ mytpl;
 $tag_attrs = <<<'mystep'
 {myTemplate::tpl_paras}
 mystep;
-$tag_attrs = unserialize($tag_attrs);
+$tag_attrs = unserialize(str_replace(chr(10),chr(13).chr(10), $tag_attrs));
 checkPara($tag_attrs, true);
 ?>
 mytpl;

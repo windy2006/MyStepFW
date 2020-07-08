@@ -1,6 +1,6 @@
 <?PHP
 return array (
-  'admin.mystep.com' => '/manager/(.*?)',
+  'admin.mystep.com' => '/console/(.*?)',
   'doc.mystep.com' => 'Document',
   'sample.mystep.com' => 'Sample',
   'cms.mystep.com' => 'CMS',

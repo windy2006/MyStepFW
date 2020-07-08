@@ -108,6 +108,7 @@ class myException extends ErrorException {
             $err_line = $match[2];
         }
         $root = dirname(__DIR__);
+        $err_file = str_replace('object context in ', '', $err_file);
         if(is_file($err_file)) {
             $the_line = file($err_file);
             $the_line = preg_replace('/(^\s+|[\r\n]+)/', '', $the_line[$err_line-1]);

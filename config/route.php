@@ -42,21 +42,21 @@ $rule_list = array (
       ),
     ),
   ),
-  'plugin_update' => 
+  'plugin_manager' => 
   array (
     0 => 
     array (
-      0 => '/update/[any]',
+      0 => '/manager/[any]',
       1 => 
       array (
         0 => 'app\\myStep\\logCheck',
-        1 => 'plugin_update::update',
+        1 => 'plugin_manager::main',
       ),
     ),
     1 => 
     array (
       0 => '/pack/[any]',
-      1 => 'plugin_update::pack',
+      1 => 'plugin_manager::pack',
     ),
   ),
   'myStep' => 
@@ -88,7 +88,7 @@ $rule_list = array (
     ),
     5 => 
     array (
-      0 => '/manager/[any]',
+      0 => '/console/[any]',
       1 => 
       array (
         0 => 'app\\myStep\\logCheck',
@@ -124,11 +124,10 @@ $api_list = array (
     'download' => 'myStep::download',
     'remove' => 'myStep::remove_ul',
   ),
-  'plugin_update' => 
+  'plugin_manager' => 
   array (
-    'check' => 'plugin_update::remote',
-    'update' => 'plugin_update::remote',
-    'download' => 'plugin_update::remote',
+    'check' => 'plugin_manager::remote',
+    'update' => 'plugin_manager::remote',
+    'download' => 'plugin_manager::remote',
   ),
 );
-

@@ -444,7 +444,7 @@ class SQLBuilder {
             return;
         }
         if($field!='') {
-            if(is_null($value) && $condition!='!') {
+            if(is_null($value) && !is_null($condition) && $condition!='!') {
                 preg_match('#^(.+?)([\=<>]+)(.+)$#', $field, $match);
                 $mode = $condition;
                 $field = '('.$match[1].')';
