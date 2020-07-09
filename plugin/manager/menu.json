@@ -1,0 +1,73 @@
+[{
+  "name": "信息",
+  "icon": "glyphicon glyphicon-info-sign",
+  "items": [{
+    "name": "基本信息",
+    "link": "console"
+  }, {
+    "name": "数据库信息",
+    "link": "console\/db"
+  }, {
+    "name": "PHP信息",
+    "link": "console\/php"
+  }, {
+    "name": "phpinfo()",
+    "link": "console\/phpinfo"
+  }, {
+    "name": "错误日志",
+    "link": "console\/error"
+  }]
+}, {
+  "name": "设置",
+  "icon": "glyphicon glyphicon-wrench",
+  "items": [{
+    "name": "参数设置",
+    "link": "console\/setting\/"
+  }, {
+    "name": "类加载设置",
+    "link": "console\/setting\/class"
+  }, {
+    "name": "域名绑定",
+    "link": "console\/setting\/domain"
+  }]
+}, {
+  "name": "功能",
+  "icon": "glyphicon glyphicon-cog",
+  "items": [{
+    "name": "应用管理",
+    "link": "console\/function\/app"
+  }, {
+    "name": "缓存管理",
+    "link": "console\/function\/cache"
+  }, {
+    "name": "插件管理",
+    "link": "console\/function\/plugin"
+  }]
+}, {
+  "name": "文档",
+  "icon": "glyphicon glyphicon-book",
+  "items": [{
+    "name": "框架指南",
+    "link": "console\/guide"
+  }, {
+    "name": "功能示例",
+    "link": "console\/samples"
+  }, {
+    "name": "应用示例",
+    "link": "Sample\/",
+    "addon": {
+      "target": "_blank"
+    }
+  }, {
+    "name": "功能类说明",
+    "link": "Document\/",
+    "addon": {
+      "target": "_blank"
+    }
+  }]
+}, {
+  "name": "插件",
+  "icon": "fa fa-plug",
+  "link": "console\/function\/plugin",
+  "items": []
+}]
