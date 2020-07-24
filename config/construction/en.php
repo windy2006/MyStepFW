@@ -297,7 +297,7 @@ $setting_detail['db'] = array(
         'charset' => array(
             'name' => 'Charset',
             'describe' => 'Default Charset of DB',
-            'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf8', 'Latin1'=>'latin1'))
+            'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf-8', 'Latin1'=>'latin1'))
         ),
         'name' => array(
             'name' => 'DB name',

@@ -68,7 +68,7 @@ $setting['db']['host'] = '127.0.0.1:3306';
 $setting['db']['user'] = 'root';
 $setting['db']['password'] = '';
 $setting['db']['pconnect'] = false;
-$setting['db']['charset'] = 'utf8';
+$setting['db']['charset'] = 'utf-8';
 $setting['db']['name'] = 'mystep';
 $setting['db']['pre'] = 'ms_';
 

@@ -1,13 +1,18 @@
 <?PHP
 if(myReq::check('post')) {
-    $config = new myConfig(CONFIG.'config.php');
     $setting = myReq::post('setting');
+    if(!empty($setting['db']['host']) && !empty($setting['db']['user']) && !empty($setting['db']['password'])) {
+        $db = new myDb($setting['db']['type'], $setting['db']['host'], $setting['db']['user'], $setting['db']['password'], $setting['db']['charset']);
+        $db->connect($setting['db']['pconnect']=='true');
+        $db->query('create database if not exists `'.$setting['db']['name'].'` default charset '.$setting['db']['charset'].' COLLATE '.$setting['db']['charset']);
+    }
+    $config = new myConfig(CONFIG.'config.php');
     $config->set($setting);
     $config->save('php');
     myController::redirect();
 }
 $tpl_setting = array(
-    'name' => 'config',
+    'name' => 'init',
     'path' => APP.'myStep/template',
     'style' => '',
     'path_compile' => CACHE.'template/myStep/'
@@ -48,4 +53,5 @@ foreach($list as $v) {
 }
 $t->assign('server', myReq::server('SERVER_SOFTWARE'));
 $t->assign('path_admin', $app_root);
+$t->assign('path_root', ROOT_WEB);
 $t->render();

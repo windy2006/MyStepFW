@@ -11,6 +11,7 @@ $app_root = myStep::setURL($app_root);
 if(isset($tpl)) {
     $tpl->assign('db', empty($s->db->password)?'n':'y')
         ->assign('path', trim($path, '/'))
+        ->assign('path_root', ROOT_WEB)
         ->assign('path_admin', mystep::$url_prefix.trim($app_root, '/'))
         ->setCacheMode(false);
 }

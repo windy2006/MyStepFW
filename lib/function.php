@@ -195,6 +195,10 @@ function isHttps() {
  */
 function myEval($code, $return = false) {
     $file = tempnam(sys_get_temp_dir(), 'ms_');
+    if($file==false) {
+        f::mkdir(CACHE.'temp/');
+        $file = CACHE.'temp/'.getMicrotime();
+    }
     $fp = fopen($file, 'w');
     if(!preg_match('#^<\?PHP#i', $code)) {
         if($return && !preg_match('#^[\r\n\s]*return#i', $code)) {

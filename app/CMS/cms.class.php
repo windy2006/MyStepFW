@@ -6,9 +6,14 @@ class cms extends myStep {
      * 登录
      * @param string $usr
      * @param string $pwd
-     * @return bool
+     * @return bool|int
      */
     public function login($usr='', $pwd='') {
+        if(parent::login($usr, $pwd)) {
+            r::s('ms_cms_op', $usr);
+            r::s('ms_cms_group', 1);
+            return 1;
+        }
         if(!empty($usr) && !empty($pwd)) {
             $pwd = md5($pwd);
             $ms_user = $usr.chr(9).$pwd;
@@ -18,30 +23,24 @@ class cms extends myStep {
         $result = false;
         if(!empty($ms_user)) {
             list($usr, $pwd) = explode(chr(9), $ms_user);
-            if($usr == $this->setting->gen->s_usr && $pwd == $this->setting->gen->s_pwd) {
+            global $db, $s;
+            $db->build($s->db->pre.'sys_op')
+                ->field('group_id')
+                ->where('username','=',$usr)
+                ->where('password','=',$pwd);
+            if($group_id=$db->result()) {
                 r::s('ms_cms_op', $usr);
-                r::s('ms_cms_group', 1);
+                r::s('ms_cms_group', $group_id);
                 $result = 1;
             } else {
-                global $db, $s;
-                $db->build($s->db->pre.'sys_op')
+                $db->build($s->db->pre.'users')
                     ->field('group_id')
                     ->where('username','=',$usr)
                     ->where('password','=',$pwd);
                 if($group_id=$db->result()) {
-                    r::s('ms_cms_op', $usr);
-                    r::s('ms_cms_group', $group_id);
-                    $result = 1;
-                } else {
-                    $db->build($s->db->pre.'users')
-                        ->field('group_id')
-                        ->where('username','=',$usr)
-                        ->where('password','=',$pwd);
-                    if($group_id=$db->result()) {
-                        r::s('ms_cms_user', $usr);
-                        r::s('ms_cms_user_group', $group_id);
-                        $result = 2;
-                    }
+                    r::s('ms_cms_user', $usr);
+                    r::s('ms_cms_user_group', $group_id);
+                    $result = 2;
                 }
             }
         }

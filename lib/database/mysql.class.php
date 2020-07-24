@@ -74,11 +74,11 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * @param $pwd
      * @param string $charset
      */
-    public function init($host, $user, $pwd, $charset='utf8') {
+    public function init($host, $user, $pwd, $charset='utf8mb4') {
         $this->host = $host;
         $this->user = $user;
         $this->pwd = $pwd;
-        if(strtolower($charset)=='utf-8') $charset = 'utf8';
+        if(strtolower($charset)=='utf-8') $charset = 'utf8mb4';
         $this->charset = $charset;
         return;
     }
@@ -142,7 +142,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
      */
     public function setCharset($charset='') {
         if(empty($charset)) $charset = $this->charset;
-        if(strtolower($charset)=='utf-8') $charset = 'utf8';
+        if(strtolower($charset)=='utf-8') $charset = 'utf8mb4';
         mysqli_set_charset($this->connect, $charset);
         if($this->checkError())    $this->error('Unknow CharSet Name');
         return mysqli_character_set_name($this->connect);
@@ -176,15 +176,16 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $sql = str_replace('(1=1)', '1=1', $sql);
         $sql = str_replace('1=1 and', '', $sql);
         $sql = str_replace('where 1=1 order', 'order', $sql);
-        $this->result = mysqli_query($this->connect, $sql);
         $this->sql = $sql;
-        if(strpos('selec|show |descr|expla|repai|check|optim', strtolower(substr(trim($sql), 0, 5)))!==false && $this->check('result')) {
-            $num_rows = mysqli_num_rows($this->result);
-        } elseif($this->check()) {
-            $num_rows = mysqli_affected_rows($this->connect);
-            $this->free();
-        } else {
-            $num_rows = 0;
+        if($this->result = mysqli_query($this->connect, $sql)) {
+            if(strpos('selec|show |descr|expla|repai|check|optim', strtolower(substr(trim($sql), 0, 5)))!==false && $this->check('result')) {
+                $num_rows = mysqli_num_rows($this->result);
+            } elseif($this->check()) {
+                $num_rows = mysqli_affected_rows($this->connect);
+                $this->free();
+            } else {
+                $num_rows = 0;
+            }
         }
         if($this->checkError())    {
             $this->error('Error Occur in Query !');

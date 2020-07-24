@@ -16,15 +16,14 @@ $db->build('sms_stuff_bak')->where(
         array('add_user', '=', '韩丽', 'or'),
         array('buy_date', '>', '2005-1-1', 'and'),
     )
-)
-    ->field('*')
-    ->order('id', 0)->limit(5, 10);
+)->order('id', 0)->limit(5, 10);
 
 $db->build('sms_consumption_bak', array(
     'mode' => 'left',
     'field' => 'stuff_id',
     'field_join' => 'id',
-))->where('consume', 'n>=', '1')->order('id', 1);
+))->field('dept, stuff_id, c_date, t_value, person, operator')
+    ->where('consume', 'n>=', '1')->order('id', 1);
 
 
 $sql = $db->select(1);

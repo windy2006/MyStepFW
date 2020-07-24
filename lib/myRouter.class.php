@@ -72,14 +72,29 @@ class myRouter extends myBase {
                 $qstr = $path_info.'?'.$qstr;
             }
         }
-        $qstr = str_replace('?', '&', trim($qstr, '?'));
-        if(strpos($qstr, '/')!==0) $qstr = '/'.$qstr;
-        array_shift($_GET);
-        preg_match('#^(.+?)((&|\?)(.+))?$#', $qstr, $match);
-        $p = $match[1] ?? '';
-        $q = $match[4] ?? '';
+        $qstr = trim(str_replace('?', '&', trim($qstr, '?')), '/');
+
+        $detail = explode('&', $qstr);
+        if(count($detail)>1) {
+            $p = $detail[0];
+            $q = implode('&', array_slice($detail, 1));
+            $q = str_replace($this->setting['delimiter_para'], '&', $q);
+        } else {
+            $detail = explode($this->setting['delimiter_path'], $qstr);
+            if(preg_match('#\w+\=#', end($detail))) {
+                $q = str_replace($this->setting['delimiter_para'], '&', current($detail));
+                $p = implode('/', array_slice($detail, 0, -1));
+            } else {
+                $q = '';
+                $p = $qstr;
+            }
+        }
+        $_SERVER["QUERY_STRING"] = $q;
         parse_str($q, $_GET);
-        $_SERVER["QUERY_STRING"] = preg_replace('#^.+?([?&])(.+)$#', '\2', $qstr);
+        if(strpos($qstr, '/')!==0) {
+            $qstr = '/'.$qstr;
+            $p = '/'.$p;
+        }
         return compact('qstr', 'p', 'q');
     }
 
@@ -163,7 +178,8 @@ class myRouter extends myBase {
      * 路由规则检测
      * @return bool
      */
-    public function check() {
+    public function check($qstr='') {
+        if(!empty($qstr)) $this->query = $qstr;
         if(preg_match('@^/(\w+)@', $this->query, $match) && is_dir(APP.$match[1])) return false;
         $url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
         $rule = '';
@@ -193,6 +209,7 @@ class myRouter extends myBase {
                 myStep::info('app_missing');
             }
             if(!$fix_mode || !empty($url_fix) && strpos($this->route['p'], $url_fix)===0) $url_fix = '';
+            if(!file_exists(APP.$rule['idx'].'/info.php')) $rule['idx'] = 'myStep';
             $info_app = include(APP.$rule['idx'].'/info.php');
             $info_app['path'] = explode('/', trim($url_fix.$this->route['p'], '/'));
             $info_app['para'] = $this->info['para'];

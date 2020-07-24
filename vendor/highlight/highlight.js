@@ -35,7 +35,14 @@ function highlight(mode=1, style = 'default') {
                 'sql                      '+global.root+'vendor/highlight/syntaxhighlighter/scripts/shBrushSql.js',
             );
             SyntaxHighlighter.all();
-            setTimeout(()=>setCopyBtn('.syntaxhighlighter'), 1000);
+            setTimeout(()=>{
+                setCopyBtn('.syntaxhighlighter');
+                $('.syntaxhighlighter').each(function(){
+                    let style = $(this).attr('style');
+                    $(this).attr('style', style+';overflow:hidden !important;');
+                    $(this).find('div.container').attr('style', 'max-width:100%;');
+                });
+            }, 1000);
         });
     }
 }

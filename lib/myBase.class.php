@@ -53,10 +53,8 @@ abstract class myBase {
      */
     protected function error($msg, $exit = false) {
         if(is_null($this->err_handler)) {
-            if(class_exists('myException')) {
-                if($exit) myException::$callback_type |= E_USER_ERROR;
-                if(myException::$log_type & E_USER_ERROR) trigger_error($msg, E_USER_ERROR);
-            }
+            myException::$callback_type |= E_USER_ERROR;
+            if(myException::$log_type & E_USER_ERROR) trigger_error($msg, E_USER_ERROR);
         } else {
             call_user_func($this->err_handler, $msg);
             $type = myException::$callback_type;
@@ -64,7 +62,7 @@ abstract class myBase {
             trigger_error($msg, E_USER_ERROR);
             myException::$callback_type = $type;
         }
-        if($exit) exit;
+        if($exit || myException::$exit_on_error) exit;
         return true;
     }
 }

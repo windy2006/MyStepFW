@@ -1,21 +1,23 @@
 <?PHP
 /********************************************
-*                                           *
-* Name    : MSSQL Manager                   *
-* Author  : Windy2000                       *
-* Time    : 2005-04-14                      *
-* Email   : windy2006@gmail.com             *
-* HomePage: www.mysteps.cn                  *
-* Notice  : U Can Use & Modify it freely,   *
-*           BUT PLEASE HOLD THIS ITEM.      *
-*                                           *
-********************************************/
+ *                                           *
+ * Name    : MSSQL Manager                   *
+ * Author  : Windy2000                       *
+ * Time    : 2005-04-14                      *
+ * Email   : windy2006@gmail.com             *
+ * HomePage: www.mysteps.cn                  *
+ * Notice  : U Can Use & Modify it freely,   *
+ *           BUT PLEASE HOLD THIS ITEM.      *
+ *                                           *
+ ********************************************/
 
 /**
 MSSQL数据库查询
     $MSSQL = new MSSQL($host, $user, $pass, $charse)  // Set the Database Class
-    $MSSQL->connect($pconnect)                        // Build a Connection to MSSQL to $MSSQL->conn
+    $MSSQL->connect($the_db)                          // Build a Connection to MSSQL to $MSSQL->conn
+    $MSSQL->reconnect($the_db)                        // Rebuild a Connection to MySQL to $mysql->DB_conn
     $MSSQL->SelectDB($the_db)                         // Select a Database of MSSQL to $MSSQL->select (Must Build Connect First)
+    $MSSQL->convertSQL($sql)                          // Convert MySQL query to MSSQL
     $MSSQL->query($sql)                               // Execute a Query of MSSQL, Result into $MSSQL->resut
     $MSSQL->getRS()                                   // Return The Current Result as an Array and Set the Point of Result to the Next Result
     $MSSQL->record($sql, $mode)                       // Get the first line of the recordset
@@ -45,7 +47,7 @@ MSSQL数据库查询
     $MSSQL->checkError()                              // Check if error occured
     $MSSQL->clearError()                              // Clear Errors Information
     $MSSQL->error($str)                               // Handle the Errors
-*/
+ */
 class MSSQL extends myBase implements interface_db, interface_sql {
     use base_db, base_sql;
 
@@ -80,9 +82,12 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     /**
      * 连接数据库服务器
      * @param string $the_db
+     * @param string $var
      * @return $this
      */
-    public function connect($the_db = '') {
+    public function connect($the_db = '', $var = '') {
+        if(!empty($var)) $the_db = $var;
+        if(!is_string($the_db)) $the_db = '';
         $connectionInfo = array(
             'Database' => $the_db,
             'UID' => $this->user,
@@ -101,6 +106,17 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     }
 
     /**
+     * 重连数据库服务器
+     * @param string $the_db
+     * @param string $var
+     * @return $this
+     */
+    public function reconnect($the_db = '', $var = '') {
+        $this->close();
+        return $this->connect($the_db, $var);
+    }
+
+    /**
      * 更换默认数据库
      * @param $the_db
      * @return bool|MSSQL
@@ -111,6 +127,44 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     }
 
     /**
+     * 转换mysql查询
+     * @param $sql
+     * @return mixed
+     */
+    public function convertSQL($sql) {
+        $sql = preg_replace('#`(\w+)`#', '[\1]', trim($sql,"\r\n"));
+        if(preg_match('#^(\w+)\s+(\w+)\s+(if\s+(not\s+)?exists\s+)([\[\]\w]+)([\w\W]+)$#m', $sql, $match)) {
+            $sql = $match[3].' ';
+            $match[5] = trim($match[5], '[]');
+            if(strtolower($match[2])=='table') {
+                $sql .= '(select * from sysobjects where id = object_id(\''.$match[5].'\') and OBJECTPROPERTY(id, \'IsUserTable\')=1)';
+                $sql = ' '.$match[1].' '.$match[2].' '.$match[5].' '.$match[6];
+            } else {
+                $sql .= '(select * from sys.databases where name = \''.$match[5].'\')';
+                $sql .= ' '.$match[1].' '.$match[2].' ['.$match[5].']';
+            }
+        }
+        preg_match('#^(\w+)\s+(\w+|\*)#', $sql, $match);
+        if(strtolower($match[1])=='create' && strtolower($match[2])=='table') {
+            $sql = str_ireplace('AUTO_INCREMENT', 'identity(1,1)', $sql);
+            $sql = str_ireplace('UNSIGNED', '', $sql);
+            $sql = str_ireplace('MEDIUMINT', 'INT', $sql);
+            $sql = str_ireplace('TIMESTAMP', 'smalldatetime', $sql);
+            $sql = str_ireplace(['TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT'], 'TEXT', $sql);
+            $sql = preg_replace('#Char\((\d+)\)#i', 'nchar(\1)', $sql);
+            $sql = preg_replace('#DEFAULT\s(\'|").+\1#i', '', $sql);
+            $sql = preg_replace('#DEFAULT\s[^\s]+\s#i', '', $sql);
+            $sql = preg_replace('#COMMENT\s+(\'|").+\1#i', '', $sql);
+            $sql = preg_replace('#ENGINE=\w+#i', '', $sql);
+            $sql = preg_replace('#\[?(\w+)\]?\s+enum\s*(\(.+?\))#i', '\1 VARCHAR(20) NOT NULL CHECK(\1 IN\2)', $sql);
+            $sql = preg_replace('#COMMENT=[^\s]+#i', '', $sql);
+        } elseif(preg_match('#limit\s\d+#i', $sql)) {
+            $sql = $this->convertLimit($sql);
+        }
+        return $sql;
+    }
+
+    /**
      * 执行查询
      * @param $sql
      * @return bool|int
@@ -118,15 +172,17 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     public function query($sql) {
         if(!$this->check()) return false;
         $this->free();
-        $this->count++;
+        $sql = $this->convertSQL($sql);
+        $this->sql = $sql;
         $ifsel = strstr('select', strtolower(substr(trim($sql), 0, 6)));
         $this->result = sqlsrv_query($this->connect, $sql, array(), array('Scrollable' => $ifsel?'keyset':'forward', 'QueryTimeout'=>3));
-        $this->sql    = $sql;
+        if($this->result===false) $this->error('Error Occur in Query !');
         if($ifsel) {
             $num_rows = sqlsrv_num_rows($this->result);
         } else {
             $num_rows = sqlsrv_rows_affected($this->result);
         }
+        $this->count++;
         $this->build('[reset]');
         if($this->checkError()) $this->error('Error Occur in Query !');
         return $num_rows;
@@ -149,8 +205,8 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     /**
      * 取得单行结果
      * @param $sql
-     * @param bool $mode
-     * @return array|bool|false|null
+     * @param int $mode
+     * @return array|bool|false|mixed|null
      */
     public function record($sql, $mode = 2) {
         if(!preg_match('/^select\s+top/i', $sql)) $sql = preg_replace('/^select/i', 'select top(1)', $sql);
@@ -170,8 +226,8 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     /**
      * 返回所有结果行
      * @param $sql
-     * @param bool $mode
-     * @return array
+     * @param int $mode
+     * @return bool|mixed
      */
     public function records($sql, $mode = 2) {
         $key = md5($sql);
@@ -223,7 +279,6 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     /**
      * 取得所有表名
      * @param string $the_db
-     * @param string $pattern
      * @return array
      */
     public function getTbls($the_db='') {
@@ -239,8 +294,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
 
     /**
      * 取得最新插入ID
-     * @param $tbl
-     * @return array|bool|false|int|mixed|null
+     * @return array|bool|false|int|mixed
      */
     public function getInsertId() {
         $the_id = $this->result('SELECT @@IDENTITY as new_id');
@@ -250,7 +304,6 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     /**
      * 取得所有列名
      * @param $the_tbl
-     * @param string $the_db
      * @return array
      */
     public function getFields($the_tbl) {
@@ -347,8 +400,7 @@ ORDER BY a.id');
     /**
      * 取得插入数据的脚本
      * @param $the_tbl
-     * @param string $the_db
-     * @return mixed|string
+     * @return string|string[]|null
      */
     public function getDataScript($the_tbl) {
         $the_tbl = $this->safeName($the_tbl);
@@ -375,7 +427,6 @@ ORDER BY a.id');
     /**
      * 取得设置索引项的脚本
      * @param $the_tbl
-     * @param string $the_db
      * @return array
      */
     public function getIdxScript($the_tbl) {
@@ -419,13 +470,15 @@ ORDER BY a.id');
     /**
      * 执行数据文件
      * @param $file
+     * @param array $find
+     * @param array $replace
      * @return array|bool
      */
-    public function file($file) {
+    public function file($file, $find = array(), $replace = array()) {
         if(!$this->check()) return false;
         if(is_file($file)) {
             $results = array();
-            $SQLs = $this->handleSQL(file_get_contents($file));
+            $SQLs = $this->handleSQL(str_replace($find, $replace, file_get_contents($file)));
             for($i=0,$m=count($SQLs); $i<$m; $i++) {
                 $theSQL = $SQLs[$i];
                 $theSQL = strtolower($theSQL);
@@ -499,6 +552,7 @@ ORDER BY a.id');
      * 构建数据查询
      * @param $tbl
      * @param null $join
+     * @return mixed|void
      */
     public function build($tbl, $join=null) {
         if($tbl=='[reset]') {
@@ -540,7 +594,7 @@ ORDER BY a.id');
      */
     public function select($show = false) {
         if(count($this->builder)==1) {
-            $sql = $this->convertLimit(current($this->builder)->select());
+            $sql = current($this->builder)->select();
         } else {
             $sql = 'select ';
             $fields = array();
@@ -582,7 +636,6 @@ ORDER BY a.id');
 
             reset($this->builder);
             $sql .= current($this->builder)->limit();
-            $sql = $this->convertLimit($sql, implode(',', $orders));
         }
         if($show) {
             return $sql;
@@ -599,7 +652,7 @@ ORDER BY a.id');
      */
     public function update($show = false) {
         if(count($this->builder)==1) {
-            $sql = $this->convertLimit(current($this->builder)->update());
+            $sql = current($this->builder)->update();
         } else {
             reset($this->builder);
             $cur_tbl = current($this->builder);
@@ -628,18 +681,6 @@ ORDER BY a.id');
                 if(!empty($the_condition)) $conditions[] = $the_condition;
             }
             if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-
-            /*
-            $orders = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_order = $cur_tbl->order();
-                if(!empty($the_order)) $orders[] = $the_order;
-            }
-            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
-
-            reset($this->builder);
-            $sql = $this->convertLimit($sql.current($this->builder)->limit());
-            */
         }
         if($show) {
             return $sql;
@@ -656,7 +697,7 @@ ORDER BY a.id');
      */
     public function delete($show = false) {
         if(count($this->builder)==1) {
-            $sql = $this->convertLimit(current($this->builder)->delete());
+            $sql = current($this->builder)->delete();
         } else {
             reset($this->builder);
             $cur_tbl = current($this->builder);
@@ -673,18 +714,6 @@ ORDER BY a.id');
                 if(!empty($the_condition)) $conditions[] = $the_condition;
             }
             if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-
-            /*
-            $orders = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_order = $cur_tbl->order();
-                if(!empty($the_order)) $orders[] = $the_order;
-            }
-            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
-
-            reset($this->builder);
-            $sql = $this->convertLimit($sql.current($this->builder)->limit());
-            */
         }
         if($show) {
             return $sql;
@@ -716,7 +745,7 @@ ORDER BY a.id');
      * @param string $the_order
      * @return null|string|string[]
      */
-    public function convertLimit($sql, $the_order='id') {
+    public function convertLimit($sql) {
         if(stripos($sql, 'limit')!==false) {
             if(preg_match('/limit\s+(\d+)$/i', $sql, $matches)) {
                 $sql = preg_replace('/limit\s+(\d+)$/i', '', $sql);

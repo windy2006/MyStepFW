@@ -4,7 +4,7 @@ if(!empty($app)) {
     $builder = APP.$app.'/config/'.$s->gen->language.'.php';
     if(!is_file($builder)) myStep::info('page_error_setting');
     $file = APP.$app.'/config.php';
-    if(!is_file($file)) myFile::copy(CONFIG.'config.php', $file);
+    if(!is_file($file)) myStep::info('page_error_setting');
 } else {
     $file = CONFIG.'config.php';
     $builder = CONFIG.'construction/'.$s->gen->language.'.php';

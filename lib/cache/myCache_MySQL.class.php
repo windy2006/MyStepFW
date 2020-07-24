@@ -5,7 +5,7 @@ class myCache_MySQL implements interface_cache {
 
     public function __construct($setting) {
         $result = false;
-        if(!isset($setting['charset'])) $setting['charset'] = 'utf8';
+        if(!isset($setting['charset']) || strtolower($setting['charset'])=='utf-8') $setting['charset'] = 'utf8mb4';
         if($this->cnt = mysqli_connect($setting['host'], $setting['user'], $setting['password'], $setting['name'])) {
             $sql = '
 CREATE TABLE IF NOT EXISTS `my_cache` (

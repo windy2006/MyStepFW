@@ -54,7 +54,7 @@ $setting_detail['db'] = array(
         'charset' => array(
             'name' => '数据库编码',
             'describe' => '开启数据库持久连接，减少反复连接数据库造成的资源消耗',
-            'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf8', 'Latin1'=>'latin1'))
+            'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf-8', 'Latin1'=>'latin1'))
         ),
         'name' => array(
             'name' => '所用数据库',

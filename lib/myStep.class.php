@@ -124,7 +124,6 @@ class myStep extends myController {
         $this->setting->cookie->prefix .= substr(md5(myReq::server('USERNAME').myReq::server('COMPUTERNAME').myReq::server('OS')), 0, 4).'_';
         if($this->setting->session->mode=='sess_file') $this->setting->session->path = CACHE.'session/'.date('Ymd').'/';
 
-
         $this->setting->info = new stdClass();
         $this->setting->info->time = myReq::server('REQUEST_TIME');
         $this->setting->info->host = myReq::server('HTTP_HOST');
@@ -159,13 +158,13 @@ class myStep extends myController {
         global $cache, $db;
         if(is_null($cache)) {
             switch($this->setting->gen->cache_mode) {
-                case 'myCache_MySQL':
+                case 'MySQL':
                     $cache_setting = myConfig::o2a($this->setting->db);
                     break;
                 default:
                     $cache_setting = CACHE.'data';
             }
-            $cache = $this->getInstance('myCache', $this->setting->gen->cache_mode, $cache_setting);
+            $cache = $this->getInstance('myCache', 'myCache_'.$this->setting->gen->cache_mode, $cache_setting);
         }
         if(is_null($db)) {
             $db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
@@ -267,8 +266,8 @@ class myStep extends myController {
 
     /**
      * 登录接口
-     * @param string $user_id
-     * @param string $user_pwd
+     * @param string $usr
+     * @param string $pwd
      * @return bool
      */
     public function login($usr='', $pwd='') {
@@ -856,7 +855,7 @@ code;
             'log_type' => E_ALL ^ E_NOTICE,
             'log_file' => ROOT.'/error.log',
             'callback_type' => E_ALL & ~(E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_NOTICE),
-            'exit_on_error' =>  false
+            'exit_on_error' =>  true
         ));
 
         $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
@@ -867,7 +866,7 @@ code;
         if(is_file(CONFIG.'config.php')) {
             self::go();
         } else {
-            require(APP.'myStep/module/config.php');
+            require(APP.'myStep/module/init.php');
         }
         return;
     }
