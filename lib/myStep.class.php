@@ -901,7 +901,7 @@ code;
         if(($s->cookie->domain = strstr($host, ':', true))===false) {
             $s->cookie->domain = $host;
         }
-        $s->cookie->path = dirname(myReq::server('SCRIPT_NAME'));
+        $s->cookie->path = str_replace('\\', '/', dirname(myReq::server('SCRIPT_NAME')));
         $s->web->url = 'http://'.$host;
         $router->setRules(CONFIG.'route.php');
         if(!$router->check()) {

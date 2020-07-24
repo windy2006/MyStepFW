@@ -190,11 +190,6 @@ $setting_detail['session'] = array(
 $setting_detail['cookie'] = array(
     'name' => 'Cookie 设置',
     'list' => [
-        'path' => array(
-            'name' => '作用路径',
-            'describe' => 'Cookie起作用的网站路径',
-            'type' => array('text', '', '30')
-        ),
         'prefix' => array(
             'name' => 'Cookie前缀',
             'describe' => '存储Cookie的变量前缀，用于防止用户密码欺骗',

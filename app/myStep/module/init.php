@@ -22,7 +22,6 @@ $t = new myTemplate($tpl_setting);
 $file = CONFIG.'config_default.php';
 $builder = CONFIG.'construction/default.php';
 $config = new myConfig($file);
-$config->cookie->domain = myReq::server('HTTP_HOST');
 
 $dirs = myFile::find('', APP, false, myFile::DIR);
 $dirs = array_map(function ($v) {return basename($v);} , $dirs);

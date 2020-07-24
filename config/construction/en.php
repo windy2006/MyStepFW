@@ -190,11 +190,6 @@ $setting_detail['session'] = array(
 $setting_detail['cookie'] = array(
     'name' => 'Cookie Setting',
     'list' => [
-        'path' => array(
-            'name' => 'Path',
-            'describe' => 'Cookie will only avilable in the path',
-            'type' => array('text', '', '30')
-        ),
         'prefix' => array(
             'name' => 'Prefix',
             'describe' => 'The prefix will add to the name of every cookie',

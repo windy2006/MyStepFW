@@ -44,8 +44,6 @@ $setting['session']['gc'] = true;
 $setting['session']['trans_sid'] = false;
 
 $setting['cookie'] = array();
-$setting['cookie']['domain'] = 'www.mysteps.cn';
-$setting['cookie']['path'] = '/';
 $setting['cookie']['prefix'] = 'ms_';
 
 $setting['router'] = array();
