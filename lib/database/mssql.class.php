@@ -144,7 +144,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
                 $sql .= ' '.$match[1].' '.$match[2].' ['.$match[5].']';
             }
         }
-        preg_match('#^(\w+)\s+(\w+|\*)#', $sql, $match);
+        preg_match('#^(\w+)\s+\[?(\w+|\*)#', $sql, $match);
         if(strtolower($match[1])=='create' && strtolower($match[2])=='table') {
             $sql = str_ireplace('AUTO_INCREMENT', 'identity(1,1)', $sql);
             $sql = str_ireplace('UNSIGNED', '', $sql);
@@ -158,6 +158,17 @@ class MSSQL extends myBase implements interface_db, interface_sql {
             $sql = preg_replace('#ENGINE=\w+#i', '', $sql);
             $sql = preg_replace('#\[?(\w+)\]?\s+enum\s*(\(.+?\))#i', '\1 VARCHAR(20) NOT NULL CHECK(\1 IN\2)', $sql);
             $sql = preg_replace('#COMMENT=[^\s]+#i', '', $sql);
+        } elseif(strtolower($match[1])=='replace') {
+            if(preg_match('#.+\s+set\s+.+#i', $sql)) {
+                preg_match('#replace\s+into\s+\[?(\w+)#', $sql, $match);
+                $pk = $this->getPri($match[1]);
+                $sql = preg_replace('/^replace\s+into/i', 'update', $sql);
+                if(preg_match('#\[?'.$this->safeName($pk).'\]?\s*\=(.+),#', $sql, $match)) {
+                    $sql = str_replace($match[0], '', $sql).' where ['.$pk.']='.$match[1];
+                }
+            } else {
+                $sql = preg_replace('/^replace/i', 'insert', $sql);
+            }
         } elseif(preg_match('#limit\s\d+#i', $sql)) {
             $sql = $this->convertLimit($sql);
         }

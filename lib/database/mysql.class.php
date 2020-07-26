@@ -446,6 +446,15 @@ class MySQL extends myBase implements interface_db, interface_sql {
             }
         }
         $this->free();
+        /*
+        $key = $this->result('SELECT k.column_name
+FROM information_schema.table_constraints t
+JOIN information_schema.key_column_usage k
+USING (constraint_name,table_schema,table_name)
+WHERE t.constraint_type=\'PRIMARY KEY\'
+        AND t.table_schema=\''.$this->safeName($the_db).'\'
+        AND t.table_name=\''.$this->safeName($the_tbl).'\'');
+        */
         return $key;
     }
 
@@ -656,7 +665,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
             }
             if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
 
-            /* don't suppor yet
+            /* don't support yet
             $orders = array();
             foreach($this->builder as $cur_tbl) {
                 $the_order = $cur_tbl->order();
@@ -702,7 +711,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
             }
             if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
 
-            /* don't suppor yet
+            /* don't support yet
             $orders = array();
             foreach($this->builder as $cur_tbl) {
                 $the_order = $cur_tbl->order();
