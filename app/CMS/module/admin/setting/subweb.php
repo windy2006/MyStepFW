@@ -23,9 +23,9 @@ switch($method) {
             $cfg_file = PATH.'website/config_'.$web_current['idx'].'.php';
             $config = new myConfig($cfg_file);
             if($s->db->pre!=$config->db->pre) {
-                $db->query('drop table if exists '.$config->db->pre.'news_show');
-                $db->query('drop table if exists '.$config->db->pre.'news_detail');
-                $db->query('drop table if exists '.$config->db->pre.'news_tag');
+                $db->drop($config->db->pre.'news_show', 'table');
+                $db->drop($config->db->pre.'news_detail', 'table');
+                $db->drop($config->db->pre.'news_tag', 'table');
                 $db->query('delete from '.$s->db->pre.'news_cat where web_id='.intval($id));
             } else {
                 $db->build($s->db->pre.'news_cat')
