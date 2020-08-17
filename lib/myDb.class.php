@@ -260,6 +260,10 @@ class SQLBuilder {
             case '!=':
                 $value = "'".$this->safeValue($value)."'";
                 break;
+            case 'b=':
+                $condition = '=';
+                $value = " binary '".$this->safeValue($value)."'";
+                break;
             case 'n=':
             case 'n<':
             case 'n<=':

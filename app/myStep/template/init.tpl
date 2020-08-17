@@ -29,7 +29,7 @@
         <div class="col-md-10 offset-md-1 col-sm-12">
             <div class="card mb-3">
                 <div class="card-header p-2 bg-info">
-                    <h5 class="text-white card-title m-0"><span class="glyphicon glyphicon-cog"></span> 框架参数初始化</h5>
+                    <h5 class="text-white card-title m-0"><span class="glyphicon glyphicon-cog"></span> 框架参数初始化（如不了解具体意义，请保持默认值）</h5>
                 </div>
                 <div class="card-body">
                     <form method="post" onsubmit="return myChecker(this)">

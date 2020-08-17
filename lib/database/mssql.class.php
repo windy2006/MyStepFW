@@ -35,6 +35,8 @@ MSSQL数据库查询
     $MSSQL->file($file)                               // Read SQL File and execute it
     $MSSQL->handleSQL($strSQL)                        // Split the SQL Query String into a array from a whole String
     $MSSQL->build($tbl, $join)                        // Set or get a SQL builder to create a sql script
+    $MSSQL->create($name, $para, $type)               // Create Object
+    $MSSQL->drop($name, $para, $type)                 // Drop Object
     $MSSQL->select()                                  // Build a select query use the SQL builder and execute it
     $MSSQL->update()                                  // Build a replace query use the SQL builder and execute it
     $MSSQL->delete()                                  // Build a delete query use the SQL builder and execute it
@@ -133,7 +135,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
      */
     public function convertSQL($sql) {
         $sql = preg_replace('#`(\w+)`#', '[\1]', trim($sql,"\r\n"));
-        if(preg_match('#^(\w+)\s+(\w+)\s+(if\s+(not\s+)?exists\s+)([\[\]\w]+)([\w\W]+)$#m', $sql, $match)) {
+        if(preg_match('#^(\w+)\s+(\w+)\s+(if\s+(not\s+)?exists\s+)([\[\]\w]+)([\w\W]+)$#im', $sql, $match)) {
             $sql = $match[3].' ';
             $match[5] = trim($match[5], '[]');
             if(strtolower($match[2])=='table') {
@@ -141,22 +143,30 @@ class MSSQL extends myBase implements interface_db, interface_sql {
                 $sql = ' '.$match[1].' '.$match[2].' '.$match[5].' '.$match[6];
             } else {
                 $sql .= '(select * from sys.databases where name = \''.$match[5].'\')';
-                $sql .= ' '.$match[1].' '.$match[2].' ['.$match[5].']';
+                $sql .= ' '.$match[1].' '.$match[2].' ['.$match[5].'] '.$match[6];
             }
         }
         preg_match('#^(\w+)\s+\[?(\w+|\*)#', $sql, $match);
         if(strtolower($match[1])=='create' && strtolower($match[2])=='table') {
-            $sql = str_ireplace('AUTO_INCREMENT', 'identity(1,1)', $sql);
-            $sql = str_ireplace('UNSIGNED', '', $sql);
-            $sql = str_ireplace('MEDIUMINT', 'INT', $sql);
-            $sql = str_ireplace('TIMESTAMP', 'smalldatetime', $sql);
-            $sql = str_ireplace(['TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT'], 'TEXT', $sql);
+            $sql = str_ireplace(' AUTO_INCREMENT', ' identity(1,1)', $sql);
+            $sql = str_ireplace(' UNSIGNED', '', $sql);
+            $sql = str_ireplace(' MEDIUMINT', ' INT ', $sql);
+            $sql = str_ireplace(' DOUBLE', ' float', $sql);
+            $sql = str_ireplace(' REAL', ' float', $sql);
+            $sql = str_ireplace(' TIMESTAMP', ' smalldatetime', $sql);
+            $sql = str_ireplace(' YEAR', ' smallint', $sql);
+            $sql = str_ireplace(' VARBINARY', ' varbinary', $sql);
+            $sql = str_ireplace(' TINYBLOB', ' varbinary', $sql);
+            $sql = str_ireplace(' BLOB', ' varbinary', $sql);
+            $sql = str_ireplace(' MEDIUMBLOB', ' varbinary', $sql);
+            $sql = str_ireplace(' LONGBLOB', ' varbinary', $sql);
+            $sql = str_ireplace(['TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT'], 'NTEXT', $sql);
             $sql = preg_replace('#Char\((\d+)\)#i', 'nchar(\1)', $sql);
             $sql = preg_replace('#DEFAULT\s(\'|").+\1#i', '', $sql);
             $sql = preg_replace('#DEFAULT\s[^\s]+\s#i', '', $sql);
             $sql = preg_replace('#COMMENT\s+(\'|").+\1#i', '', $sql);
             $sql = preg_replace('#ENGINE=\w+#i', '', $sql);
-            $sql = preg_replace('#\[?(\w+)\]?\s+enum\s*(\(.+?\))#i', '\1 VARCHAR(20) NOT NULL CHECK(\1 IN\2)', $sql);
+            $sql = preg_replace('#\[?(\w+)\]?\s+enum\s*(\(.+?\))#i', '\1 NVARCHAR(20) NOT NULL CHECK(\1 IN\2)', $sql);
             $sql = preg_replace('#COMMENT=[^\s]+#i', '', $sql);
         } elseif(strtolower($match[1])=='replace') {
             if(preg_match('#.+\s+set\s+.+#i', $sql)) {
@@ -172,6 +182,11 @@ class MSSQL extends myBase implements interface_db, interface_sql {
         } elseif(preg_match('#limit\s\d+#i', $sql)) {
             $sql = $this->convertLimit($sql);
         }
+        $sql = str_ireplace(' NOW()', ' GETDATE()', $sql);
+        $sql = str_ireplace('= binary', '=', $sql);
+        $sql = str_ireplace(' like binary ', ' like ', $sql);
+        $sql = str_ireplace(' regexp binary ', ' like ', $sql);
+        $sql = str_ireplace(' rlike ', ' like ', $sql);
         return $sql;
     }
 
@@ -580,6 +595,104 @@ ORDER BY a.id');
             if(!empty($join)) $this->builder[$tbl]->join = $join;
         }
         return $this->builder[$tbl];
+    }
+
+    /**
+     * 创建对象
+     * @param $name
+     * @param array $para
+     * @param string $type
+     * @param bool $run
+     * @return bool|int
+     */
+    public function create($name, $para=[], $type='db', $run = true) {
+        switch($type) {
+            case 't':
+            case 'tbl':
+            case 'table':
+                if(is_string($para)) {
+                    $para=['cols'=>$para];
+                }
+                if(!isset($para['col'])) {
+                    $this->error('Column data for table is missing!');
+                }
+                $sql = 'create table IF NOT EXISTS '.$this->safeName($name).' ('.chr(10);
+                if(is_string($para['col'])) {
+                    if(preg_match('#^\w+$#', $para['col'])) {
+                        $sql = 'select * into `'.$this->safeName($name).'` from `'.$para['col'].'` where 1=0';
+                        break;
+                    } else {
+                        $sql .= $para['col'];
+                    }
+                } else {
+                    $cols =& $para['col'];
+                    for($i=0,$m=count($cols);$i<$m;$i++) {
+                        if(is_string($cols[$i])){
+                            $cols[$i] = preg_replace('#^(\w+)#', '`\1`', $cols[$i]);
+                            $sql .= $cols[$i].','.chr(10);
+                        } else {
+                            $sql .= '`'.$cols[$i]['name'].'` '.$cols[$i]['type'].' '.(isset($cols[$i]['null'])?'NULL':'NOT NULL').chr(10);
+                        }
+                    }
+                    if(isset($para['idx'])) {
+                        if(is_string($para['idx'])) {
+                            $sql .= 'INDEX idx_'.md5($para['idx']).'('.$para['idx'].'),'.chr(10);
+                        } else {
+                            $sql .= 'INDEX '.$para['idx'][0].'('.$para['idx'][1].'),'.chr(10);
+                        }
+                    }
+                    if(isset($para['uni'])) $sql .= 'UNIQUE (`'.$para['uni'].'`),'.chr(10);
+                    if(isset($para['pri'])) {
+                        $sql .= 'PRIMARY KEY (`'.$para['pri'].'`)';
+                    } else {
+                        $sql = substr($sql, 0, -2);
+                    }
+                }
+                $sql .= chr(10).')';
+                if(isset($para['charset'])) $sql .= ' COLLATE '.$para['charset'].'_CI_AS';
+                break;
+            case 'i':
+            case 'idx':
+            case 'index':
+                if(is_string($para)) {
+                    $para=['col'=>$para];
+                }
+                if(is_array($para['col'])) $para['col'] = implode(',', $para['col']);
+                if(!isset($para['name'])) $para['name'] = 'idx_'.md5($para['col']);
+                $sql = 'create index `'.$this->safeName($para['name']).'` on '.$this->safeName($name).'('.$para['col'].')';
+                break;
+            default:
+                $sql = 'create database IF NOT EXISTS ['.$this->safeName($name).']';
+                if(empty($para)) $para = 'Chinese_PRC';
+                $sql .= ' COLLATE '.strtoupper($para).'_CI_AS';
+        }
+        return $run ? $this->query($sql) : $sql;
+    }
+
+    /**
+     * 移除对象
+     * @param $name
+     * @param string $type
+     * @param bool $run
+     * @return bool|int|string
+     */
+    public function drop($name, $type='db', $run = true) {
+        $sql = 'drop ';
+        switch($type) {
+            case 't':
+            case 'tbl':
+            case 'table':
+                $sql .= 'table IF EXISTS `'.$this->safeName($name).'`';
+                break;
+            case 'i':
+            case 'idx':
+            case 'index':
+                $sql .= 'index IF EXISTS `'.$this->safeName($name[0]).'` on `'.$this->safeName($name[1]).'`';
+                break;
+            default:
+                $sql .= 'database IF EXISTS `'.$this->safeName($name).'`';
+        }
+        return $run ? $this->query($sql) : $sql;
     }
 
     /**

@@ -122,3 +122,21 @@ $db->build('cms_news_detail', array(
 echo $db->delete(1).';<br /><br />';
 
 //echo $db->close();
+
+//create
+//echo $db->create('my_db', '', 'db', 0).'<br /><br />';
+//echo $db->create('my_tbl', 'my_col_1, my_col_2', 'idx', 0).'<br /><br />';
+//echo $db->create('my_tbl', 'tbl2', 'tbl', 0).'<br /><br />';
+//echo $db->create('my_table', 'my_col char(1000)', 'tbl', 0).'<br /><br />';
+debug_show($db->create('my_table', [
+    'col' => [
+        'id int identity(1,1)',
+        'my_col_1 char(1000)',
+        'my_col_2 int',
+    ],
+    'pri' => 'id',
+    'uni' => 'my_col_2',
+    'idx' => 'my_col_2',
+    'charset' => 'GBK',
+    'comment' => 'comments'
+], 'tbl', 0));

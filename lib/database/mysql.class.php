@@ -38,6 +38,8 @@ MySQL查询类
     $mysql->getStat()                            // Get the Current Status of MySQL
     $mysql->getProcesses($mode, $time_limit)     // Get the processes list of MySQL
     $mysql->build($tbl, $join)                   // Set or get a SQL builder to create a sql script
+    $mysql->create($name, $para, $type)          // Create Object
+    $mysql->drop($name, $para, $type)            // Drop Object
     $mysql->select()                             // Build a select query use the SQL builder and execute it
     $mysql->update()                             // Build a replace query use the SQL builder and execute it
     $mysql->delete()                             // Build a delete query use the SQL builder and execute it
@@ -74,11 +76,10 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * @param $pwd
      * @param string $charset
      */
-    public function init($host, $user, $pwd, $charset='utf8mb4') {
+    public function init($host, $user, $pwd, $charset='utf8') {
         $this->host = $host;
         $this->user = $user;
         $this->pwd = $pwd;
-        if(strtolower($charset)=='utf-8') $charset = 'utf8mb4';
         $this->charset = $charset;
         return;
     }
@@ -142,7 +143,14 @@ class MySQL extends myBase implements interface_db, interface_sql {
      */
     public function setCharset($charset='') {
         if(empty($charset)) $charset = $this->charset;
-        if(strtolower($charset)=='utf-8') $charset = 'utf8mb4';
+        if(strtolower($charset)=='utf-8') {
+            if(version_compare(mysqli_get_server_info($this->connect), '5.5.3', '>')) {
+                $charset = 'utf8mb4';
+            } else {
+                $charset = 'utf8';
+            }
+        }
+        $this->charset = $charset;
         mysqli_set_charset($this->connect, $charset);
         if($this->checkError())    $this->error('Unknow CharSet Name');
         return mysqli_character_set_name($this->connect);
@@ -551,6 +559,117 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     }
 
     /**
+     * 创建对象
+     * @param $name
+     * @param array $para
+     * @param string $type
+     * @param bool $run
+     * @return bool|int
+     */
+    public function create($name, $para=[], $type='db', $run = true) {
+        switch($type) {
+            case 't':
+            case 'tbl':
+            case 'table':
+                if(is_string($para)) {
+                    $para=['col'=>$para];
+                }
+                if(!isset($para['col'])) {
+                    $this->error('Column data for table is missing!');
+                }
+                $sql = 'create table IF NOT EXISTS `'.$this->safeName($name).'` ('.chr(10);
+                if(is_string($para['col'])) {
+                    if(preg_match('#^\w+$#', $para['col'])) {
+                        $sql = 'create table IF NOT EXISTS `'.$this->safeName($name).'` like `'.$para['col'].'`';
+                        break;
+                    } else {
+                        $sql .= $para['col'];
+                    }
+                } else {
+                    $cols =& $para['col'];
+                    for($i=0,$m=count($cols);$i<$m;$i++) {
+                        if(is_string($cols[$i])){
+                            $cols[$i] = preg_replace('#^(\w+)#', '`\1`', $cols[$i]);
+                            $sql .= $cols[$i].','.chr(10);
+                        } else {
+                            $sql .= '`'.$cols[$i]['name'].'` '.$cols[$i]['type'].' '.(isset($cols[$i]['null'])?'NULL':'NOT NULL');
+                            if(!isset($cols[$i]['condition'])) $cols[$i]['condition'] = '';
+                            if(is_string($cols[$i]['condition'])) {
+                                $sql .= ' '.$cols[$i]['condition'];
+                            } else {
+                                foreach($cols[$i]['condition'] as $k => $v) {
+                                    $sql .= $k.' \''.$v.'\'';
+                                }
+                            }
+                            $sql .= chr(10);
+                        }
+                    }
+                    if(isset($para['idx'])) {
+                        if(is_string($para['idx'])) {
+                            $sql .= 'INDEX idx_'.md5($para['idx']).'('.$para['idx'].'),'.chr(10);
+                        } else {
+                            $sql .= 'INDEX '.$para['idx'][0].'('.$para['idx'][1].'),'.chr(10);
+                        }
+                    }
+                    if(isset($para['uni'])) $sql .= 'UNIQUE (`'.$para['uni'].'`),'.chr(10);
+                    if(isset($para['pri'])) {
+                        $sql .= 'PRIMARY KEY (`'.$para['pri'].'`)';
+                    } else {
+                        $sql = substr($sql, 0, -2);
+                    }
+                }
+                $sql .= chr(10).')';
+                if(!isset($para['engine'])) $para['engine'] = 'MyISAM';
+                if(!isset($para['charset'])) $para['charset'] = $this->charset;
+                $sql .= 'ENGINE='.$para['engine'].' DEFAULT CHARSET='.$para['charset'];
+                if(isset($para['increment'])) $sql .= ' AUTO_INCREMENT='.$para['increment'];
+                if(isset($para['comment'])) $sql .= ' COMMENT=\''.$para['comment'].'\'';
+                break;
+            case 'i':
+            case 'idx':
+            case 'index':
+                if(is_string($para)) {
+                    $para=['col'=>$para];
+                }
+                if(is_array($para['col'])) $para['col'] = implode(',', $para['col']);
+                if(!isset($para['name'])) $para['name'] = 'idx_'.md5($para['col']);
+                $sql = 'create index `'.$this->safeName($para['name']).'` on '.$this->safeName($name).'('.$para['col'].')';
+                break;
+            default:
+                $sql = 'create database IF NOT EXISTS `'.$this->safeName($name).'`';
+                if(empty($para)) $para = $this->charset;
+                $sql .= ' default charset '.$para.' COLLATE '.$para.'_unicode_ci';
+        }
+        return $run ? $this->query($sql) : $sql;
+    }
+
+    /**
+     * 移除对象
+     * @param $name
+     * @param string $type
+     * @param bool $run
+     * @return bool|int|string
+     */
+    public function drop($name, $type='db', $run = true) {
+        $sql = 'drop ';
+        switch($type) {
+            case 't':
+            case 'tbl':
+            case 'table':
+                $sql .= 'table IF EXISTS `'.$this->safeName($name).'`';
+                break;
+            case 'i':
+            case 'idx':
+            case 'index':
+                $sql .= 'index IF EXISTS `'.$this->safeName($name[0]).'` on `'.$this->safeName($name[1]).'`';
+                break;
+            default:
+                $sql .= 'database IF EXISTS `'.$this->safeName($name).'`';
+        }
+        return $run ? $this->query($sql) : $sql;
+    }
+
+    /**
      * 插入数据
      * @param bool $show
      * @return bool|int
@@ -932,7 +1051,7 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     protected function error($str, $exit=false) {
         if(!$this->err) {
             $this->err = true;
-            $this->err_info .= mysqli_errno($this->connect).' - '.mysqli_error($this->connect);
+            if($this->check()) $this->err_info .= mysqli_errno($this->connect).' - '.mysqli_error($this->connect);
         }
         $this->err_info .= ' ('.$str.')';
         $str = "\nQuery String: ".$this->sql."\n";

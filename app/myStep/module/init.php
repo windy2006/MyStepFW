@@ -4,7 +4,7 @@ if(myReq::check('post')) {
     if(!empty($setting['db']['host']) && !empty($setting['db']['user']) && !empty($setting['db']['password'])) {
         $db = new myDb($setting['db']['type'], $setting['db']['host'], $setting['db']['user'], $setting['db']['password'], $setting['db']['charset']);
         $db->connect($setting['db']['pconnect']=='true');
-        $db->query('create database if not exists `'.$setting['db']['name'].'` default charset '.$setting['db']['charset'].' COLLATE '.$setting['db']['charset']);
+        $db->create($setting['db']['name']);
     }
     $config = new myConfig(CONFIG.'config.php');
     $config->set($setting);

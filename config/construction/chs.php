@@ -42,7 +42,7 @@ $setting_detail['gen'] = array(
         ),
         'close' => array(
             'name' => '关闭页面',
-            'describe' => '网站关闭并显示的设置页面',
+            'describe' => '如设置，网站所有页面将均转向到这里',
             'type' => array('text', '_', '80')
         ),
         'static' => array(
