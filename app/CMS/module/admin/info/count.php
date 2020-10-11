@@ -20,8 +20,8 @@ $db->build($s->db->pre.'counter')
     ->limit($record_start, $page_size);
 $db->select();
 while($record = $db->getRS()) {
-	s::htmlTrans($record);
-	$t->setLoop('record', $record);
+    s::htmlTrans($record);
+    $t->setLoop('record', $record);
 }
 
 $db->free();

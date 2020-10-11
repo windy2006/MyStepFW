@@ -1,17 +1,17 @@
 <?PHP
 if($method=='clean') {
-	cms::$log = $mystep->getLanguage('admin_info_log_clean');
+    cms::$log = $mystep->getLanguage('admin_info_log_clean');
     $db->query('truncate table '.$db->safeName($web_info['setting']->db->pre.'sys_log'));
     cms::redirect();
 } elseif($method=='download') {
-	cms::$log = $mystep->getLanguage('admin_info_log_download');
-	$db->build($s->db->pre.'sys_log')
+    cms::$log = $mystep->getLanguage('admin_info_log_download');
+    $db->build($s->db->pre.'sys_log')
         ->order('id', true);
-	$db->select();
-	$content = '';
-	while($record = $db->getRS()) {
-		$content .= join(',', $record).'\n';
-	}
+    $db->select();
+    $content = '';
+    while($record = $db->getRS()) {
+        $content .= join(',', $record).'\n';
+    }
     getOB();
     $content = preg_replace('/\n+/', '\n', $content);
     $content = str_replace('\n', '\r\n', $content);
@@ -20,7 +20,7 @@ if($method=='clean') {
     header('Accept-Length: '.strlen($content));
     header('Content-Disposition: attachment; filename='.date('Ymd').'_log.txt');
     echo $content;
-	exit();
+    exit();
 }
 
 $tpl_setting['name'] = 'info_log';
@@ -46,10 +46,10 @@ $db->build($s->db->pre.'sys_log')
 if($order!='id') $db->build($s->db->pre.'sys_log')->order('id', true);
 $db->select();
 while($record = $db->getRS()) {
-	s::htmlTrans($record);
-	$record['time'] = date('Y-m-d H:i:s', $record['time']);
+    s::htmlTrans($record);
+    $record['time'] = date('Y-m-d H:i:s', $record['time']);
     $record['link_short'] = strlen($record['link'])>40 ? shortUrl($record['link']) : $record['link'];
-	$t->setLoop('record', $record);
+    $t->setLoop('record', $record);
 }
 $t->assign('order', $order);
 $t->assign('order_type_org', $order_type);

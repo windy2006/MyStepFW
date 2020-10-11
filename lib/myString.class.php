@@ -207,7 +207,11 @@ class myString {
      */
     public static function toJson($var, $charset='UTF-8') {
         if(!empty($charset)) $var = self::setCharset($var, $charset);
-        if(is_array($var) || is_object($var)) $var = json_encode($var);
+        if(is_array($var) || is_object($var)) {
+            $var = json_encode($var, JSON_PRETTY_PRINT);
+        } else {
+            $var = '[]';
+        }
         return $var;
     }
 
@@ -218,7 +222,7 @@ class myString {
      * @return mixed
      */
     public static function fromJson($json, $assoc = true) {
-        $json = str_replace(array(chr(10), chr(13)), '', $json);
+        $json = str_replace([chr(10), chr(13)], '', $json);
         $json = preg_replace('/([ {, ])(\s*)([^"]+?)\s*:/', '$1"$3":', $json);
         $json = str_replace('\\"', "&#34;", $json);
         return json_decode($json, $assoc);

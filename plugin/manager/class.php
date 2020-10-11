@@ -26,7 +26,7 @@ class plugin_manager implements interface_plugin {
         regPluginRoute('manager');
         myFile::mkdir(__DIR__.'/update');
         myFile::mkdir(__DIR__.'/pack');
-        addPluginLink($mystep->getLanguage('plugin_manager_info_title'), 'manager');
+        addPluginLink($mystep->getLanguage('plugin_manager_title'), 'manager');
     }
     public static function uninstall() {
         global $router;
@@ -272,9 +272,8 @@ class plugin_manager implements interface_plugin {
     }
     public static function remote() {
         global $s, $info_app;
-        $sign = myReq::server('MS_SIGN');
         $setting = new myConfig(__DIR__.'/config.php');
-        if((empty($sign) || !$setting->update) && !$s->gen->debug) myStep::header('404');
+        if(!$setting->update && !$s->gen->debug) myStep::header('404');
         $method = end($info_app['path']);
         switch($method) {
             case 'version':
@@ -387,7 +386,7 @@ class plugin_manager implements interface_plugin {
             myFile::move(APP.'myStep/menu.json', $dir);
             myFile::copy($dir.'../menu.json', APP.'myStep/menu.json');
             $mypacker = new myPacker(ROOT, $dir.$idx.'/mystep.pack');
-            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', '/config.php');
+            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak');
             $mypacker->pack();
             myFile::del(APP.'myStep/menu.json');
             myFile::move($dir.'menu.json', APP.'myStep/menu.json');

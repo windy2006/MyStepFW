@@ -1,5 +1,5 @@
 <div class="card w-100 mb-5 mb-sm-2">
-	<div id="grid" class="card-body">
+    <div id="grid" class="card-body">
         <div class="grid-item">1.Normal</div>
         <div class="grid-item grid-item--width2 grid-item--height2">2.w2,h2</div>
         <div class="grid-item grid-item--height3">3.h3</div>
@@ -23,7 +23,7 @@
         <div class="grid-item">21.Normal</div>
         <div class="grid-item">22.Normal</div>
         <div class="grid-item grid-item--height2">23.h2</div>
-	</div>
+    </div>
 </div>
 <script type="application/javascript">
     jQuery.vendor('masonry.pkgd', {

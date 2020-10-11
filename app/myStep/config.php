@@ -4,6 +4,7 @@ $setting = array();
 
 $setting['gen'] = array();
 $setting['gen']['cache_page'] = false;
+$setting['gen']['path_admin'] = 'console';
 
 $setting['web'] = array();
 $setting['web']['minify'] = false;

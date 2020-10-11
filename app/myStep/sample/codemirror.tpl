@@ -1,19 +1,19 @@
 <div class="card w-100 mb-5 mb-sm-2">
-	<div class="card-body p-0">
-		<textarea id="code" class="w-100" title="highlight code">程序初始化，请稍候！</textarea>
-	</div>
-	<div class="progress" style="height:5px;">
-		<div id="progress_bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-	</div>
+    <div class="card-body p-0">
+        <textarea id="code" class="w-100" title="highlight code">程序初始化，请稍候！</textarea>
+    </div>
+    <div class="progress" style="height:5px;">
+        <div id="progress_bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+    </div>
     <div id="info" class="text-muted small"></div>
 </div>
 <script type="application/javascript">
     $(function() {
         $.setCSS([
             'vendor/codemirror/lib/codemirror.css',
-			'vendor/codemirror/addon/fold/foldgutter.css',
-			'vendor/codemirror/addon/display/fullscreen.css'
-		]);
+            'vendor/codemirror/addon/fold/foldgutter.css',
+            'vendor/codemirror/addon/display/fullscreen.css'
+        ]);
         $.setJS([
             "vendor/codemirror/lib/codemirror.js",
             "vendor/codemirror/addon/fold/foldcode.js",
@@ -59,13 +59,13 @@
                 $('#info').remove();
             });
         }, function(num_done, num_total, script) {
-			let obj = $('#progress_bar');
-			obj.width(obj.parent().width() * Math.ceil(num_done/num_total));
-			$('#info').html('脚本 ' + script + ' 已载入！');
-			if(num_done===num_total) {
-				$('#info').html('代码处理中。。。');
-				obj.parent().remove();
-			}
-		});
+            let obj = $('#progress_bar');
+            obj.width(obj.parent().width() * Math.ceil(num_done/num_total));
+            $('#info').html('脚本 ' + script + ' 已载入！');
+            if(num_done===num_total) {
+                $('#info').html('代码处理中。。。');
+                obj.parent().remove();
+            }
+        });
     });
 </script>

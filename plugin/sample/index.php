@@ -6,19 +6,19 @@ $this->regTag('test_tag', function() {return 'Plugin tag test.';});
 $this->setLanguage(['test_lng'=>'模版语言测试']);
 $this->setFunction('page', 'plugin_sample::setPage');
 $this->editorSetPlugin('
-			editor.addCommand( "test_cmd", function() {
-				let selected_text = editor.selection.getContent();
-				let return_text = "";
-				return_text = "<h1>" + selected_text + "</h1>";
-				editor.execCommand("mceInsertContent", 0, return_text);
-			});
+            editor.addCommand( "test_cmd", function() {
+                let selected_text = editor.selection.getContent();
+                let return_text = "";
+                return_text = "<h1>" + selected_text + "</h1>";
+                editor.execCommand("mceInsertContent", 0, return_text);
+            });
         ');
 $this->editorSetPlugin('
-			editor.addButton("test_button", {
-				text : "按钮",
-				title : "插入测试文字",
-				cmd: "test_cmd"
-			});
+            editor.addButton("test_button", {
+                text : "按钮",
+                title : "插入测试文字",
+                cmd: "test_cmd"
+            });
         ', 'test_button');
 $this->editorSetPlugin('
             editor.addButton( "test_list", {

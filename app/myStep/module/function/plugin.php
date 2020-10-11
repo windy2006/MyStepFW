@@ -51,6 +51,7 @@ switch($method) {
             myStep::info('plugin_installed', $app_root.'function/plugin/');
         }
         $check = $class::check($check_info);
+        $t->assign('btn_install', $check?'':'d-none');
         $t->assign('check', $check_info);
         $t->assign('info', $mystep->getLanguage('plugin_check_'.($check?'ok':'fail')));
     case 'setting':

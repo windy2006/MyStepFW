@@ -1,2 +1,2 @@
 <?PHP
-return '1.6.4';
+return '1.6.5';

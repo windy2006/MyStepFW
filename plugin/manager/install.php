@@ -244,7 +244,7 @@ function GetFile($file, $length=0, $offset=0) {
         $data = fread($fp, $length);
         fclose($fp);
     }
-    if(get_magic_quotes_runtime()) $data = stripcslashes($data);
+    //if(get_magic_quotes_runtime()) $data = stripcslashes($data);
     return $data;
 }
 function GetFileSize($para) {

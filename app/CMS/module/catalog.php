@@ -29,7 +29,7 @@ if(!empty($catalog)) {
     $s->web->keyword = $cat_info['keyword'];
     $s->web->description = $cat_info['comment'];
     $list_limit = array_values((array)$s->list);
-    if(isset($list_limit[$cat_info['type']]))	{
+    if(isset($list_limit[$cat_info['type']]))    {
         $page_size = $list_limit[$cat_info['type']];
     } else {
         $page_size = $list_limit[0];

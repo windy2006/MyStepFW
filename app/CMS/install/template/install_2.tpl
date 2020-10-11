@@ -1,23 +1,23 @@
 <DIV id="main_frm" class="border rounded p-4 mb-5">
-	<H2 class="mb-4">步骤二 ： 环境设置</H2>
-	<h4 class="title">检测服务器环境以及设置基本网站参数</h4>
-	<form method="post" action="CMS/install/3" onsubmit="return myChecker(this)">
-		<table class="table table-bordered table-striped">
-			<tbody>
-			<!--loop:start key="setting"-->
-			<!--setting_content-->
-			<!--loop:end-->
-			</tbody>
-			<tfoot class="position-fixed bg-white border-top">
-			<tr>
-				<td colspan="2" class="p-3 border-0 text-center">
-					<button class="btn btn-info btn-sm mr-3" type="submit"> 提 交 </button>
-					<button class="btn btn-info btn-sm" type="reset"> 复 位 </button>
-				</td>
-			</tr>
-			</tfoot>
-		</table>
-	</form>
+    <H2 class="mb-4">步骤二 ： 环境设置</H2>
+    <h4 class="title">检测服务器环境以及设置基本网站参数</h4>
+    <form method="post" action="CMS/install/3" onsubmit="return myChecker(this)">
+        <table class="table table-bordered table-striped">
+            <tbody>
+            <!--loop:start key="setting"-->
+            <!--setting_content-->
+            <!--loop:end-->
+            </tbody>
+            <tfoot class="position-fixed bg-white border-top">
+            <tr>
+                <td colspan="2" class="p-3 border-0 text-center">
+                    <button class="btn btn-info btn-sm mr-3" type="submit"> 提 交 </button>
+                    <button class="btn btn-info btn-sm" type="reset"> 复 位 </button>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </form>
 </DIV>
 
 <script type="application/javascript">

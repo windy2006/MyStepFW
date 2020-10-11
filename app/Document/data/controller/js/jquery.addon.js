@@ -229,7 +229,7 @@ jQuery.cookie = function(name, value, options) {
 /**
  * 
  * credits for this plugin go to brandonaaron.net
- * 	
+ *
  * unfortunately his site is down
  * 
  * @param {Object} up
@@ -302,19 +302,19 @@ jQuery.event.mousewheel = {
 };
 
 jQuery.fn.outerHTML = function(s) {
-	return (s) ? this.before(s).remove() : $('<p>').append(this.eq(0).clone()).html();
+    return (s) ? this.before(s).remove() : $('<p>').append(this.eq(0).clone()).html();
 };
 
 jQuery.fn.cssText = function(css) {
-	var css_list = css.trim().split(";");
-	var cur_style = null;
-	for(var i=0,m=css_list.length;i<m;i++) {
-		css_list[i] = css_list[i].trim();
-		if(css_list[i].length<3) continue;
-		cur_style = css_list[i].split(":");
-		if(cur_style.length==2) $(this).css(cur_style[0].trim(), cur_style[1].trim());
-	}
-	return this;
+    var css_list = css.trim().split(";");
+    var cur_style = null;
+    for(var i=0,m=css_list.length;i<m;i++) {
+        css_list[i] = css_list[i].trim();
+        if(css_list[i].length<3) continue;
+        cur_style = css_list[i].split(":");
+        if(cur_style.length==2) $(this).css(cur_style[0].trim(), cur_style[1].trim());
+    }
+    return this;
 };
 
 /*!
@@ -322,80 +322,80 @@ jQuery.fn.cssText = function(css) {
  * Mixture image enhance function by windy2000
 */
 jQuery.fn.powerImage = function(options) {
-	var defaults = {
-		image: "/images/loading_img.gif",
-		width: 600,
-		zoom: true
-	};
-	var params = $.extend({}, defaults, options || {});
-	params.imgs = [];
-	$(this).find("img").each(function(i) {
-		if($(this).hasClass("title_img")) return;
-		var url = $(this).attr("src");
-		if(!url) return;
-		this.src = params.image;
-		$(this).css({"width":32,"height":32,"margin-bottom":"20px"});
-		if(this.title=="" && this.alt!="") this.title = this.alt;
-		if(params.zoom) {
-			if(this.title!="") this.title += "\n";
-			this.title += "Press ALT button, wheel the mouse to zoom in or zoom out the image.";
-			$(this).mousewheel(function(objEvent, intDelta){
-				if(objEvent.altKey) {
-					var zoom = parseInt(this.style.zoom, 10) || 100;
-					zoom += intDelta * 10;
-					if(zoom > 0) {
-						this.style.zoom = zoom + '%';
-					}
-					if(objEvent.preventDefault){
-						objEvent.preventDefault();
-					} else {
-						objEvent.returnValue = false;
-					}
-					return false;
-				} else {
-					return true;
-				}
-			});
-		}
-		var data = {
-			obj: $(this),
-			url: url
-		};
-		params.imgs.push(data);
-	});
-	var showIt = function() {
-		var win_top_1 = $(window).scrollTop(), win_top_2 = win_top_1 + $(window).height();
-		$.each(params.imgs, function(i, data) {
-			if(data.obj==null) return;
-			var obj = data.obj, url = data.url;
-			var img_top_1 = obj.offset().top+100; img_top_2 = img_top_1 + obj.height();
-			if((img_top_1 > win_top_1 && img_top_1 < win_top_2) || (img_top_2 > win_top_1 && img_top_2 < win_top_2)) {
-				var cur_img = $("<img>");
-				cur_img.load(function() {
-					obj.hide();
-					obj.attr("src", url);
-					var the_width = obj.attr("width");
-					var the_height = obj.attr("height");
-					if(typeof(the_width)=="undefined") the_width = "auto";
-					if(typeof(the_height)=="undefined") the_height = "auto";
-					obj.css({"width":the_width,"height":the_height,"margin-bottom":"10px"});
-					obj.fadeIn("slow");
-					if(obj.width()>params.width) obj.css({"width":params.width,"height":"auto"});
-					$(this).remove();
-				});
-				cur_img.error(function(){
-					$(this).remove();
-					obj.remove();
-				});
-				cur_img.attr("src", url);
-				data.obj = null;
-			}
-		});
-		return false;
-	};
-	setTimeout(showIt, 1000);
-	$(window).bind("resize", showIt);
-	$(window).bind("scroll", showIt);
+    var defaults = {
+        image: "/images/loading_img.gif",
+        width: 600,
+        zoom: true
+    };
+    var params = $.extend({}, defaults, options || {});
+    params.imgs = [];
+    $(this).find("img").each(function(i) {
+        if($(this).hasClass("title_img")) return;
+        var url = $(this).attr("src");
+        if(!url) return;
+        this.src = params.image;
+        $(this).css({"width":32,"height":32,"margin-bottom":"20px"});
+        if(this.title=="" && this.alt!="") this.title = this.alt;
+        if(params.zoom) {
+            if(this.title!="") this.title += "\n";
+            this.title += "Press ALT button, wheel the mouse to zoom in or zoom out the image.";
+            $(this).mousewheel(function(objEvent, intDelta){
+                if(objEvent.altKey) {
+                    var zoom = parseInt(this.style.zoom, 10) || 100;
+                    zoom += intDelta * 10;
+                    if(zoom > 0) {
+                        this.style.zoom = zoom + '%';
+                    }
+                    if(objEvent.preventDefault){
+                        objEvent.preventDefault();
+                    } else {
+                        objEvent.returnValue = false;
+                    }
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+        }
+        var data = {
+            obj: $(this),
+            url: url
+        };
+        params.imgs.push(data);
+    });
+    var showIt = function() {
+        var win_top_1 = $(window).scrollTop(), win_top_2 = win_top_1 + $(window).height();
+        $.each(params.imgs, function(i, data) {
+            if(data.obj==null) return;
+            var obj = data.obj, url = data.url;
+            var img_top_1 = obj.offset().top+100; img_top_2 = img_top_1 + obj.height();
+            if((img_top_1 > win_top_1 && img_top_1 < win_top_2) || (img_top_2 > win_top_1 && img_top_2 < win_top_2)) {
+                var cur_img = $("<img>");
+                cur_img.load(function() {
+                    obj.hide();
+                    obj.attr("src", url);
+                    var the_width = obj.attr("width");
+                    var the_height = obj.attr("height");
+                    if(typeof(the_width)=="undefined") the_width = "auto";
+                    if(typeof(the_height)=="undefined") the_height = "auto";
+                    obj.css({"width":the_width,"height":the_height,"margin-bottom":"10px"});
+                    obj.fadeIn("slow");
+                    if(obj.width()>params.width) obj.css({"width":params.width,"height":"auto"});
+                    $(this).remove();
+                });
+                cur_img.error(function(){
+                    $(this).remove();
+                    obj.remove();
+                });
+                cur_img.attr("src", url);
+                data.obj = null;
+            }
+        });
+        return false;
+    };
+    setTimeout(showIt, 1000);
+    $(window).bind("resize", showIt);
+    $(window).bind("scroll", showIt);
 };
 
 /*!
@@ -403,112 +403,112 @@ jQuery.fn.powerImage = function(options) {
  * Image Marquee show by windy2000
 */
 jQuery.fn.showImage = function(options) {
-	var defaults = {
-		ole_width: 640,
-		img_show_height: 420,
-		img_width: 120,
-		img_height: 80,
-		ole_id: "showImage",
-		pos_adjust: 1,
-		step_adjust: -10,
-		interval: 5,
-		remove_org: false
-	};
-	var params = $.extend({}, defaults, options || {});
-	var obj_ole = $("#"+params.ole_id);
-	var obj_ole_show = null;
-	var obj_ole_list = null;
-	var obj_ole_wrapper = null;
-	var img_list = $(this).find("img");
-	var the_width = 0;
-	var repeat_times = 4;
-	var act_img = null;
-	if(img_list.length<2) return;
-	obj_ole.addClass("showImage");
-	obj_ole.css("width",params.ole_width);
-	var swich_img = function(step) {
-		if(step==null) step = -1;
-		var the_left = obj_ole_wrapper.position().left;
-		var the_step = the_left + step * (params.img_width+12);
-		obj_ole_wrapper.find("img").css("opacity", "0.3");
-		obj_ole_wrapper.find("img").attr("active", "n");
-		if(the_step>0) {
-			obj_ole_wrapper.css("left", the_step-the_width-(params.img_width+12));
-			the_step -= the_width;
-		} else if(-the_step>the_width) {
-			obj_ole_wrapper.css("left", the_width+the_step+(params.img_width+12));
-			the_step += the_width;
-		}
-		obj_ole_show.find("img").animate({"opacity": 0}, 1000);
-		obj_ole_wrapper.animate({"left":the_step},1000,function(){
-			var the_idx = Math.ceil(-the_step/(params.img_width+12));
-			act_img = obj_ole_wrapper.find("img").get(the_idx+params.pos_adjust);
-			$(act_img).css("opacity", "1");
-			$(act_img).attr("active", "y");
-			obj_ole_show.find("a").attr("href", act_img.src).attr("title", act_img.title);
-			obj_ole_show.find("img").attr("src", act_img.src);
-			obj_ole_show.find("img").animate({"opacity": 1}, 500);
-			return;
-		});
-		return;
-	}
-	obj_ole.bind("contextmenu",function(){return false;}).bind("selectstart",function(){return false;});  
-	obj_ole.show();
-	$("<div/>").addClass("ole_show").html('<span class="jump back">&nbsp;</span><div class="main"><a href="###" target="_blank" title="Click to show the image in a new window."><img src="/images/dummy.png" /></a></div><span class="jump forward">&nbsp;</span>').appendTo(obj_ole);
-	$("<div/>").addClass("ole_list").html('<a class="arrow back">&nbsp;</a><div class="wrapper"></div><a class="arrow forward">&nbsp;</a>').appendTo(obj_ole);
-	obj_ole_show = obj_ole.find(".ole_show");
-	obj_ole_show.css("height", params.img_show_height+20);
-	obj_ole_show.find(".jump").css({"opacity":"0","height":params.img_show_height+20}).click(function(){
-		swich_img($(this).hasClass("back")?-1:1);
-		this.blur();
-		return false;
-	});
-	obj_ole_show.find("img").css({"height":params.img_show_height,"max-width":(params.ole_width-20)});
-	obj_ole_list = obj_ole.find(".ole_list");
-	obj_ole_wrapper = obj_ole_list.find(".wrapper");
-	obj_ole_wrapper.css("left",params.step_adjust);
-	obj_ole_list.find("a").css("z-index",999);
-	obj_ole_list.find("a").first().click(function(){swich_img(-1)});
-	obj_ole_list.find("a").last().click(function(){swich_img(1)});
-	var cur_img = "";
-	var cur_title = "";
-	for(var i=0,m=img_list.length;i<m;i++) {
-			cur_img = img_list.get(i).src;
-			cur_title = img_list.get(i).alt;
-			if(cur_title.length==0) cur_title = img_list.get(i).title;
-			$("<img/>").attr("src", cur_img).attr("title", cur_title).css({"width":params.img_width,"height":params.img_height}).appendTo(obj_ole_wrapper);
-			if(params.remove_org) $(img_list.get(i)).remove();
-	}
-	the_width = (params.img_width+12) * m;
-	repeat_times = Math.ceil(obj_ole_wrapper.width()*2/the_width);
-	if(repeat_times<2) repeat_times = 2;
-	obj_ole_wrapper.html((new Array(repeat_times+1)).join(obj_ole_wrapper.html()));
-	obj_ole_wrapper.width(the_width*repeat_times);
-	obj_ole_wrapper.find("img").hover(
-		function () {
-			if($(this).attr("active")!="y") $(this).css("opacity", "0.8");
-		},
-		function () {
-			if($(this).attr("active")!="y") $(this).css("opacity", "0.3");
-		}
-	).click(function(){
-		if($(this).attr("active")=="y") return;
-		var the_step = Math.ceil(($(act_img).position().left-$(this).position().left)/(params.img_width+12));
-		swich_img(the_step);
-	});
-	swich_img(1 - m + params.pos_adjust);
-	if(params.interval>0) {
-		var marquee_interval = setInterval(swich_img, params.interval*1000);
-		obj_ole.hover(
-			function () {
-				clearInterval(marquee_interval);
-			},
-			function () {
-				marquee_interval = setInterval(swich_img, params.interval*1000);
-			}
-		);
-	}
-	return;
+    var defaults = {
+        ole_width: 640,
+        img_show_height: 420,
+        img_width: 120,
+        img_height: 80,
+        ole_id: "showImage",
+        pos_adjust: 1,
+        step_adjust: -10,
+        interval: 5,
+        remove_org: false
+    };
+    var params = $.extend({}, defaults, options || {});
+    var obj_ole = $("#"+params.ole_id);
+    var obj_ole_show = null;
+    var obj_ole_list = null;
+    var obj_ole_wrapper = null;
+    var img_list = $(this).find("img");
+    var the_width = 0;
+    var repeat_times = 4;
+    var act_img = null;
+    if(img_list.length<2) return;
+    obj_ole.addClass("showImage");
+    obj_ole.css("width",params.ole_width);
+    var swich_img = function(step) {
+        if(step==null) step = -1;
+        var the_left = obj_ole_wrapper.position().left;
+        var the_step = the_left + step * (params.img_width+12);
+        obj_ole_wrapper.find("img").css("opacity", "0.3");
+        obj_ole_wrapper.find("img").attr("active", "n");
+        if(the_step>0) {
+            obj_ole_wrapper.css("left", the_step-the_width-(params.img_width+12));
+            the_step -= the_width;
+        } else if(-the_step>the_width) {
+            obj_ole_wrapper.css("left", the_width+the_step+(params.img_width+12));
+            the_step += the_width;
+        }
+        obj_ole_show.find("img").animate({"opacity": 0}, 1000);
+        obj_ole_wrapper.animate({"left":the_step},1000,function(){
+            var the_idx = Math.ceil(-the_step/(params.img_width+12));
+            act_img = obj_ole_wrapper.find("img").get(the_idx+params.pos_adjust);
+            $(act_img).css("opacity", "1");
+            $(act_img).attr("active", "y");
+            obj_ole_show.find("a").attr("href", act_img.src).attr("title", act_img.title);
+            obj_ole_show.find("img").attr("src", act_img.src);
+            obj_ole_show.find("img").animate({"opacity": 1}, 500);
+            return;
+        });
+        return;
+    }
+    obj_ole.bind("contextmenu",function(){return false;}).bind("selectstart",function(){return false;});
+    obj_ole.show();
+    $("<div/>").addClass("ole_show").html('<span class="jump back">&nbsp;</span><div class="main"><a href="###" target="_blank" title="Click to show the image in a new window."><img src="/images/dummy.png" /></a></div><span class="jump forward">&nbsp;</span>').appendTo(obj_ole);
+    $("<div/>").addClass("ole_list").html('<a class="arrow back">&nbsp;</a><div class="wrapper"></div><a class="arrow forward">&nbsp;</a>').appendTo(obj_ole);
+    obj_ole_show = obj_ole.find(".ole_show");
+    obj_ole_show.css("height", params.img_show_height+20);
+    obj_ole_show.find(".jump").css({"opacity":"0","height":params.img_show_height+20}).click(function(){
+        swich_img($(this).hasClass("back")?-1:1);
+        this.blur();
+        return false;
+    });
+    obj_ole_show.find("img").css({"height":params.img_show_height,"max-width":(params.ole_width-20)});
+    obj_ole_list = obj_ole.find(".ole_list");
+    obj_ole_wrapper = obj_ole_list.find(".wrapper");
+    obj_ole_wrapper.css("left",params.step_adjust);
+    obj_ole_list.find("a").css("z-index",999);
+    obj_ole_list.find("a").first().click(function(){swich_img(-1)});
+    obj_ole_list.find("a").last().click(function(){swich_img(1)});
+    var cur_img = "";
+    var cur_title = "";
+    for(var i=0,m=img_list.length;i<m;i++) {
+            cur_img = img_list.get(i).src;
+            cur_title = img_list.get(i).alt;
+            if(cur_title.length==0) cur_title = img_list.get(i).title;
+            $("<img/>").attr("src", cur_img).attr("title", cur_title).css({"width":params.img_width,"height":params.img_height}).appendTo(obj_ole_wrapper);
+            if(params.remove_org) $(img_list.get(i)).remove();
+    }
+    the_width = (params.img_width+12) * m;
+    repeat_times = Math.ceil(obj_ole_wrapper.width()*2/the_width);
+    if(repeat_times<2) repeat_times = 2;
+    obj_ole_wrapper.html((new Array(repeat_times+1)).join(obj_ole_wrapper.html()));
+    obj_ole_wrapper.width(the_width*repeat_times);
+    obj_ole_wrapper.find("img").hover(
+        function () {
+            if($(this).attr("active")!="y") $(this).css("opacity", "0.8");
+        },
+        function () {
+            if($(this).attr("active")!="y") $(this).css("opacity", "0.3");
+        }
+    ).click(function(){
+        if($(this).attr("active")=="y") return;
+        var the_step = Math.ceil(($(act_img).position().left-$(this).position().left)/(params.img_width+12));
+        swich_img(the_step);
+    });
+    swich_img(1 - m + params.pos_adjust);
+    if(params.interval>0) {
+        var marquee_interval = setInterval(swich_img, params.interval*1000);
+        obj_ole.hover(
+            function () {
+                clearInterval(marquee_interval);
+            },
+            function () {
+                marquee_interval = setInterval(swich_img, params.interval*1000);
+            }
+        );
+    }
+    return;
 };
 
 /*!
@@ -516,52 +516,52 @@ jQuery.fn.showImage = function(options) {
  * Image Marquee show by windy2000
 */
 jQuery.fn.imageWall = function(options) {
-	var defaults = {
-		size_h: 3,
-		size_v: 2,
-		img_width: 150,
-		img_height: 60,
-		interval: 5,
-		speed: 500,
-		tag: "img"
-	};
-	var params = $.extend({}, defaults, options || {});
-	var obj_ole = $(this);
-	var img_cnt = params.size_h*params.size_v;
-	var img_content = obj_ole.html().replace(/\s*[\r\n]+\s*/g, "");
-	var repeat_times = Math.ceil(img_cnt/obj_ole.find(params.tag).length)+1;
-	var show_done = true;
-	var rebuild_list = function(theOle) {
-		for(var i=0;i<img_cnt;i++) {
-			theOle.find(params.tag).first().appendTo(theOle);
-		}
-	};
-	var setBack = function() {
-		obj_ole.find("div").last().prependTo(obj_ole);
-	}
-	params.interval *= 1000;
-	if(params.interval<params.speed*(img_cnt+1)) params.interval = params.speed*(img_cnt+2);
-	img_content = (new Array(repeat_times+1)).join(img_content);
-	obj_ole.css({"width":(params.size_h*params.img_width),"height":(params.size_v*params.img_height),"overflow":"hidden","position":"relative"});
-	obj_ole.html('<div></div><div></div>');
-	obj_ole.find("div").css({"position":"absolute","top":0,"left":0,"z-index":0}).html(img_content);
-	obj_ole.find(params.tag).css({"display":"block","float":"left","width":params.img_width,"height":params.img_height,"overflow":"hidden"});
-	obj_ole.find("img").css({"display":"block","float":"left","width":params.img_width,"height":params.img_height,"border":0});
-	rebuild_list(obj_ole.find("div:eq(0)"));
-	setInterval(function(){
-		if(show_done == false) return;
-		var cur_obj = obj_ole.find("div").last();
-		var cur_idx = 0;
-		show_done = false;
-		for(var i=0;i<img_cnt;i++) {
-			setTimeout(function(){cur_obj.find(params.tag+":eq("+cur_idx+")").animate({"opacity":"0"},params.speed*3);cur_idx++;}, params.speed*i);
-		}
-		setTimeout(function(){
-			setBack();
-			rebuild_list(obj_ole.find("div").first());
-			obj_ole.find("div").first().find(params.tag).css("opacity", "1");
-			show_done = true;
-		}, params.speed*(i+2));
-	}, params.interval);
-	return;
+    var defaults = {
+        size_h: 3,
+        size_v: 2,
+        img_width: 150,
+        img_height: 60,
+        interval: 5,
+        speed: 500,
+        tag: "img"
+    };
+    var params = $.extend({}, defaults, options || {});
+    var obj_ole = $(this);
+    var img_cnt = params.size_h*params.size_v;
+    var img_content = obj_ole.html().replace(/\s*[\r\n]+\s*/g, "");
+    var repeat_times = Math.ceil(img_cnt/obj_ole.find(params.tag).length)+1;
+    var show_done = true;
+    var rebuild_list = function(theOle) {
+        for(var i=0;i<img_cnt;i++) {
+            theOle.find(params.tag).first().appendTo(theOle);
+        }
+    };
+    var setBack = function() {
+        obj_ole.find("div").last().prependTo(obj_ole);
+    }
+    params.interval *= 1000;
+    if(params.interval<params.speed*(img_cnt+1)) params.interval = params.speed*(img_cnt+2);
+    img_content = (new Array(repeat_times+1)).join(img_content);
+    obj_ole.css({"width":(params.size_h*params.img_width),"height":(params.size_v*params.img_height),"overflow":"hidden","position":"relative"});
+    obj_ole.html('<div></div><div></div>');
+    obj_ole.find("div").css({"position":"absolute","top":0,"left":0,"z-index":0}).html(img_content);
+    obj_ole.find(params.tag).css({"display":"block","float":"left","width":params.img_width,"height":params.img_height,"overflow":"hidden"});
+    obj_ole.find("img").css({"display":"block","float":"left","width":params.img_width,"height":params.img_height,"border":0});
+    rebuild_list(obj_ole.find("div:eq(0)"));
+    setInterval(function(){
+        if(show_done == false) return;
+        var cur_obj = obj_ole.find("div").last();
+        var cur_idx = 0;
+        show_done = false;
+        for(var i=0;i<img_cnt;i++) {
+            setTimeout(function(){cur_obj.find(params.tag+":eq("+cur_idx+")").animate({"opacity":"0"},params.speed*3);cur_idx++;}, params.speed*i);
+        }
+        setTimeout(function(){
+            setBack();
+            rebuild_list(obj_ole.find("div").first());
+            obj_ole.find("div").first().find(params.tag).css("opacity", "1");
+            show_done = true;
+        }, params.speed*(i+2));
+    }, params.interval);
+    return;
 };

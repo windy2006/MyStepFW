@@ -24,20 +24,20 @@ $db->build($s->db->pre.'user_online')
     ->limit($record_start, $page_size);
 $db->select();
 while($record = $db->getRS()) {
-	$user = r::sessionDecode($record['data']);
-	s::htmlTrans($record);
+    $user = r::sessionDecode($record['data']);
+    s::htmlTrans($record);
     $record['sid'] = 'Session ID: '.$record['sid'];
-	$record['refresh'] = date('Y-m-d H:i:s', $record['refresh']);
+    $record['refresh'] = date('Y-m-d H:i:s', $record['refresh']);
     $record['url_simple'] = preg_replace('#&.+$#', '', $record['url']);
     if(strlen($record['url_simple'])>40) $record['url_simple'] = substr($record['url_simple'],0, 25).'...'.substr($record['url_simple'],-12);
-	if(isset($user['ms_cms_op'])) {
+    if(isset($user['ms_cms_op'])) {
         $record['username'] = $user['ms_cms_op'];
         $record['group'] = \app\CMS\checkVal($group, 'group_id', $user['ms_cms_group'])['name'];
     } else {
         $record['username'] = 'Guest';
         $record['group'] = 'Visitor';
     }
-	$t->setLoop('record', $record);
+    $t->setLoop('record', $record);
 }
 $db->free();
 

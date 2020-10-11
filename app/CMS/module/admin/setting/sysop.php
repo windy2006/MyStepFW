@@ -3,20 +3,20 @@ global $sys_group;
 if(empty($id)) $id = r::r('id');
 $sys_group = \app\CMS\getCache('sys_group');
 switch($method) {
-	case 'add':
-	case 'edit':
-	case 'list':
+    case 'add':
+    case 'edit':
+    case 'list':
         $content = build_page($method);
-		break;
-	case 'delete':
-		cms::$log = $mystep->getLanguage('admin_sys_op_delete');
+        break;
+    case 'delete':
+        cms::$log = $mystep->getLanguage('admin_sys_op_delete');
         $db->build($s->db->pre.'sys_op')
             ->where('id', 'n=', $id);
-		$db->delete();
+        $db->delete();
         cms::redirect();
-		break;
-	case 'add_ok':
-	case 'edit_ok':
+        break;
+    case 'add_ok':
+    case 'edit_ok':
         if(myReq::check('post')) {
             $data = r::p('[ALL]');
             $flag = false;
@@ -43,8 +43,8 @@ switch($method) {
             }
         }
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
-		break;
-	default:
+        break;
+    default:
         $content = build_page('list');
 }
 
@@ -55,12 +55,12 @@ function build_page($method) {
     $tpl_setting['name'] = 'set_sysop_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
-	if($method == 'list') {
-		$keyword = r::g('keyword')??'';
-		$group_id = r::g('group_id')??'';
-		$condition = array();
-		if(!empty($keyword)) $condition[] = array('username', 'like', $keyword);
-		if(!empty($group_id)) $condition[] = array('group_id', 'n=', $group_id);
+    if($method == 'list') {
+        $keyword = r::g('keyword')??'';
+        $group_id = r::g('group_id')??'';
+        $condition = array();
+        if(!empty($keyword)) $condition[] = array('username', 'like', $keyword);
+        if(!empty($group_id)) $condition[] = array('group_id', 'n=', $group_id);
 
         $db->build($s->db->pre.'sys_op')->field('count(*)')->where($condition);
         $counter = $db->result();
@@ -81,43 +81,43 @@ function build_page($method) {
             ->limit($record_start, $page_size);
         if($order!='id') $db->build($s->db->pre.'sys_op')->order('id', true);
         $db->select();
-		while($record = $db->getRS()) {
+        while($record = $db->getRS()) {
             s::htmlTrans($record);
-			$record['group_name'] = '';
-			if($group_info = \app\CMS\getPara($sys_group, 'group_id', $record['group_id'])) {
-				$record['group_name'] = $group_info['name'];
-			}
-			$tpl->setLoop('record', $record);
-		}
+            $record['group_name'] = '';
+            if($group_info = \app\CMS\getPara($sys_group, 'group_id', $record['group_id'])) {
+                $record['group_name'] = $group_info['name'];
+            }
+            $tpl->setLoop('record', $record);
+        }
         $tpl->assign('group_id', $group_id);
         $tpl->assign('keyword', $keyword);
         $tpl->assign('order', $order);
-		$tpl->assign('order_type_org', $order_type);
+        $tpl->assign('order_type_org', $order_type);
         $tpl->assign('order_type', $order_type=='asc'?'desc':'asc');
         $tpl->assign('title', $mystep->getLanguage('admin_sys_op_title'));
-	} elseif($method=='edit') {
+    } elseif($method=='edit') {
         $db->build($s->db->pre.'sys_op')
             ->where('id', 'n=', $id);
         if(($record = $db->record())===false) {
             myStep::info('admin_sys_op_error');
         }
-		$group_id = $record['group_id'];
-		$tpl->assign($record);
+        $group_id = $record['group_id'];
+        $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage('admin_sys_op_edit'));
-	} else {
-		$group_id = 0;
-		$record['id'] = 0;
-		$record['username'] = '';
-		$record['email'] = '';
-		$tpl->assign($record);
+    } else {
+        $group_id = 0;
+        $record['id'] = 0;
+        $record['username'] = '';
+        $record['email'] = '';
+        $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage('admin_sys_op_add'));
-	}
-	for($i=0, $m=count($sys_group); $i<$m; $i++) {
-		$sys_group[$i]['selected'] = ($sys_group[$i]['group_id']==$group_id?'selected':'');
-		$tpl->setLoop('sys_group', $sys_group[$i]);
-	}
-	$tpl->assign('back_url', r::svr('HTTP_REFERER'));
-	$tpl->assign('method', $method);
-	$db->free();
+    }
+    for($i=0, $m=count($sys_group); $i<$m; $i++) {
+        $sys_group[$i]['selected'] = ($sys_group[$i]['group_id']==$group_id?'selected':'');
+        $tpl->setLoop('sys_group', $sys_group[$i]);
+    }
+    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    $tpl->assign('method', $method);
+    $db->free();
     return $mystep->render($tpl);
 }

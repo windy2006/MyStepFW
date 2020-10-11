@@ -1,7 +1,7 @@
 <?PHP
 global $app_root;
 $path = implode('/', $info_app['path']);
-$app_root = 'console';
+$app_root = $s->gen->path_admin;
 if(defined('URL_FIX')) {
     $path = preg_replace('#^'.URL_FIX.'/#', '', $path).'/';
     $app_root = preg_replace('#^'.URL_FIX.'#', '', $app_root);

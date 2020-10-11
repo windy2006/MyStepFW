@@ -6,13 +6,13 @@ $the_tbl = r::r('table');
 $web_idx = r::r('web_idx');
 $op_info = '';
 if(empty($web_idx)) {
-	$web_idx = $website['0']['idx'];
+    $web_idx = $website['0']['idx'];
 }
 $method = r::r('method');
 
 if(myReq::check('post')) {
-	$content = '';
-	switch($method) {
+    $content = '';
+    switch($method) {
         case 'import':
             cms::$log = $mystep->getLanguage('admin_func_backup_import');
             $path = CACHE.'tmp/';
@@ -165,7 +165,7 @@ $tpl_sub = new myTemplate($tpl_setting, false);
 
 $tbl_list = $db->getTbls();
 for($i=0,$m=count($tbl_list); $i<$m; $i++) {
-	$tpl_sub->setLoop('tbls', array('name'=>$tbl_list[$i]));
+    $tpl_sub->setLoop('tbls', array('name'=>$tbl_list[$i]));
 }
 $db->free();
 

@@ -1,43 +1,43 @@
 <div class="card w-100 mb-5 mb-sm-2">
-	<div class="card-header bg-info text-white">
-		<b><span class="glyphicon glyphicon-cog"></span> 插件安装 - “<!--name-->”</b>
-	</div>
-	<div class="card-body p-0 table-responsive">
+    <div class="card-header bg-info text-white">
+        <b><span class="glyphicon glyphicon-cog"></span> 插件安装 - “<!--name-->”</b>
+    </div>
+    <div class="card-body p-0 table-responsive">
         <form method="post" class="form-inline">
-		<table class="table table-striped table-hover m-0 font-sm">
-			<tr>
-				<td class="text-center"><!--info--></td>
-			</tr>
-			<tr>
-				<td style="line-height:22px;">
-					<b>插件名称：</b><!--name--><br />
-					<b>插件索引：</b><!--idx--><br />
-					<b>插件板本：</b><!--ver--><br />
-					<b>功能描述：</b><!--intro--><br />
-					<b>版权信息：</b><!--copyright--><br />
-					<b>检测信息：</b>
-					<div style="margin-top:-22px;margin-left:70px;"><!--check--></div>
+        <table class="table table-striped table-hover m-0 font-sm">
+            <tr>
+                <td class="text-center"><!--info--></td>
+            </tr>
+            <tr>
+                <td style="line-height:22px;">
+                    <b>插件名称：</b><!--name--><br />
+                    <b>插件索引：</b><!--idx--><br />
+                    <b>插件板本：</b><!--ver--><br />
+                    <b>功能描述：</b><!--intro--><br />
+                    <b>版权信息：</b><!--copyright--><br />
+                    <b>检测信息：</b>
+                    <div style="margin-top:-22px;margin-left:70px;"><!--check--></div>
                     <b>插件简介：</b>
                     <div style="margin-top:-22px;margin-left:70px;"><!--description--></div>
-				</td>
-			</tr>
+                </td>
+            </tr>
             <tr>
                 <td style="line-height:22px;">
                     <!--setting-->
                 </td>
             </tr>
-			<tr>
-				<td align="center">
-					<input type="hidden" value="<!--idx-->" name="idx" />
-					<button class="btn btn-primary btn-sm mr-3" type="submit"> 安 装 </button>
-					<button class="btn btn-primary btn-sm mr-3" type="button" onclick="location.reload()"> 复 查 </button>
-					<button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
-					<button class="btn btn-primary btn-sm mr-3" type="button" onClick="history.go(-1)" > 返 回 </button>
-				</td>
-			</tr>
-		</table>
+            <tr>
+                <td align="center">
+                    <input type="hidden" value="<!--idx-->" name="idx" />
+                    <button class="btn btn-primary btn-sm mr-3 <!--btn_install-->" type="submit"> 安 装 </button>
+                    <button class="btn btn-primary btn-sm mr-3" type="button" onclick="location.reload()"> 复 查 </button>
+                    <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
+                    <button class="btn btn-primary btn-sm mr-3" type="button" onClick="history.go(-1)" > 返 回 </button>
+                </td>
+            </tr>
+        </table>
         </form>
-	</div>
+    </div>
 </div>
 <script type="text/javascript">
 $('form').submit(function() {
@@ -51,5 +51,22 @@ $('form').submit(function() {
     }
     theObjs.remove();
     return true;
+});
+function setSize() {
+    if($(window).width()>576) {
+        $('textarea,select,input[type=text],input[type=password]').each(function(){
+            $(this).width($(this).parent().width()-180);
+        });
+    } else {
+        $('textarea,select,input[type=text],input[type=password]').css('width','100%');
+    }
+}
+$(function(){
+    $('textarea').each(function(){
+        $(this).width(this.scrollWidth);
+        $(this).height(this.scrollHeight);
+    });
+    setSize();
+    $(window).resize(setSize);
 });
 </script>

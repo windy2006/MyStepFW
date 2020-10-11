@@ -597,18 +597,18 @@ $count_max = 0;
 $tag_list = array();
 $result = $cache->getData($sql, 'all', $s->expire->tag);
 for($i=0,$m=count($result); $i<$m; $i++) {
-	$record = $result[$i];
-	$record['link'] = \app\CMS\getLink($record, 'tag');
-	$record['size'] = $base_size;
-	if($count_max<$record['count']) $count_max = $record['count'];
-	$tag_list[] = $record;
-	unset($record);
+    $record = $result[$i];
+    $record['link'] = \app\CMS\getLink($record, 'tag');
+    $record['size'] = $base_size;
+    if($count_max<$record['count']) $count_max = $record['count'];
+    $tag_list[] = $record;
+    unset($record);
 }
 unset($result);
 for($i=0,$m=count($tag_list); $i<$m; $i++) {
-	$tag_list[$i]['size'] = $base_size + round($dyn_size * $tag_list[$i]['count'] / $count_max);
-	$tag = $tag_list[$i];
-	echo <<<content
+    $tag_list[$i]['size'] = $base_size + round($dyn_size * $tag_list[$i]['count'] / $count_max);
+    $tag = $tag_list[$i];
+    echo <<<content
 {myTemplate::unit}
 content;
 }

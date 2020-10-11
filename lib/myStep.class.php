@@ -634,6 +634,8 @@ code;
                 }
             }
         }
+        $tmp = getOB(true);
+        if(!empty($tmp)) $result = $tmp;
         echo $result;
         exit;
     }

@@ -1,20 +1,20 @@
 <?php
 if(empty($id)) $id = r::r('user_id');
 switch($method) {
-	case 'add':
-	case 'edit':
-	case 'list':
+    case 'add':
+    case 'edit':
+    case 'list':
         $content = build_page($method);
-		break;
-	case 'delete':
-		cms::$log = $mystep->getLanguage('admin_user_detail_delete');
+        break;
+    case 'delete':
+        cms::$log = $mystep->getLanguage('admin_user_detail_delete');
         $db->build($s->db->pre.'users')
             ->where('user_id','n=',$id);
         $db->delete();
         cms::redirect();
-		break;
-	case 'add_ok':
-	case 'edit_ok':
+        break;
+    case 'add_ok':
+    case 'edit_ok':
         if(!myReq::check('post')) {
             cms::redirect();
         }
@@ -41,8 +41,8 @@ switch($method) {
             $db->update();
         }
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
-		break;
-	default:
+        break;
+    default:
         $content = build_page('list');
 }
 
@@ -53,23 +53,23 @@ function build_page($method) {
     $tpl = new myTemplate($tpl_setting, false);
     $user_group = \app\CMS\getCache('user_group');
 
-	if($method == 'list') {
-		$order = r::g('order');
+    if($method == 'list') {
+        $order = r::g('order');
         if(empty($order)) $order='user_id';
-		$order_type = r::g('order_type');
-		if(empty($order_type)) $order_type = 'desc';
-		$keyword = r::g('keyword')??'';
-		$group_id = r::g('group_id')??'';
+        $order_type = r::g('order_type');
+        if(empty($order_type)) $order_type = 'desc';
+        $keyword = r::g('keyword')??'';
+        $group_id = r::g('group_id')??'';
 
-		$condition = array();
-		if(!empty($keyword)) $condition[] = array('username', 'like', $keyword);
-		if(!empty($group_id)) $condition[] = array('group_id', 'n=', $group_id);
+        $condition = array();
+        if(!empty($keyword)) $condition[] = array('username', 'like', $keyword);
+        if(!empty($group_id)) $condition[] = array('group_id', 'n=', $group_id);
 
         $db->build($s->db->pre.'users')
             ->field('count(*)')->where($condition);
-		$counter = $db->result();
+        $counter = $db->result();
 
-		$page = r::g('page', 'int');
+        $page = r::g('page', 'int');
         list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'keyword='.$keyword.'&group_id='.$group_id.'&order='.$order.'&order_type='.$order_type);
         $tpl->assign($page_info);
         $tpl->assign('record_count', $counter);
@@ -80,42 +80,42 @@ function build_page($method) {
             ->limit($record_start, $page_size);
         if($order!='user_id') $db->build($s->db->pre.'users')->order('user_id', true);
         $db->select();
-		while($record = $db->getRS()) {
-			s::htmlTrans($record);
-			$record['reg_date'] = date('Y-m-d H:i:s', $record['reg_date']);
+        while($record = $db->getRS()) {
+            s::htmlTrans($record);
+            $record['reg_date'] = date('Y-m-d H:i:s', $record['reg_date']);
             $group_info = \app\CMS\getPara($user_group, 'group_id', $record['group_id']);
-			$record['group_name'] = $group_info['name'];
-			$tpl->setLoop('record', $record);
-		}
+            $record['group_name'] = $group_info['name'];
+            $tpl->setLoop('record', $record);
+        }
 
         $tpl->assign('group_id', $group_id);
         $tpl->assign('keyword', $keyword);
         $tpl->assign('order', $order);
         $tpl->assign('order_type_org', $order_type);
         $tpl->assign('order_type', $order_type=='asc'?'desc':'asc');
-		$tpl->assign('title', $mystep->getLanguage('admin_user_detail_title'));
-	} elseif($method=='edit') {
+        $tpl->assign('title', $mystep->getLanguage('admin_user_detail_title'));
+    } elseif($method=='edit') {
         $db->build($s->db->pre.'users')->where('user_id','n=',$id);
         if(($record = $db->record())===false) {
             myStep::info('admin_user_detail_error');
         }
-		$group_id = $record['group_id'];
-		$tpl->assign($record);
+        $group_id = $record['group_id'];
+        $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage('admin_user_detail_edit'));
-	} else {
-		$group_id = 0;
-		$record['user_id'] = 0;
-		$record['username'] = '';
-		$record['email'] = '';
-		$tpl->assign($record);
+    } else {
+        $group_id = 0;
+        $record['user_id'] = 0;
+        $record['username'] = '';
+        $record['email'] = '';
+        $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage('admin_user_detail_add'));
-	}
-	for($i=1,$m=count($user_group); $i<$m; $i++) {
-		$user_group[$i]['selected'] = ($user_group[$i]['group_id']==$group_id?'selected':'');
-		$tpl->setLoop('user_group', $user_group[$i]);
-	}
-	$tpl->assign('back_url', r::svr('HTTP_REFERER'));
-	$tpl->assign('method', $method);
+    }
+    for($i=1,$m=count($user_group); $i<$m; $i++) {
+        $user_group[$i]['selected'] = ($user_group[$i]['group_id']==$group_id?'selected':'');
+        $tpl->setLoop('user_group', $user_group[$i]);
+    }
+    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    $tpl->assign('method', $method);
     $db->free();
     return $mystep->render($tpl);
 }

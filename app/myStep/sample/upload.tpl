@@ -23,16 +23,16 @@
     }
 </style>
 <div class="card w-100 mb-5 mb-sm-2">
-	<div id="receiver" class="card-body py-5 text-center" style="height:200px;font-size:24px;padding-top:40%">
-		上传组件初始化中。。。
-	</div>
-	<div id="list_file" class="card-body py-2 d-none">
-		已上传文件：
-	</div>
+    <div id="receiver" class="card-body py-5 text-center" style="height:200px;font-size:24px;padding-top:40%">
+        上传组件初始化中。。。
+    </div>
+    <div id="list_file" class="card-body py-2 d-none">
+        已上传文件：
+    </div>
 </div>
 <script type="application/javascript">
     jQuery.vendor('jquery.powerupload', {
-		callback:function(){
+        callback:function(){
             $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
             $('#receiver').powerUpload({
                 url: '<!--url_prefix-->api/myStep/upload',
@@ -53,16 +53,16 @@
                         obj.appendTo('#list_file');
                         obj.find('span').click(function(e){
                             e.preventDefault();
-							if(confirm('是否确认删除 "'+$(this).parent().text().replace(/X$/, '')+'" ？')) {
+                            if(confirm('是否确认删除 "'+$(this).parent().text().replace(/X$/, '')+'" ？')) {
                                 $.get('<!--url_prefix-->api/myStep/remove/'+result.new_name.split('.').slice(0,2).join('.'), function(data, status){
-									if(data.error==='0' && status==='success') {
+                                    if(data.error==='0' && status==='success') {
                                         if(obj.parent().find('a').length==1) obj.parent().addClass('d-none');
                                         obj.remove();
                                     } else {
                                         alert(data.error);
                                     }
                                 }, 'json');
-							}
+                            }
                             return false;
                         });
                     }
@@ -71,7 +71,7 @@
                 allDone:function(){
                     $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
                     $('#uploader').find(".modal-title > b").html("全部文件上传完成，请关闭本对话框！");
-				},
+                },
 
                 dragEnter: function(){
                     $("#receiver").text('松开鼠标以上传！');
@@ -81,6 +81,6 @@
                     $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
                 },
             });
-    	}
+        }
     });
 </script>

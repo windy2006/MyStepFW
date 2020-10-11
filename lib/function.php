@@ -304,7 +304,7 @@ function recursionFunction($func, $para) {
  */
 function getOB($clean=true) {
     $result = '';
-    if(ob_get_length()!==false) {
+    if(count(ob_list_handlers())>0 && ob_get_length()!==false) {
         $result = ob_get_contents();
         if($clean) ob_clean();
     }

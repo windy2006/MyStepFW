@@ -9,6 +9,11 @@ $setting_detail['gen'] = array(
             'describe' => 'Save page content into cache file',
             'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
         ),
+        'path_admin' => array(
+            'name' => 'Admin Path',
+            'describe' => 'URL path to the admin panel',
+            'type' => array('text', 'word', '10')
+        )
     ]
 );
 
@@ -19,6 +24,11 @@ $setting_detail['web'] = array(
             'name' => 'Website Name',
             'describe' => 'Name of the website',
             'type' => array('text', 'name', '40')
+        ),
+        'minify' => array(
+            'name' => 'HTML Minify',
+            'describe' => 'Minify the html code of each page to reduce the internet transfer time',
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
         ),
     ]
 );

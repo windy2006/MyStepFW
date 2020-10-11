@@ -11,9 +11,20 @@ if(!empty($app)) {
 }
 $config = new myConfig($file);
 if(myReq::check('post')) {
+    $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
+    if($app==='myStep' && isset($_POST['setting']['gen']['path_admin'])) {
+        if($_POST['setting']['gen']['path_admin']!==$s->gen->path_admin) {
+            $mystep->setAddedContent('end', '<script>location.href=location.href.replace("'.ROOT_WEB.$s->gen->path_admin.'","'.ROOT_WEB.$_POST['setting']['gen']['path_admin'].'");</script>');
+            $router->remove(CONFIG.'route.php', 'myStep');
+            $content = f::g(PATH.'menu.json');
+            $content = str_replace('"link":"'.$s->gen->path_admin, '"link":"'.$_POST['setting']['gen']['path_admin'], $content);
+            f::s(PATH.'menu.json', $content);
+            $s->gen->path_admin = $_POST['setting']['gen']['path_admin'];
+            $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
+        }
+    }
     $config->set($_POST['setting']);
     $config->save('php');
-    $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }
 
 $dirs = myFile::find('', APP, false, myFile::DIR);

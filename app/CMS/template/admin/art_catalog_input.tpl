@@ -148,22 +148,22 @@ function myChecker(the_form) {
     return true;
 }
 function changeCata(idx) {
-	let web_id=$id("pid").options[idx].getAttribute("webid");
+    let web_id=$id("pid").options[idx].getAttribute("webid");
     let obj = $('select[name=web_id]').get(0);
-	if(web_id!=null) {
-		for(let i=0; i<obj.options.length; i++) {
-			if(obj.options[i].value==web_id) {
+    if(web_id!=null) {
+        for(let i=0; i<obj.options.length; i++) {
+            if(obj.options[i].value==web_id) {
                 obj.selectedIndex = i;
-				break;
-			}
-		}
-	}
+                break;
+            }
+        }
+    }
 }
 function setCata(){
-	let webid = $('select[name=web_id]').val();
-	$("#pid > option").hide();
-	$("#pid > option:first").show();
-	$("#pid > option[webid="+webid+"]").show();
+    let webid = $('select[name=web_id]').val();
+    $("#pid > option").hide();
+    $("#pid > option:first").show();
+    $("#pid > option[webid="+webid+"]").show();
     $("select[name=pid]").val('<!--cat_pid-->');
 }
 function showTpl() {
@@ -182,7 +182,7 @@ $(function(){
         n = Math.pow(2, i++);
     }
     $("select[name=type]").val('<!--cat_type-->');
-	setCata();
+    setCata();
     $.setCSS([
         '<!--path_root-->vendor/codemirror/lib/codemirror.css',
         '<!--path_root-->vendor/codemirror/addon/fold/foldgutter.css',

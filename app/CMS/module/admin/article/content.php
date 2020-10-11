@@ -16,10 +16,10 @@ if(!empty($id)) {
     $db->build($web_info['setting']->db->pre.'news_show')
         ->field('web_id')
         ->where('news_id', 'n=', $id);
-	$web_id_news = $db->result();
-	if($web_id_news===false || !checkPower('web', $web_id_news)) {
-	    myStep::info('admin_art_content_nopower');
-	}
+    $web_id_news = $db->result();
+    if($web_id_news===false || !checkPower('web', $web_id_news)) {
+        myStep::info('admin_art_content_nopower');
+    }
     if($method=='edit_ok' || $method=='delete') {
         $db->build($web_info['setting']->db->pre.'news_show')
             ->field('cat_id,web_id,add_date')
@@ -29,17 +29,17 @@ if(!empty($id)) {
             cms::redirect();
         }
         if(checkPower('func') && ($s->info->time/1000-strtotime($add_date))/(60*60*24)>60) {
-	        myStep::info('admin_art_content_locked');
+            myStep::info('admin_art_content_locked');
         }
     }
 }
 switch($method) {
-	case 'add':
-	case 'edit':
-	case 'list':
+    case 'add':
+    case 'edit':
+    case 'list':
         $content = build_page($method);
-		break;
-	case 'delete':
+        break;
+    case 'delete':
         cms::$log = $mystep->getLanguage('admin_art_content_delete');
         $db->build($web_info['setting']->db->pre.'news_show')
             ->where('news_id', 'n=', $id);
@@ -49,22 +49,22 @@ switch($method) {
         $db->delete();
         \app\CMS\removeNewsCache($id, $web_info['web_id']);
         cms::redirect();
-		break;
-	case 'unlock':
-		if(checkPower('func')) {
-			cms::$log = $mystep->getLanguage('admin_art_content_unlock');
-			$db->build($web_info['setting']->db->pre.'news_show')
-			    ->field(['add_date'=>'(now())'])
+        break;
+    case 'unlock':
+        if(checkPower('func')) {
+            cms::$log = $mystep->getLanguage('admin_art_content_unlock');
+            $db->build($web_info['setting']->db->pre.'news_show')
+                ->field(['add_date'=>'(now())'])
                 ->where('news_id', 'n=', $id);
-			$db->update();
-		}
+            $db->update();
+        }
         cms::redirect();
-		break;
-	case 'add_ok':
-	case 'edit_ok':
+        break;
+    case 'add_ok':
+    case 'edit_ok':
         if(!myReq::check('post') || !checkPower('web', r::p('web_id'))) {
             cms::redirect();
-		}
+        }
         $data = r::p('[ALL]');
         if(empty($data['active'])) unset($data['active']);
         if(empty($data['expire'])) unset($data['expire']);
@@ -249,7 +249,7 @@ switch($method) {
         }
         myStep::$goto_url = !empty($back_url)?$back_url:preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
         break;
-	default:
+    default:
         $content = build_page('list');
 }
 
@@ -269,32 +269,32 @@ function build_page($method) {
         $tpl->setLoop('push_mode', ['idx'=>$i,'name'=>$mode[$i]]);
     }
 
-	//if(empty($group['power_cat'])) $group['power_cat'] = 0;
-	if($method == 'list') {
-		$page = r::r('page')??1;
-		$keyword = r::r('keyword')??'';
-		$order = r::r('order')??'news_id';
-		$order_type = r::r('order_type');
-		if(empty($order_type)) $order_type = 'desc';
+    //if(empty($group['power_cat'])) $group['power_cat'] = 0;
+    if($method == 'list') {
+        $page = r::r('page')??1;
+        $keyword = r::r('keyword')??'';
+        $order = r::r('order')??'news_id';
+        $order_type = r::r('order_type');
+        if(empty($order_type)) $order_type = 'desc';
 
-		//condition
-		$condition = array();
-		if(!checkPower('web')) $condition[] = array('web_id', 'nin', $group_info['power_web'], 'and');
-		if(!empty($web_info['web_id'])) $condition[] = array('web_id', 'n=', $web_info['web_id'], 'and');
-		if(!empty($cat_id)) $condition[] = array('cat_id', 'n=', $cat_id);
-		if(!empty($keyword)) $condition[] = array([['subject', 'like', $keyword], ['tag', 'like', $keyword, 'or']], 'and');
+        //condition
+        $condition = array();
+        if(!checkPower('web')) $condition[] = array('web_id', 'nin', $group_info['power_web'], 'and');
+        if(!empty($web_info['web_id'])) $condition[] = array('web_id', 'n=', $web_info['web_id'], 'and');
+        if(!empty($cat_id)) $condition[] = array('cat_id', 'n=', $cat_id);
+        if(!empty($keyword)) $condition[] = array([['subject', 'like', $keyword], ['tag', 'like', $keyword, 'or']], 'and');
 
-		//navigation
+        //navigation
         $db->build($web_info['setting']->db->pre.'news_show')
             ->field('count(*)')
             ->where($condition);
-		$counter = $db->result();
-		list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'keyword='.$keyword.'&cat_id='.$id.'&web_id='.$web_info['web_id'].'&order='.$order.'&order_type='.$order_type);
-		$tpl->assign($page_info);
-		$tpl->assign('record_count', $counter);
+        $counter = $db->result();
+        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'keyword='.$keyword.'&cat_id='.$id.'&web_id='.$web_info['web_id'].'&order='.$order.'&order_type='.$order_type);
+        $tpl->assign($page_info);
+        $tpl->assign('record_count', $counter);
 
-		//main list
-		$db->build($web_info['setting']->db->pre.'news_show')
+        //main list
+        $db->build($web_info['setting']->db->pre.'news_show')
             ->field('news_id,cat_id,web_id,subject,add_user,add_date')
             ->where($condition)
             ->order($order, $order_type=='desc')->order('order', $order_type=='desc')
@@ -303,78 +303,78 @@ function build_page($method) {
                 'mode' => 'left',
                 'field' => 'cat_id'
             ])->field('idx','name as cat_name');
-		$db->select();
-		while($record = $db->getRS()) {
-			s::htmlTrans($record);
-			if(empty($record['link'])) {
-				$record['link'] = \app\CMS\getLink($record);
-			}
-			$tpl->setLoop('record', $record);
-		}
-		if(empty($cat_id)) {
+        $db->select();
+        while($record = $db->getRS()) {
+            s::htmlTrans($record);
+            if(empty($record['link'])) {
+                $record['link'] = \app\CMS\getLink($record);
+            }
+            $tpl->setLoop('record', $record);
+        }
+        if(empty($cat_id)) {
             $title = $mystep->getLanguage('admin_art_content_list_all');
         } else {
-		    $db->build($s->db->pre.'news_cat')->field('name')->where('cat_id','n=',$cat_id);
+            $db->build($s->db->pre.'news_cat')->field('name')->where('cat_id','n=',$cat_id);
             $title = $db->result();
         }
         $tpl->assign('keyword', $keyword);
         $tpl->assign('order', $order);
         $tpl->assign('order_type_org', $order_type);
         $tpl->assign('order_type', $order_type=='asc'?'desc':'asc');
-		$tpl->assign('title', $mystep->getLanguage('admin_art_content_list_article').' - '.$s->web->title.' - '.$title);
-	} elseif($method == 'edit') {
+        $tpl->assign('title', $mystep->getLanguage('admin_art_content_list_article').' - '.$s->web->title.' - '.$title);
+    } elseif($method == 'edit') {
         $db->build($web_info['setting']->db->pre.'news_show')
             ->where('news_id', 'n=', $id);
         if(!checkPower('web')) {
             $db->build($web_info['setting']->db->pre.'news_show')
                 ->where('web_id', 'in', $group_info['power_web'], 'and');
         }
-		if(($record = $db->record())===false) {
-		    myStep::info('admin_art_content_error');
-		}
+        if(($record = $db->record())===false) {
+            myStep::info('admin_art_content_error');
+        }
         s::htmlTrans($record);
-		$tpl->assign('record', $record);
-		$cat_id = $record['cat_id'];
-		$content = array();
+        $tpl->assign('record', $record);
+        $cat_id = $record['cat_id'];
+        $content = array();
         $db->build($web_info['setting']->db->pre.'news_detail')
             ->where('news_id', 'n=', $id)
             ->order('page');
-		$db->select();
-		while($record = $db->getRS()) {
-			$record['content'] = str_replace('&', '&#38;', $record['content']);
+        $db->select();
+        while($record = $db->getRS()) {
+            $record['content'] = str_replace('&', '&#38;', $record['content']);
             s::htmlTrans($record);
-			$record['content'] = '<p><span class="mceSubtitle">'.$record['sub_title'].'</span></p>'.$record['content'];
-			$content[] = $record['content'];
-		}
-		$tpl->assign('record_content', implode(chr(10).'<!-- pagebreak -->'.chr(10), $content));
-		$tpl->assign('title', $mystep->getLanguage('admin_art_content_edit'));
-	} else {
-		$record = array();
-		$record['news_id'] = 0;
-		$record['cat_id'] = $cat_id;
-		$record['web_id'] = $web_info['web_id'];
-		$record['subject'] = '';
-		$record['style'] = '';
-		$record['describe'] = '';
-		$record['original'] = '';
-		$record['link'] = '';
-		$record['tag'] = '';
-		$record['image'] = '';
-		$record['content'] = '';
-		$record['pages'] = 1;
-		$record['order'] = 0;
+            $record['content'] = '<p><span class="mceSubtitle">'.$record['sub_title'].'</span></p>'.$record['content'];
+            $content[] = $record['content'];
+        }
+        $tpl->assign('record_content', implode(chr(10).'<!-- pagebreak -->'.chr(10), $content));
+        $tpl->assign('title', $mystep->getLanguage('admin_art_content_edit'));
+    } else {
+        $record = array();
+        $record['news_id'] = 0;
+        $record['cat_id'] = $cat_id;
+        $record['web_id'] = $web_info['web_id'];
+        $record['subject'] = '';
+        $record['style'] = '';
+        $record['describe'] = '';
+        $record['original'] = '';
+        $record['link'] = '';
+        $record['tag'] = '';
+        $record['image'] = '';
+        $record['content'] = '';
+        $record['pages'] = 1;
+        $record['order'] = 0;
         $record['active'] = '';
         $record['expire'] = '';
         $record['setop'] = '';
-		$record['view_lvl'] = $cat_info['view_lvl']??0;
-		$tpl->assign('record', $record);
-		$tpl->assign('title', $mystep->getLanguage('admin_art_content_add'));
-	}
+        $record['view_lvl'] = $cat_info['view_lvl']??0;
+        $tpl->assign('record', $record);
+        $tpl->assign('title', $mystep->getLanguage('admin_art_content_add'));
+    }
 
-	//catalog select
-	if(empty($web_info['web_id'])) $web_info['web_id']=1;
-	for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
-	    if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
+    //catalog select
+    if(empty($web_info['web_id'])) $web_info['web_id']=1;
+    for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
+        if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
         $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
         $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
         $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));
@@ -385,17 +385,17 @@ function build_page($method) {
             'view_lvl'=>$news_cat_plat[$i]['view_lvl'],
             'selected'=>(($cat_id==$news_cat_plat[$i]['cat_id'])?'selected':'')
         ));
-		$tpl->setLoop('cat_sub', array(
-		    'cat_id'=>$news_cat_plat[$i]['cat_id'],
+        $tpl->setLoop('cat_sub', array(
+            'cat_id'=>$news_cat_plat[$i]['cat_id'],
             'prefix'=>$news_cat_plat[$i]['prefix']
         ));
-	}
-	$tpl->assign('get_remote_file', $s->content->get_remote_img?'checked':'');
-	$tpl->assign('method', $method);
-	$tpl->assign('web_id', $web_info['web_id']);
-	$tpl->assign('cat_id', $cat_id);
-	$tpl->assign('news_id', $id);
-	$tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    }
+    $tpl->assign('get_remote_file', $s->content->get_remote_img?'checked':'');
+    $tpl->assign('method', $method);
+    $tpl->assign('web_id', $web_info['web_id']);
+    $tpl->assign('cat_id', $cat_id);
+    $tpl->assign('news_id', $id);
+    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
     setWeb($tpl, $web_info['web_id']);
     return $mystep->render($tpl);
 }

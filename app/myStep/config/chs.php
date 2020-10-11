@@ -8,6 +8,11 @@ $setting_detail['gen'] = array(
             'name' => '页面缓存',
             'describe' => '开启页面缓存，减少固定时间内的查询频率，增强网站效率',
             'type' => array('radio', array('开启'=>'true', '关闭'=>'false'))
+        ),
+        'path_admin' => array(
+            'name' => '后台路径',
+            'describe' => '框架后台管理路径，可以根据实际情况更改以避免暴露',
+            'type' => array('text', 'word', '10')
         )
     ]
 );
@@ -18,7 +23,12 @@ $setting_detail['web'] = array(
         'title' => array(
             'name' => '网站名称',
             'describe' => '用于在浏览器上显示网站名称',
-            'type' => array("text", "name", "40")
+            'type' => array('text', 'name', '40')
+        ),
+        'minify' => array(
+            'name' => '页面压缩',
+            'describe' => 'HTML、CSS及JS代码压缩，以减少页面传送时间',
+            'type' => array('radio', array('开启'=>'true', '关闭'=>'false'))
         ),
     ]
 );
@@ -29,17 +39,17 @@ $setting_detail['template'] = array(
         'name' => array(
             'name' => '调用模版',
             'describe' => '应用调用的主模版（子模版需要在程序内设置）',
-            'type' => array("text", "", "10")
+            'type' => array('text', '', '10')
         ),
         'path' => array(
             'name' => '模版路径',
             'describe' => '模版的存放位置（相对于本应用的相对路径）',
-            'type' => array("text", "", "30")
+            'type' => array('text', '', '30')
         ),
         'style' => array(
             'name' => '模版样式',
             'describe' => '如果程序有多个模版，可通过本选项设置（即为模板路径下的子目录名）',
-            'type' => array("text", "_", "20")
+            'type' => array('text', '_', '20')
         ),
     ]
 );

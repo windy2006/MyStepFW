@@ -93,7 +93,7 @@ $t->assign('record', $record);
 global $tag;
 $tag = explode(',', $record['tag']);
 for($i=0,$m=count($tag); $i<$m; $i++) {
-	$t->setLoop('tag', array('link'=>\app\CMS\getLink($tag[$i], 'tag'), 'name'=>$tag[$i]));
+    $t->setLoop('tag', array('link'=>\app\CMS\getLink($tag[$i], 'tag'), 'name'=>$tag[$i]));
 }
 $tag = $record['tag'];
 

@@ -14,7 +14,7 @@
 /**
 How To Use:
 $mc = new memoryCache(array (
-            'server' => '127.0.0.1:18888',
+            'server' => '127.0.0.1:11211', //or ['127.0.0.1','11211'] or '[{"server":"127.0.0.1","port":"11211","weight":"5"},{"server":"127.0.0.2","port":"11211","weight":"5"}]'
             'weight' => '2',
             'persistant' => false,
             'timeout' => '1',
@@ -33,20 +33,36 @@ class memoryCache implements interface_cache {
             exit;
         }
         $this->mc_cnnopt['expire'] = isset($options['expire']) ? $options['expire'] : 259200;
-        $this->mc_cnnopt['persistant'] = isset($options['persistant']) ? $options['persistant'] :    null;
-        $this->mc_cnnopt['weight'] = isset($options['weight']) ? $options['weight'] : 5;
         $this->mc_cnnopt['timeout'] = isset($options['timeout']) ? $options['timeout'] : 1;
         $this->mc_cnnopt['retry_interval'] = isset($options['retry_interval']) ? $options['retry_interval'] : 1;
-        $this->mc = new Memcached($this->mc_cnnopt['persistant']);
+        $this->mc = new Memcached('myStep');
         $this->mc->setOption(Memcached::OPT_CONNECT_TIMEOUT, $this->mc_cnnopt['timeout']);
         $this->mc->setOption(Memcached::OPT_SERVER_FAILURE_LIMIT, 2);
         $this->mc->setOption(Memcached::OPT_RETRY_TIMEOUT, $this->mc_cnnopt['retry_interval']);
-        $this->mc->setOption(Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
         $this->mc->setOption(Memcached::OPT_REMOVE_FAILED_SERVERS, true);
-
-        $server = explode(':', $options['server']);
-        if(count($server)==1) $server[1] = '11211';
-        $this->mc->addServer($server[0], $server[1], $this->mc_cnnopt['weight']);
+        $this->mc->setOption(Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
+        $this->mc->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
+        if(!count($this->mc->getServerList())) {
+            if(is_array($options['server'])) {
+                if(isset($options['server'][0]['server'])) {
+                    $server = $options['server'];
+                } else {
+                    $server = [$options['server']];
+                }
+            } else {
+                $server = explode(':', $options['server']);
+                if(count($server)==1) $server[1] = '11211';
+                $server = [[
+                    'server' => $server[0],
+                    'port' => $server[1],
+                    'weight' => (isset($options['weight']) ? $options['weight'] : 5)
+                ]];
+            }
+            foreach($server as $svr) {
+                $svr = array_values($svr);
+                $this->mc->addServer($svr[0], $svr[1]??'11211', $svr[2]??5);
+            }
+        }
         $this->check();
         return true;
     }

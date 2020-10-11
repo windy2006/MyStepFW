@@ -12,12 +12,12 @@ if(!empty($id)) {
     $web_current = \app\CMS\checkVal($website, 'web_id', $id);
 }
 switch($method) {
-	case 'add':
-	case 'edit':
-	case 'list':
+    case 'add':
+    case 'edit':
+    case 'list':
         $content = build_page($method);
-		break;
-	case 'delete':
+        break;
+    case 'delete':
         cms::$log = $mystep->getLanguage('admin_web_subweb_delete');
         if(isset($web_current['idx'])) {
             $cfg_file = PATH.'website/config_'.$web_current['idx'].'.php';
@@ -49,9 +49,9 @@ switch($method) {
             \app\CMS\deleteCache('website');
         }
         cms::redirect();
-		break;
-	case 'add_ok':
-	case 'edit_ok':
+        break;
+    case 'add_ok':
+    case 'edit_ok':
         if(!myReq::check('post') || (!checkPower() && $method=='add_ok')) {
             cms::redirect();
         }
@@ -88,8 +88,8 @@ switch($method) {
         f::del(CACHE.'app/'.$info_app['app']);
         f::del(CACHE.'template/'.$info_app['app']);
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
-		break;
-	default:
+        break;
+    default:
         $content = build_page('list');
 }
 
@@ -99,31 +99,31 @@ function build_page($method) {
     $tpl_setting['name'] = 'set_subweb_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false, true);
 
-	if($method == 'list') {
+    if($method == 'list') {
         $db->build($s->db->pre.'website')
             ->order('web_id');
-		$db->select();
-		while($record = $db->getRS()) {
-			myString::htmlTrans($record);
-			$tpl->setLoop('record', $record);
-		}
-		$tpl->assign('title', $mystep->getLanguage('admin_web_subweb_title'));
-	} else {
-		$tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_web_subweb_add':'admin_web_subweb_edit'));
-		if($method == 'edit') {
+        $db->select();
+        while($record = $db->getRS()) {
+            myString::htmlTrans($record);
+            $tpl->setLoop('record', $record);
+        }
+        $tpl->assign('title', $mystep->getLanguage('admin_web_subweb_title'));
+    } else {
+        $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_web_subweb_add':'admin_web_subweb_edit'));
+        if($method == 'edit') {
             $db->build($s->db->pre.'website')
                 ->where('web_id', 'n=', $id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_web_subweb_error');
             }
             $cfg_file = PATH.'website/config_'.$record['idx'].'.php';
-		} else {
-			$record['web_id'] = 0;
-			$record['idx'] = '';
-			$record['domain'] = '';
+        } else {
+            $record['web_id'] = 0;
+            $record['idx'] = '';
+            $record['domain'] = '';
             $cfg_file = PATH.'website/config_main.php';
-		}
-		$config = new myConfig($cfg_file);
+        }
+        $config = new myConfig($cfg_file);
         $builder = PATH.'website/config/'.$s->gen->language.'.php';
 
         $files = myFile::find('', PATH.'language', false, myFile::FILE);
@@ -151,10 +151,10 @@ function build_page($method) {
                 ']);
             }
         }
-		$tpl->assign($record);
-		$tpl->assign('method', $method);
+        $tpl->assign($record);
+        $tpl->assign('method', $method);
         $tpl->assign('back_url', r::svr('HTTP_REFERER'));
-	}
-	$db->free();
+    }
+    $db->free();
     return $mystep->render($tpl);
 }

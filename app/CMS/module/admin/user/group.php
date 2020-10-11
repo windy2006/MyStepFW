@@ -1,26 +1,26 @@
 <?PHP
 if(empty($id)) $id = r::r('group_id');
 switch($method) {
-	case 'add':
-	case 'edit':
-	case 'list':
+    case 'add':
+    case 'edit':
+    case 'list':
         $content = build_page($method);
-		break;
-	case 'delete':
-		if($id>3) {
+        break;
+    case 'delete':
+        if($id>3) {
             cms::$log = $mystep->getLanguage('admin_user_group_delete');
             $db->build($s->db->pre.'users')->field(array('group_id'=>2))->where('group_id','n=',$id);
-			$db->update();
+            $db->update();
             $db->build($s->db->pre.'user_group')->where('group_id','n=',$id);
-			$db->delete();
+            $db->delete();
             \app\CMS\deleteCache('user_group');
             cms::redirect();
-		} else {
-		    myStep::info('admin_user_group_error');
+        } else {
+            myStep::info('admin_user_group_error');
         }
-		break;
-	case 'add_ok':
-	case 'edit_ok':
+        break;
+    case 'add_ok':
+    case 'edit_ok':
         if(!myReq::check('post')) {
             cms::redirect();
         }
@@ -30,8 +30,8 @@ switch($method) {
         $db->replace();
         \app\CMS\deleteCache('user_group');
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
-		break;
-	default:
+        break;
+    default:
         $content = build_page('list');
 }
 
@@ -41,38 +41,38 @@ function build_page($method) {
     $tpl_setting['name'] = 'user_group_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
     $power = \app\CMS\getCache('user_power');
-	
-	if($method == 'list') {
+
+    if($method == 'list') {
         $db->build($s->db->pre.'user_group')->order('group_id');
-		$db->select();
-		while($record = $db->getRS()) {
-			s::htmlTrans($record);
-			$record['user_power'] = '';
-			for($i=0,$m=count($power); $i<$m; $i++) {
-				$record['user_power'] .= '<td>'.$record[$power[$i]['idx']].'</td>';
-			}
-			$tpl->setLoop('record', $record);
-		}
-		$tpl->assign('title', $mystep->getLanguage('admin_user_group_title'));
-	} else {
-		if($method == 'edit') {
+        $db->select();
+        while($record = $db->getRS()) {
+            s::htmlTrans($record);
+            $record['user_power'] = '';
+            for($i=0,$m=count($power); $i<$m; $i++) {
+                $record['user_power'] .= '<td>'.$record[$power[$i]['idx']].'</td>';
+            }
+            $tpl->setLoop('record', $record);
+        }
+        $tpl->assign('title', $mystep->getLanguage('admin_user_group_title'));
+    } else {
+        if($method == 'edit') {
             $db->build($s->db->pre.'user_group')->where(array('group_id','n=',$id));
             if(($record = $db->record())===false) {
                 myStep::info('admin_user_group_error');
             }
-		} else {
-			$record['group_id'] = 0;
-			$record['name'] = '';
-		}
-		$tpl->assign($record);
-		$tpl->assign('method', $method);
-		$tpl->assign('back_url', r::svr('HTTP_REFERER'));
+        } else {
+            $record['group_id'] = 0;
+            $record['name'] = '';
+        }
+        $tpl->assign($record);
+        $tpl->assign('method', $method);
+        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
         $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_user_group_add':'admin_user_group_edit'));
-	}
-	for($i=0,$m=count($power); $i<$m; $i++) {
-		if(isset($record[$power[$i]['idx']])) $power[$i]['value'] = $record[$power[$i]['idx']];
-		$tpl->setLoop('user_power', $power[$i]);
-	}
+    }
+    for($i=0,$m=count($power); $i<$m; $i++) {
+        if(isset($record[$power[$i]['idx']])) $power[$i]['value'] = $record[$power[$i]['idx']];
+        $tpl->setLoop('user_power', $power[$i]);
+    }
     $db->free();
     return $mystep->render($tpl);
 }

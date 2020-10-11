@@ -105,6 +105,7 @@ function checkModify(mode) {
     $.get(url, function(info){
         if(info==false || typeof(info.error)!="undefined") {
             alert(mode==0?"校验失败，请确认校验信息是否已成功建立！":"服务器连接失败，或不存在本网站对应字符集的校验信息");
+            loadingShow();
             return;
         }
         loadingShow('框架文件校验中……');
@@ -155,15 +156,15 @@ function checkUpdate() {
     let result = "";
     result += '\
 <div class="font-weight-bold text-center"  style="font-size:16px;">\
-	更新详情\
+    更新详情\
 </div>\
 ';
     try {
         for(let ver in update_info) {
             result += '\
 <div class="mb-3">\
-	<div class="font-weight-bold border-bottom">Version: '+ver+'</div>\
-	<div>'+update_info[ver].replace(/[\r\n]+/g, "<br />")+'</div>\
+    <div class="font-weight-bold border-bottom">Version: '+ver+'</div>\
+    <div>'+update_info[ver].replace(/[\r\n]+/g, "<br />")+'</div>\
 </div>\
 ';
         }

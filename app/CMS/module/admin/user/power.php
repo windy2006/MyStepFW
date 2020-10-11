@@ -1,12 +1,12 @@
 <?PHP
 $power = \app\CMS\getCache('user_power');
 switch($method) {
-	case 'add':
-	case 'edit':
-	case 'list':
+    case 'add':
+    case 'edit':
+    case 'list':
         $content = build_page($method);
-		break;
-	case 'delete':
+        break;
+    case 'delete':
         cms::$log = $mystep->getLanguage('admin_user_power_delete');
         if($power_info = \app\CMS\getPara($power, 'id', $id)) {
             cms::$log = $mystep->getLanguage('admin_user_power_delete');
@@ -18,9 +18,9 @@ switch($method) {
             \app\CMS\deleteCache('user_power');
         }
         cms::redirect();
-		break;
-	case 'add_ok':
-	case 'edit_ok':
+        break;
+    case 'add_ok':
+    case 'edit_ok':
         if(!myReq::check('post')) {
             cms::redirect();
         }
@@ -55,57 +55,57 @@ switch($method) {
         \app\CMS\deleteCache('user_group');
         \app\CMS\deleteCache('user_power');
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
-		break;
-	default:
+        break;
+    default:
         $content = build_page('list');
 }
 
 function build_page($method) {
     global $mystep, $tpl_setting, $s, $db, $id;
-	
+
     $tpl_setting['name'] = 'user_power_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
-	$format_list = array(
-		'digital' => $mystep->getLanguage('checkform_item_digital'),
-		'date' => $mystep->getLanguage('checkform_item_date'),
-		'time' => $mystep->getLanguage('checkform_item_time'),
-	);
+    $format_list = array(
+        'digital' => $mystep->getLanguage('checkform_item_digital'),
+        'date' => $mystep->getLanguage('checkform_item_date'),
+        'time' => $mystep->getLanguage('checkform_item_time'),
+    );
 
-	if($method == 'list') {
+    if($method == 'list') {
         $db->build($s->db->pre.'user_power')->order('id');
-		$db->select();
-		while($record = $db->getRS()) {
-			s::htmlTrans($record);
-			$record['format'] = $format_list[$record['format']]??$mystep->getLanguage('checkform_item_string');
-			$tpl->setLoop('record', $record);
-		}
-		$tpl->assign('title', $mystep->getLanguage('admin_user_power_title'));
-	} else {
-		if($method == 'edit') {
+        $db->select();
+        while($record = $db->getRS()) {
+            s::htmlTrans($record);
+            $record['format'] = $format_list[$record['format']]??$mystep->getLanguage('checkform_item_string');
+            $tpl->setLoop('record', $record);
+        }
+        $tpl->assign('title', $mystep->getLanguage('admin_user_power_title'));
+    } else {
+        if($method == 'edit') {
             $db->build($s->db->pre.'user_power')->where('id','n=',$id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_user_power_error');
             }
-			$record['idx_org'] = $record['idx'];
-		} else {
-			$record['id'] = 0;
-			$record['idx'] = '';
-			$record['idx_org'] = '';
-			$record['name'] = '';
-			$record['value'] = '';
-			$record['format'] = '';
-			$record['format_org'] = '';
-			$record['comment'] = '';
-		}
-		$tpl->assign($record);
-		foreach($format_list as $key => $value) {
-			$tpl->setLoop('format', array('key'=>$key, 'value'=>$value, 'select'=>($record['format']==$key?'selected':'')));
-		}
-		$tpl->assign('method', $method);
-		$tpl->assign('back_url', r::svr('HTTP_REFERER'));
+            $record['idx_org'] = $record['idx'];
+        } else {
+            $record['id'] = 0;
+            $record['idx'] = '';
+            $record['idx_org'] = '';
+            $record['name'] = '';
+            $record['value'] = '';
+            $record['format'] = '';
+            $record['format_org'] = '';
+            $record['comment'] = '';
+        }
+        $tpl->assign($record);
+        foreach($format_list as $key => $value) {
+            $tpl->setLoop('format', array('key'=>$key, 'value'=>$value, 'select'=>($record['format']==$key?'selected':'')));
+        }
+        $tpl->assign('method', $method);
+        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
         $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_user_power_add':'admin_user_power_edit'));
-	}
-	$db->free();
+    }
+    $db->free();
     return $mystep->render($tpl);
 }
