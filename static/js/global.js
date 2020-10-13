@@ -591,6 +591,21 @@ function gotoAnchor(theAnchor = '') {
     return false;
 }
 
+//无需跳转改变地址栏链接
+function setLocation(path, name = '') {
+    let state = {
+        title: name,
+        url: path
+    };
+    window.history.pushState(state, name, path);
+    window.addEventListener('popstate', function(e){
+        if (history.state){
+            let state = e.state;
+            //do something(state.url, state.title);
+        }
+    }, false);
+}
+
 //注册需要页面载入后运行的函数
 function ms_func_reg(func) {
     if(typeof(func)!=='function') return;

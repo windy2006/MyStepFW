@@ -88,7 +88,7 @@ class myPacker extends myBase {
      * 打包文件或目录
      * @param string $dir
      */
-    protected function packFile($dir='.') {
+    protected function packFile($dir='./') {
         $root = myFile::rootPath();
         $dir = myFile::realPath($dir);
         for($i=0,$m=count($this->file_ignore);$i<$m;$i++) {
@@ -151,7 +151,7 @@ class myPacker extends myBase {
      * @param string $outdir
      * @return int
      */
-    protected function unpackFile($outdir='.') {
+    protected function unpackFile($outdir='./') {
         $root = myFile::rootPath();
         $outdir = myFile::realPath($outdir);
         if(!is_dir($outdir)) myFile::mkdir($outdir);

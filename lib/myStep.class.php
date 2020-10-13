@@ -833,18 +833,9 @@ code;
             }
             @unlink(CONFIG.'class.php');
             file_put_contents(CONFIG.'class.php', '<?PHP'.chr(10).'return '.var_export($class, true).';');
-
             $setting_class = include(CONFIG.'class.php');
             self::regClass($setting_class);
-
             myFile::del(CONFIG.'route.php');
-            $dirs = myFile::find('', APP, false, myFile::DIR);
-            $dirs = array_map(function ($v) {return basename($v);} , $dirs);
-            foreach($dirs as $k) {
-                if(is_file(APP.$k.'/route.php')) {
-                    myRouter::checkRoute(CONFIG.'route.php', APP.$k.'/route.php', $k);
-                }
-            }
             myFile::del(CACHE.'template');
             myFile::del(CACHE.'session');
         } else {
@@ -859,7 +850,6 @@ code;
             'callback_type' => E_ALL & ~(E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_NOTICE),
             'exit_on_error' =>  true
         ));
-
         $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
         $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
         $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));

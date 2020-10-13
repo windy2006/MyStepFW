@@ -17,21 +17,21 @@ global $info_app;
 <ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
     <li>执行接口指向自定义函数：<a href="<!--root2-->mySample/" target="_blank"><!--root2-->mySample/</a> （路由规则为：/mySample/[any]）</li>
     <li>通过mystep::getModule()执行（推荐）：<a href="<!--root2-->mySample2/" target="_blank"><!--root2-->mySample2/</a> （路由规则为：/mySample2/[any]）</li>
-    <li>多函数链接调用：<a href="<!--root2-->sample/anyCamelCase" target="_blank"><!--root2-->sample/anyCamelCase</a> （路由规则为：/[camel]，其中camel正则为：[a-z]+([A-Z][a-z]+)+，
+    <li>多函数链接调用：<a href="<!--root2-->mySample3/anyCamelCase" target="_blank"><!--root2-->mySample3/anyCamelCase</a> （路由规则为：/[camel]，其中camel正则为：[a-z]+([A-Z][a-z]+)+，
         响应规则为：array('app\sample\perCheck,3', 'app\sample\routeTest')，表示先执行'app\sample\perCheck'，且输入参数为'3'，
         如果结果为false则终止执行，否则将返回值传递至'app\sample\routeTest'并执行。还可以根据需要设置更多的链接函数。）</li>
 </ul>
 
 <h5 class="mt-4">API接口测试：</h5>
 <ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
-    <li>基础模式（默认json格式）：<a href="api/Sample/sample" target="_blank">api/Sample/sample</a> </li>
-    <li>返回XML格式：<a href="api/Sample/sample/xml" target="_blank">api/Sample/sample/xml</a> </li>
-    <li>返回PHP脚本格式：<a href="api/Sample/sample/code" target="_blank">api/Sample/sample/code</a> </li>
-    <li>返回序列化字符串格式：<a href="api/Sample/sample/string" target="_blank">api/Sample/sample/string</a> </li>
-    <li>返回十六进制编译格式（可通过myString::fromHex解码）：<a href="api/Sample/sample/hex" target="_blank">api/Sample/sample/hex</a> </li>
-    <li>按路径参数返回：<a href="api/Sample/sample/gen/charset" target="_blank">api/Sample/sample/gen/charset</a> </li>
-    <li>按路径参数返回指定格式：<a href="api/Sample/sample/gen/xml" target="_blank">api/Sample/sample/gen/xml</a> </li>
-    <li>URL中的查询字符串优先于路径参数：<a href="api/Sample/sample/json/?p1=gen&p2=charset" target="_blank">api/Sample/sample/json/?p1=gen&p2=charset</a> </li>
+    <li>基础模式（默认json格式）：<a href="api/Sample/setting" target="_blank">api/Sample/setting</a> </li>
+    <li>返回XML格式：<a href="api/Sample/setting/xml" target="_blank">api/Sample/setting/xml</a> </li>
+    <li>返回PHP脚本格式：<a href="api/Sample/setting/code" target="_blank">api/Sample/setting/code</a> </li>
+    <li>返回序列化字符串格式：<a href="api/Sample/setting/string" target="_blank">api/Sample/setting/string</a> </li>
+    <li>返回十六进制编译格式（可通过myString::fromHex解码）：<a href="api/Sample/setting/hex" target="_blank">api/Sample/setting/hex</a> </li>
+    <li>按路径参数返回：<a href="api/Sample/setting/gen/charset" target="_blank">api/Sample/setting/gen/charset</a> </li>
+    <li>按路径参数返回指定格式：<a href="api/Sample/setting/gen/xml" target="_blank">api/Sample/setting/gen/xml</a> </li>
+    <li>URL中的查询字符串优先于路径参数：<a href="api/Sample/setting/json/?p1=gen&p2=charset" target="_blank">api/Sample/setting/json/?p1=gen&p2=charset</a> </li>
 </ul>
 
 <h5 class="mt-4">脚本代码：</h5>

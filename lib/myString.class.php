@@ -120,7 +120,12 @@ class myString {
             foreach($str as $k => $v) {
                 $str[$k] = self::setCharset($v, $charset);
             }
+        } else if(is_object($str)) {
+            foreach($str as $k => $v) {
+                $str->$k = self::setCharset($v, $charset);
+            }
         } else {
+            if(!is_string($str)) $str = (string)$str;
             $charset_str = self::charset($str);
             if($charset!=$charset_str) {
                 if(function_exists('mb_convert_encoding')) {
@@ -209,8 +214,6 @@ class myString {
         if(!empty($charset)) $var = self::setCharset($var, $charset);
         if(is_array($var) || is_object($var)) {
             $var = json_encode($var, JSON_PRETTY_PRINT);
-        } else {
-            $var = '[]';
         }
         return $var;
     }

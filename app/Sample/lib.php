@@ -43,9 +43,9 @@ function route($para) {
 function preCheck($times = 5) {
     $counter = \myReq::c('counter');
     if(empty($counter)) $counter = 0;
-    if($counter>$times) {
+    if($counter>=$times) {
         if(!class_exists('myStep')) require_once APP.'myStep.class.php';
-        \myStep::info("一分钟内访问不能超过{$times} 次！");
+        \myStep::info("一分钟内访问不能超过 {$times} 次！");
         exit;
     } else {
         \myReq::setCookie('counter', ++$counter, 60);

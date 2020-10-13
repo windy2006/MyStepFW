@@ -48,7 +48,7 @@ switch($method) {
                 'name' => $info['name'],
                 'intro' => $info['intro'],
             ), true);
-            myStep::info('plugin_installed', $app_root.'function/plugin/');
+            myStep::info('plugin_installed', $app_root.'/function/plugin/');
         }
         $check = $class::check($check_info);
         $t->assign('btn_install', $check?'':'d-none');
@@ -59,7 +59,7 @@ switch($method) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
-            myStep::redirect($app_root.'function/plugin/');
+            myStep::redirect($app_root.'/function/plugin/');
         }
         $t->assign($info);
         if(!is_file(PLUGIN.$idx.'/config.php')) {
@@ -88,7 +88,7 @@ switch($method) {
     case 'active':
         $active = $mydb->result('idx='.$idx, 'active');
         $mydb->update('idx='.$idx, array('active' => 1 - (int)$active));
-        myStep::redirect($app_root.'function/plugin/');
+        myStep::redirect($app_root.'/function/plugin/');
         break;
     case 'delete':
         myFile::del(PLUGIN.$idx);
@@ -97,7 +97,7 @@ switch($method) {
     case 'uninstall':
         $mydb->delete('idx='.$idx);
         call_user_func(array($class, 'uninstall'));
-        myStep::info('plugin_uninstalled', $app_root.'function/plugin/');
+        myStep::info('plugin_uninstalled', $app_root.'/function/plugin/');
         break;
     case 'pack':
         if(!empty($idx) || is_dir(PLUGIN.$idx)) {
