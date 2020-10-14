@@ -2,8 +2,7 @@
 if(is_file(PATH.'config.php')) {
     myStep::redirect('/CMS/');
 }
-global $mystep, $s, $router, $info_app;
-$router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
+global $mystep, $s, $info_app;
 $tpl = new myTemplate($tpl_setting, $tpl_cache);
 if($info_app['path'][0]!='install') {
     $info_app['path'][0] = 'install';
@@ -45,20 +44,28 @@ switch ($info_app['path'][1]) {
         break;
     case 3:
         if(myReq::check('post')) {
-            $c = new myConfig(PATH.'/config_default.php');
-            $c->set($_POST['setting']);
+            $config = new myConfig(PATH.'/config_default.php');
+            $app = $info_app['app'];
+            include(PATH.'setting_expand.php');
+            $config->set($_POST['setting']);
             myException::init(array(
                 'log_type' => E_ALL ^ E_NOTICE,
                 'callback_type' => E_ALL ^ E_NOTICE,
                 'exit_on_error' => true
             ));
-            $db = new myDb($c->db->type, $c->db->host, $c->db->user, $c->db->password, $c->db->charset);
-            if($db->connect($c->db->pconnect)===false) {
+            $db = new myDb($config->db->type, $config->db->host, $config->db->user, $config->db->password, $config->db->charset);
+            if($db->connect($config->db->pconnect)===false) {
                 myStep::info('db_connect_error');
             }
-            $charset_collate = $db->record('SHOW CHARACTER SET LIKE "'.$c->db->charset.'"');
+            if($config->db->type=='mysql') {
+                if($config->db->charset=='utf-8') $config->db->charset = 'utf8mb4';
+                $charset_collate = $db->record('SHOW CHARACTER SET LIKE "'.$config->db->charset.'"');
+                $charset_collate = $charset_collate['Default collation'];
+            } else {
+                $charset_collate = strtoupper($config->db->charset).'_CI_AS';
+            }
             $strFind = array('{db_name}', '{pre}', '{charset}', '{host}', '{charset_collate}', '{web_name}');
-            $strReplace = array($c->db->name, $c->db->pre, $c->db->charset, myReq::server('HTTP_HOST'), $charset_collate['Default collation'], $c->web->title);
+            $strReplace = array($config->db->name, $config->db->pre, $config->db->charset, myReq::server('HTTP_HOST'), $charset_collate, $config->web->title);
             $result = $db->file(PATH.'/install/install.sql', $strFind, $strReplace);
             for($i=0,$m=count($result);$i<$m;$i++) {
                 switch($result[$i][1]) {
@@ -92,7 +99,7 @@ switch ($info_app['path'][1]) {
                 }
                 $t->setLoop('result', ['content'=> $detail]);
             }
-            $c->save('php', PATH.'/config.php');
+            $config->save('php', PATH.'/config.php');
         } else {
             $info_app['path'][1] = 2;
             unset($t);

@@ -108,6 +108,12 @@ $api_list = array (
   array (
     'setting' => 'app\\sample\\api',
   ),
+  'plugin_manager' => 
+  array (
+    'check' => 'plugin_manager::remote',
+    'update' => 'plugin_manager::remote',
+    'download' => 'plugin_manager::remote',
+  ),
   'myStep' => 
   array (
     'error' => 'app\\myStep\\getError',
@@ -117,12 +123,6 @@ $api_list = array (
     'upload' => 'myStep::upload',
     'download' => 'myStep::download',
     'remove' => 'myStep::remove_ul',
-  ),
-  'plugin_manager' => 
-  array (
-    'check' => 'plugin_manager::remote',
-    'update' => 'plugin_manager::remote',
-    'download' => 'plugin_manager::remote',
   ),
   'CMS' => 
   array (
