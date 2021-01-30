@@ -595,7 +595,7 @@ code;
         global $s, $info_app;
         $para = preg_replace('#&.+$#', '', $para);
         $para = explode('/', trim($para, '/'));
-        $module = $info_app['app'];
+        $module = $para[0];
         include(CONFIG.'route.php');
         $result = '{"error":"Module is Missing!"}';
         if(isset($api_list)) {
@@ -921,6 +921,8 @@ code;
             myStep::setPara();
             if(is_file(PATH.'/global.php')) require_once(PATH.'/global.php');
             require(PATH.'/index.php');
+            if(isset($tpl)) $mystep->show($tpl);
+            $mystep->end();
         }
     }
 

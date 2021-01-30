@@ -6,37 +6,39 @@ jQuery.event.addProp("dataTransfer");
 (function($){
     let opts = {},
         default_opts = {
-            title: 'Power Uploader',
-            url: '',
-            refresh: 1000,
-            param_name: 'userfile',
-            max_files: 1,
-            max_file_size: 10, // MBs
-            data: {},
-            mode: 'drop', // browse, drop or paste
-            errors: [],
-            drop: dummy,
-            file: dummy,
-            paste: dummy,
-            dragEnter: dummy,
-            dragOver: dummy,
-            dragLeave: dummy,
-            docEnter: dummy,
-            docOver: dummy,
-            docLeave: dummy,
-            beforeEach: dummy,
-            allDone: dummy,
-            uploadStarted: dummy,
-            uploadFinished: dummy,
-            progressUpdated: dummy,
-            speedUpdated: dummy
+            title: 'Power Uploader',    //浏览模式下载的对话框标题
+            url: '',                    //响应上传的服务器地址
+            refresh: 1000,              //进程刷新频率，1000为1秒
+            param_name: 'userfile',     //上传文件的变量名
+            max_files: 1,               //同时上传文件的数量限制
+            max_file_size: 10,          //上传文件的最大体积（MB）
+            data: {},                   //随同文件同时提交的参数（类似于form表单）
+            mode: 'drop',               //上传模式，可为：browse, drop, paste 或直接传入文件对象变量（可为数组）
+            errors: [],                 //错误回馈信息，默认为：["Browser Not Supported", "Too Many Files", "File Too Large", "No Upload Script Set", "Choose a file at least", "Error occurred when send data"]
+            drop: dummy,                //在执行拖拽上传前所执行的指令，参数为浏览器事件，需返回 true 才会继续
+            file: dummy,                //在执行浏览上传前所执行的指令，参数为浏览器事件，需返回 true 才会继续
+            paste: dummy,               //在执行粘贴上传前所执行的指令，参数为浏览器事件，需返回 true 才会继续
+            dragEnter: dummy,           //当鼠标拖拽文件进入目标元素时所执行的代码，参数为浏览器事件
+            dragOver: dummy,            //当鼠标拖拽文件经过目标元素时所执行的代码，参数为浏览器事件
+            dragLeave: dummy,           //当鼠标拖拽文件离开目标元素时所执行的代码，参数为浏览器事件
+            docEnter: dummy,            //当鼠标拖拽文件进入浏览器时所执行的代码，参数为浏览器事件
+            docOver: dummy,             //当鼠标拖拽文件经过浏览器时所执行的代码，参数为浏览器事件
+            docLeave: dummy,            //当鼠标拖拽文件离开浏览器时所执行的代码，参数为浏览器事件
+            beforeUpload: dummy,        //在执行上传操作前需执行的代码
+            beforeEach: dummy,          //在每个文件上传操作前执行的检测代码，参数为当前文件对象，需返回true才能继续
+            allDone: dummy,             //所有文件上传结束后执行的代码
+            uploadStarted: dummy,       //在每个文件开始上传时执行的代码，包含 index, file, files_count 三个参数
+            uploadFinished: dummy,      //在每个文件上传完成时执行的代码，包含 index, file, info, duration 四个参数
+            progressUpdated: dummy,     //在当前进度发生变化时执行的代码，包含 index, file, currentProgress 三个参数
+            speedUpdated: dummy         //在上传速度发生变化时执行的代码，包含 index, file, speeds 三个参数
         },
-        errors = ["Browser Not Supported", "Too Many Files", "File Too Large", "No Upload Script Set", "Choose a file at least"],
+        errors = ["Browser Not Supported", "Too Many Files", "File Too Large", "No Upload Script Set", "Choose a file at least", "Error occurred when send data"],
         doc_leave_timer,
         stop_loop = false,
         files_count = 0,
         files_done = 0,
         files_rejected = 0,
+        files_loaded = 0,
         reject_list = [],
         files = [],
         result = [];
@@ -55,24 +57,33 @@ jQuery.event.addProp("dataTransfer");
                     '        </div>\n' +
                     '    </div>\n' +
                     '</div>',
-        'file' :    '<div data-idx="" class="input-group mb-3">\n' +
+        'file' :    '<div class="input-group mb-3">\n' +
                     '    <div class="input-group-prepend">\n' +
                     '        <span class="input-group-text">文件</span>\n' +
                     '    </div>\n' +
                     '    <div class="custom-file">\n' +
-                    '        <label><input type="file" class="custom-file-input" name="files[]" />\n' +
-                    '        <span class="custom-file-label nowrap" data-browse="浏览">点击选取需上传的文件</span></label>\n' +
+                    '        <label><input type="file" multiple class="custom-file-input" />\n' +
+                    '        <span class="custom-file-label nowrap" data-browse="浏览">点击选取文件</span></label>\n' +
                     '    </div>\n' +
+                    '</div>\n' +
+                    '<div class="input-group mb-3">\n' +
+                    '    <div class="list-group w-100"></div>' +
+                    '</div>\n',
+        'waiting' : '<div class="input-group p-3">\n' +
+                    '    <h6>正在读取文件准备上传，文件如果较大，可能持续较长时间，请耐心等待！</h6>\n' +
                     '</div>\n',
         'process' : '<div data-idx="" class="progress mb-3">\n' +
                     '  <div class="progress-bar progress-bar-striped progress-bar-animated text-left p-2" role="progressbar" style="width:0"></div>\n' +
                     '</div>\n',
         'btn_close' :'<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> 关闭 </button>',
         'btn_upload':'<button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-floppy-open"></span> 上传 </button>',
-        'btn_add'   :'<button type="button" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-plus-sign"></span> 增加 </button>',
     };
 
     $.fn.powerUpload = function(options) {
+        if(typeof(this.data('upload')) !== 'undefined') {
+            $.extend(opts, this.data('upload'), options );
+            return;
+        }
         opts = $.extend( {}, default_opts, options );
         switch(opts.mode) {
             case 'paste':
@@ -90,15 +101,28 @@ jQuery.event.addProp("dataTransfer");
                     .bind('dragover', docOver)
                     .bind('dragleave', docLeave);
                 break;
+            case 'browse':
             default:
-                $(this).click(function(){
-                    reset(this);
-                    getTpl('browse');
-                });
-                template.file = $(template.file);
-                template.file.find('input[type=file]').change(function(){
-                    $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
-                });
+                if(opts.mode instanceof Function) {
+                    $(this).click(function(e){
+                        reset(this);
+                        files = opts.mode();
+                        files_count = files.length;
+                        beforeUpload();
+                        setTimeout(upload, 1000);
+                        e.preventDefault();
+                    });
+                } else {
+                    $(this).click(function(){
+                        reset(this);
+                        getTpl('browse');
+                    });
+                    template.file = $(template.file);
+                    template.file.find('input[type=file]').change(function(){
+                        $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
+                    });
+                }
+                break;
         }
         this.addClass('upload');
         this.data('upload', opts);
@@ -109,6 +133,7 @@ jQuery.event.addProp("dataTransfer");
         files_count = 0;
         files_done = 0;
         files_rejected = 0;
+        files_loaded = 0,
         files = [];
         result = [];
         reject_list = [];
@@ -135,6 +160,9 @@ jQuery.event.addProp("dataTransfer");
         tpl.find(".modal-title > b").html(opts.title);
 
         switch(mode) {
+            case 'waiting':
+                tpl.find(".modal-body").append($(template.waiting));
+                break;
             case 'drop':
                 tpl.find(".modal-body").html('Drop the file(s) you need to upload here.(WIP)');
                 tpl.find(".modal-footer").append($(template.btn_close));
@@ -155,42 +183,54 @@ jQuery.event.addProp("dataTransfer");
                 break;
             case 'browse':
             default:
-                obj = template.file.clone(true);
                 let btn = $(template.btn_upload).bind('click', file);
-                tpl.find(".modal-body").append(obj.attr('data-idx', 0));
+                tpl.find(".modal-body").append(template.file.clone(true));
                 tpl.find(".modal-footer").append(btn).append($(template.btn_close));
-                if(opts.max_files>1) {
-                    $(template.btn_add).click(function(){
-                        let cnt = $("#uploader input[name='files[]']").length;
-                        if(cnt<opts.max_files) {
-                            let obj = template.file.clone(true);
-                            obj.attr('data-idx', cnt);
-                            $("#uploader").find(".modal-body").append(obj);
-                            if(cnt===opts.max_files-1) $(this).hide();
-                        } else {
-                            $(this).hide();
-                        }
-                    }).prependTo(tpl.find(".modal-footer"));
+                if(typeof opts.obj_attr === 'object') {
+                    tpl.find("input[type=file]").attr(opts.obj_attr);
                 }
+                tpl.find("input[type=file]").change(function(){
+                    let files = this.files, m = files.length;
+                    if($('#uploader .list-group').find('.list-group-item').length + m > opts.max_files) {
+                        error(1);
+                        return false;
+                    }
+                    let btn = $('<a href="###" class="link-secondary">&times;</a>');
+                    btn.css('float', 'right').click(function(){
+                        $(this).parentsUntil('.list-group').remove();
+                    });
+                    for(let i=0; i<m; i++) {
+                        $('<a>').addClass('list-group-item list-group-item-action')
+                            .html(files[i].name).data('file', files[i])
+                            .appendTo('#uploader .list-group')
+                            .append(btn.clone(true));
+                    }
+                    if(typeof tpl.find("input[type=file]").attr('capture')==='undefined')
+                        tpl.find('.custom-file-label').text('点击选取文件');
+                });
         }
         $('body').append(tpl);
         if(!tpl.is(":visible")) tpl.modal('show');
     }
 
     function file(e) {
-        opts.file(e);
-        let objs = $(e.target).parentsUntil('#uploader').parent().find("input[name='files[]']");
-        let file = null;
-        for(let i=0,m=objs.length;i<m;i++) {
-            if(objs.get(i).files.length===0) continue;
-            file = objs.get(i).files[0];
+        if(opts.file(e)===false) return;
+        let objs = $(e.target).parentsUntil('#uploader').parent().find(".list-group-item");
+        let size = 0, m = objs.length;
+        for(let i=0;i<m;i++) {
             files_count++;
-            files.push(file);
+            if($(objs.get(i)).data('file').size<size) {
+                files.push($(objs.get(i)).data('file'));
+            } else {
+                files.unshift($(objs.get(i)).data('file'));
+            }
+            size = $(objs.get(i)).data('file').size;
         }
         if(files_count===0) {
             error(4);
         } else {
-            upload();
+            beforeUpload();
+            setTimeout(upload, 1000);
             e.preventDefault();
         }
         return false;
@@ -214,7 +254,8 @@ jQuery.event.addProp("dataTransfer");
                 }
             } else if(files.length>0) {
                 files_count = files.length;
-                upload();
+                beforeUpload();
+                setTimeout(upload, 1000);
                 e.preventDefault();
             }
         }
@@ -223,14 +264,15 @@ jQuery.event.addProp("dataTransfer");
 
     function drop(e) {
         reset(e.target);
-        opts.drop(e);
+        if(opts.drop(e)===false) return;
         files = e.dataTransfer.files;
         if (files === null || files === undefined) {
             error(0);
             return false;
         }
         files_count = files.length;
-        upload();
+        beforeUpload();
+        setTimeout(upload, 1000);
         e.preventDefault();
         return false;
     }
@@ -238,7 +280,6 @@ jQuery.event.addProp("dataTransfer");
     function getBuilder(filename, filetype, filedata, boundary) {
         let the_dash = '--', crlf = '\r\n', builder = '';
         $.each(opts.data, function(i, val) {
-            c(i, val);
             if (typeof val === 'function') val = val();
             if(builder==='') {
                 builder = the_dash;
@@ -281,7 +322,7 @@ jQuery.event.addProp("dataTransfer");
             let obj = $(".progress[data-idx="+this.index+"] > div");
             if (this.currentProgress !== percentage) {
                 this.currentProgress = percentage;
-                obj.width(this.currentProgress);
+                obj.css('width', this.currentProgress+'%');
                 opts.progressUpdated(this.index, this.file, this.currentProgress);
                 let elapsed = new Date().getTime();
                 let diffTime = elapsed - this.currentStart;
@@ -307,6 +348,7 @@ jQuery.event.addProp("dataTransfer");
             error(1);
             return false;
         }
+        files_loaded = 0;
         for (let i=0; i<files_count; i++) {
             if (stop_loop) return false;
             try {
@@ -331,7 +373,6 @@ jQuery.event.addProp("dataTransfer");
                 return false;
             }
         }
-        getTpl('process');
     }
 
     function send(e) {
@@ -339,6 +380,8 @@ jQuery.event.addProp("dataTransfer");
             error(3);
             return;
         }
+        files_loaded++;
+        if(files_loaded===files_count) getTpl('process');
         let xhr = new XMLHttpRequest(),
             upload = xhr.upload,
             file = null,
@@ -368,42 +411,43 @@ jQuery.event.addProp("dataTransfer");
         upload.addEventListener("progress", progress, false);
 
         xhr.open("POST", opts.url, true);
-        xhr.setRequestHeader('content-type', 'multipart/form-data; boundary=' + boundary);
+        xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
         xhr.overrideMimeType(file.type);
         xhr.sendAsBinary(builder);
         opts.uploadStarted(index, file, files_count);
+
+        xhr.onerror = function(e) {
+            setTimeout(function(){
+                $('#uploader').modal('hide');
+            },2000);
+            error(5);
+        };
 
         xhr.onload = function() {
             if (xhr.responseText) {
                 let flag = false;
                 let obj = $(".progress[data-idx="+index+"] > div");
+                let info = {};
                 try{
-                    /*
-                    * xhr.responseText
-                    * error - error no. ('0' means no error)
-                    * message - error detail
-                    * eg: {"error":"-1","message":"Upload Denied!"}
-                    */
-                    let info = jQuery.parseJSON(xhr.responseText);
-                    if(typeof result.error!=='undefined' && result.error!==0) {
-                        obj.addClass('bg-danger').css('width','100%');
-                        flag = opts.uploadFinished(index, file, info, (new Date().getTime() - start_time));
-                        result.push("<"+file.name+"> failed!");
-                    } else {
-                        obj.addClass('bg-success').css('width','100%');
-                        flag = opts.uploadFinished(index, file, info, (new Date().getTime() - start_time));
-                        result.push("<"+file.name+"> uploaded!");
-                    }
+                    info = jQuery.parseJSON(xhr.responseText);
+                    result.push("<"+file.name+"> uploaded!");
                 } catch(e) {
-                    obj.addClass('bg-danger').css('width','100%');
-                    result.push("<"+file.name+"> failed!");
+                    info = {error: e};
+                    result.push("<"+file.name+"> error!");
                 }
+                obj.addClass('bg-success').css('width','100%');
+                flag = opts.uploadFinished(index, file, info, (new Date().getTime() - start_time));
                 files_done++;
                 if (files_done === files_count - files_rejected) allDone();
                 if (flag === false) stop_loop = true;
             }
-            //xhr.abort();
+            xhr.abort();
         };
+    }
+
+    function beforeUpload() {
+        getTpl('waiting');
+        return opts.beforeUpload();
     }
 
     function beforeEach(file) {
@@ -411,7 +455,7 @@ jQuery.event.addProp("dataTransfer");
     }
 
     function allDone() {
-        return opts.allDone(result);
+        return opts.allDone();
     }
 
     function dragEnter(e) {

@@ -509,15 +509,13 @@ class myController extends myBase {
             header("Expires: " . date("D, j M Y H:i:s", strtotime("now + 10 years")) . " GMT");
             header('Content-Type: ' . $type);
             if ($type !== 'text/html') {
-                header("Accept-Ranges: bytes");
-                header("Accept-Length: " . strlen($content));
-                header("Content-Disposition: attachment; filename=" . $name);
-                header('Content-Transfer-Encoding: binary');
-                header('Cache-Control: must-revalidate');
                 header('Pragma: public');
+                header('Accept-Ranges: bytes');
+                header('Accept-Length: ' . strlen($content));
+                header('Content-Disposition: attachment; filename=' . $name);
+                header('Content-Transfer-Encoding: binary');
             }
-            echo $content;
-            exit;
+            myFile::show($content);
         }
     }
 

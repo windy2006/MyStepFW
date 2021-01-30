@@ -10,6 +10,7 @@ if($m=='del') {
     list($the_year, $the_month, $the_file) = explode('/', $idx);
     if($the_file!='log.txt') f::del(FILE.$idx);
 }
+if($list===false) $list = [];
 for($i=0,$m=count($list);$i<$m;$i++) {
     $tmp = myFile::find('log.txt', $list[$i], true, 2);
     if(empty($tmp)) {

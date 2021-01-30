@@ -1,0 +1,66 @@
+.parallax {
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-x: center;
+}
+.animation {
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+}
+@keyframes slide-up {
+    from {opacity:0; top:100px;}
+    to {opacity:1; top:0;}
+}
+.animation_slide-up {
+    animation-name: slide-up;
+}
+@keyframes slide-down {
+    from {opacity:0; bottom:100px;}
+    to {opacity:1; bottom:0;}
+}
+.animation_slide-down {
+    animation-name: slide-down;
+}
+@keyframes slide-left {
+    from {opacity:0; left:100px;}
+    to {opacity:1; left:0;}
+}
+.animation_slide-left {
+    animation-name: slide-left;
+}
+@keyframes slide-right {
+    from {opacity:0; right:100px;}
+    to {opacity:1; right:0;}
+}
+.animation_slide-right {
+    animation-name: slide-right;
+}
+@keyframes flip-x {
+    from {opacity:0;transform: perspective(400px) scale3d(1, 1, 1) translate3d(0, 0, 0) rotate3d(0, 1, 0, -180deg);}
+    to {opacity:1;transform: perspective(400px) scale3d(1, 1, 1) translate3d(0, 0, 0) rotate3d(0, 1, 0, 0deg);}
+}
+.animation_flip-x {
+    backface-visibility: visible;
+    animation-name: flip-x;
+}
+@keyframes flip-y {
+    from {opacity: 0;transform: perspective(400px) rotate3d(1, 0, 0, 90deg);}
+    to {opacity:1;transform: perspective(400px);}
+}
+.animation_flip-y {
+    backface-visibility: visible !important;
+    animation-name: flip-y;
+}
+@keyframes zoom {
+    from {opacity: 0;transform: scale3d(0.3, 0.3, 0.3);}
+    to {opacity: 1;}
+}
+.animation_zoom {
+    animation-name: zoom;
+}

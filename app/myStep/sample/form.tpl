@@ -187,12 +187,24 @@
                 <td>
                     <div class="input-group">
                         <div class="input-group-prepend">
+                            <span class="input-group-text">区间选择</span>
+                        </div>
+                        <div class="form-control" style="height:50px;padding-top:20px;overflow: hidden;">
+                            <input type="hidden" class="range-slider" />
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
                             <span class="input-group-text">对 话 框</span>
                         </div>
                         <div class="form-control pl-0" style="padding-top:3px;">
-                            <button class="ml-2" onClick="alert('这是一个信息框示例。\n\n原始函数可通过 alert_org 调用。')">alert</button>
-                            <button class="ml-2" onClick="confirm('这是一个确认框示例。\n\n原始函数可通过 confirm_org 调用。', 'alert_org', ['确 定','取 消'], '我是标题')">confirm</button>
-                            <button class="ml-2" onClick="prompt('这是一个文本录入示例。\n\n原始函数可通过 prompt_org 调用。', 'alert_org', '随便写点什么？', '我是标题', ['确 定','取 消','重 填'])">prompt</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="alert('这是一个信息框示例。\n\n原始函数可通过 alert_org 调用。')">alert</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="confirm('这是一个确认框示例。\n\n原始函数可通过 confirm_org 调用。', 'alert_org', ['确 定','取 消'], '我是标题')">confirm</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="prompt('这是一个文本录入示例。\n\n原始函数可通过 prompt_org 调用。', 'alert_org', '随便写点什么？', '我是标题', ['确 定','取 消','重 填'])">prompt</button>
                         </div>
                     </div>
                 </td>
@@ -204,10 +216,10 @@
                             <span class="input-group-text">模态窗口</span>
                         </div>
                         <div class="form-control pl-0" style="padding-top:3px;">
-                            <button class="ml-2" onClick="showPop('newLayer','自定义内容窗口','id','newLayer',400)">自定义内容</button>
-                            <button class="ml-2" onClick="showPop('newPage','自定义网址窗口','url','./',400, 700)">自定义网址</button>
-                            <button class="ml-2" onClick="showPop('newImg','自定义图片窗口','img','https://ss2.baidu.com/6ONYsjip0QIZ8tyhnq/it/u=2276456453,1005174699&fm=58&bpow=7416&bpoh=4320',400, 300)">自定义图片</button>
-                            <button class="ml-2" onClick="showPop('newImg','自定义文字窗口','xxx','类似于alert的信息内容',400)">自定义文字</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="showPop('newLayer','自定义内容窗口','id','newLayer',400)">自定义内容</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="showPop('newPage','自定义网址窗口','url','./',400, 700)">自定义网址</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="showPop('newImg','自定义图片窗口','img','https://ss2.baidu.com/6ONYsjip0QIZ8tyhnq/it/u=2276456453,1005174699&fm=58&bpow=7416&bpoh=4320',400, 300)">自定义图片</button>
+                            <button class="ml-2 btn btn-sm btn-outline-info" onClick="showPop('newImg','自定义文字窗口','xxx','类似于alert的信息内容',400)">自定义文字</button>
                         </div>
                     </div>
                 </td>
@@ -291,9 +303,9 @@
                         minimumInputLength: 0,
                     }
                     if($(this).prop('multiple')) {
-                        opt.maximumSelectionSize = 3;
+                        opt.maximumSelectionLength = 3;
                         opt.tags = ["HI","AK"];
-                        opt.tokenSeparators = [",", " "];
+                        opt.tokenSeparators = [",", ";"];
                     }
                     $(this).select2(opt);
                     $(this).next().removeAttr('style');
@@ -360,6 +372,25 @@
                     $('.form-control.date').datepicker('show');
                 });
             });
+        }
+    });
+    jQuery.vendor('jquery.range', {
+        add_css:true,
+        callback:function(){
+            $('.range-slider').jRange({
+                from: 0,
+                to: 100,
+                step: 1,
+                scale: [0,25,50,75,100],
+                format: '%s',
+                width: 350,
+                showLabels: true,
+                isRange : true,
+                snap : true,
+            });
+            setTimeout(()=>{
+                $('.range-slider').jRange('setValue', '0,100');
+            }, 1000);
         }
     });
 </script>

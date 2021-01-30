@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<title>视差展示</title>
+	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
+	<link href="jquery.parallax.css" rel="stylesheet">
+	<style type="text/css" rel="stylesheet">
+		.list_item:last-child .index .index-divider {
+			border-width: 0;
+		}
+		.list_item .index {
+			text-align: center;
+			color: #ffffff;
+		}
+		.list_item .index .index-text {
+			display: inline-flex;
+			border: 1px solid;
+			width: 52px;
+			height: 52px;
+			justify-content: center;
+			align-items: center;
+			margin-bottom: 12px;
+			font-size: 26px;
+			font-weight: bold;
+		}
+		.list_item .index .index-divider {
+			position: absolute;
+			top: 27px;
+			left: calc(50% + 52px);
+			width: calc(100% - 112px);
+			height: 1px;
+			border-top: 1px solid;
+		}
+		@media (max-width: 768px) {
+			.list_item .index {
+				float:left;
+				margin-right: 20px;
+				height: 100%;
+				width: auto;
+			}
+			.list_item .index .index-divider {
+				position: absolute;
+				top: 75px;
+				left: 40px;
+				width: 1px;
+				height: calc(100% - 70px);
+				border-right: 1px solid;
+				border-top: 0;
+			}
+			.list_item {
+				margin-bottom: 30px;
+			}
+			.list_item .card {
+				float: left;
+				width: calc(100% - 80px);
+			}
+		}
+	</style>
+</head>
+<body class="p-0">
+<div id="main" class="container-fluid">
+	<div class="row p-5" data-bg="bg/1.jpg" data-rate="0.2" data-effect="zoom" data-func="custom_show">
+		<h1 class="col-12 text-center mb-5">联盟职能</h1>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row p-5 bg-warning" data-func="show_2">
+		<h1 class="col-12 text-center mb-5">联盟职能</h1>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row p-5" data-bg="bg/2.jpg" data-rate="0.4" data-effect="flip-x">
+		<h1 class="col-12 text-center mb-5">联盟职能</h1>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md list_item">
+			<div class="index">
+				<div class="index-text">1</div>
+				<div class="index-divider"></div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<div class="card-title"><h3>发挥政府引导作用</h3></div>
+					<div class="card-body p-0">
+						联盟依托政府部门的引导，努力创新管理方式，积极营造有利的政策环境，为产业发展争取政府部门的政策、项目等支持，为政府部门政策制订以及重大项目实施提供决策参考。
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row p-5 bg-primary" data-effect="flip-y">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-success" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-info mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-secondary" style="height:300px;"></div>
+	</div>
+	<div class="row p-5" data-bg="bg/3.jpg" data-rate="0.6" data-effect="slide-left">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+	</div>
+	<div class="row p-5 bg-dark" data-effect="slide-right">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-success" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-info mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-secondary" style="height:300px;"></div>
+	</div>
+	<div class="row p-5" data-bg="bg/4.jpg" data-rate="0.5" data-effect="slide-up">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+	</div>
+	<div class="row p-5 bg-warning" data-effect="slide-down">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-success" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-info mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-secondary" style="height:300px;"></div>
+	</div>
+	<div class="row p-5" data-bg="bg/5.jpg" data-rate="0.3" data-effect="zoom" >
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+	</div>
+	<div class="row p-5 bg-primary" data-effect="rand">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-success" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-info mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-secondary" style="height:300px;"></div>
+	</div>
+	<div class="row p-5" data-bg="bg/6.jpg" data-rate="0.1" data-effect="rand">
+		<h1 class="col-12 text-center mb-5">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light mx-0 mx-md-5 my-5 my-md-0" style="height:300px;"></div>
+		<div class="col-12 col-md p-2 bg-light" style="height:300px;"></div>
+	</div>
+	<div class="row p-5 bg-dark">
+		<h1 class="col-12 text-center mb-5" data-effect="random">我是大标题</h1>
+		<div class="col-12 col-md p-2 bg-success" style="height:300px;" data-effect="slide-left"></div>
+		<div class="col-12 col-md p-2 bg-info mx-0 mx-md-5 my-5 my-md-0" style="height:300px;" data-effect="zoom"></div>
+		<div class="col-12 col-md p-2 bg-secondary" style="height:300px;" data-effect="slide-right"></div>
+	</div>
+</div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.parallax.js"></script>
+<script type="text/javascript">
+	$('#main').parallax();
+	function custom_show(obj, mode) {
+		obj.children().addClass('animation animation_'+mode);
+	}
+</script>
+</html>

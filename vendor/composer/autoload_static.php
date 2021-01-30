@@ -11,20 +11,56 @@ class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
     );
 
     public static $prefixLengthsPsr4 = array (
+        'Z' => 
+        array (
+            'Zend\\Escaper\\' => 13,
+        ),
+        'P' => 
+        array (
+            'PhpOffice\\PhpWord\\' => 18,
+            'PhpOffice\\Common\\' => 17,
+        ),
         'E' => 
         array (
             'Erusev\\Parsedown\\' => 17,
         ),
+        'A' => 
+        array (
+            'AliCloud\\OSS\\' => 13,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Zend\\Escaper\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/zendframework/zend-escaper/src',
+        ),
+        'PhpOffice\\PhpWord\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/phpword/src/PhpWord',
+        ),
+        'PhpOffice\\Common\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/common/src/Common',
+        ),
         'Erusev\\Parsedown\\' => 
         array (
             0 => __DIR__ . '/..' . '/erusev/parsedown/src',
         ),
+        'AliCloud\\OSS\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jiajialu/aliyun-sdk-oss/src/OSS',
+        ),
     );
 
     public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'PHPExcel' => 
+            array (
+                0 => __DIR__ . '/..' . '/phpoffice/phpexcel/Classes',
+            ),
+        ),
         'J' => 
         array (
             'JSMin\\' => 
@@ -93,6 +129,7 @@ class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
         'CssVariablesMinifierFilter' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/minifier/filter/CssVariablesMinifierFilter.php',
         'CssVariablesMinifierPlugin' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/minifier/plugins/CssVariablesMinifierPlugin.php',
         'CssWhitesmithsFormatter' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/formatter/CssWhitesmithsFormatter.php',
+        'PclZip' => __DIR__ . '/..' . '/pclzip/pclzip/pclzip.lib.php',
         'aCssAtBlockEndToken' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/tokens/aCssAtBlockEndToken.php',
         'aCssAtBlockStartToken' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/tokens/aCssAtBlockStartToken.php',
         'aCssDeclarationToken' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/tokens/aCssDeclarationToken.php',

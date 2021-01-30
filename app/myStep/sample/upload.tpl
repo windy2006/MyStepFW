@@ -40,11 +40,11 @@
                 mode: 'drop',
                 max_files: 5,
                 max_file_size: 32,
-                errors: ["浏览器不支持", "一次只能上传5个文件", "每个文件必须小于32MB", "未设置上传目标"],
+                errors: ["浏览器不支持", "一次只能上传5个文件", "每个文件必须小于32MB", "未设置上传目标", "请至少选择一个文件"],
 
                 uploadFinished:function(i,file,result,timeDiff){
                     let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
-                    if(result.error!=0) {
+                    if(result.error!==0) {
                         obj.html(obj.html()+' - upload failed! ('+result.message+')');
                     } else {
                         $('#list_file').removeClass('d-none');

@@ -69,5 +69,3 @@ if(empty($module)) {
     $tpl->assign('main', $content);
 }
 $mystep->setting->show = true;
-$mystep->show($tpl);
-$mystep->end();

@@ -13,10 +13,12 @@
   ],
   "require": {
     "php": "^7.0",
-    "erusev/parsedown": "2.0.x-dev",
-    "mrclay/jsmin-php": "2.4.0",
-    "meenie/javascript-packer": "1.1",
-    "phrozenbyte/cssmin": "v3.0.2"
+    "erusev/parsedown": "^2.0.x-dev",
+    "mrclay/jsmin-php": "^2.4.0",
+    "meenie/javascript-packer": "^1.1",
+    "phrozenbyte/cssmin": "^v3.0.2",
+    "phpoffice/phpexcel": "^1.8.2",
+    "phpoffice/phpword": "^0.17.0"
   },
   "config": {
     "preferred-install": "dist"

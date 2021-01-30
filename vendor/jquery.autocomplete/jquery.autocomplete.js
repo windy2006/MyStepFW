@@ -1,22 +1,22 @@
 /**
-*  Ajax Autocomplete for jQuery, version 1.1.3
-*  (c) 2010 Tomas Kirda
-*
-*  Ajax Autocomplete for jQuery is freely distributable under the terms of an MIT-style license.
-*  For details, see the web site: http://www.devbridge.com/projects/autocomplete/jquery/
-*
-*  Last Review: 04/19/2010
-*/
+ *  Ajax Autocomplete for jQuery, version 1.1.3
+ *  (c) 2010 Tomas Kirda
+ *
+ *  Ajax Autocomplete for jQuery is freely distributable under the terms of an MIT-style license.
+ *  For details, see the web site: http://www.devbridge.com/projects/autocomplete/jquery/
+ *
+ *  Last Review: 04/19/2010
+ */
 
 /*jslint onevar: true, evil: true, nomen: true, eqeqeq: true, bitwise: true, regexp: true, newcap: true, immed: true */
 /*global window: true, document: true, clearInterval: true, setInterval: true, jQuery: true */
 
 (function($) {
 
-  var reEscape = new RegExp('(\\' + ['/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\'].join('|\\') + ')', 'g');
+  let reEscape = new RegExp('(\\' + ['/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\'].join('|\\') + ')', 'g');
 
   function fnFormatResult(value, data, currentValue) {
-    var pattern = '(' + currentValue.replace(reEscape, '\\$1') + ')';
+    let pattern = '(' + currentValue.replace(reEscape, '\\$1') + ')';
     return value.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>');
   }
 
@@ -49,19 +49,15 @@
     this.initialize();
     this.setOptions(options);
   }
-  
+
   $.fn.autocomplete = function(options) {
     return new Autocomplete(this.get(0)||$('<input />'), options);
   };
 
-
   Autocomplete.prototype = {
-
     killerFn: null,
-
     initialize: function() {
-
-      var me, uid, autocompleteElId;
+      let me, uid, autocompleteElId;
       me = this;
       uid = Math.floor(Math.random()*0x100000).toString(16);
       autocompleteElId = 'Autocomplete_' + uid;
@@ -89,9 +85,9 @@
       this.el.blur(function() { me.enableKillerFn(); });
       this.el.focus(function() { me.fixPosition(); });
     },
-    
+
     setOptions: function(options){
-      var o = this.options;
+      let o = this.options;
       $.extend(o, options);
       if(o.lookup){
         this.isLocal = true;
@@ -100,37 +96,37 @@
       $('#'+this.mainContainerId).css({ zIndex:o.zIndex });
       this.container.css({ maxHeight: o.maxHeight + 'px', width:o.width });
     },
-    
+
     clearCache: function(){
       this.cachedResponse = [];
       this.badQueries = [];
     },
-    
+
     disable: function(){
       this.disabled = true;
     },
-    
+
     enable: function(){
       this.disabled = false;
     },
 
     fixPosition: function() {
-      var offset = this.el.offset();
+      let offset = this.el.offset();
       $('#' + this.mainContainerId).css({ top: (offset.top + this.el.innerHeight()) + 'px', left: offset.left + 'px' });
     },
 
     enableKillerFn: function() {
-      var me = this;
+      let me = this;
       $(document).bind('click', me.killerFn);
     },
 
     disableKillerFn: function() {
-      var me = this;
+      let me = this;
       $(document).unbind('click', me.killerFn);
     },
 
     killSuggestions: function() {
-      var me = this;
+      let me = this;
       this.stopKillSuggestions();
       this.intervalId = window.setInterval(function() { me.hide(); me.stopKillSuggestions(); }, 300);
     },
@@ -181,7 +177,7 @@
       if (this.currentValue !== this.el.val()) {
         if (this.options.deferRequestBy > 0) {
           // Defer lookup in case when value changes very quickly:
-          var me = this;
+          let me = this;
           this.onChangeInterval = setInterval(function() { me.onValueChange(); }, this.options.deferRequestBy);
         } else {
           this.onValueChange();
@@ -192,7 +188,7 @@
     onValueChange: function() {
       clearInterval(this.onChangeInterval);
       this.currentValue = this.el.val();
-      var q = this.getQuery(this.currentValue);
+      let q = this.getQuery(this.currentValue);
       this.selectedIndex = -1;
       if (this.ignoreValueChange) {
         this.ignoreValueChange = false;
@@ -206,7 +202,7 @@
     },
 
     getQuery: function(val) {
-      var d, arr;
+      let d, arr;
       d = this.options.delimiter;
       if (!d) { return $.trim(val); }
       arr = val.split(d);
@@ -214,7 +210,7 @@
     },
 
     getSuggestionsLocal: function(q) {
-      var ret, arr, len, val, i;
+      let ret, arr, len, val, i;
       arr = this.options.lookup;
       len = arr.suggestions.length;
       ret = { suggestions:[], data:[] };
@@ -228,9 +224,9 @@
       }
       return ret;
     },
-    
+
     getSuggestions: function(q) {
-      var cr, me;
+      let cr, me;
       cr = this.isLocal ? this.getSuggestionsLocal(q) : this.cachedResponse[q];
       if (cr && $.isArray(cr.suggestions)) {
         this.suggestions = cr.suggestions;
@@ -244,7 +240,7 @@
     },
 
     isBadQuery: function(q) {
-      var i = this.badQueries.length;
+      let i = this.badQueries.length;
       while (i--) {
         if (q.indexOf(this.badQueries[i]) === 0) { return true; }
       }
@@ -263,7 +259,7 @@
         return;
       }
 
-      var me, len, div, f, v, i, s, mOver, mClick;
+      let me, len, div, f, v, i, s, mOver, mClick;
       me = this;
       len = this.suggestions.length;
       f = this.options.fnFormatResult;
@@ -283,7 +279,7 @@
     },
 
     processResponse: function(text) {
-      var response;
+      let response;
       text = text.replace(/null/ig, "[]");
       try {
         response = eval('(' + text + ')');
@@ -296,12 +292,12 @@
       if (response.query === this.getQuery(this.currentValue)) {
         this.suggestions = response.suggestions;
         this.data = response.data;
-        this.suggest(); 
+        this.suggest();
       }
     },
 
     activate: function(index) {
-      var divs, activeItem;
+      let divs, activeItem;
       divs = this.container.children();
       // Clear previous selection:
       if (this.selectedIndex !== -1 && divs.length > this.selectedIndex) {
@@ -321,7 +317,7 @@
     },
 
     select: function(i) {
-      var selectedValue, f;
+      let selectedValue, f;
       selectedValue = this.suggestions[i];
       if (selectedValue) {
         this.el.val(selectedValue);
@@ -352,7 +348,7 @@
     },
 
     adjustScroll: function(i) {
-      var activeItem, offsetTop, upperBound, lowerBound;
+      let activeItem, offsetTop, upperBound, lowerBound;
       activeItem = this.activate(i);
       offsetTop = activeItem.offsetTop;
       upperBound = this.container.scrollTop();
@@ -366,7 +362,7 @@
     },
 
     onSelect: function(i) {
-      var me, fn, s, d;
+      let me, fn, s, d;
       me = this;
       fn = me.options.onSelect;
       s = me.suggestions[i];
@@ -374,18 +370,17 @@
       me.el.val(me.getValue(s));
       if ($.isFunction(fn)) { fn(s, d, me.el); }
     },
-    
+
     getValue: function(value){
-        var del, currVal, arr, me;
-        me = this;
-        del = me.options.delimiter;
-        if (!del) { return value; }
-        currVal = me.currentValue;
-        arr = currVal.split(del);
-        if (arr.length === 1) { return value; }
-        return currVal.substr(0, currVal.length - arr[arr.length - 1].length) + value;
+      let del, currVal, arr, me;
+      me = this;
+      del = me.options.delimiter;
+      if (!del) { return value; }
+      currVal = me.currentValue;
+      arr = currVal.split(del);
+      if (arr.length === 1) { return value; }
+      return currVal.substr(0, currVal.length - arr[arr.length - 1].length) + value;
     }
 
   };
-
 }(jQuery));

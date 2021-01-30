@@ -8,7 +8,7 @@
  * @param {Function} [opt.callback(obj)] 回调函数
  */
 $.fn.resizeImg = function(options) {
-    var defaults = {
+    let defaults = {
         mode: 0,
         val: 400,
         type: "image/jpeg",
@@ -16,23 +16,23 @@ $.fn.resizeImg = function(options) {
         callback: new Function()
     };
     if(!$.isFunction(options)) {
-        var opt = defaults;
+        let opt = defaults;
     } else {
-        var opt = $.extend({}, defaults, options || {});
+        let opt = $.extend({}, defaults, options || {});
     }
     this.on('change', function() {
-        if(this.value=="") return;
-        var file = this.files[0];
+        if(this.value==="") return;
+        let file = this.files[0];
         if($.isFunction(options)) opt = options();
         getOrientation(file, function(orientation){
-            var reader  = new FileReader();
-            var img = new Image();
+            let reader  = new FileReader();
+            let img = new Image();
             img.onload = function() {
-                var para = getOpt(this.width, this.height, file.size);
-                var w = para.width;
-                var h = para.height;
-                var canvas = document.createElement("canvas");
-                var ctx = canvas.getContext('2d');
+                let para = getOpt(this.width, this.height, file.size);
+                let w = para.width;
+                let h = para.height;
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext('2d');
                 if(orientation<6) {
                     canvas.width = w;
                     canvas.height = h;
@@ -83,7 +83,7 @@ $.fn.resizeImg = function(options) {
                 ctx.drawImage(this, 0, 0, w, h);
                 this.onload = null;
 
-                var result = canvas.toDataURL(opt.type, opt.quality);
+                let result = canvas.toDataURL(opt.type, opt.quality);
                 if($.isFunction(opt.callback)) opt.callback(result);
 
             }
@@ -94,8 +94,8 @@ $.fn.resizeImg = function(options) {
         });
     });
 
-    var getOpt = function(width, height, size) {
-        var result = {};
+    let getOpt = function(width, height, size) {
+        let result = {};
         switch(opt.mode) {
             case 0:
                 result.rate = opt.val/width;
@@ -118,32 +118,32 @@ $.fn.resizeImg = function(options) {
         return result;
     }
 
-    var getOrientation = function (file, callback) {
-        var reader = new FileReader();
+    let getOrientation = function (file, callback) {
+        let reader = new FileReader();
         reader.onload = function(e) {
-            var view = new DataView(e.target.result);
-            if (view.getUint16(0, false) != 0xFFD8) {
+            let view = new DataView(e.target.result);
+            if (view.getUint16(0, false) !== 0xFFD8) {
                 return callback(-2);
             }
-            var length = view.byteLength, offset = 2;
+            let length = view.byteLength, offset = 2;
             while (offset < length) {
                 if (view.getUint16(offset+2, false) <= 8) return callback(-1);
-                var marker = view.getUint16(offset, false);
+                let marker = view.getUint16(offset, false);
                 offset += 2;
-                if (marker == 0xFFE1) {
-                    if (view.getUint32(offset += 2, false) != 0x45786966) {
+                if (marker === 0xFFE1) {
+                    if (view.getUint32(offset += 2, false) !== 0x45786966) {
                         return callback(-1);
                     }
-                    var little = view.getUint16(offset += 6, false) == 0x4949;
+                    let little = view.getUint16(offset += 6, false) === 0x4949;
                     offset += view.getUint32(offset + 4, little);
-                    var tags = view.getUint16(offset, little);
+                    let tags = view.getUint16(offset, little);
                     offset += 2;
-                    for (var i = 0; i < tags; i++) {
-                        if (view.getUint16(offset + (i * 12), little) == 0x0112) {
+                    for (let i = 0; i < tags; i++) {
+                        if (view.getUint16(offset + (i * 12), little) === 0x0112) {
                             return callback(view.getUint16(offset + (i * 12) + 8, little));
                         }
                     }
-                } else if ((marker & 0xFF00) != 0xFF00) {
+                } else if ((marker & 0xFF00) !== 0xFF00) {
                     break;
                 } else {
                     offset += view.getUint16(offset, false);

@@ -263,6 +263,17 @@ class myConfig extends myBase {
                 unset($s);
             }
         }
+        if($check && isset($construction['switch'])) {
+            foreach($construction['switch'] as $v) {
+                $s =& $setting;
+                $v = explode('.', $v);
+                foreach($v as $v1) {
+                    if(!isset($s[$v1])) $s[$v1] = '';
+                    $s =& $s[$v1];
+                }
+                unset($s);
+            }
+        }
         $item = $this->setting;
         if(!empty($idx)) {
             $keys = explode('.', $idx);
@@ -339,7 +350,7 @@ return '.var_export($setting, true).';';
      * @param $detail
      * @param string $idx
      * @param array $ext_setting
-     * @return array
+     * @return array|false
      */
     public function build($detail, $idx = '', $ext_setting = array()) {
         if(is_array($detail)) {
@@ -373,7 +384,7 @@ return '.var_export($setting, true).';';
                 $result[] = ['name' => $v['name'], 'idx' => $cur_idx];
                 $result = array_merge($result, $this->build($v['list'], $cur_idx));
                 continue;
-            };
+            }
             $item = array(
                 'name' => $v['name'],
                 'describe' => $v['describe'],
@@ -392,7 +403,7 @@ return '.var_export($setting, true).';';
                     $item['html'] = '<input type="text" name="setting['.$k.']" value="'.$the_value.'" maxlength="'.$v['type'][2].'"'.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).' />';
                     break;
                 case 'textarea':
-                    $item['html'] = '<textarea name="setting['.$k.']" wrap="off" rows="'.$v['type'][2].'"'.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).'>'.$the_value.'</textarea>';
+                    $item['html'] = '<textarea name="setting['.$k.']" wrap="off" rows="'.$v['type'][2].'" '.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).' >'.$the_value.'</textarea>';
                     break;
                 case 'password':
                 case 'password_md5':
@@ -414,6 +425,11 @@ return '.var_export($setting, true).';';
                         $cur_component .= '<label><input type="checkbox" name="setting['.$k.'][]" value="'.$v_c.'" '.$checked.' /> '.$k_c.'</label>'.chr(10);
                     }
                     $item['html'] = $cur_component;
+                    break;
+                case 'switch':
+                    $checked = !empty($the_value) ?'checked':'';
+                    if(!isset($v['type'][2])) $v['type'][2] = '';
+                    $item['html'] = '<div type="switch"><input type="checkbox" id="setting['.$k.'][]" name="setting['.$k.'][]" value="'.$v['type'][1].'" '.$checked.' /><label for="setting['.$k.'][]">'.$v['type'][2].'</label></div>'.chr(10);
                     break;
                 case 'radio':
                     $cur_component = '';

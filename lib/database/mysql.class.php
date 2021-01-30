@@ -24,7 +24,7 @@ MySQL查询类
     $mysql->record()                             // Get the first line of the record set
     $mysql->records()                            // Get the all of the lines of the query
     $mysql->result()                             // Get the single value of the query with the parameters of buildSel function
-    $mysql->count()                              // Count the result number of current query
+    $mysql->count($sql)                          // Count the result number of current query
     $mysql->getData($line, $field)               // Get specified field or line of a query
     $mysql->GetFields($the_db, $the_tbl)         // Get the Columns List of a Table as an Array
     $mysql->getCreateScript($the_tbl, $the_db)   // Get the Whole structure of Current Selected Database as an Array
@@ -296,9 +296,10 @@ class MySQL extends myBase implements interface_db, interface_sql {
 
     /**
      * 返回当前查询的结果数
+     * @param $sql
      */
-    public function count() {
-        $sql = $this->select(1);
+    public function count($sql='') {
+        if(empty($sql)) $sql = $this->select(1);
         $sql = preg_replace('#limit[\s\d, ]+$#', '', $sql);
         return $this->result('select count(*) from ('.$sql.') as cnt');
     }

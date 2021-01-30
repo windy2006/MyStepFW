@@ -20,25 +20,24 @@ function getData($tbl_name) {
     $result['total'] = 0;
     $result['rows'] = [];
     $request = file_get_contents('php://input');
-    if(!empty($request)) {
-        $db->build($tbl_name);
-        $request = json_decode($request, true);
-        $limit = $request['limit'] ?? '';
-        if(!empty($limit)) {
-            $offset = $request['offset'];
-            if(empty($offset)) $offset = 0;
-            $db->build($tbl_name)->limit($offset, $limit);
-        }
-        foreach($request['field'] as $k => $v) {
-            if(!empty($v) && $k) {
-                $judge = is_numeric($v) ? '=' : 'like';
-                $db->build($tbl_name)->where(htmlentities($k), $judge, htmlentities($v));
-            }
-        }
-        $sql = $db->select(1);
-        $result['total'] = $db->count($sql);
-        $result['rows'] = $db->records($sql);
+    $db->build($tbl_name);
+    $request = json_decode($request, true);
+    $limit = $request['limit'] ?? '';
+    if(!empty($limit)) {
+        $offset = $request['offset'] ?? 0;
+        if(empty($offset)) $offset = 0;
+        $db->build($tbl_name)->limit($offset, $limit);
     }
+    $field = $request['field'] ?? [];
+    foreach($field as $k => $v) {
+        if(!empty($v) && $k) {
+            $judge = is_numeric($v) ? '=' : 'like';
+            $db->build($tbl_name)->where(htmlentities($k), $judge, htmlentities($v));
+        }
+    }
+    $sql = $db->select(1);
+    $result['total'] = $db->count($sql);
+    $result['rows'] = $db->records($sql);
     return $result;
 }
 

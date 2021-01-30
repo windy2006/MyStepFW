@@ -130,5 +130,9 @@ $api_list = array (
     'get' => 'app\\CMS\\getData',
     'attachment' => 'app\\CMS\\getAttachment',
   ),
+  'recruit' => 
+  array (
+    'data' => 'app\\recruit\\getData',
+  ),
 );
 

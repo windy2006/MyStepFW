@@ -30,7 +30,4 @@ foreach ([
 $tpl->assign('main', $tpl_sub->render('', false));
 //是否显示页面信息（页脚下显示执行信息，默认关闭，可能会影响页面整体效果，视需要开启）
 $mystep->setting->show = true;
-//主页面编译
-$mystep->show($tpl);
-//结束页面并显示
-$mystep->end();
+//主页面编译和显示由主框架代码完成

@@ -266,7 +266,7 @@
 
         $('#btn_query').click(function() {
             $tbl.bootstrapTable('refresh', {
-                url : '<!--path_root-->api/myStep/data/?tbl=cms_admin_cat'
+                url : '<!--url_prefix-->api/myStep/data/?tbl=cms_admin_cat'
             });
         });
 

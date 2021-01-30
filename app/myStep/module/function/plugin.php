@@ -72,8 +72,14 @@ switch($method) {
                 if(isset($v['idx'])) {
                     $result .= '<div class="font-weight-bold">'.$v['name'].'</div>'.chr(10);
                 } else {
-                    $v['html'] = str_replace(' name="', ' class="form-control" name="', $v['html']);
-                    $v['html'] = str_replace('<label><input', '<label class="mr-3"><input class="mr-1"', $v['html']);
+                    if(strpos($v['html'], '<div type="switch">')===0) {
+                        $v['html'] = str_replace('type="switch"', 'class="custom-control custom-switch"', $v['html']);
+                        $v['html'] = str_replace('name="', 'class="custom-control-input" name="', $v['html']);
+                        $v['html'] = str_replace('<label', '<label class="custom-control-label"', $v['html']);
+                    } else {
+                        $v['html'] = str_replace(' name="', ' class="form-control" name="', $v['html']);
+                        $v['html'] = str_replace('<label><input', '<label class="mr-3"><input class="mr-1"', $v['html']);
+                    }
                     $result .= '
   <div class="form-group mb-2" data-toggle="tooltip" data-placement="bottom" title="'.$v['describe'].'">
     <label class="mr-3" style="min-width:100px;">'.$v['name'].'：</label>

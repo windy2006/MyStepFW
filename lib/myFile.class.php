@@ -34,6 +34,7 @@
     self::getLocal($file, $length=0, $offset=0)                 // get the content from the local file
     self::getRemote($url, $header, $method, $data, $timeout)    // get the content from the remote file
     self::getRemote_curl($url, $data='', $header=array())       // get the content from the remote file
+    self::show($content)                                        // content output
     self::find($filter='', $dir='./', $recursive=false)         // return a list of the specified files for specified directory
     self::getRemoteFile($remote_file, $local_file)              // get remote file to local
     self::judgeChild($dir, $only_dir = true)                    // To judge is there any file or subdirectory in a diretory
@@ -799,6 +800,17 @@ class myFile {
         }
         curl_close($curl);
         return self::removeBom($result);
+    }
+
+    /**
+     * 输出内容
+     * @param $content
+     */
+    public static function show($content) {
+        if(count(ob_list_handlers())>0 && ob_get_length()!==false) ob_clean();
+        file_put_contents('php://output', $content);
+        //echo $content;
+        exit;
     }
 
     /**

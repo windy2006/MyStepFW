@@ -3,7 +3,7 @@
  * Image Marquee show by windy2000
  */
 jQuery.fn.showImage = function(options) {
-    var defaults = {
+    let defaults = {
         obj: null,
         container_width: 640,
         img_height: 420,
@@ -16,26 +16,26 @@ jQuery.fn.showImage = function(options) {
         adjust_left: 0,
         interval: 2
     };
-    var params = $.extend({}, defaults, options || {});
+    let params = $.extend({}, defaults, options || {});
     params.obj = this;
     params.thumb_width_offset = params.thumb_width + params.thumb_margin
-    var container = $("#"+params.container_id);
-    var container_show = null;
-    var container_list = null;
-    var container_wrapper = null;
-    var img_list = $(this).find("img");
-    var img_cnt = img_list.length;
-    var the_width = 0;
-    var repeat_times = 4;
-    var act_img = null;
-    var marquee_interval = 0;
-    var rate = container.width()/params.thumb_width_offset;
+    let container = $("#"+params.container_id);
+    let container_show = null;
+    let container_list = null;
+    let container_wrapper = null;
+    let img_list = $(this).find("img");
+    let img_cnt = img_list.length;
+    let the_width = 0;
+    let repeat_times = 4;
+    let act_img = null;
+    let marquee_interval = 0;
+    let rate = container.width()/params.thumb_width_offset;
 
     if(img_list.length<2) return;
     container.addClass("showImage");
     container.css("width",params.container_width);
     if(isNaN(params.interval) || params.interval<=0) params.interval = 2;
-    
+
     params.adjust_pos = Math.round(rate/2)-1;
     params.adjust_left = params.thumb_width_offset*(rate - Math.floor(rate))/2;
     if(Math.floor(rate)%2) {
@@ -52,7 +52,7 @@ jQuery.fn.showImage = function(options) {
     container_show.css("width", '100%');
     container_show.css("height", 'auto');
     container_show.find(".jump").css({"opacity":"0","height":'100%'}).click(function(){
-        swich_img($(this).hasClass("back")?-1:1);
+        switch_img($(this).hasClass("back")?-1:1);
         this.blur();
         return false;
     });
@@ -61,14 +61,14 @@ jQuery.fn.showImage = function(options) {
     container_wrapper = container_list.find(".wrapper");
     container_wrapper.css("left",params.adjust_left);
     container_list.find("a").css("z-index",999);
-    container_list.find("a").first().click(function(){swich_img(-1)});
-    container_list.find("a").last().click(function(){swich_img(1)});
-    var cur_img = "";
-    var cur_title = "";
-    for(var i=0;i<img_cnt;i++) {
+    container_list.find("a").first().click(function(){switch_img(-1)});
+    container_list.find("a").last().click(function(){switch_img(1)});
+    let cur_img = "";
+    let cur_title = "";
+    for(let i=0;i<img_cnt;i++) {
         cur_img = img_list.get(i).src;
         cur_title = img_list.get(i).alt;
-        if(cur_title.length==0) cur_title = img_list.get(i).title;
+        if(cur_title.length===0) cur_title = img_list.get(i).title;
         $("<img/>").attr("src", cur_img).attr("title", cur_title).css({"width":params.thumb_width,"height":params.thumb_height}).appendTo(container_wrapper);
     }
     the_width = params.thumb_width_offset * img_cnt;
@@ -78,24 +78,24 @@ jQuery.fn.showImage = function(options) {
     container_wrapper.width(the_width*repeat_times);
     container_wrapper.find("img").hover(
         function () {
-            if($(this).attr("active")!="y") $(this).css("opacity", "0.8");
+            if($(this).attr("active")!=="y") $(this).css("opacity", "0.8");
         },
         function () {
-            if($(this).attr("active")!="y") $(this).css("opacity", "0.3");
+            if($(this).attr("active")!=="y") $(this).css("opacity", "0.3");
         }
     ).click(function(){
-        if($(this).attr("active")=="y") return;
+        if($(this).attr("active")==="y") return;
         clearInterval(marquee_interval);
-        var the_step = Math.ceil(($(act_img).position().left-$(this).position().left)/params.thumb_width_offset);
+        let the_step = Math.ceil(($(act_img).position().left-$(this).position().left)/params.thumb_width_offset);
         if(the_step<=0) the_step -= 1;
-        swich_img(the_step);
-        marquee_interval = setInterval(swich_img, params.interval*1000);
+        switch_img(the_step);
+        marquee_interval = setInterval(switch_img, params.interval*1000);
     });
 
-    var swich_img = function(step) {
+    let switch_img = function(step) {
         if(step==null) step = -1;
-        var the_left = container_wrapper.position().left;
-        var the_step = the_left + step * params.thumb_width_offset;
+        let the_left = container_wrapper.position().left;
+        let the_step = the_left + step * params.thumb_width_offset;
         container_wrapper.find("img").css("opacity", "0.3");
         container_wrapper.find("img").attr("active", "n");
         if(the_step>0) {
@@ -107,28 +107,25 @@ jQuery.fn.showImage = function(options) {
         }
         container_show.find("img").animate({"opacity": 0}, 1000);
         container_wrapper.animate({"left":the_step},1000,function(){
-            var the_idx = Math.ceil(-the_step/params.thumb_width_offset);
+            let the_idx = Math.ceil(-the_step/params.thumb_width_offset);
             act_img = container_wrapper.find("img").get(the_idx+params.adjust_pos);
             $(act_img).css("opacity", "1");
             $(act_img).attr("active", "y");
             container_show.find("a").attr("href", act_img.src).attr("title", act_img.title);
             container_show.find("img").attr("src", act_img.src);
             container_show.find("img").animate({"opacity": 1}, 500);
-            return;
         });
-        return;
     }
 
-    var reset = function() {
+    let reset = function() {
         clearInterval(marquee_interval);
         container.find('div,span,a,img').unbind();
         container.empty();
         $(params.obj).showImage(params);
-        return;
     };
 
-    swich_img(1 - img_cnt + params.adjust_pos);
-    marquee_interval = setInterval(swich_img, params.interval*1000);
+    switch_img(1 - img_cnt + params.adjust_pos);
+    marquee_interval = setInterval(switch_img, params.interval*1000);
 
     $(window).resize(function(){
         if(!isNaN(params.container_width)) return;
@@ -136,7 +133,7 @@ jQuery.fn.showImage = function(options) {
         setTimeout(function(){
             global.resize_monitor = false;
         },400);
-        if(typeof(global.resize_timer)=='undefined' || global.resize_timer==0) {
+        if(typeof(global.resize_timer)=='undefined' || global.resize_timer===0) {
             global.resize_timer = setInterval(function(){
                 if(global.resize_monitor) return;
                 reset();
@@ -145,7 +142,6 @@ jQuery.fn.showImage = function(options) {
             }, 900);
         }
     });
-    return;
 };
 
 /**
@@ -153,7 +149,7 @@ jQuery.fn.showImage = function(options) {
  * Image Marquee show by windy2000
  */
 jQuery.fn.imageWall = function(options) {
-    var defaults = {
+    let defaults = {
         size_h: 3,
         size_v: 2,
         img_width: 150,
@@ -162,14 +158,14 @@ jQuery.fn.imageWall = function(options) {
         speed: 500,
         tag: "img"
     };
-    var params = $.extend({}, defaults, options || {});
-    var container = $(this);
-    var img_cnt = params.size_h*params.size_v;
-    var img_content = container.html().replace(/\s*[\r\n]+\s*/g, "");
-    var repeat_times = Math.ceil(img_cnt/container.find(params.tag).length)+1;
-    var show_done = true;
+    let params = $.extend({}, defaults, options || {});
+    let container = $(this);
+    let img_cnt = params.size_h*params.size_v;
+    let img_content = container.html().replace(/\s*[\r\n]+\s*/g, "");
+    let repeat_times = Math.ceil(img_cnt/container.find(params.tag).length)+1;
+    let show_done = true;
     var rebuild_list = function(thecontainer) {
-        for(var i=0;i<img_cnt;i++) {
+        for(let i=0;i<img_cnt;i++) {
             thecontainer.find(params.tag).first().appendTo(thecontainer);
         }
     };
@@ -186,11 +182,12 @@ jQuery.fn.imageWall = function(options) {
     container.find("img").css({"display":"block","float":"left","width":params.img_width,"height":params.thumb_height,"border":0});
     rebuild_list(container.find("div:eq(0)"));
     setInterval(function(){
-        if(show_done == false) return;
-        var cur_obj = container.find("div").last();
-        var cur_idx = 0;
+        if(show_done === false) return;
+        let cur_obj = container.find("div").last();
+        let cur_idx = 0;
         show_done = false;
-        for(var i=0;i<img_cnt;i++) {
+        let i;
+        for(i=0;i<img_cnt;i++) {
             setTimeout(function(){cur_obj.find(params.tag+":eq("+cur_idx+")").animate({"opacity":"0"},params.speed*3);cur_idx++;}, params.speed*i);
         }
         setTimeout(function(){
@@ -200,5 +197,4 @@ jQuery.fn.imageWall = function(options) {
             show_done = true;
         }, params.speed*(i+2));
     }, params.interval);
-    return;
 };

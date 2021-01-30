@@ -35,5 +35,3 @@ $tpl->assign('news_cat', myString::toJson($news_cat));
 if(isset($t) && ($t instanceof myTemplate)) $content = $mystep->render($t);
 if(!isset($content)) $content = 'No content has been set!';
 $tpl->assign('main', $content);
-$mystep->show($tpl);
-$mystep->end();
