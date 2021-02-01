@@ -8,13 +8,14 @@ myException::init(array(
 $mail = new myEmail();
 
 $email = 'sunkai@cccfna.org.cn';
+$pwd = '';
 
 $server_1 = [
     'mode'=>'smtp',
     'host'=>'smtpx.sina.net',
     'port'=>25,
     'user'=>$email,
-    'password'=>'Mygod1978'
+    'password'=>$pwd
 ];
 
 // https://www.google.com/settings/security/lesssecureapps
@@ -22,8 +23,8 @@ $server_2 = [
     'mode'=>'ssl',
     'host'=>'smtp.gmail.com',
     'port'=>465,
-    'user'=>'windy2006@gmail.com',
-    'password'=>'mygod2000'
+    'user'=>$email,
+    'password'=>$pwd
 ];
 
 $mail->init($email, 'utf-8');

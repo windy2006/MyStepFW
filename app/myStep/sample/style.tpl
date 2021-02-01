@@ -1,4 +1,4 @@
-﻿<div class="col mt-3">
+<div class="col mt-3">
     <h1 class="display-4 d-none d-sm-block">
         Bootstrap 4 Dashboard
     </h1>
