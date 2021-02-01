@@ -1,7 +1,17 @@
-/*!
- * jquery.powerUpload.js
- * File upload through browse, drop or paste function by windy2000
-*/
+/**
+ * jquery.powerUpload.js - File upload through browse, drop or paste function
+ *
+ * Written by
+ * ----------
+ * Windy2000 (windy2006@gmail.com)
+ *
+ * Licensed under the Apache License Version 2.0
+ *
+ * Dependencies
+ * ------------
+ * jQuery (http://jquery.com)
+ *
+ **/
 jQuery.event.addProp("dataTransfer");
 (function($){
     let opts = {},

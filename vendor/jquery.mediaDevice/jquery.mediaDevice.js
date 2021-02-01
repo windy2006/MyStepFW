@@ -1,8 +1,18 @@
-/*
- * jquery.mediaDevice.js
- * H5 Audio and Video device call by windy2000
-*/
-window.onerror = function(e) {alert(e);};
+/**
+ * jquery.mediaDevice.js - H5 Audio and Video device call
+ *
+ * Written by
+ * ----------
+ * Windy2000 (windy2006@gmail.com)
+ *
+ * Licensed under the Apache License Version 2.0
+ *
+ * Dependencies
+ * ------------
+ * jQuery (http://jquery.com)
+ *
+ **/
+
 (function($){
     let constraints = {},
         default_constraints = {

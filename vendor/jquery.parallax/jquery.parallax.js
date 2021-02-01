@@ -1,7 +1,17 @@
-/*
- * jquery.parallax.js
- * H5 Audio and Video device call by windy2000
-*/
+/**
+ * jquery.parallax.js - build a parallax page with awesome effect
+ *
+ * Written by
+ * ----------
+ * Windy2000 (windy2006@gmail.com)
+ *
+ * Licensed under the Apache License Version 2.0
+ *
+ * Dependencies
+ * ------------
+ * jQuery (http://jquery.com)
+ *
+ **/
 (function($){
     $('body').css('overflow-x', 'hidden');
     $.fn.parallax = function(opt) {
