@@ -10,5 +10,4 @@ return array(
     'PhpOffice\\PhpWord\\' => array($vendorDir . '/phpoffice/phpword/src/PhpWord'),
     'PhpOffice\\Common\\' => array($vendorDir . '/phpoffice/common/src/Common'),
     'Erusev\\Parsedown\\' => array($vendorDir . '/erusev/parsedown/src'),
-    'AliCloud\\OSS\\' => array($vendorDir . '/jiajialu/aliyun-sdk-oss/src/OSS'),
 );

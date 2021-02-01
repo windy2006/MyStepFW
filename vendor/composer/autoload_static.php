@@ -24,10 +24,6 @@ class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
         array (
             'Erusev\\Parsedown\\' => 17,
         ),
-        'A' => 
-        array (
-            'AliCloud\\OSS\\' => 13,
-        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -46,10 +42,6 @@ class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
         'Erusev\\Parsedown\\' => 
         array (
             0 => __DIR__ . '/..' . '/erusev/parsedown/src',
-        ),
-        'AliCloud\\OSS\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/jiajialu/aliyun-sdk-oss/src/OSS',
         ),
     );
 

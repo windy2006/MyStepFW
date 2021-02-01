@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $province = array(
     array("北京市", "Beijing", "BJ"),
     array("天津市", "Tianjin", "TJ"),
