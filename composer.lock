@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "926a534836a7f6a7aa7f96d762aa9292",
+    "content-hash": "54d273b01701e80d769961c2a2a1024e",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -60,48 +60,6 @@
                 "parser"
             ],
             "time": "2020-05-10T13:41:15+00:00"
-        },
-        {
-            "name": "jiajialu/aliyun-sdk-oss",
-            "version": "2.2.4",
-            "source": {
-                "type": "git",
-                "url": "https://gitee.com/jiajialu/aliyun-sdk-oss",
-                "reference": "6186549966181b2323b02a0f154ba62334462d33"
-            },
-            "require": {
-                "php": ">=5.3"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4.0",
-                "satooshi/php-coveralls": "~1.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "AliCloud\\OSS\\": "src/OSS/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Alu",
-                    "email": "alu@xdreport.com",
-                    "homepage": "https://gitee.com/jiajialu"
-                }
-            ],
-            "description": "aliyun-php-sdk-oss 封装，支持composer方式使用",
-            "homepage": "https://gitee.com/jiajialu/aliyun-sdk-oss",
-            "keywords": [
-                "alicloud",
-                "aliyun",
-                "oss",
-                "sdk"
-            ],
-            "time": "2018-12-14T04:59:16+00:00"
         },
         {
             "name": "meenie/javascript-packer",
