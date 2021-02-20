@@ -39,6 +39,10 @@
 <script type="application/javascript" src="app/CMS/asset/admin/tinymce_init.js"></script>
 <script type="text/javascript">
 $(function(){
+    let web_id = '<!--web_id_site-->';
+    if(web_id !== '1') {
+        $('select[name=web_id]').val(web_id).parent().hide();
+    }
     global.root_fix += 'article/custom/';
 });
 </script>

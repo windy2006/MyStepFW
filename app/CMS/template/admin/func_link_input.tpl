@@ -69,7 +69,7 @@
 </div>
 <script type="text/javascript">
 $(function(){
-    jQuery.vendor('jquery.powerupload', {
+    jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $('#upload').powerUpload({
                 url: '<!--url_prefix-->api/myStep/upload',
@@ -92,6 +92,10 @@ $(function(){
             });
         }
     });
+    let web_id = '<!--web_id_site-->';
+    if(web_id !== '1') {
+        $('select[name=web_id]').val(web_id).parent().hide();
+    }
     global.root_fix += 'function/link/';
 });
 </script>

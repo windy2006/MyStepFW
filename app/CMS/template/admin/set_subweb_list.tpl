@@ -18,7 +18,7 @@
             <!--loop:start key="record" time="15"-->
             <tr>
                 <td align="center"><!--record_web_id--></td>
-                <td><!--record_name--></td>
+                <td><a href="<!--record_link-->" target="_blank"><!--record_name--></a></td>
                 <td><!--record_idx--></td>
                 <td><!--record_domain--></td>
                 <td>

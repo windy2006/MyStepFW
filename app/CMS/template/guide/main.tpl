@@ -20,7 +20,7 @@
             <li class="nav-item"><a class="nav-link" href="<!--url_prefix_app-->"><span class="glyphicon glyphicon-home"></span> <!--lng_page_main--></a></li>
             <!--loop:start key="news_cat"-->
             <li class="nav-item">
-                <a class="nav-link" href="#" idx="<!--news_cat_idx-->">
+                <a class="nav-link" href="<!--news_cat_link-->" idx="<!--news_cat_idx-->">
                     <span class="glyphicon glyphicon-info-sign"></span> <!--news_cat_name-->
                 </a>
             </li>
@@ -35,13 +35,13 @@
     <div class="row" style="min-height:570px;">
         <div id="list">
             <div class="position-fixed" style="top:60px;width:200px;">
-                <ul id="side_nav" class="navbar-nav">
+                <ul id="side_nav" class="navbar-nav list-group">
                     <li class="nav-item">
                         <a class="nav-link" href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
                     </li>
                     <!--loop:start key="news_cat"-->
-                    <li class="nav-item" idx="<!--news_cat_idx-->">
-                        <a class="nav-link" href="#cat_<!--news_cat_idx-->">
+                    <li class="nav-item" idx="<!--news_cat_idx-->" cat="<!--news_cat_cat_id-->">
+                        <a class="nav-link" href="<!--news_cat_link-->">
                             <span class="glyphicon glyphicon-info-sign"></span> <!--news_cat_name-->
                         </a>
                     </li>
@@ -58,6 +58,7 @@
 <script type="application/javascript">
 if(self!==top) top.location.href = location.href;
 let news_cat = <!--news_cat-->;
+if(typeof cat_id === 'undefined') cat_id = 0;
 $(function(){
     $(document).off('click.bs.dropdown.data-api');
     let objs = $('#top_nav>li>a[idx]');
@@ -66,22 +67,35 @@ $(function(){
         let idx = obj.attr('idx');
         if(typeof news_cat[idx].sub != 'undefined') {
             let list = $('<div class="dropdown-menu"></div>').css('margin-top',1);
-            obj.addClass('dropdown-toggle').attr('data-toggle','dropdown').parent().addClass('dropdown');
+            obj.addClass('dropdown-toggle').attr('data-toggle','dropdown').attr('href', 'javascript:').parent().addClass('dropdown');
             obj = obj.parent();
             let obj2 = $('#side_nav li[idx="'+idx+'"]');
-            let list2 = $('<div class="collapse"></div>').attr('id', 'cat_'+idx);
-            obj2.find('a').attr('data-toggle','collapse');
+            let list2 = $('<div class="collapse mb-2"></div>').attr('id', 'cat_'+idx);
+            obj2.find('a').attr('data-toggle','collapse').attr('href', '#cat_'+idx);
             obj2.append('<i class="nav-arrow" data-toggle="collapse" href="#cat_'+idx+'"></i>');
             for(let j=0,n=news_cat[idx].sub.length;j<n;j++) {
                 if((news_cat[idx].sub[j].show & 1) === 0) continue;
                 if(news_cat[idx].sub[j].link.length===0) news_cat[idx].sub[j].link = 'catalog/' + news_cat[idx].sub[j].idx;
-                list.append('<a class="dropdown-item" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
-                list2.append('<a class="dropdown-item" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
+                list.append('<a class="dropdown-item" data-id="'+news_cat[idx].sub[j].cat_id+'" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
+                list2.append('<a class="dropdown-item" data-id="'+news_cat[idx].sub[j].cat_id+'" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
             }
             obj.append(list);
             obj2.append(list2);
             setURL('<!--url_prefix_app-->', obj);
             setURL('<!--url_prefix_app-->', obj2);
+        }
+    }
+    let sub_cat = $('a[data-id="'+cat_id+'"]');
+    if(sub_cat.length>0) {
+        sub_cat.addClass('active');
+        sub_cat.last().parent().collapse('show');
+        sub_cat.last().parent().parent().addClass('active');
+    } else {
+        sub_cat = $('li[cat="'+cat_id+'"]');
+        if(sub_cat.length>0) {
+            sub_cat.addClass('active');
+        } else {
+            $('#side_nav > li').first().addClass('active');
         }
     }
     $('body').click(function(e){
@@ -117,12 +131,6 @@ $(function(){
             $(this).next().collapse('hide');
         });
     })
-    let the_link = location.pathname.replace(/&.*$/, '');
-    let obj = $('#side_nav a[href$="'+the_link+'"]');
-    if(obj.length>0 && the_link!=='/') {
-        obj.addClass('active').css('color','white');
-        obj.parent().collapse('show');
-    }
     setURL();
     resizeMain();
 });

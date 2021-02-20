@@ -81,7 +81,7 @@
 </div>
 
 <script type="text/javascript">
-    jQuery.vendor('jquery.powerupload', {
+    jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $('#upload').powerUpload({
                 url: '<!--path_admin-->/function/plugin/upload',

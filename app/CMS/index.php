@@ -1,4 +1,5 @@
 <?PHP
+if(!empty($s->gen->close)) cms::redirect($s->gen->close);
 $mystep->regTag('news', 'app\CMS\parseNews');
 $mystep->regTag('news_next', 'app\CMS\parseNewsNext');
 $mystep->regTag('info', 'app\CMS\parseInfo');
@@ -8,7 +9,10 @@ $mystep->regTag('catalog', 'app\CMS\parseCatalog');
 
 $module = $info_app['path'][0] ?? 'index';
 $user_info = \app\CMS\getUserInfo();
-if(!is_file(PATH.'module/'.$module.'.php')) myStep::info('module_missing', '/');
+if(!is_file(PATH.'module/'.$module.'.php')) {
+    $info_app['path'][1] = $info_app['path'][0];
+    $info_app['path'][0] = $module = 'article';
+}
 if($tpl_cache) {
     $tpl_cache['path'] .= $web_info['idx'].'/';
     if(!defined('URL_FIX')) $tpl_cache['path'] .= '_sub/';

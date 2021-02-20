@@ -153,6 +153,7 @@ function build_page() {
     $tpl->assign('order_type', $order_type=='asc'?'desc':'asc');
     $tpl->assign('title', $mystep->getLanguage('admin_art_tag_title'));
     $tpl->assign('web_id', $web_id??'');
+    $tpl->assign('web_id_site', $web_info['web_id']);
     setWeb($tpl, $web_id);
     return $mystep->render($tpl);
 }

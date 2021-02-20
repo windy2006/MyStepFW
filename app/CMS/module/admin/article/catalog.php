@@ -169,7 +169,7 @@ switch($method) {
             \app\CMS\deleteCache('news_cat');
             $cache->func('\app\CMS\setCatList', [$news_cat], null);
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
         break;
     default:
         $content = build_page('list');
@@ -186,6 +186,7 @@ function build_page($method) {
         $tpl->assign('news_cat', myString::toJson($news_cat_plat, $s->gen->charset));
         for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
             if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
+            if($web_info['web_id']!=1 && $web_info['web_id']!=$news_cat_plat[$i]['web_id']) continue;
             $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
             $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
             $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));

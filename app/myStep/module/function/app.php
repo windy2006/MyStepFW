@@ -8,6 +8,7 @@ if(myReq::check('post')) {
     for($i=0,$m=count($name);$i<$m;$i++) {
         myFile::saveFile(APP.$name[$i].'/route.php', $route[$i]);
         myFile::saveFile(APP.$name[$i].'/plugin.php', '<?PHP'.chr(10).'return '.var_export(explode(',', $plugin[$i]), true).';');
+        $s->merge(APP.$name[$i].'/config.php');
         $router->checkRoute(CONFIG.'route.php', APP.$name[$i].'/route.php', $name[$i]);
     }
     if(is_file(CONFIG.'route_plugin.php')) {
@@ -29,7 +30,7 @@ foreach($dirs as $k) {
             'app' => $k,
             'ver' => '',
             'intro' => '信息文件缺失，应用有可能无法正常执行',
-            'copyright' => '版权所有 2020 <a href="mailto:windy2006@gmail.com">Windy2000</a>'
+            'copyright' => '版权所有 2021 <a href="mailto:windy2006@gmail.com">Windy2000</a>'
         );
     }
     $info['route'] = '';

@@ -359,7 +359,11 @@ function getLink($data, $mode='news') {
         if($cat = checkVal($news_cat_plat, 'cat_id', $data['cat_id'])) {
             $data['web_id'] = $cat['web_id'];
         } else {
-            unset($cat);
+            if(isset($data['cat_idx'])) {
+                $cat = ['idx'=>$data['cat_idx']];
+            } else {
+                unset($cat);
+            }
         }
     }
     switch($mode) {
@@ -369,11 +373,8 @@ function getLink($data, $mode='news') {
             $link .= $data['news_id'];
             break;
         case 'catalog':
-            $link .= 'catalog/';
             if(isset($cat)) {
-                $link .= urlencode($cat['idx']).'/';
-            } elseif(isset($data['cat_id'])) {
-                $link .= $data['cat_id'].'/';
+                $link .= 'catalog/'.urlencode($cat['idx']).'/';
             }
             break;
         case 'tag':
@@ -509,8 +510,13 @@ if($tag_attrs['mode']=='next') {
     $db->build($s->db->pre_sub.'news_show')->where('news_id', 'n<', $tag_attrs['id'])->order('news_id', true);
 }
 if($news = $db->record()) {
-    echo '<a href="'.app\CMS\getLink($news).'">'.$news['subject'].'</a>';
+    $url = app\CMS\getLink($news);
+    $name = $news['subject'];
+} else {
+    $url = app\CMS\getLink($tag_attrs, 'catalog');
+    $name = $mystep->getLanguage('page_return');
 }
+echo '<a href="'.$url.'" id="article_'.$tag_attrs['mode'].'">'.$name.'</a>';
 ?>
 mytpl;
     return $result;
@@ -702,6 +708,7 @@ function buildSQL($paras) {
         $web = $web_info;
     }
     $web['setting'] = new \myConfig(PATH.'website/config_'.$web['idx'].'.php');
+    if(!isset($web['setting']->db->pre)) $web['setting']->db->pre = $s->db->pre;
     $tbl = $web['setting']->db->pre.'news_show';
     $db->build($tbl);
     $db->build($s->db->pre.'news_cat', array(

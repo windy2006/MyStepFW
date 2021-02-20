@@ -119,7 +119,7 @@
     </div>
 </div>
 <script type="text/javascript">
-jQuery.vendor('jquery.powerupload', {
+jQuery.vendor('jquery.powerUpload', {
     callback:function(){
         $('#upload').powerUpload({
             url: '<!--url_prefix-->api/myStep/upload',
@@ -129,7 +129,7 @@ jQuery.vendor('jquery.powerupload', {
             maxfilesize: 8,
             errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
             uploadFinished:function(i,file,result,timeDiff){
-                if(result.error!=0) {
+                if(result.error!==0) {
                     alert("上传失败！\n原因：" + result.message);
                 } else {
                     $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
@@ -142,9 +142,9 @@ jQuery.vendor('jquery.powerupload', {
     }
 });
 function myChecker(the_form) {
-    if(the_form.idx.value=="") the_form.idx.value = the_form.name.value;
-    if(the_form.keyword.value=="") the_form.keyword.value = the_form.name.value;
-    if(the_form.comment.value=="") the_form.comment.value = the_form.name.value;
+    if(the_form.idx.value==="") the_form.idx.value = the_form.name.value;
+    if(the_form.keyword.value==="") the_form.keyword.value = the_form.name.value;
+    if(the_form.comment.value==="") the_form.comment.value = the_form.name.value;
     return true;
 }
 function changeCata(idx) {
@@ -152,7 +152,7 @@ function changeCata(idx) {
     let obj = $('select[name=web_id]').get(0);
     if(web_id!=null) {
         for(let i=0; i<obj.options.length; i++) {
-            if(obj.options[i].value==web_id) {
+            if(obj.options[i].value===web_id) {
                 obj.selectedIndex = i;
                 break;
             }
@@ -167,14 +167,14 @@ function setCata(){
     $("select[name=pid]").val('<!--cat_pid-->');
 }
 function showTpl() {
-    let val = $("select[name=type]").val();
-    if(val==3) {
+    if($("select[name=type]").val()===3) {
         $("#tpl").show();
     } else {
         $("#tpl").hide();
     }
 }
 $(function(){
+    let web_id = '<!--web_id-->';
     let cat_show = <!--cat_show-->;
     let i = 1, n = 1;
     while(n <= cat_show) {
@@ -182,6 +182,9 @@ $(function(){
         n = Math.pow(2, i++);
     }
     $("select[name=type]").val('<!--cat_type-->');
+    if(web_id!=='1') {
+        $('select[name=web_id]').val(web_id).parent().hide();
+    }
     setCata();
     $.setCSS([
         '<!--path_root-->vendor/codemirror/lib/codemirror.css',

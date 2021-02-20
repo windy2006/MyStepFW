@@ -1,33 +1,26 @@
-整体描述：
+Summary
+--------
+MyStep Framework is a website framework based on [PHP 7.0], which focus on building a development toolkit that can call common functions with a easier way, and coding a functional website with more concise code. The framework is also highly scalable. With the agent mode and composer, the third-party function modules can be convenient to integrate into the framework.
+
+整体描述
 --------
 迈思框架（MyStep Framework）是一套基于 **[PHP 7.0]** 的web开发框架，旨在构建一个可以便捷调用常用功能，以最简洁的代码实现目标功能，同时具备高度可扩展性，可通过代理模式，方便的将第三方功能模块集成到框架中。
 - 路由系统 - 框架通过 rewrite 方法接管所有响应，除 static 目录和自定义扩展类型外，其他文件均无法直接通过 url 访问，兼具高可控性和安全性。 （IIS对应web.config，Apache对应.htaccess，NginX需参考目录下文件手动添加）。  
-- 路由模式 - 为增加环境适应度，框架同时支持Rewrite，QueryString和PathInfo三种模式，页面中站内URL只需要按照rewrite的模式书写（相对于框架目录，首位无需加"/"），框架将自动调整为对应模式，但为保证最大兼容性，php脚本内的链接多以QueryString模式处理。
 - 模版系统 - 采用二次编译模式，严格实现模板与程序的分离，通过通俗的标签模式调用各类数据。基本模板格式简单易学，方便制作，只要对HTML有一定了解的设计师均可以很快上手，模板修改后即时生效。同时具备高度可扩展性，可根据实际需要任意扩充模版标签。  
 - 插件系统 - 可插件模式扩展框架功能，无论是功能增强、系统优化、前台展示均可与系统无缝连接。内容评分、评论、投票、专题、检索、采集、统计等都可以通过插件实现，并可以无缝结合到系统中。  
 - 应用接口 - 系统为各类插件提供了丰富的接口，无论是api、模板标签、代码嵌入、脚本附加、登录处理，都可以通过系统接口便捷地实现，为二次开发或插件开发提供最大限度的支持和自由。  
 - 多语言支持 - 系统可以随意添加语言包，通过调整参数立即变化。
-- 缓存机制 - 通过三级缓存保证高效
-   - 数据缓存，用于缓存从数据库查询出的结果集，包含自建文件和数据库两种模式，也可通过代理模式扩展；
-   - 页面缓存，可将解析好的页面整体缓存到缓存文件，在过期前不用再次生成页面，即实现了静态化的效果，也保留了动态脚本的特性；
-   - 浏览器缓存，通过etag标识，在客户端再次请求页面数据时，如页面未发生变化，则直接从客户端缓存调用数据，减少了对服务器带宽的请求。
+- Composer - 框架支持通过composer添加附属功能及相关依赖，具体请参见[composer文档](https://docs.phpcomposer.com/00-intro.html "简介")
+- 域名绑定 - 每个应用或路由规则（仅限一级目录）均可以通过框架绑定到独立域名，但需要避免路由中与其他路由规则混淆（如：setting关键字默认为调用对应应用的设置信息），具体解决方法请见myStep应用。
 
-公共函数：
+缓存机制
 --------
-- getMicrotime($rate) - 获取微秒时间
-- getTimeDiff($time_start, $decimal, $micro) - 取得时间差
-- getDate_cn($date) - 获取中文日期
-- shortUrl($url, $max_length) - 缩略链接
-- tinyUrl($url) - 获取短网址
-- isMobile() - 判断是否为移动设备
-- isHttps() - 判断当前是否为SSL链接
-- myEval($code) - 自定义代码执行
-- checkPara($att_list, $parse) - 检测数据变量中是否有待解析的变量，并解析
-- recursionFunction($func, $para) - 递归执行某一函数
-- getOB() - 获取缓存区内容并清空
-- debug系列函数 - 变量情况查看
+通过数据、页面、浏览器三层缓存机制保证系统高效运行。
+- 数据缓存，用于缓存从数据库查询出的结果集，包含自建文件和数据库两种模式，也可通过代理模式扩展；
+- 页面缓存，可将解析好的页面整体缓存到缓存文件，在过期前不用再次生成页面，即实现了静态化的效果，也保留了动态脚本的特性；
+- 浏览器缓存，通过etag标识，在客户端再次请求页面数据时，如页面未发生变化，则直接从客户端缓存调用数据，减少了对服务器带宽的请求。
 
-执行顺序：
+执行顺序
 --------
 所有响应网址均通过rewrite模块反馈给根目录下的index.php脚本统一处理，虽然框架也支持QueryString和PathInfo两种模式，但是为了更好的网址优化和安全性，建议采用rewrite的方式，主要执行流程如下：
 - 初始化框架 - 通过框架根目录index.php，调用myStep::init()
@@ -41,7 +34,40 @@
    - global.php - 本脚本为应用通用脚本，自定义路由模式下通过 myStep::getModule() 自动加载，其他模式下需手动加载，可用于在模版实例声明后做后期变量及程序调整。
    - $mystep->shutdown() - 并非myStep类中的原生方法，但是如果应用扩展类中存在此方法，将在页面结束时执行
 
-PHP常量：
+路由规则
+--------
+路由分为路径调用和自定义路由两种，并以路径调用优先
+- 路径调用 - 相关路径信息将直接传递给应用目录下的index.php处理，格式为：网址/应用目录名/路径信息
+- 自定义路由 - 可在框架的应用设置中载入应用路由配置，格式如下：
+    - $format - 路径辨别格式，含如下默认格式：
+        - [any] - 任意非路径字符
+        - [str] - 字母、数字及下划线
+        - [int] - 任意数字
+        - 自定义格式为 array(格式索引 => 格式正则)，示例如下：
+          ```php
+           $format = array(
+              'test' => '([A-Z][a-z]+)+',
+           );
+           ```
+    - $rule - 路由规则，格式为 array(请求路径, 处理接口)
+        - "请求路径"中可包含预定义路径（格式为[格式索引]），每个路径间隔符中，仅能包含一个自定义格式且不能有其他字符；
+        - "处理接口"为负责相应该路径的函数，如果为数组的话，则会依次执行，除最后一个外，如某个子判断返回false则终止执行，否则上一个函数的返回值将作为下一个函数最后一个参数；各处理函数如需加带参数，可依照"函数名,参数值"的格式，其中参数值可以指定固定值，也可以通过"$1","$2"的模式指定为对应的路径匹配部分（下例2中$1匹配[test]部分）；如处理函数为静态类方法，调用格式为"类名:方法名"；处理函数也可为闭包函数，如：
+           ```php
+           $rule = array(
+              array('/test/[test]', array('perCheck,3','routeTest'))
+           );
+           $rule = array(
+              array('/test/[test]', array('perCheck,$1','routeTest'))
+           );
+           ```
+    - $api - 应用接口程序，格式如下：
+         ```php 
+         $api = array(
+             'error' => 'app\myStep\getError'
+         );
+         ```
+
+PHP常量
 --------
 - PATH - 当前应用路径
 - ROOT - 框架根目录路径
@@ -55,7 +81,7 @@ PHP常量：
 - VENDOR - 第三方应用库存放路径
 - FILE - 文件上传目录
 
-全局变量：
+PHP变量
 --------
 - $s - 框架配置，通过对象模式调用，如$s->web-title
 - $info_app - 当前调用应用的基本信息，除对应APP信息外（APP目录下info.php定义），还包括path（数组）和route（字符串）项目
@@ -65,20 +91,20 @@ PHP常量：
 - $tpl_setting - 模版参数，从 app 设置中调用，并继承于全局变量
 - $tpl_cache - 模版缓存参数，从 app 设置中调用，并继承于全局变量
 
-基础类：
+JS变量
 --------
-myBase为抽象类，可为所有其他子类提供统一的构建方法和错误处理；myTrait为扩展类，可为所调用的类提供一整套魔术方法
-- myBase->__construct - 将构造函数引导至init方法
-- myBase->setErrHandler - 设置错误处理函数
-- myBase->error - 通过异常处理类处理代码错误
-- myTrait->__set - 添加类动态变量，即没有在类中声明过的变量
-- myTrait->__get - 调用类动态变量，如变量名为instatnce，则直接返回新的当前类实例
-- myTrait->__destruct - unset类时，注销所有类内部变量
-- myTrait->__call - 智能判断并调用方法别名，动态方法或类外部函数
-- myTrait->addMethod - 动态添加类方法
-- myTrait->regAlias - 注册类内方法别名
+相关变量是通过脚本在页面被调取时动态生成，在调用时建议在 onload 事件或 jQuery 的 $(document).ready() 中调用
+- language - 调用系统语言设置（可自动扩展app语言包）
+- setting - 调用系统设置（包括：language，router，debug，app，path_root，path_app，url_fix，url_prefix，url_prefix_app等信息，可通过APP设置中的 $setting['js'] 扩充）
+- global - 全局变量，可在任何函数内部调用，可随意扩种，已包含以下子参数
+    - global.root - 针对rewrite、pathinfo和querystring模式下的根路径
+    - global.root_fix - 配合setURL，用于页面链接的自适应调整
+    - global.editor_btn - 针对tinyMCE编辑器的按钮扩展
+    - global.alert_leave - 在含表单的页面，如果内容发生变更，且通过非提交方式离开页面的话，将此变量设置为 true，即可出现警告
+    - global.timer - 用于计时器的返回值记录（非强占，可灵活调用）
+    - global.func - 页面载入后所需运行的函数组
 
-控制类：
+控制类
 --------
 myController类为核心控制类，具体用法请参加功能类文档，其中几个重要方法说明如下：
 - 页面附加内容设置 - 包括 setAddedContent 和 pushAddedContent 两个方法，可设置指定关键字的内容，并将相关内容插入到模版中"page_关键字"的位置
@@ -100,7 +126,7 @@ myController类为核心控制类，具体用法请参加功能类文档，其�
 - setAlias方法 - 设置类调用别名
 - header方法 - 返回指定的响应头（可以编码或指定的索引，具体参见源代码）
 
-核心类：
+核心类
 --------
 myStep类扩展自myController类，具体用法请参加功能类文档，其中几个重要方法说明如下：
 - start($set_plugin) - 执行于脚本主程序开始之前，用于设置框架类及其方法的调用别名，设定错误报告模式，加载应用对应插件，初始化cookie和session，声明数据库（$db, 如$s->db->auto为false，则不建立连接，以便于无数据库操作的应用）和缓存（$cache）实例，以及为状态变量赋值
@@ -132,20 +158,23 @@ myStep类扩展自myController类，具体用法请参加功能类文档，其�
       - app路径/module/模版样式/index.php（模版样式为设置中对应的内容）
       - app路径/module/index.php
 
-JS变量：
+PHP函数
 --------
-相关变量是通过脚本在页面被调取时动态生成，在调用时建议在onload事件或jQuery的$(function(){<!--code-->})中调用
-- language - 调用系统语言设置（可自动扩展app语言包）
-- setting - 调用系统设置（包括：language，router，debug，app，path_root，path_app，url_fix，url_prefix，url_prefix_app等信息，可通过APP设置重的 $setting['js'] 扩充）
-- global - 全局变量，可在任何函数内部调用，可随意扩种，已包含以下子参数：
-   - global.root - 针对rewrite、pathinfo和querystring模式下的根路径
-   - global.root_fix - 配合setURL，用于页面链接的自适应调整
-   - global.editor_btn - 针对tinyMCE编辑器的按钮扩展
-   - global.alert_leave - 在含表单的页面，如果内容发生变更，且通过非提交方式离开页面的话，将此变量设置为 true，即可出现警告
-   - global.timer - 用于计时器的返回值记录（非强占，可灵活调用）
-   - global.func - 页面载入后所需运行的函数组
+- getMicrotime($rate) - 获取微秒时间
+- getTimeDiff($time_start, $decimal, $micro) - 取得时间差
+- getDate_cn($date) - 获取中文日期
+- formatDate($date, $format) - 格式化日期
+- shortUrl($url, $max_length) - 缩略链接
+- tinyUrl($url) - 获取短网址
+- isMobile() - 判断是否为移动设备
+- isHttps() - 判断当前是否为SSL链接
+- myEval($code) - 自定义代码执行
+- checkPara($att_list, $parse) - 检测数据变量中是否有待解析的变量，并解析
+- recursionFunction($func, $para) - 递归执行某一函数
+- getOB() - 获取缓存区内容并清空
+- debug系列函数 - 变量情况查看
 
-JS函数：
+JS函数
 --------
 - getPath(lvl) - 获取相对于网站根的到调用函数页面所在路径的lvl级路径
 - $id(id) - 获取对应id的页面元素
@@ -192,40 +221,7 @@ JS函数：
    - $obj.outerHTML - 返回jQuery对象的外部超文本代码
    - $obj.cssText - 为jQuery对象批量添加CSS
 
-路由规则：
---------
-路由分为路径调用和自定义路由两种，并以路径调用优先
-- 路径调用 - 相关路径信息将直接传递给应用目录下的index.php处理，格式为：网址/应用目录名/路径信息
-- 自定义路由 - 可在框架的应用设置中载入应用路由配置，格式如下：
-   - $format - 路径辨别格式，含如下默认格式：
-      - [any] - 任意非路径字符
-      - [str] - 字母、数字及下划线
-      - [int] - 任意数字
-      - 自定义格式为 array(格式索引 => 格式正则)，示例如下：
-        ```php
-         $format = array(
-            'test' => '([A-Z][a-z]+)+',
-         );
-         ```
-   - $rule - 路由规则，格式为 array(请求路径, 处理接口)
-      - "请求路径"中可包含预定义路径（格式为[格式索引]），每个路径间隔符中，仅能包含一个自定义格式且不能有其他字符；
-      - "处理接口"为负责相应该路径的函数，如果为数组的话，则会依次执行，除最后一个外，如某个子判断返回false则终止执行，否则上一个函数的返回值将作为下一个函数最后一个参数；各处理函数如需加带参数，可依照"函数名,参数值"的格式，其中参数值可以指定固定值，也可以通过"$1","$2"的模式指定为对应的路径匹配部分（下例2中$1匹配[test]部分）；如处理函数为静态类方法，调用格式为"类名:方法名"；处理函数也可为闭包函数，如：
-         ```php
-         $rule = array(
-            array('/test/[test]', array('perCheck,3','routeTest'))
-         );
-         $rule = array(
-            array('/test/[test]', array('perCheck,$1','routeTest'))
-         );
-         ```
-   - $api - 应用接口程序，格式如下： 
-        ```php 
-        $api = array(
-            'error' => 'app\myStep\getError'
-        );
-        ```
-
-框架接口：
+框架接口
 --------
 以下接口为框架通过路由规则预定义的接口，接口处理函数统一返回数组格式数据，可通过在url最后加上"/返回类型"来控制（可选），格式默认为json，还可为xml、string、hex、script等，如需在某一APP内调用另外一个APP的插件接口（如captcha），可通过在url上加上"&app=[AppName]"的模式保重接口依照对应app的设置执行。
 - /api/[str]/[any] - 自定义应用接口，[str]为app名称，[any]为接口名及参数，可通过_GET或_POST接收参数
@@ -237,7 +233,7 @@ JS函数：
 - /api/myStep/download/[any] - 文件下载接口，[any]为文件索引
 - /api/myStep/remove/[any] - 上传文件删除接口，[any]为文件索引
 
-应用结构：
+应用结构
 --------
 应用是在框架基础上的独立功能组合，相关文件存放在框架APP目录对应应用名称（应用名称首字母需要大写）的目录下，推荐结构如下：
 - config - 配置文件描述，分语种，用于生成配置设置页面，模式可参考框架config目录，格式参照static/js/checkForm.js规范输入格式
@@ -255,7 +251,7 @@ JS函数：
 - plugin.php - 插件引用记录（自动生成）
 - route.php - 路由信息，格式详见路由章节
 
-脚本加载：
+脚本加载
 --------
 每个应用可通过myStep::setPara()自动生成 cache/script/[appName].js 和 cache/script/[appName].css（[appName]表示应用名称），供页面调用，这两个文件经压缩处理，可根据相关文件内容改变自动更新。载入规则如下（如文件不存在将自动忽略，其中[TemplateStyle]为模版样式名称）：
 - cache/script/[appName].css - 将自动载入以下文件（其中部分static目录下的文件可在设置中调整）：
@@ -273,7 +269,7 @@ JS函数：
    - [appName]/asset/function.js
    - [appName]/asset/[TemplateStyle]/function.js
 
-功能插件：
+功能插件
 -------- 
 插件为为应用添加某一组功能，可通过框架后台插件管理设置参数，并在应用管理的插件选项中设置对应应用都调用那些插件，推荐结构如下：
 - index.php - 入口脚本，插件调用时将首先调用此文件（必需）
@@ -299,12 +295,4 @@ JS函数：
 - JS脚本模式 - 链接直接按照路由对应规则（即rewrite模式）设置，在页面载入最后执行JS函数 setURL() （setURL函数的规则详见JS函数章节），即可智能转换页面所有链接
 - 其他说明 - 在实际应用中需参考以下情况：
    - 在转换链接的同时，也会给链接加上路径信息，如：<br />框架存放在 /dir/ 目录下，设置模式为PathInfo，路由链接为 /func/method/id，经过转换后的链接为：/dir/index.php/func/method/id
-   - 模版函数也将传递一个路径变量：<!--url_prefix-->，，参照上例，此变量内容为：/dir/index.php/，如所调用文件为静态文件可直接在利用<!--path_root-->即可。
-
-域名绑定：
---------
-每个应用或路由规则（仅限一级目录）均可以通过框架绑定到独立域名，但需要避免路由中与其他路由规则混淆（如：setting关键字默认为调用对应应用的设置信息），具体解决方法请见myStep应用
-
-Composer：
---------
-框架支持通过composer添加附属功能及相关依赖，具体请参见[composer文档](https://docs.phpcomposer.com/00-intro.html "简介")
+   - 模版函数也将传递一个路径变量：<!--url_prefix-->，参照上例，此变量内容为：/dir/index.php/，如所调用文件为静态文件可直接在利用<!--path_root-->即可。

@@ -36,7 +36,7 @@ CREATE TABLE `{pre}admin_cat` (
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='管理目录';
 
 INSERT INTO `{pre}admin_cat` VALUES
-        (1, 0, '首页', '###', 0, 9, '管理首页'),
+        (1, 0, '首页', '###', 1, 9, '管理首页'),
         (2, 0, '内容', '###', 0, 8, '内容管理'),
         (3, 0, '功能', '###', 0, 7, '网站功能'),
         (4, 0, '设置', '###', 0, 6, '网站管理'),
@@ -91,6 +91,7 @@ INSERT INTO `{pre}news_cat` VALUES (0, 1, 0, '新闻资讯', '新闻,体育,娱�
 # 新闻描述
 CREATE TABLE `{pre}news_show` (
     `news_id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `idx` Char(32) NOT NULL COMMENT '标题hash',
     `cat_id` SMALLINT UNSIGNED NOT NULL COMMENT '新闻类型索引',
     `web_id` TINYINT UNSIGNED DEFAULT 0 COMMENT '所属子站',
     `subject` Char(200) NOT NULL COMMENT '新闻标题',
@@ -154,7 +155,7 @@ CREATE TABLE `{pre}info` (
     INDEX (`web_id`),
     PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='内容展示';
-INSERT INTO `{pre}info` VALUES (0, 1, 'copyright', '<p style="text-align: center;">&copy;2010-2020&nbsp;www.mysteps.cn</p>');
+INSERT INTO `{pre}info` VALUES (0, 1, 'copyright', '<p style="text-align: center;">&copy;2010-2021&nbsp;www.mysteps.cn</p>');
 INSERT INTO `{pre}info` VALUES (0, 1, 'contact', '<p>QQ：18509608</p><p>Email：windy_sk@126.com</p>');
 
 # ---------------------------------------------------------------------------------------------------------------

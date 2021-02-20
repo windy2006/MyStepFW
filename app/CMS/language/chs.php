@@ -13,6 +13,7 @@ return array(
     'page_register_failed' => '用户注册失败！',
     'page_profile_changed' => '用户信息已修改！',
     'page_user_activate' => '用户已激活！',
+    'page_return' => '返回目录',
 
     'admin_update_done' => '在线升级',
     'admin_update_sql' => '成功执行 %d 条数据库命令',
@@ -31,6 +32,7 @@ return array(
     'admin_nopower' => '您无权进行该操作！',
     'admin_database_error' => '更新数据库时出错，请查看错误记录！',
     'admin_all_web' => '所有网站',
+    'admin_web' => '网站',
 
     'admin_art_catalog_delete' => '删除分类',
     'admin_art_catalog_change' => '变更分类顺序',

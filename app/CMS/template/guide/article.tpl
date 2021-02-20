@@ -21,6 +21,21 @@
                 <div>
                     <!--record_content-->
                 </div>
+                <div class="row">
+                    <div class="col">
+                        上一篇：<!--news_next id='$id' cat_id='$cat_id' mode='prev'-->
+                    </div>
+                    <div class="col text-right">
+                        下一篇：<!--news_next id='$id' cat_id='$cat_id'-->
+                    </div>
+                </div>
+                <nav class="w-100 mb-3 mx-auto <!--multi_page-->">
+                    <ul class="pagination pagination-sm justify-content-center">
+                        <!--loop:start key="page"-->
+                        <li class="page-item <!--page_active-->"><a class="page-link" href="<!--page_link-->"><!--page_no--></a></li>
+                        <!--loop:end-->
+                    </ul>
+                </nav>
             </div>
             <div id="side_cat" class="pt-4">
                 <div id="cat_list" class="position-sticky">
@@ -31,65 +46,8 @@
                 </div>
             </div>
         </div>
-        <div class="clearfix"></div>
-        <nav class="w-100 mb-3 mx-auto <!--multi_page-->">
-            <ul class="pagination pagination-sm justify-content-center">
-                <!--loop:start key="page"-->
-                <li class="page-item <!--page_active-->"><a class="page-link" href="<!--page_link-->"><!--page_no--></a></li>
-                <!--loop:end-->
-            </ul>
-        </nav>
-        <div class="row">
-            <div class="col">
-                上一篇：<!--news_next id='$id' mode='prev'-->
-            </div>
-            <div class="col text-right">
-                下一篇：<!--news_next id='$id'-->
-            </div>
-        </div>
     </div>
 </div>
-<script type="text/javascript">
-$.vendor('highlight',{callback:()=>highlight(1, 'vs2015')});
-$(function(){
-    let anchor_list = $("a[id^=p]");
-    let cat_html = '<ul>';
-    let cur_lvl = 1;
-    let m = anchor_list.length;
-    if(m===0) {
-        $('#side_cat').hide();
-        $('#content').css('width', '100%');
-        return;
-    }
-    for(let i=0;i<m;i++) {
-        let obj = $(anchor_list.get(i));
-        let cur_idx = obj.attr('id').replace('p', '').split('.');
-        obj.addClass('anchor').attr('href', '#'+obj.attr('id'));
-        obj.parent().addClass('sub_title').addClass('level_'+cur_idx.length);
-        if(cur_idx.length > cur_lvl) {
-            cat_html += '<ul>';
-        } else if(cur_idx.length < cur_lvl) {
-            cat_html += '</li></ul></li>';
-        } else {
-            if(i>0) cat_html += '</li>';
-        }
-        cur_lvl = cur_idx.length;
-        cat_html += '<li><a href="#'+obj.attr('id')+'">'+('&emsp;').repeat(cur_lvl)+cur_idx.join('.')+'&emsp;'+obj.parent().text()+'</a>';
-    }
-    cat_html += ('</li></ul>').repeat(cur_lvl-1);
-    cat_html += '</li></ul>';
-    $('#cat_list').html($('#cat_list').html()+cat_html);
-    $("#cat_list a:first").addClass('active');
-    $(window).scroll(function(){
-        let offset_top = 200;
-        let the_top = $("html").scrollTop();
-        $("#cat_list a").removeClass('active');
-        for(let i=anchor_list.length-1;i>=0;i--) {
-            if(the_top+offset_top>=$(anchor_list.get(i)).offset().top) {
-                $("#cat_list a[href='#"+anchor_list.get(i).id+"']").addClass('active');
-                break;
-            }
-        }
-    });
-})
+<script type="application/javascript">
+let cat_id = '<!--cat_id-->';
 </script>

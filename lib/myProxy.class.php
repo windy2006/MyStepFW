@@ -12,9 +12,9 @@
 ********************************************/
 
 /**
- * 用于代理模式的相关方法，可自动调用被代理示例方法
+ * 用于代理模式的相关方法，可自动调用被代理实例方法
  */
-class myProxy extends myBase {
+abstract class myProxy extends myBase {
     use myTrait {
         __get as public __get_base;
         __set as public __set_base;

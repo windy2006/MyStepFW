@@ -1,15 +1,20 @@
 <?PHP
 if(empty($id)) $id = r::r('web_id');
-$list = explode(',', $group_info['power_web']);
-if(count($list)==1 && $list[0]!='all') {
-    $id = $list[0];
+if($web_info['web_id']!=='1') {
+    $id = $web_info['web_id'];
     if($method!='edit_ok') $method = 'edit';
+} else {
+    $list = explode(',', $group_info['power_web']);
+    if(count($list)==1 && $list[0]!='all') {
+        $id = $list[0];
+        if($method!='edit_ok') $method = 'edit';
+    }
 }
 if(!empty($id)) {
     if(!checkPower('web', $id)) {
         myStep::info('admin_web_subweb_error');
     }
-    $web_current = \app\CMS\checkVal($website, 'web_id', $id);
+    $web_cur = \app\CMS\checkVal($website, 'web_id', $id);
 }
 switch($method) {
     case 'add':
@@ -19,8 +24,8 @@ switch($method) {
         break;
     case 'delete':
         cms::$log = $mystep->getLanguage('admin_web_subweb_delete');
-        if(isset($web_current['idx'])) {
-            $cfg_file = PATH.'website/config_'.$web_current['idx'].'.php';
+        if(isset($web_cur['idx'])) {
+            $cfg_file = PATH.'website/config_'.$web_cur['idx'].'.php';
             $config = new myConfig($cfg_file);
             if($s->db->pre!=$config->db->pre) {
                 $db->drop($config->db->pre.'news_show', 'table');
@@ -44,7 +49,7 @@ switch($method) {
                 ->where('web_id','n=',$id);
             $db->delete();
             $domain = include(CONFIG.'domain.php');
-            unset($domain[$web_current['domain']]);
+            unset($domain[$web_cur['domain']]);
             myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
             \app\CMS\deleteCache('website');
         }
@@ -71,7 +76,7 @@ switch($method) {
                 $info = $db->file(PATH.'module/admin/subweb.sql', $strFind, $strReplace);
             }
         } else {
-            unset($domain[$web_current['domain']]);
+            unset($domain[$web_cur['domain']]);
         }
         if(isset($domain[$data['domain']])) {
             mystep::info('admin_web_subweb_domain');
@@ -87,7 +92,7 @@ switch($method) {
         \app\CMS\deleteCache('website');
         f::del(CACHE.'app/'.$info_app['app']);
         f::del(CACHE.'template/'.$info_app['app']);
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
         break;
     default:
         $content = build_page('list');
@@ -105,6 +110,11 @@ function build_page($method) {
         $db->select();
         while($record = $db->getRS()) {
             myString::htmlTrans($record);
+            if(empty($record['domain'])) {
+                $record['link'] = '/';
+            } else {
+                $record['link'] = 'http://'.$record['domain'];
+            }
             $tpl->setLoop('record', $record);
         }
         $tpl->assign('title', $mystep->getLanguage('admin_web_subweb_title'));

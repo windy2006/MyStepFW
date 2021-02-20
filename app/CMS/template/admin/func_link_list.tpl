@@ -73,6 +73,10 @@
 </div>
 <script type="application/javascript">
 $(function(){
+    let web_id = '<!--web_id_site-->';
+    if(web_id !== '1') {
+        $('select[name=web_id]').val(web_id).hide();
+    }
     $('select[name=web_id]').change(function(){
         location.href=global.root_fix+'?web_id='+this.value;
     });

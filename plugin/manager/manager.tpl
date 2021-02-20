@@ -49,7 +49,7 @@
 
 <script type="text/javascript">
 jQuery.vendor('jquery.jmpopups', {add_css:true});
-jQuery.vendor('jquery.powerupload', {
+jQuery.vendor('jquery.powerUpload', {
     callback:function(){
         $('#upload').powerUpload({
             title: '请选择需要上传的升级文件',

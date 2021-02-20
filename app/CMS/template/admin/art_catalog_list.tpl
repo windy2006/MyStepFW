@@ -49,6 +49,7 @@
 $(function(){
     if(typeof window.parent.getList !== 'undefined') {
         $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
+            let web_id = '<!--web_id-->';
             let obj = $(window.parent.document.getElementById('sidebar'));
             if(typeof data.err==='undefined') {
                 obj.empty();
@@ -57,6 +58,7 @@ $(function(){
                 window.parent.setLink();
                 obj.find('.collapse').addClass('show');
                 obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
+                if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
             } else {
                 alert(data.err);
             }

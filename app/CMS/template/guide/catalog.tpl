@@ -1,6 +1,6 @@
 <div id="main" class="border-left">
     <div class="mb-3 h-75">
-        <nav aria-label="breadcrumb">
+        <nav aria-label="breadcrumb" class="w-100">
             <ol class="breadcrumb">
                 <!--loop:start key="cat_list"-->
                 <li class="breadcrumb-item" aria-current="page"><!--cat_list_name--></li>
@@ -8,7 +8,6 @@
             </ol>
         </nav>
         <div class="w-100">
-
             <ul class="nav justify-content-center pre_list mb-3">
                 <!--loop:start key="prefix"-->
                 <li class="nav-item mx-3">

@@ -5,7 +5,7 @@
     </div>
     <div class="form-inline mx-auto">
         <select class="form-control" name="web_id">
-            <option value="">全部</option>
+            <option value="0">全部</option>
             <!--loop:start key="website"-->
             <option value="<!--website_web_id-->" <!--website_selected-->><!--website_name--></option>
             <!--loop:end-->
@@ -43,6 +43,10 @@
 </div>
 <script type="application/javascript">
 $(function() {
+    let web_id = '<!--web_id_site-->';
+    if(web_id !== '1') {
+        $('select[name=web_id]').val(web_id).parent().hide();
+    }
     $('select[name=web_id]').change(function () {
         location.href = global.root_fix+'?web_id=' + this.value;
     });

@@ -1,35 +1,39 @@
 <?PHP
-global $id;
-if(!isset($info_app['path'][2]) && is_numeric($info_app['path'][1])) {
-    $id = $info_app['path'][1];
-} else {
+global $id, $cat_id;
+if(isset($info_app['path'][2]) && is_numeric($info_app['path'][2])) {
     $id = $info_app['path'][2];
 }
-$id = intval($id);
+$id = $info_app['path'][1]??0;
+
 $page = r::g('page');
 if($page!='all') {
     $page = intval($page);
     if($page<1) $page = 1;
 }
 $db->build($s->db->pre_sub.'news_show')
-    ->field('cat_id,add_date,subject,tag,image,describe,view_lvl,original,views,link,active,expire')
-    ->where('news_id', 'n=', $id);
+    ->field('news_id,cat_id,add_date,subject,tag,image,describe,view_lvl,original,views,link,active,expire')
+    ->where(is_numeric($id) ? ['news_id', 'n=', $id] : ['idx', '=', md5($id)]);
+
 $db->build($s->db->pre_sub.'news_detail', array(
         'mode' => 'left',
         'field' => 'news_id'
     ))->field('sub_title,content')->order('page');
+
 $records = $cache->getData($db->select(true),1);
+
 if(empty($records)) {
     myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
 }
 $record = $records[0];
-if( !is_null($record['active'])
+$id = $record['news_id'];
+$cat_id = $record['cat_id'];
+if(!is_null($record['active'])
     && ($record['active']=strtotime($record['active']))>0
     && $record['active'] > $s->info->time
 ) {
     myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
 }
-if( !is_null($record['expire'])
+if(!is_null($record['expire'])
     && ($record['expire']=strtotime($record['expire']))>0
     && $record['expire'] < $s->info->time
 ) {
@@ -89,6 +93,7 @@ if($s->watermark->mode & 1) $record['content'] = myString::watermark($record['co
 if(empty($record['original'])) $record['original'] = $mystep->getLanguage('page_original');
 if(empty($record['image'])) $record['image'] = ROOT_WEB.'static/images/dummy.png';
 $t->assign('record', $record);
+$t->assign('cat_id', $cat_id);
 
 global $tag;
 $tag = explode(',', $record['tag']);

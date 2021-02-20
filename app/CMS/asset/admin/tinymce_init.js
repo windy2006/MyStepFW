@@ -4,20 +4,20 @@ let setting_tinymce = {
         editor_encoding:'raw',
         entity_encoding:'raw',
         plugins: [
-            "advlist autolink autosave link image imagetools lists charmap print preview hr anchor pagebreak spellchecker",
+            "advlist autolink autosave link image imagetools lists charmap print preview hr anchor pagebreak",
             "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-            "paste1 table contextmenu directionality emoticons template textcolor textcolor importcss myStep myStep_cms"
+            "table contextmenu directionality emoticons template textcolor textcolor importcss myStep myStep_cms"
         ],
 
         toolbar1 : "code pastetext searchreplace | bold italic underline removeformat | alignleft aligncenter alignright | bullist numlist | outdent indent hr blockquote | forecolor backcolor | fullscreen",
-        toolbar2 : "fontselect fontsizeselect formatselect | link anchor image media",
+        toolbar2 : "fontselect fontsizeselect formatselect alert | link anchor image media",
         toolbar_items_size: 'small',
 
         //menubar: false,
         menubar: 'edit view insert format table',
         menu: {
             edit: {title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall'},
-            view: {title: 'View', items: 'code | visualaid visualchars visualblocks | spellchecker | preview fullscreen'},
+            view: {title: 'View', items: 'code | visualaid visualchars visualblocks | preview fullscreen'},
             insert: {title: 'Insert', items: 'link image media | insert charmap emoticons hr | pagebreak nonbreaking anchor | insertdatetime'},
             format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats fonts'},
             table: {title: 'Table', items: 'inserttable tableprops deletetable | cell row column'},
@@ -56,28 +56,30 @@ function insertContent(str) {
     tinyMCE.activeEditor.execCommand("mceInsertContent", false, str);
 }
 function setHighlight(editor, brush) {
-    let sel = editor.selection.getContent();
-    if(sel.length===0) return;
-    let str = sel.replace(/<.+?>/g, '');
+    let str = editor.selection.getContent();
     if(str.length===0) return;
-    if(/^<pre class="highlight".+?><code.+?>(.+?)<\/code><\/pre>$/ism.test(sel)) {
+    if(/^<pre class="highlight".+?><code.+?>(.+?)<\/code><\/pre>$/ism.test(str)) {
         str = RegExp.$1;
     }
+    let symbol = '　　';
+    str = str.replace(new RegExp(symbol, 'g'), '');
     str = str.replace(/<br.*?>/g, '\n');
+    str = str.replace(/\r/g, '\n');
     str = str.replace(/<.+?>/g, '');
-    str = str.replace(/\n\s(.)/g, '\n  $1');
+    str = str.replace(/[\n]+/g, symbol+'\n');
     str = str.replace(/ /g, '&nbsp;');
+    str = str.replace(/\t/g, '&nbsp; &nbsp; ');
     if(brush!=='') {
         str = '<pre class="highlight" data-lng="'+brush+'"><code class="language-'+brush+'">'+str+'<\/code></pre>';
     } else {
-        str = '<div>' + str.replace(/\n+/g, '</div>\n<div>') + '</div>';
+        str = str.replace(new RegExp(symbol, 'g'), '<br />\n');
+        str = '<div>' + str + '</div>';
     }
-    str += '\n<div></div>\n';
     insertContent(str);
 }
 function uploadInit() {
     if(!checkSetting()) return;
-    $.vendor('jquery.powerupload', {
+    $.vendor('jquery.powerUpload', {
         callback:function(){
             let opts = {
                 url: setting.url_prefix+'api/myStep/upload',
@@ -90,7 +92,7 @@ function uploadInit() {
             $('#upload').powerUpload($.extend({}, opts, {
                 max_files: 1,
                 uploadFinished:function(i,file,result,timeDiff){
-                    if(result.error!==0) {
+                    if(result.error!=="0") {
                         alert("上传失败！\n原因：" + result.message);
                     } else {
                         $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
@@ -105,7 +107,7 @@ function uploadInit() {
                 title: '附件上传',
                 uploadFinished:function(i,file,result,timeDiff){
                     let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
-                    if(result.error!==0) {
+                    if(result.error!=="0") {
                         obj.html(obj.html()+' - upload failed! ('+result.message+')');
                     } else {
                         obj.html(obj.html()+' - uploaded!');
@@ -179,15 +181,14 @@ $(function(){
                 let tag = 'div';
                 if(content.indexOf("<div")===-1) {
                     content = content.replace(/(<br(\s\/)?>)+/ig, "</p><p>");
-                    content = content.replace(/<p(.*?)>[\xa0\r\n\s\u3000]+/ig, "<p$1>");
+                    content = content.replace(/<p(.*?)>[\r\n]+/ig, "<p$1>");
                     content = content.replace(/<\/p><p/g, "<\/p>\n<p");
                     tag = 'p';
                 } else {
                     content = content.replace(/(<br(\s\/)?>)+/ig, "</div><div>");
-                    content = content.replace(/<div(.*?)>[\xa0\r\n\s\u3000]+/ig, "<div$1>");
+                    content = content.replace(/<div(.*?)>[\r\n]+/ig, "<div$1>");
                     content = content.replace(/<\/div><div/g, "<\/div>\n<div");
                 }
-                content = content.replace(/[\xa0]/g, "");
                 content = content.replace(/<\/td>/g, "&nbsp;</td>");
                 content = content.replace(/(<a id=.+>)(<\/a>)/g, "$1&nbsp;$2");
                 while(content.search(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/g, "<!-- pagebreak -->");
@@ -225,7 +226,7 @@ $(function(){
                         global.pastetext = !global.pastetext;
                     }
                 }
-            })
+            });
             editor.addButton('upload', {
                 title : '附件管理',
                 image : global.root + 'static/images/file.gif',
@@ -300,22 +301,78 @@ $(function(){
                     { text: '取消高亮', value: '' },
                 ],
                 onselect: function(e) {
-                    setHighlight(editor, this.value());
+                    let brush = this.value();
+                    let obj = editor.selection.getNode();
+                    if(obj.tagName==='CODE') {
+                        editor.selection.select(obj.parentNode);
+                    }
+                    setHighlight(editor, brush);
                     this.text('高亮代码');
                 },
                 onPostRender: function() {
                     let ctrl = this;
                     editor.on('click', function(e) {
+                        e.cancelBubble = true;
+                        e.stopPropagation();
                         e = e.target;
                         if(e.nodeName === 'CODE') e = e.parentNode;
                         if (e.nodeName === 'PRE' && editor.dom.hasClass(e, "highlight")) {
                             let type = e.getAttribute('data-lng').toLocaleLowerCase();
-                            editor.selection.select(e);
+                            //editor.selection.select(e);
                             ctrl.value(type);
                             ctrl.text(type.toUpperCase());
                         } else {
-                            ctrl.value('');
+                            ctrl.value(null);
                             ctrl.text('高亮代码');
+                        }
+                    });
+                }
+            });
+            editor.addButton('alert', {
+                text: '提示文字',
+                title : '突出显示提示文字',
+                type: 'listbox',
+                values: [
+                    { text: '主题蓝', value: 'primary' },
+                    { text: '加重灰', value: 'secondary' },
+                    { text: '成功绿', value: 'success' },
+                    { text: '警告红', value: 'danger' },
+                    { text: '提示黄', value: 'warning' },
+                    { text: '信息青', value: 'info' },
+                ],
+                onselect: function(e) {
+                    this.text('提示文字');
+                    let brush = this.value();
+                    let str = editor.selection.getContent();
+                    if(str.length===0) return;
+                    if(/^<div class="alert alert-.+?>(.*?)<\/div>$/ism.test(str)) {
+                        str = RegExp.$1;
+                    }
+                    str = str.replace(/<(p|div).*?>/g, '');
+                    str = str.replace(/<\/(p|div)>/g, '<br />');
+                    str = str.replace(/<br \/>/g, '</p><p>');
+                    insertContent('<div class="alert alert-'+brush+' my-3" data-type="'+brush+'"><p>'+str+'</p></div>');
+                },
+                onPostRender: function() {
+                    let ctrl = this;
+                    editor.on('click', function(e) {
+                        e = e.target;
+                        let list = {
+                            'primary': '主题蓝',
+                            'secondary': '加重灰',
+                            'success': '成功绿',
+                            'danger': '警告红',
+                            'warning': '提示黄',
+                            'info': '信息青'
+                        };
+                        if(e.parentNode.nodeName === 'DIV' && editor.dom.hasClass(e.parentNode, "alert")) e = e.parentNode;
+                        if (e.nodeName === 'DIV' && editor.dom.hasClass(e, "alert")) {
+                            let type = e.getAttribute('data-type').toLocaleLowerCase();
+                            ctrl.value(type);
+                            ctrl.text(list[type]);
+                        } else {
+                            ctrl.value(null);
+                            ctrl.text('提示文字');
                         }
                     });
                 }
@@ -331,7 +388,8 @@ $(function(){
                 let cd = (e.originalEvent || e).clipboardData || window.clipboardData;
                 let content = '';
                 if(global.pastetext) {
-                    content = cd.getData('text/plain').replace(/[\r\n]+/g, '<br />');;
+                    content = cd.getData('text/plain').replace(/[\r\n]+/g, '</p><p>');
+                    content = '<p>' + content + '</p>'
                 } else {
                     content = cd.getData('text/html');
                     if(content.indexOf('schemas-microsoft')>=0) {
@@ -353,6 +411,7 @@ $(function(){
                         content = content.replace(/(['"])\n+/g, '$1 ');
                         content = content.replace(/([;:])\n+/g, '$1');
                         content = content.replace(/\w+:\w+=".+?"/g, '');
+                        content = content.replace(/<a name.+?<\/a>/ig, '');
                         re = /<([\w:]+)>\s*<\/\1>/sg;
                         while(content.search(re)!==-1) content = content.replace(re, '');
                         re = /<\/([\w:]+)>\s*<\1>/sg;
@@ -366,6 +425,7 @@ $(function(){
                                 '并将对应文件拖拽到编辑框即可完成上传！' );
                         }
                     }
+                    content = content.replace(/style=("|')(.+?)\1/sg, '');
                 }
                 if(content.length>0) {
                     insertContent(content);

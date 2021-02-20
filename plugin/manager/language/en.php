@@ -2,7 +2,7 @@
 return array (
     'plugin_manager_info_name' => 'Framework Checker',
     'plugin_manager_info_intro' => 'Check, Pack and Update Framework',
-    'plugin_manager_info_copyright' => 'Copyright 2019-2020 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
+    'plugin_manager_info_copyright' => 'Copyright 2019-2021 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
     'plugin_manager_info_description' => 'Make current framework up to date, and check which files have been changed',
     'plugin_manager_title' => 'FW Checker',
     'plugin_manager_error'=>'Please download the file pack, and update manually!',

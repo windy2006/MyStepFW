@@ -66,6 +66,7 @@ $t->assign($page_info);
 $t->assign('record_count', $counter);
 $t->assign('prefix', $prefix);
 $t->assign('cat_name', $cat_info['name']??$mystep->getLanguage('page_update'));
+$t->assign('cat_id', $catalog);
 
 if(!empty($cat_info['prefix'])) {
     $cat_info['prefix'] = explode(',', $cat_info['prefix']);
@@ -82,7 +83,8 @@ $limit = (($page-1)*$page_size).','.$page_size;
 $loop = $s->list->txt;
 
 $path_list = [];
-$pid = $cat_info['pid']??0;
+$pid = $cat_info['pid'];
+if($pid==0) $pid = $cat_info['cat_id'];
 while($pid>0) {
     $the_cat = \app\CMS\getPara($news_cat_plat, 'cat_id', $pid);
     $path_list[] = [

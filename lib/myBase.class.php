@@ -34,7 +34,6 @@ abstract class myBase {
                 call_user_func(array($this, "init"));
             }
         }
-        return;
     }
 
     /**

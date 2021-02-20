@@ -42,7 +42,7 @@ $setting['expire']['tag'] = 86400;
 $setting['expire']['article'] = 604800;
 
 $setting['watermark'] = array();
-$setting['watermark']['mode'] = 2;
+$setting['watermark']['mode'] = '';
 $setting['watermark']['txt'] = 'MyStep CMS';
 $setting['watermark']['img'] = 'static/images/logo.png';
 $setting['watermark']['position'] = 3;

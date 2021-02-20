@@ -1,7 +1,7 @@
 <?PHP
 require 'inc.php';
 // Basic Parameter init
-global $id, $web_id, $group, $group_info;
+global $id, $web_info, $web_id, $group, $group_info;
 $db->cache(0);
 $id = $info_app['para']['id']??r::r('id');
 if(isset($info_app['para']['method'])) {
@@ -52,9 +52,7 @@ if(!checkPower('web', $web_id, $list)) {
         $web_id = $list[0];
     }
 }
-if(($web_info = \app\CMS\checkVal($website, 'domain', $s->info->host))===false) {
-    $web_info = \app\CMS\checkVal($website, 'web_id', $web_id);
-}
+if($web_info['web_id']!=1) $web_id = $web_info['web_id'];
 $web_info['setting'] = new myConfig(PATH.'website/config_'.$web_info['idx'].'.php');
 function setWeb(myTemplate &$tpl, $web_id='') {
     global $website;
@@ -92,5 +90,7 @@ if(!empty($info_app['path'][1]) && is_dir(PATH.'module/admin/'.$info_app['path']
     $t->assign('list_func', $group_info['power_func']);
     $t->assign('list_web', $group_info['power_web']);
     $t->assign('path_admin', $path_admin);
+    $t->assign('websites', myString::toJson($website));
+    $t->assign('web_id', $web_info['web_id']);
     $content = $mystep->render($t);
 }

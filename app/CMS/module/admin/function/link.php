@@ -1,8 +1,7 @@
 <?PHP
-global $link, $web_id, $idx;
+global $link, $idx;
 $link = \app\CMS\getCache('link');
 $idx = r::r('idx');
-$web_id = r::r('web_id');
 if(!empty($id)) {
     $link_info = \app\CMS\checkVal($link['txt'], 'id', $id);
     if($link_info==false) $link_info = \app\CMS\checkVal($link['img'], 'id', $id);
@@ -39,7 +38,7 @@ switch($method) {
             }
             \app\CMS\deleteCache('link');
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
         break;
     default:
         $content = build_page('list');
@@ -95,7 +94,6 @@ function build_page($method) {
         $tpl->assign('order_type', $order_type=='asc'?'desc':'asc');
         $tpl->assign('title', $mystep->getLanguage('admin_func_link_title'));
         $tpl->assign('idx', $idx??'');
-        $tpl->assign('web_id', $web_id??'');
     } else {
         if($method == 'edit') {
             $db->build($s->db->pre.'links')->where('id','n=',$id);
@@ -121,6 +119,9 @@ function build_page($method) {
         $idx = $record['idx'];
         $web_id = $record['web_id'];
     }
+    $tpl->assign('web_id', $web_id??'');
+    $tpl->assign('web_id_site', $web_info['web_id']);
+
     $db->build($s->db->pre.'links')->field('distinct')->field('idx');
     $db->select();
     while($record = $db->getRS()) {

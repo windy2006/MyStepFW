@@ -12,7 +12,7 @@
         <ul id="main_nav" class="navbar-nav mr-auto mt-2 mt-lg-0"></ul>
     </div>
     <ul class="nav">
-        <li class="nav-item">
+        <li class="nav-item d-inline d-sm-none d-md-inline">
             <div class="text-white-50"><span class="glyphicon glyphicon-user"></span> <!--username-->（<!--groupname-->）</div>
         </li>
         <li class="nav-item">
@@ -59,7 +59,7 @@
     </div>
 </div>
 <footer class="border-top text-center fixed-bottom bg-light pt-2 font-sm" style="max-height:60px;overflow:hidden;">
-    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2020 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
+    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
 <script type="application/javascript">
 if(self!=top) top.location.href = location.href;
@@ -277,7 +277,7 @@ function setLink() {
     });
 }
 function setTheme(idx) {
-    if(idx == null || idx == '') idx = 'default';
+    if(idx == null || idx === '') idx = 'default';
     $('#theme_css').attr('href', '<!--path_app-->asset/theme/'+idx+'.css');
     $.cookie('ms_theme', idx, {expires: 365});
     $('a[theme]').removeClass('active');
@@ -322,27 +322,60 @@ function getList(data) {
     return obj;
 }
 $(function(){
+    let web_id = '<!--web_id-->';
+    let websites = <!--websites-->;
     $.getJSON('<!--url_prefix-->api/CMS/get/admin_cat', function(data){
         if(typeof data.error==='undefined') {
-            let list = data.admin_cat;
-            let obj = null, obj_sub = null;
-            let i = 0, j = 0, n = 0;
-            for(i=list.length-1;i>=0;i--) {
-                if(list_func!==',all,' && list_func.indexOf(','+list[i].id+',')===-1) continue;
+            if(web_id==='1') {
+                let list = data.admin_cat;
+                let obj = null, obj_sub = null;
+                let i = 0, j = 0, n = 0;
+                for(i=list.length-1;i>=0;i--) {
+                    if(list_func!==',all,' && list_func.indexOf(','+list[i].id+',')===-1) continue;
+                    obj = $('' +
+                        '<li class="nav-item">\n' +
+                        '    <a class="nav-link" href="'+list[i].path+'" title="'+list[i].comment+'">'+list[i].name+'</a>\n' +
+                        '</li>');
+                    if(typeof list[i].sub!='undefined' && list[i].sub.length>0) {
+                        obj.addClass("dropdown").append('<div class="dropdown-menu"></div>');
+                        obj.find('a').addClass("dropdown-toggle").attr({'href':'#','path':list[i].path,'data-toggle':'dropdown'});
+                        obj_sub = obj.find('div');
+                        for(j=0,n=list[i].sub.length;j<n;j++) {
+                            if(list_func!==',all,' && list_func.indexOf(','+list[i].sub[j].id+',')===-1) continue;
+                            obj_sub.append('<a class="dropdown-item" href="'+list[i].sub[j].path+'">'+list[i].sub[j].name+'</a>');
+                        }
+                    }
+                    obj.prependTo('#nav > ul');
+                }
                 obj = $('' +
+                    '<li class="nav-item dropdown">\n' +
+                    '    <a class="nav-link dropdown-toggle" href="#" path="###" data-toggle="dropdown"><!--lng_admin_web--></a>\n' +
+                    '    <div class="dropdown-menu"></div>\n' +
+                    '</li>');
+                obj_sub = obj.find('div');
+                for(i=websites.length-1;i>=0;i--) {
+                    if(websites[i].domain.length < 5) {
+                        websites[i].domain = '/';
+                    } else {
+                        websites[i].domain = 'http://'+websites[i].domain;
+                    }
+                    obj_sub.prepend('<a class="dropdown-item" href="'+websites[i].domain+'" target="_blank">'+websites[i].name+'</a>');
+                }
+                obj.appendTo('#nav > ul');
+            } else {
+                let list = data.admin_cat_plat;
+                for(let i=list.length-1; i>=0; i--) {
+                    if(list_func!==',all,' && list_func.indexOf(','+list[i].id+',')===-1) continue;
+                    if(list[i].public==='0') continue;
+                    $('' +
                     '<li class="nav-item">\n' +
                     '    <a class="nav-link" href="'+list[i].path+'" title="'+list[i].comment+'">'+list[i].name+'</a>\n' +
-                    '</li>');
-                if(typeof list[i].sub!='undefined' && list[i].sub.length>0) {
-                    obj.addClass("dropdown").append('<div class="dropdown-menu"></div>');
-                    obj.find('a').addClass("dropdown-toggle").attr({'href':'#','path':list[i].path,'data-toggle':'dropdown'});
-                    obj_sub = obj.find('div');
-                    for(j=0,n=list[i].sub.length;j<n;j++) {
-                        if(list_func!==',all,' && list_func.indexOf(','+list[i].sub[j].id+',')===-1) continue;
-                        obj_sub.append('<a class="dropdown-item" href="'+list[i].sub[j].path+'">'+list[i].sub[j].name+'</a>');
-                    }
+                    '</li>').prependTo('#nav > ul');
                 }
-                obj.prependTo('#nav > ul');
+                $('' +
+                    '<li class="nav-item">\n' +
+                    '    <a class="nav-link" href="/" title="<!--lng_admin_web-->" target="_blank"><!--lng_admin_web--></a>\n' +
+                    '</li>').appendTo('#nav > ul');
             }
             setLink();
         } else {
@@ -356,6 +389,16 @@ $(function(){
             setLink();
             obj.find('.collapse').addClass('show');
             obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
+            if(web_id !== '1') $('#web_id').val(web_id).trigger('change');
+            if($("#list > nav > .nav").height() < $("#list > nav").height()-40) {
+                $("#list > div").children().hide();
+                if(web_id === '1') {
+                    $("#list > div > select").show();
+                    $("#list > nav").css('padding-top', 30);
+                } else {
+                    $("#list > nav").css('padding-top', 0);
+                }
+            }
         } else {
             alert(data.error+' - '+data.message);
         }

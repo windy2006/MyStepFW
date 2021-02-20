@@ -24,7 +24,7 @@
     </div>
 </div>
 <script type="application/javascript">
-    jQuery.vendor('jquery.powerimage', {
+    jQuery.vendor('jquery.powerImage', {
         callback:function(){
             $("#pic_container").powerImage({
                 selector: 'data-src',

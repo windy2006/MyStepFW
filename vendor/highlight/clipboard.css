@@ -6,7 +6,7 @@
     transition:all .5s ease-in;
 }
 pre.highlight[data-lng] .btn-copy {
-    top: 30px;
+    top: 5px;
 }
 div.syntaxhighlighter:hover .btn-copy,
 pre.highlight:hover .btn-copy {
@@ -16,6 +16,10 @@ div.syntaxhighlighter .btn-copy:hover,
 pre.highlight .btn-copy:hover {
     opacity:1;
 }
+div.syntaxhighlighter,
+pre.highlight {
+    margin:10px 0;
+}
 div.syntaxhighlighter:before,
 pre.highlight:before {
     content:attr(data-lng);
@@ -23,4 +27,5 @@ pre.highlight:before {
     text-transform:uppercase;
     font-weight:bold;
     opacity:0.8;
+    display:none;
 }

@@ -12,8 +12,8 @@
 
 ```html
 <link href="/path/to/jquery.parallax.css" rel="stylesheet">
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="/path/to/text/javascript" src="jquery.parallax.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="/path/to/jquery.parallax.js"></script>
 ```
 
 调用方式：

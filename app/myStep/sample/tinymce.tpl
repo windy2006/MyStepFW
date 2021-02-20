@@ -35,7 +35,7 @@ function tinymceInit(obj){
         language:'zh_CN',
         selector:obj,
         plugins: [
-            "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
+            "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak",
             "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
             "table contextmenu directionality emoticons template textcolor paste fullpage textcolor",
             "importcss"

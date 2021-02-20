@@ -40,7 +40,7 @@ switch($method) {
             $db->build($s->db->pre.'users')->field($data)->where('user_id','n=',$id);
             $db->update();
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
         break;
     default:
         $content = build_page('list');

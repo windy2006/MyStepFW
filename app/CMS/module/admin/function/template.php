@@ -93,7 +93,7 @@ switch($method) {
             $data['file_content'] = str_replace('  ', chr(9), htmlspecialchars_decode($data['file_content']));
             f::s($file, $data['file_content']);
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', 'list&idx='.$idx, r::env('REQUEST_URI'));
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', 'list&idx='.$idx, r::svr('REQUEST_URI'));
         break;
     default:
         $content = build_page('show');

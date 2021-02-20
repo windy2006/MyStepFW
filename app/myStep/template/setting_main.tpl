@@ -10,19 +10,20 @@
                     <td colspan="2" class="text-center">
                         <div class="row">
                             <div class='col-6'>
+                                <b>应用选取：</b>
+                                <select class="custom-select custom-select-sm is-valid my-1 w-50" onchange="location.href='<!--path_admin-->/setting/'+this.value">
+                                    <option value="">主框架设置</option>
+                                    <!--loop:start key="app"-->
+                                    <option value="<!--app_name-->" <!--app_selected-->><!--app_name--></option>
+                                    <!--loop:end-->
+                                </select>
+                            </div>
+                            <div class='col-6'>
                                 <b>项目选取：</b>
                                 <select class="custom-select custom-select-sm is-valid my-1 w-50" onchange="setSection(this.value)">
                                     <option value="">显示全部设置项目</option>
 <!--loop:start key="item"-->
                                     <option value="<!--item_idx-->"><!--item_name--></option>
-<!--loop:end-->
-                                </select>
-                            </div><div class='col-6'>
-                                <b>应用选取：</b>
-                                <select class="custom-select custom-select-sm is-valid my-1 w-50" onchange="location.href='<!--path_admin-->/setting/'+this.value">
-                                    <option value="">主框架设置</option>
-<!--loop:start key="app"-->
-                                    <option value="<!--app_name-->" <!--app_selected-->><!--app_name--></option>
 <!--loop:end-->
                                 </select>
                             </div>

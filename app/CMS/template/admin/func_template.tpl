@@ -66,7 +66,7 @@ $(function(){
         });
     }
     global.root_fix += 'function/template/';
-    jQuery.vendor('jquery.powerupload', {
+    jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $('#upload').powerUpload({
                 url: global.root_fix + 'upload',

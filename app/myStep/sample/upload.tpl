@@ -31,7 +31,7 @@
     </div>
 </div>
 <script type="application/javascript">
-    jQuery.vendor('jquery.powerupload', {
+    jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
             $('#receiver').powerUpload({
@@ -44,7 +44,7 @@
 
                 uploadFinished:function(i,file,result,timeDiff){
                     let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
-                    if(result.error!==0) {
+                    if(result.error!=='0') {
                         obj.html(obj.html()+' - upload failed! ('+result.message+')');
                     } else {
                         $('#list_file').removeClass('d-none');

@@ -259,6 +259,10 @@ function setPrefix(cat_id) {
     }
 }
 $(function(){
+    let web_id = '<!--web_id_site-->';
+    if(web_id !== '1') {
+        $('select[name=web_id]').val(web_id).parent().hide();
+    }
     $('#show_cat').click(function(){
         $('.cat_ext').slideToggle();
     });

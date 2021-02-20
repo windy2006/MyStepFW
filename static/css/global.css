@@ -1,6 +1,7 @@
 * {font-size:14px;}
 .font-sm{font-size:12px;}
 .font-md{font-size:16px;}
+.font-lg{font-size:24px;}
 .bg-transparent-half{background-color:rgba(255,255,255,0.5);}
 .rb {border:1px red solid;}
 td {vertical-align: middle;word-break:break-all;word-wrap:break-word;}

@@ -13,6 +13,7 @@ return array (
     'page_register_failed' => 'User register failed!',
     'page_profile_changed' => 'User profile has been modified!',
     'page_user_activate' => 'User has been activated!',
+    'page_return' => 'Return to Catalog',
 
     'admin_update_done' => 'Online Update',
     'admin_update_sql' => '%d SQL query has been executed!',
@@ -30,7 +31,8 @@ return array (
     'admin_psw_desc_addon' => ' (If no need to change, just keep the blank empty)',
     'admin_nopower' => 'You havn\'t the power to make current operation!',
     'admin_database_error' => 'Error occurs when write to database, check the error please!',
-    'admin_all_web' => 'All Websties',
+    'admin_all_web' => 'All Websites',
+    'admin_web' => 'Website',
 
     'admin_art_catalog_delete' => 'Delecte Catalog',
     'admin_art_catalog_change' => 'Reorder Catalog',

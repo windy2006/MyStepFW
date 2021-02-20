@@ -4,7 +4,7 @@ if(!file_exists(ROOT.'readme.md')) {
 }
 $md = new Erusev\Parsedown\Parsedown();
 $guide = myFile::getLocal(ROOT.'readme.md');
-$guide = str_replace(chr(13), '', $guide);
+$guide = str_replace(['<','>',chr(13)],['&lt;','&gt;',''], $guide);
 $guide = preg_split('#[\n]{2,}#', $guide);
 $detail = array();
 for($i=0,$m=count($guide);$i<$m;$i++) {
@@ -12,7 +12,7 @@ for($i=0,$m=count($guide);$i<$m;$i++) {
     $guide[$i] = preg_replace('#\n[\-]{5,}#', '', $guide[$i]);
     $lines = explode(chr(10), $guide[$i]);
     $the_line = array();
-    $detail[$i]['section'] = str_replace('：', '', $lines[0]);
+    $detail[$i]['section'] = $lines[0];
     $detail[$i]['detail'] = array();
     for($j=1, $n=count($lines);$j<$n;$j++) {
         $lines[$j] = preg_replace('#^\- #', '', $lines[$j]);

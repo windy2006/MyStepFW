@@ -7,9 +7,9 @@ $setting['gen']['language'] = 'default';
 $setting['gen']['close'] = '';
 
 $setting['web'] = array();
-$setting['web']['title'] = 'MyStep 开源网站内容管理系统';
+$setting['web']['title'] = '迈思内容管理系统';
 $setting['web']['keyword'] = 'mystep,cms,free';
-$setting['web']['description'] = '开源网站内容管理系统';
+$setting['web']['description'] = 'MyStep 开源网站内容管理系统';
 
 $setting['template'] = array();
 $setting['template']['style'] = 'default';

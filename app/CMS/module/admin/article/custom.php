@@ -1,5 +1,6 @@
 <?PHP
-global $web_id;
+global $web_cur;
+if($web_id===1) $web_id = r::r('web_id');
 if(!empty($id)) {
     $db->build($s->db->pre.'info')
         ->field('web_id')
@@ -12,9 +13,13 @@ if(!empty($id)) {
     } else {
         myStep::info('admin_art_custom_error');
     }
-} else {
-    $web_id = r::g('web_id');
 }
+if(($web_cur = \app\CMS\checkVal($website, 'web_id', $web_id))!==false) {
+    $web_cur['setting'] = new myConfig(PATH.'website/config_'.$web_cur['idx'].'.php');
+} else {
+    $web_cur = $web_info;
+}
+
 switch($method) {
     case 'add':
     case 'edit':
@@ -46,7 +51,7 @@ switch($method) {
                 ->where('id', 'n=', $id);
             $db->update();
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::env('REQUEST_URI'));
+        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
         break;
     default:
         $content = build_page('list');
@@ -54,7 +59,7 @@ switch($method) {
 
 function build_page($method) {
     global $mystep, $tpl_setting, $s, $db;
-    global $id, $web_id, $website, $group_info;;
+    global $id, $web_id, $website, $web_info, $group_info;;
 
     $tpl_setting['name'] = 'art_custom_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
@@ -100,6 +105,7 @@ function build_page($method) {
     }
     $db->free();
     $tpl->assign('web_id', $web_id??'');
+    $tpl->assign('web_id_site', $web_info['web_id']);
     setWeb($tpl, $web_id);
     return $mystep->render($tpl);
 }

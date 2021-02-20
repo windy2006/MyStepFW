@@ -11,9 +11,9 @@
 下载并复制 jquery.resizeImg.js，mobileBUGFix.mini.js 到网站目录，同时也需要事先准备好 jQuery 框架。
 
 ```html
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="/path/to/text/javascript" src="jquery.resizeImg.js"></script>
-<script type="/path/to/text/javascript" src="mobileBUGFix.mini.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="/path/to/jquery.resizeImg.js"></script>
+<script type="text/javascript" src="/path/to/mobileBUGFix.mini.js"></script>
 ```
 
 调用方式：

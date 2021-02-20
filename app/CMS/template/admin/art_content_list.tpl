@@ -80,6 +80,10 @@
 </div>
 <script type="application/javascript">
 $(function(){
+    let web_id = '<!--web_id_site-->';
+    if(web_id !== '1') {
+        $('#web_id').val(web_id).parent().hide();
+    }
     $('#web_id').change(function(){
         location.href=global.root_fix+'?web_id='+this.value;
     });
@@ -95,7 +99,7 @@ $(function(){
         location.href=global.root_fix+'?web_id=<!--web_id-->&keyword='+$('input[name=keyword]').val();
     });
     $('input[name=jump]').keypress(function(e){
-        if(e.keyCode==13) {
+        if(e.keyCode===13) {
             location.href=global.root_fix+'?web_id=<!--web_id-->&keyword=<!--keyword-->&order=<!--order-->&order_type=<!--order_type_org-->&page='+this.value;
         }
     });
@@ -115,6 +119,7 @@ $(function(){
                 window.parent.setLink();
                 obj.find('.collapse').addClass('show');
                 obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
+                if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
             } else {
                 alert(data.err);
             }

@@ -6,7 +6,7 @@ class cms extends myStep {
      * 登录
      * @param string $usr
      * @param string $pwd
-     * @return bool|int
+     * @return int
      */
     public function login($usr='', $pwd='') {
         if(parent::login($usr, $pwd)) {
@@ -20,9 +20,14 @@ class cms extends myStep {
         } else {
             $ms_user = myReq::cookie('ms_cms_op');
         }
-        $result = false;
+        $result = 0;
         if(!empty($ms_user)) {
             list($usr, $pwd) = explode(chr(9), $ms_user);
+            if($usr == $this->setting->gen->s_usr && $pwd == $this->setting->gen->s_pwd) {
+                r::s('ms_cms_op', $usr);
+                r::s('ms_cms_group', 1);
+                return 1;
+            }
             global $db, $s;
             $db->build($s->db->pre.'sys_op')
                 ->field('group_id')

@@ -11,6 +11,7 @@ use {db_name};
 # 新闻描述
 CREATE TABLE `{pre}news_show` (
     `news_id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `idx` Char(32) NOT NULL COMMENT '标题hash',
     `cat_id` SMALLINT UNSIGNED NOT NULL COMMENT '新闻类型索引',
     `web_id` TINYINT UNSIGNED DEFAULT 0 COMMENT '所属子站',
     `subject` Char(200) NOT NULL COMMENT '新闻标题',

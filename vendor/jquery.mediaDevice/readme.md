@@ -13,8 +13,8 @@
 下载并复制 jquery.mediaDevice.js 到网站目录，同时也需要事先准备好 jQuery 框架。
 
 ```html
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="/path/to/jquery.mediaDevice.js"></script>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="/path/to/jquery.mediaDevice.js"></script>
 ```
 
 包含组件：
