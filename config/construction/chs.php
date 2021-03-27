@@ -38,7 +38,7 @@ $setting_detail['gen'] = array(
             'name' => '管理密码',
             'name2' => '重复密码',
             'describe' => '请确认密码的安全可靠',
-            'type' => array('password_md5', '', '40')
+            'type' => array('password', 'md5', '40')
         ),
         'close' => array(
             'name' => '关闭页面',
@@ -194,6 +194,11 @@ $setting_detail['cookie'] = array(
             'name' => 'Cookie前缀',
             'describe' => '存储Cookie的变量前缀，用于防止用户密码欺骗',
             'type' => array('text', 'alpha', '10')
+        ),
+        'domain' => array(
+            'name' => '作用域名',
+            'describe' => 'Cookie仅在该域名下生效',
+            'type' => array("text", "", "20")
         ),
     ]
 );

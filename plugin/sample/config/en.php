@@ -31,7 +31,7 @@ return array(
             'name' => 'Password test',
             'name2' => 'Re-input',
             'describe' => 'Input the same password twice, 15 characters as max',
-            'type' => array('password', '', '15')
+            'type' => array('password', 'md5', '6-10')
         ),
         'para_7' => array(
             'name' => 'Switch test',

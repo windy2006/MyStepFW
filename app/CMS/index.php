@@ -1,11 +1,12 @@
 <?PHP
-if(!empty($s->gen->close)) cms::redirect($s->gen->close);
+if(!empty($S->gen->close)) cms::redirect($S->gen->close);
 $mystep->regTag('news', 'app\CMS\parseNews');
 $mystep->regTag('news_next', 'app\CMS\parseNewsNext');
 $mystep->regTag('info', 'app\CMS\parseInfo');
 $mystep->regTag('link', 'app\CMS\parseLink');
 $mystep->regTag('tag', 'app\CMS\parseTag');
 $mystep->regTag('catalog', 'app\CMS\parseCatalog');
+$mystep->regTag('pages', 'app\CMS\parsePages');
 
 $module = $info_app['path'][0] ?? 'index';
 $user_info = \app\CMS\getUserInfo();
@@ -19,8 +20,8 @@ if($tpl_cache) {
     $tpl_cache['path'] .= trim(implode('/', $info_app['path']), '/');
     $tpl_cache['path'] = str_replace('/article/', '/catalog/', $tpl_cache['path']);
     $tpl_cache['name'] = implode('_', $info_app['para']);
-    $tpl_cache['expire'] = $s->expire->$module;
-    if(is_null($tpl_cache['expire'])) $tpl_cache['expire'] = $s->expire->default;
+    $tpl_cache['expire'] = $S->expire->$module;
+    if(is_null($tpl_cache['expire'])) $tpl_cache['expire'] = $S->expire->default;
 }
 $tpl = new myTemplate($tpl_setting, $tpl_cache);
 if(!in_array($module, ['article','tag','user'])) $mystep->checkCache($tpl);

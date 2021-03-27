@@ -1,14 +1,14 @@
 <?PHP
 if(myReq::check('post')) {
     global $router;
-    $name = myReq::p('name');
-    $route = myReq::p('route');
-    $plugin = myReq::p('plugin');
+    $name = myReq::post('name');
+    $route = myReq::post('route');
+    $plugin = myReq::post('plugin');
     myFile::del(CONFIG.'route.php');
     for($i=0,$m=count($name);$i<$m;$i++) {
         myFile::saveFile(APP.$name[$i].'/route.php', $route[$i]);
         myFile::saveFile(APP.$name[$i].'/plugin.php', '<?PHP'.chr(10).'return '.var_export(explode(',', $plugin[$i]), true).';');
-        $s->merge(APP.$name[$i].'/config.php');
+        $ms_setting->merge(APP.$name[$i].'/config.php');
         $router->checkRoute(CONFIG.'route.php', APP.$name[$i].'/route.php', $name[$i]);
     }
     if(is_file(CONFIG.'route_plugin.php')) {

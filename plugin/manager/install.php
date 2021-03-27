@@ -149,7 +149,6 @@ function GetFileSize($para) {
     return $filesize;
 }
 
-
 $step = isset($_GET['step']) ? $_GET['step'] : 1;
 switch($step) {
     case 1:
@@ -253,5 +252,11 @@ myStep;
         $mypack->DoIt();
         unset($mypack);
         @unlink($pack_file);
+        $empty = '<?PHP
+return array();        
+';
+        WriteFile('config/domain.php', $empty);
+        WriteFile('config/route_plugin.php', $empty);
+        WriteFile('config/route.php', '');
         echo 'done';
 }

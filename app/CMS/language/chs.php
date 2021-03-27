@@ -8,6 +8,8 @@ return array(
     'page_article_expired' => '指定文章已过期',
     'page_nopower' => '无权浏览此文章！',
     'page_original' => '网络',
+    'page_search' => '内容检索',
+    'page_search_error' => '检索关键字过短',
     'page_show_all' => '显示全部',
     'page_registered' => '用户注册成功，请查收确认邮件并激活！',
     'page_register_failed' => '用户注册失败！',

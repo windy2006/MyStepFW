@@ -17,6 +17,7 @@ global.root_fix = global.root_fix.replace(/\/+/g, '/');
 global.editor_btn = '';
 global.alert_leave = false;
 global.func = [];
+global.mobile = isMobile().any;
 
 //获取当前路径（可自定义目录层级）
 function getPath(lvl) {
@@ -320,22 +321,12 @@ function watermark(obj, rate, copyright, char_c, jam_tag) {
 //移动设备判断
 function isMobile() {
     let isMobile = {
-        Android: function () {
-            return navigator.userAgent.match(/Android/i) ? true : false;
-        },
-        BlackBerry: function () {
-            return navigator.userAgent.match(/BlackBerry/i) ? true : false;
-        },
-        iOS: function () {
-            return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
-        },
-        Windows: function () {
-            return navigator.userAgent.match(/IEMobile/i) ? true : false;
-        },
-        any: function () {
-            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
-        }
+        Android: (navigator.userAgent.match(/Android/i) ? true : false),
+        BlackBerry: (navigator.userAgent.match(/BlackBerry/i) ? true : false),
+        iOS: (navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false),
+        Windows: (navigator.userAgent.match(/IEMobile/i) ? true : false)
     };
+    isMobile.any = (isMobile.Android || isMobile.BlackBerry || isMobile.iOS || isMobile.Windows);
     return isMobile;
 }
 

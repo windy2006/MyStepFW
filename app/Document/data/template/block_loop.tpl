@@ -1,5 +1,5 @@
 <ul>
-    <li><!--name--></li>
+    <li><!--name--> - <!--author--></li>
 <!--loop:start-->
     <li style="<!--news_style-->">
         <em><!--news_catalog--></em>

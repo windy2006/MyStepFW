@@ -1,20 +1,20 @@
 <?PHP
 $years = [];
-$the_year = r::r('y');
-$the_month = r::r('m');
+$the_year = myReq::request('y');
+$the_month = myReq::request('m');
 $list = myFile::find('*', FILE, false, 1);
-$m = r::g('m');
+$m = myReq::get('m');
 $empty = true;
 if($m=='del') {
-    $idx = r::g('idx');
+    $idx = myReq::get('idx');
     list($the_year, $the_month, $the_file) = explode('/', $idx);
-    if($the_file!='log.txt') f::del(FILE.$idx);
+    if($the_file!='log.txt') myFile::del(FILE.$idx);
 }
 if($list===false) $list = [];
 for($i=0,$m=count($list);$i<$m;$i++) {
     $tmp = myFile::find('log.txt', $list[$i], true, 2);
     if(empty($tmp)) {
-        f::del($list[$i]);
+        myFile::del($list[$i]);
     } else {
         if(empty($the_year) && empty($years)) $the_year = basename($list[$i]);
         $years[] = basename($list[$i]);
@@ -32,7 +32,7 @@ if(!empty($years)) {
     for($i=0,$m=count($list);$i<$m;$i++) {
         $tmp = myFile::find('log.txt', $list[$i], true, 2);
         if(empty($tmp)) {
-            f::del($list[$i]);
+            myFile::del($list[$i]);
         } else {
             if(empty($the_month) && empty($months)) $the_month = basename($list[$i]);
             $months[] = basename($list[$i]);
@@ -45,7 +45,7 @@ if(!empty($years)) {
         }
     }
     $files = myFile::getTree(FILE.$the_year.'/'.$the_month);
-    $the_log = f::g(FILE.$the_year.'/'.$the_month.'/log.txt');
+    $the_log = myFile::getLocal(FILE.$the_year.'/'.$the_month.'/log.txt');
     if(strlen($the_log)>10) {
         foreach($files as $k => $v) {
             if($k=='log.txt') continue;
@@ -67,7 +67,7 @@ if(!empty($years)) {
         }
         if(strlen($the_log)>0) {
             $list = explode(chr(10), $the_log);
-            $the_log = f::g(FILE.$the_year.'/'.$the_month.'/log.txt');
+            $the_log = myFile::getLocal(FILE.$the_year.'/'.$the_month.'/log.txt');
             for($i=0,$m=count($list);$i<$m;$i++) {
                 if(strpos($list[$i], '::')===false) continue;
                 $tmp = [
@@ -82,10 +82,10 @@ if(!empty($years)) {
                 $t->setLoop('files', $tmp);
                 $the_log = str_replace($list[$i].chr(10), '', $the_log);
             }
-            f::s(FILE.$the_year.'/'.$the_month.'/log.txt', $the_log);
+            myFile::saveFile(FILE.$the_year.'/'.$the_month.'/log.txt', $the_log);
         }
     } else {
-        f::del(FILE.$the_year.'/'.$the_month);
+        myFile::del(FILE.$the_year.'/'.$the_month);
     }
 }
 $t->setIf('empty',  $empty);

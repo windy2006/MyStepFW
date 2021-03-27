@@ -216,15 +216,15 @@ class myRouter extends myBase {
             $info_app['route'] = $url_fix.$this->route['p'];
             myReq::globals('info_app', $info_app);
 
-            global $s;
+            global $ms_setting;
             if(is_file(APP.$info_app['app'].'/config.php')) {
-                $s->merge(APP.$info_app['app'].'/config.php');
+                $ms_setting->merge(APP.$info_app['app'].'/config.php');
             }
             if(is_file(APP.$info_app['app'].'/config_'.$path.'.php')) {
-                $s->merge(APP.$info_app['app'].'/config_'.$path.'.php');
+                $ms_setting->merge(APP.$info_app['app'].'/config_'.$path.'.php');
             }
             if(isset($info_app['para']['ms_app']) && is_dir(APP.$info_app['para']['ms_app'])) {
-                if(is_file(APP.$info_app['para']['ms_app'].'/config.php')) $s->merge(APP.$info_app['para']['ms_app'].'/config.php');
+                if(is_file(APP.$info_app['para']['ms_app'].'/config.php')) $ms_setting->merge(APP.$info_app['para']['ms_app'].'/config.php');
             }
             myStep::setPara();
             if(is_array($rule['method'])) {

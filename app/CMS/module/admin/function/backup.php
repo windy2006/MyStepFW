@@ -16,7 +16,7 @@ if(myReq::check('post')) {
         case 'import':
             cms::$log = $mystep->getLanguage('admin_func_backup_import');
             $path = CACHE.'tmp/';
-            $upload = new myUploader($path, true, $s->upload->ban_ext);
+            $upload = new myUploader($path, true, $S->upload->ban_ext);
             $upload->do(false);
 
             if(count($upload->result)>0) {
@@ -128,7 +128,7 @@ if(myReq::check('post')) {
                     }
                 }
             } else {
-                $db->query('optimize table '.$s->db->name.'.'.$the_tbl);
+                $db->query('optimize table '.$S->db->name.'.'.$the_tbl);
                 $record = $db->getRS();
                 $op_info .= '<h6>'.$record['Table'].' - <i>'.$record['Msg_text'].'</i></h6>';
             }
@@ -150,7 +150,7 @@ if(myReq::check('post')) {
                     }
                 }
             } else {
-                $record = $db->query('repair table '.$s->db->name.'.'.$the_tbl);
+                $record = $db->query('repair table '.$S->db->name.'.'.$the_tbl);
                 $record = $db->getRS();
                 $op_info .= '<h6>'.$record['Table'].' - <i>'.$record['Msg_text'].'</i></h6>';
             }

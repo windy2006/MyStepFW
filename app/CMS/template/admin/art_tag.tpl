@@ -46,21 +46,7 @@
         </table>
     </div>
     <nav>
-        <ul class="pagination pagination-sm justify-content-center">
-            <li class="page-item"><a class="page-link" href="<!--link_first-->">首页</a></li>
-            <li class="page-item"><a class="page-link" href="<!--link_prev-->">上页</a></li>
-            <li class="page-item"><a class="page-link" href="<!--link_next-->">下页</a></li>
-            <li class="page-item"><a class="page-link" href="<!--link_last-->">末页</a></li>
-            <li>
-                <div class="input-group input-group-sm mb-2 mr-sm-2">
-                    <input type="text" class="form-control" name="jump" size="2" value="<!--page_current-->" style="text-align:center" />
-                    <div class="input-group-append">
-                        <button class="btn btn-light btn-outline-secondary" name="jump" type="button">跳页</button>
-                    </div>
-                </div>
-            </li>
-            <li class="pl-4 pt-1"> 【 共 <!--page_count--> 页，  <!--record_count--> 条记录 】</li>
-        </ul>
+        <!--pages query='$query' count='$count' page='$page' size='$page_size'-->
     </nav>
 </div>
 <script type="application/javascript">

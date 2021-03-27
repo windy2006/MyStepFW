@@ -16,6 +16,10 @@ if(!empty($id)) {
     }
     $web_cur = \app\CMS\checkVal($website, 'web_id', $id);
 }
+$domain = [];
+if(is_file(CONFIG.'domain.php')) {
+    $domain = include(CONFIG.'domain.php');
+}
 switch($method) {
     case 'add':
     case 'edit':
@@ -27,17 +31,17 @@ switch($method) {
         if(isset($web_cur['idx'])) {
             $cfg_file = PATH.'website/config_'.$web_cur['idx'].'.php';
             $config = new myConfig($cfg_file);
-            if($s->db->pre!=$config->db->pre) {
+            if($S->db->pre!=$config->db->pre) {
                 $db->drop($config->db->pre.'news_show', 'table');
                 $db->drop($config->db->pre.'news_detail', 'table');
                 $db->drop($config->db->pre.'news_tag', 'table');
-                $db->query('delete from '.$s->db->pre.'news_cat where web_id='.intval($id));
+                $db->query('delete from '.$S->db->pre.'news_cat where web_id='.intval($id));
             } else {
-                $db->build($s->db->pre.'news_cat')
+                $db->build($S->db->pre.'news_cat')
                     ->field(['web_id'=>1])
                     ->where('web_id','n=',$id);
                 $db->update();
-                $db->build($s->db->pre.'news_show')
+                $db->build($S->db->pre.'news_show')
                     ->field(['web_id'=>1])
                     ->where('web_id','n=',$id);
                 $db->update();
@@ -45,10 +49,9 @@ switch($method) {
             f::del($cfg_file);
             f::del(CACHE.'app/'.$info_app['app']);
             f::del(CACHE.'template/'.$info_app['app']);
-            $db->build($s->db->pre.'website')
+            $db->build($S->db->pre.'website')
                 ->where('web_id','n=',$id);
             $db->delete();
-            $domain = include(CONFIG.'domain.php');
             unset($domain[$web_cur['domain']]);
             myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
             \app\CMS\deleteCache('website');
@@ -65,14 +68,13 @@ switch($method) {
         $setting = $data['setting'];
         unset($data['setting']);
         $data['name'] = $setting['web']['title'];
-        $domain = include(CONFIG.'domain.php');
         if($method=='add_ok') {
             if(($tmp = \app\CMS\checkVal($website, 'idx', $data['idx']))!==false) {
                 myStep::info('admin_web_subweb_same_idx');
             }
-            if($s->db->pre!=$setting['db']['pre']) {
+            if($S->db->pre!=$setting['db']['pre']) {
                 $strFind = array('{db_name}', '{pre}', '{charset}', '{domain}', '{idx}');
-                $strReplace = array($s->db->name, $setting['db']['pre'], $s->db->charset, $data['domain'], $data['idx']);
+                $strReplace = array($S->db->name, $setting['db']['pre'], $S->db->charset, $data['domain'], $data['idx']);
                 $info = $db->file(PATH.'module/admin/subweb.sql', $strFind, $strReplace);
             }
         } else {
@@ -86,7 +88,7 @@ switch($method) {
         $config = new myConfig(PATH.'website/config_'.$data['idx'].'.php');
         $config->set($setting);
         $config->save('php');
-        $db->build($s->db->pre.'website')
+        $db->build($S->db->pre.'website')
             ->field($data);
         $db->replace();
         \app\CMS\deleteCache('website');
@@ -99,13 +101,13 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db, $id;
+    global $mystep, $tpl_setting, $S, $db, $id;
 
     $tpl_setting['name'] = 'set_subweb_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false, true);
 
     if($method == 'list') {
-        $db->build($s->db->pre.'website')
+        $db->build($S->db->pre.'website')
             ->order('web_id');
         $db->select();
         while($record = $db->getRS()) {
@@ -121,7 +123,7 @@ function build_page($method) {
     } else {
         $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_web_subweb_add':'admin_web_subweb_edit'));
         if($method == 'edit') {
-            $db->build($s->db->pre.'website')
+            $db->build($S->db->pre.'website')
                 ->where('web_id', 'n=', $id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_web_subweb_error');
@@ -134,7 +136,7 @@ function build_page($method) {
             $cfg_file = PATH.'website/config_main.php';
         }
         $config = new myConfig($cfg_file);
-        $builder = PATH.'website/config/'.$s->gen->language.'.php';
+        $builder = PATH.'website/config/'.$S->gen->language.'.php';
 
         $files = myFile::find('', PATH.'language', false, myFile::FILE);
         $files = array_map(function($v){return str_replace('.php', '', basename($v));}, $files);

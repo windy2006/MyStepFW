@@ -61,20 +61,23 @@ class myString {
 
     /**
      * 构造函数
-     * @param $str 默认字符串，用于各类内操作
+     * @param $str //默认字符串，用于各类内操作
      */
     public function __construct($str='') {
         $this->str = $str;
         $this->charset = self::charset($str);
-        return;
     }
 
     /**
      * 作为字符串显示时的操作
-     * @return 默认字符串
+     * @return array|string
      */
     public function __toString() {
-        return $this->get();
+        if(is_callable($this->func_str)) {
+            return call_user_func($this->func_str, $this);
+        } else {
+            return $this->str;
+        }
     }
 
     /**
@@ -88,7 +91,7 @@ class myString {
     /**
      * 返回指定字符集的默认字符串
      * @param string $charset
-     * @return 默认字符串
+     * @return array|string
      */
     public function get($charset='') {
         if(!empty($charset) && $charset != $this->charset) {
@@ -151,6 +154,19 @@ class myString {
         return $hex;
     }
 
+    /**
+     * 将16进制转换为字符串
+     * @param $hex
+     * @return string
+     */
+    public static function fromHex($hex) {
+        $str='';
+        for($i=0,$m=strlen($hex)-1; $i<$m; $i+=2) {
+            $str .= chr(hexdec($hex[$i].$hex[$i+1]));
+        }
+        return $str;
+    }
+
      /**
      * 将ini文件转换为数组
      * @param $ini
@@ -188,20 +204,6 @@ class myString {
             $result .= chr(10);
         }
         return $result;
-    }
-
-
-    /**
-     * 将16进制转换为字符串
-     * @param $hex
-     * @return string
-     */
-    public static function fromHex($hex) {
-        $str='';
-        for($i=0,$m=strlen($hex)-1; $i<$m; $i+=2) {
-            $str .= chr(hexdec($hex[$i].$hex[$i+1]));
-        }
-        return $str;
     }
 
     /**
@@ -369,7 +371,7 @@ class myString {
         $content = str_replace('    ', '&nbsp; ', $content);
         $content = str_replace("\r\n", chr(10), $content);
         $content = str_replace(chr(10), "<br />\n", $content);
-        $content = str_replace("\t", ' &nbsp; &nbsp; &nbsp; &nbsp;', $content);
+        $content = str_replace("\t", ' &nbsp; &nbsp;', $content);
         return $content;
     }
 

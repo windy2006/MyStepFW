@@ -37,7 +37,7 @@
                 <span class="sidebar-go sidebar-go-top glyphicon glyphicon-circle-arrow-up" title="滚动到顶部" data-placement="right"></span>
                 <span class="sidebar-go sidebar-go-down glyphicon glyphicon-circle-arrow-down" title="滚动到底部" data-placement="right"></span>
             </div>
-            <nav class="sidebar sidebar-offcanvas" id="sidebar" style="padding-top:70px"></nav>
+            <nav id="sidebar"></nav>
         </div>
         <div id="bar" class="px-2 border bg-light"><span class="fa fa-angle-double-right"></span></div>
         <div id="main" class="p-0 pt-2">
@@ -382,23 +382,28 @@ $(function(){
             alert(data.error+' - '+data.message);
         }
     });
+    let sidebar_top = 70;
     $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
         if(typeof data.error==='undefined') {
             let obj = $('#sidebar');
             obj.append(getList(data).removeClass('sub-menu'));
+            obj.css('height', '0');
             setLink();
             obj.find('.collapse').addClass('show');
             obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-            if(web_id !== '1') $('#web_id').val(web_id).trigger('change');
-            if($("#list > nav > .nav").height() < $("#list > nav").height()-40) {
-                $("#list > div").children().hide();
-                if(web_id === '1') {
-                    $("#list > div > select").show();
-                    $("#list > nav").css('padding-top', 30);
-                } else {
-                    $("#list > nav").css('padding-top', 0);
-                }
+            if(web_id !== '1') {
+                $('#web_id').val(web_id).trigger('change').hide();
+                $('.sidebar-go-top').css('top', 4);
+                $('.sidebar-go-down').css('top', 22);
+                sidebar_top -= 28;
             }
+            if($("#sidebar").height() > $("#sidebar > .nav").height()) {
+                $("#list > div").hide();
+                sidebar_top = 0;
+            } else {
+                $('button[name=collapse]').trigger('click');
+            }
+            $('#sidebar').css('padding-top', sidebar_top);
         } else {
             alert(data.error+' - '+data.message);
         }
@@ -412,17 +417,17 @@ $(function(){
         clearInterval(global.timer);
     });
     $('#sidebar').mousewheel(function(e){
-        if($('#sidebar').height() > $('#sidebar .nav').height()) return;
+        if($('#sidebar').height() > $('#sidebar > .nav').height() + sidebar_top) return;
         let obj = $(this);
         let top = obj.position().top;
         let step = 5;
         let d = e.deltaY;
         if(d<0) {
-            if(obj.height()+top>$(window).height()-$('header').height()-$('body').height()/3) {
+            if(obj.find(".nav").height()+top > $(window).height()-$('header').height()-$('body').height()/5) {
                 obj.css('top', top-step);
             }
         } else {
-            if(obj.position().top<0) {
+            if(obj.position().top < 0) {
                 if(top>-step) step = -top;
                 obj.css('top', top+step);
             }
@@ -434,7 +439,10 @@ $(function(){
         $('#sidebar').animate({'top':0});
     });
     $('#list .sidebar-go-down').click(function(){
-        $('#sidebar').animate({'top':$(window).height()-$('header').height()-$('#sidebar').height()-$('body').height()/3});
+        let obj = $('#sidebar');
+        obj.find('.collapse').addClass('show');
+        obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
+        obj.animate({'top': $(window).height() - $('header').height() - $('#sidebar > .nav').height() - $('body').height()/5});
     });
     $('body').css('overflow','hidden');
     $('#bar').click(function(e){
@@ -488,6 +496,7 @@ $(function(){
         obj.find('.collapse').removeClass('show');
         obj.find('.menu-arrow').addClass('collapsed').attr('aria-expanded', false);
     });
+    $('#sidebar').css('padding-top', sidebar_top);
     $(window).resize(resizeMain);
     setTheme($.cookie('ms_theme'));
     $('body').disableSelection();

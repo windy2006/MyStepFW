@@ -37,7 +37,6 @@ MySQL查询类
     $mysql->optTabs()                            // Optimize the Tables of Selected Database
     $mysql->getStat()                            // Get the Current Status of MySQL
     $mysql->getProcesses($mode, $time_limit)     // Get the processes list of MySQL
-    $mysql->build($tbl, $join)                   // Set or get a SQL builder to create a sql script
     $mysql->create($name, $para, $type)          // Create Object
     $mysql->drop($name, $para, $type)            // Drop Object
     $mysql->select()                             // Build a select query use the SQL builder and execute it
@@ -81,7 +80,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $this->user = $user;
         $this->pwd = $pwd;
         $this->charset = $charset;
-        return;
+        $this->delimiter = '`';
     }
 
     /**
@@ -207,14 +206,14 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * @param int $mode
      * @return array|bool|null
      */
-    public function getRS($mode = 1) {
+    public function getRS($mode = 2) {
         if(!$this->check('result')) return false;
         switch($mode) {
             case 1:
-                $flag = ($row = mysqli_fetch_assoc($this->result));
+                $flag = ($row = mysqli_fetch_row($this->result));
                 break;
             case 2:
-                $flag = ($row = mysqli_fetch_row($this->result));
+                $flag = ($row = mysqli_fetch_assoc($this->result));
                 break;
             case 3:
                 $flag = ($row = mysqli_fetch_array($this->result));
@@ -225,83 +224,6 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $this->sql = 'none(Get Recordset)';
         if($this->checkError())    $this->error('Error Occur in Get Recordset !');
         return ($flag?$row:false);
-    }
-
-    /**
-     * 返回单一结果集
-     * @param $sql
-     * @param int $mode
-     * @return array|bool|null
-     */
-    public function record($sql='', $mode = 1) {
-        if(empty($sql)) $sql = $this->select(1);
-        if(stripos($sql, 'select')===0 && stripos($sql, 'limit ')==false) $sql .= ' limit 1';
-        $key = md5($sql);
-        if(($result = $this->getCache($key))===false) {
-            $row_num = $this->query($sql);
-            if($row_num>0) {
-                $result = $this->getRS($mode);
-                $this->writeCache($key, $result);
-            }
-            $this->free();
-        }
-        $this->build('[reset]');
-        return $result;
-    }
-
-    /**
-     * 放回全部结果集
-     * @param $sql
-     * @param int $mode
-     * @return array
-     */
-    public function records($sql='', $mode = 1) {
-        if(!empty($sql) && strpos($sql, ' ')==false) {
-            $this->build($sql);
-            $sql = '';
-        }
-        if(empty($sql)) $sql = $this->select(1);
-        $key = md5($sql);
-        if(($result = $this->getCache($key))===false) {
-            $this->query($sql);
-            while($result[] = $this->getRS($mode)) {}
-            array_pop($result);
-            if(!empty($result)) $this->writeCache($key, $result);
-            $this->free();
-        }
-        $this->build('[reset]');
-        return $result;
-    }
-
-    /**
-     * 返回单一结果值
-     * @param string $sql
-     * @return array|bool|mixed|null
-     */
-    public function result($sql='') {
-        if(empty($sql)) $sql = $this->select(1);
-        $key = md5($sql);
-        if(($result = $this->getCache($key))===false) {
-            if($result = $this->record($sql, 2)) {
-                $result = $result[0];
-                $this->writeCache($key, $result);
-            } else {
-                $result = false;
-            }
-            $this->free();
-        }
-        $this->build('[reset]');
-        return $result;
-    }
-
-    /**
-     * 返回当前查询的结果数
-     * @param $sql
-     */
-    public function count($sql='') {
-        if(empty($sql)) $sql = $this->select(1);
-        $sql = preg_replace('#limit[\s\d, ]+$#', '', $sql);
-        return $this->result('select count(*) from ('.$sql.') as cnt');
     }
 
     /**
@@ -348,7 +270,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
     public function getCreateScript($the_tbl, $the_db='') {
         if(empty($the_db)) $the_db = $this->db;
         $this->query('SHOW TABLE STATUS FROM `'.$this->safeName($the_db).'` LIKE \''.$this->safeName($the_tbl).'\'');
-        $row = $this->getRS(1);
+        $row = $this->getRS(2);
         $result = '#Table Name: '.$row['Name'].chr(10).
                             '# Create Time: '.$row['Create_time'].chr(10).
                             '# Update Time: '.$row['Update_time'].chr(10);
@@ -367,8 +289,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         if(empty($the_db)) $the_db = $this->db;
         $this->query('SELECT * FROM `'.$this->safeName($the_db).'`.`'.$this->safeName($the_tbl).'`');
         $result = '';
-        while($row = $this->getRS(2)) {
-
+        while($row = $this->getRS(1)) {
             $result .= 'INSERT INTO `'.$the_tbl.'` VALUES (';
             for($i=0,$m=count($row); $i<$m; $i++) {
                 $result .= '"'.$this->safeValue($row[$i]).'", ';
@@ -389,7 +310,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         if(empty($the_db)) $the_db = $this->db;
         $idxes = array();
         $this->query('SHOW INDEX FROM `'.$this->safeName($the_db).'`.`'.$this->safeName($the_tbl).'`');
-        while($row = $this->getRS(0)) {
+        while($row = $this->getRS(2)) {
             if($row['Key_name'] != 'PRIMARY') {
                 $tmp = '`'.$row['Column_name'].'`';
                 if($row['Sub_part'] != '') $tmp .= '('.$row['Sub_part'].')';
@@ -413,7 +334,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
     public function getDBs() {
         $dbs = array();
         $this->query('SHOW DATABASES');
-        while($row = $this->getRS(2)) {
+        while($row = $this->getRS(1)) {
             $dbs[] = $row[0];
         }
         $this->free();
@@ -430,7 +351,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         if(empty($the_db)) $the_db = $this->db;
         $tabs = array();
         $this->query('SHOW TABLES FROM '.$this->safeName($the_db).(empty($pattern)?'':' like \'%'.$this->safeValue($pattern).'%\''));
-        while($row = $this->getRS(2)) {
+        while($row = $this->getRS(1)) {
             $tabs[] = $row[0];
         }
         $this->free();
@@ -447,7 +368,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         if(empty($the_db)) $the_db = $this->db;
         $this->query('SHOW FIELDS FROM `'.$this->safeName($the_db).'`.`'.$this->safeName($the_tbl).'`');
         $key = '';
-        while($row = $this->getRS(0)) {
+        while($row = $this->getRS(2)) {
             if($row['Key']=='UNI') $key = $row['Field'];
             if($row['Key'] == 'PRI') {
                 $key = $row['Field'];
@@ -522,7 +443,7 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
         if(!$this->check()) return '';
         $result = array();
         $this->query('SHOW PROCESSLIST');
-        while($row = $this->getRS(0)) {
+        while($row = $this->getRS(2)) {
             if($row['Time']<$time_limit) continue;
             if($mode==1) {
                 $result[] = $row;
@@ -534,321 +455,6 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
         }
         $this->free();
         return $result;
-    }
-
-    /**
-     * 构建数据查询
-     * @param $tbl
-     * @param null $join
-     * @return mixed|void
-     */
-    public function build($tbl, $join=null) {
-        if($tbl=='[reset]') {
-            foreach($this->builder as $k => $v) {
-                $this->builder[$k]->reset();
-                unset($this->builder[$k]);
-            }
-            return;
-        }
-        $tbl = $this->safeName($tbl);
-        if(!isset($this->builder[$tbl])) {
-            $this->builder[$tbl] = new SQLBuilder($tbl, $join, 't'.count($this->builder), '`');
-        } else {
-            if(!empty($join)) $this->builder[$tbl]->join = $join;
-        }
-        return $this->builder[$tbl];
-    }
-
-    /**
-     * 创建对象
-     * @param $name
-     * @param array $para
-     * @param string $type
-     * @param bool $run
-     * @return bool|int
-     */
-    public function create($name, $para=[], $type='db', $run = true) {
-        switch($type) {
-            case 't':
-            case 'tbl':
-            case 'table':
-                if(is_string($para)) {
-                    $para=['col'=>$para];
-                }
-                if(!isset($para['col'])) {
-                    $this->error('Column data for table is missing!');
-                }
-                $sql = 'create table IF NOT EXISTS `'.$this->safeName($name).'` ('.chr(10);
-                if(is_string($para['col'])) {
-                    if(preg_match('#^\w+$#', $para['col'])) {
-                        $sql = 'create table IF NOT EXISTS `'.$this->safeName($name).'` like `'.$para['col'].'`';
-                        break;
-                    } else {
-                        $sql .= $para['col'];
-                    }
-                } else {
-                    $cols =& $para['col'];
-                    for($i=0,$m=count($cols);$i<$m;$i++) {
-                        if(is_string($cols[$i])){
-                            $cols[$i] = preg_replace('#^(\w+)#', '`\1`', $cols[$i]);
-                            $sql .= $cols[$i].','.chr(10);
-                        } else {
-                            $sql .= '`'.$cols[$i]['name'].'` '.$cols[$i]['type'].' '.(isset($cols[$i]['null'])?'NULL':'NOT NULL');
-                            if(!isset($cols[$i]['condition'])) $cols[$i]['condition'] = '';
-                            if(is_string($cols[$i]['condition'])) {
-                                $sql .= ' '.$cols[$i]['condition'];
-                            } else {
-                                foreach($cols[$i]['condition'] as $k => $v) {
-                                    $sql .= $k.' \''.$v.'\'';
-                                }
-                            }
-                            $sql .= chr(10);
-                        }
-                    }
-                    if(isset($para['idx'])) {
-                        if(is_string($para['idx'])) {
-                            $sql .= 'INDEX idx_'.md5($para['idx']).'('.$para['idx'].'),'.chr(10);
-                        } else {
-                            $sql .= 'INDEX '.$para['idx'][0].'('.$para['idx'][1].'),'.chr(10);
-                        }
-                    }
-                    if(isset($para['uni'])) $sql .= 'UNIQUE (`'.$para['uni'].'`),'.chr(10);
-                    if(isset($para['pri'])) {
-                        $sql .= 'PRIMARY KEY (`'.$para['pri'].'`)';
-                    } else {
-                        $sql = substr($sql, 0, -2);
-                    }
-                }
-                $sql .= chr(10).')';
-                if(!isset($para['engine'])) $para['engine'] = 'MyISAM';
-                if(!isset($para['charset'])) $para['charset'] = $this->charset;
-                $sql .= 'ENGINE='.$para['engine'].' DEFAULT CHARSET='.$para['charset'];
-                if(isset($para['increment'])) $sql .= ' AUTO_INCREMENT='.$para['increment'];
-                if(isset($para['comment'])) $sql .= ' COMMENT=\''.$para['comment'].'\'';
-                break;
-            case 'i':
-            case 'idx':
-            case 'index':
-                if(is_string($para)) {
-                    $para=['col'=>$para];
-                }
-                if(is_array($para['col'])) $para['col'] = implode(',', $para['col']);
-                if(!isset($para['name'])) $para['name'] = 'idx_'.md5($para['col']);
-                $sql = 'create index `'.$this->safeName($para['name']).'` on '.$this->safeName($name).'('.$para['col'].')';
-                break;
-            default:
-                $sql = 'create database IF NOT EXISTS `'.$this->safeName($name).'`';
-                if(empty($para)) $para = $this->charset;
-                $sql .= ' default charset '.$para.' COLLATE '.$para.'_unicode_ci';
-        }
-        return $run ? $this->query($sql) : $sql;
-    }
-
-    /**
-     * 移除对象
-     * @param $name
-     * @param string $type
-     * @param bool $run
-     * @return bool|int|string
-     */
-    public function drop($name, $type='db', $run = true) {
-        $sql = 'drop ';
-        switch($type) {
-            case 't':
-            case 'tbl':
-            case 'table':
-                $sql .= 'table IF EXISTS `'.$this->safeName($name).'`';
-                break;
-            case 'i':
-            case 'idx':
-            case 'index':
-                $sql .= 'index IF EXISTS `'.$this->safeName($name[0]).'` on `'.$this->safeName($name[1]).'`';
-                break;
-            default:
-                $sql .= 'database IF EXISTS `'.$this->safeName($name).'`';
-        }
-        return $run ? $this->query($sql) : $sql;
-    }
-
-    /**
-     * 插入数据
-     * @param bool $show
-     * @return bool|int
-     */
-    public function insert($show = false) {
-        reset($this->builder);
-        $sql = current($this->builder)->insert();
-        $sql = preg_replace('/^(insert|replace)/i', '\1 LOW_PRIORITY', $sql);
-        if($show) {
-            return $sql;
-        } else {
-            return $this->query($sql);
-        }
-    }
-
-    /**
-     * 查询数据
-     * @param bool $show
-     * @return bool|int|string
-     */
-    public function select($show = false) {
-        if(count($this->builder)==1) {
-            $sql = current($this->builder)->select();
-        } else {
-            $sql = 'select ';
-            if(!empty($this->builder[0]->sel_prefix)) $sql = $this->builder[0].$this->sel_prefix.' ';
-            $fields = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_field = $cur_tbl->field();
-                if($the_field=='*') {
-                    $the_field = $cur_tbl->dl.$cur_tbl->idx.$cur_tbl->dr.'.*';
-                } elseif(substr(strtolower($the_field),0,6)=='count(') {
-                    $fields = array($the_field);
-                    break;
-                }
-                if(!empty($the_field)) $fields[] = $the_field;
-            }
-            $sql .= implode(',', $fields);
-
-            reset($this->builder);
-            $cur_tbl = current($this->builder);
-            $sql .= ' from '.$cur_tbl->tbl.' as '.$cur_tbl->idx.' ';
-            while(($cur_tbl=next($this->builder))!==false) {
-                if(empty($cur_tbl->join)) continue;
-                $sql .= $cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
-                if(empty($cur_tbl->join['field_join'])) {
-                    $sql .= ' using('.$cur_tbl->join['field'].')';
-                } else {
-                    $sql .= ' on '.$cur_tbl->idx.'.'.$cur_tbl->join['field'].'='.$cur_tbl->join['field_join'];
-                }
-            }
-
-            $conditions = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_condition = $cur_tbl->where();
-                if(!empty($the_condition)) $conditions[] = $the_condition;
-            }
-            if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-
-            $orders = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_order = $cur_tbl->order();
-                if(!empty($the_order)) $orders[] = $the_order;
-            }
-            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
-
-            reset($this->builder);
-            $sql .= current($this->builder)->limit();
-        }
-        if($show) {
-            return $sql;
-        } else {
-            return $this->query($sql);
-        }
-    }
-
-    /**
-     * 更新数据
-     * @param bool $show
-     * @return bool|int|string
-     */
-    public function update($show = false) {
-        if(count($this->builder)==1) {
-            $sql = current($this->builder)->update();
-            $sql = preg_replace('/^update/i', 'update LOW_PRIORITY', $sql);
-        } else {
-            reset($this->builder);
-            $cur_tbl = current($this->builder);
-            $sql = 'update LOW_PRIORITY '.$cur_tbl->tbl.' as '.$cur_tbl->idx.' ';
-            while(($cur_tbl=next($this->builder))!==false) {
-                if(empty($cur_tbl->join)) continue;
-                $sql .= $cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
-                if(empty($cur_tbl->join['field_join'])) {
-                    $sql .= ' using('.$cur_tbl->join['field'].')';
-                } else {
-                    $sql .= ' on '.$cur_tbl->idx.'.'.$cur_tbl->join['field'].'='.$cur_tbl->join['field_join'];
-                }
-            }
-
-            $sql .= ' set ';
-            $fields = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_field = $cur_tbl->field('update');
-                if(!empty($the_field)) $fields[] = $the_field;
-            }
-            $sql .= implode(',', $fields);
-
-            $conditions = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_condition = $cur_tbl->where();
-                if(!empty($the_condition)) $conditions[] = $the_condition;
-            }
-            if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-
-            /* don't support yet
-            $orders = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_order = $cur_tbl->order();
-                if(!empty($the_order)) $orders[] = $the_order;
-            }
-            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
-
-            reset($this->builder);
-            $sql .= current($this->builder)->limit();
-            */
-        }
-        if($show) {
-            return $sql;
-        } else {
-            return $this->query($sql);
-        }
-    }
-
-    /**
-     * 删除数据
-     * @param bool $show
-     * @return bool|int|mixed|string
-     */
-    public function delete($show = false) {
-        if(count($this->builder)==1) {
-            $sql = current($this->builder)->delete();
-            $sql = preg_replace('/^delete/i', 'delete LOW_PRIORITY', $sql);
-        } else {
-            reset($this->builder);
-            $cur_tbl = current($this->builder);
-            $sql = 'delete LOW_PRIORITY [idx_list] from '.$cur_tbl->tbl.' as '.$cur_tbl->idx.' ';
-            $idx = $cur_tbl->idx;
-            while(($cur_tbl=next($this->builder))!==false) {
-                $idx .= ', '.$cur_tbl->idx;
-                $sql .= $cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
-                $sql .= ' on '.$cur_tbl->idx.'.'.$cur_tbl->join['field'].'='.$cur_tbl->join['field_join'];
-            }
-
-            $conditions = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_condition = $cur_tbl->where();
-                if(!empty($the_condition)) $conditions[] = $the_condition;
-            }
-            if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-
-            /* don't support yet
-            $orders = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_order = $cur_tbl->order();
-                if(!empty($the_order)) $orders[] = $the_order;
-            }
-            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
-
-            reset($this->builder);
-            $sql .= current($this->builder)->limit();
-            */
-            $sql = str_replace('[idx_list]', $idx, $sql);
-        }
-        if($show) {
-            return $sql;
-        } else {
-            return $this->query($sql);
-        }
     }
 
     /**
@@ -1007,7 +613,6 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     public function free() {
         if($this->check('result', 'object')) mysqli_free_result($this->result);
         $this->result = NULL;
-        return;
     }
 
     /**
@@ -1041,7 +646,6 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     public function clearError() {
         $this->err = false;
         $this->err_info = '';
-        return;
     }
 
     /**
@@ -1058,6 +662,5 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
         $str = "\nQuery String: ".$this->sql."\n";
         $str .= 'MySQL Message: '.$this->err_info;
         parent::Error($str, $exit);
-        return;
     }
 }

@@ -78,7 +78,6 @@ Class myEmail extends myBase {
         $subject = trim($subject);
         $subject = myString::setCharset($subject, $this->charset);
         $this->subject = '=?'.$this->charset.'?B?'.base64_encode($subject).'?=';
-        return;
     }
 
     /**
@@ -147,7 +146,6 @@ Content-Transfer-Encoding: base64
         }
         $this->body .= chr(10).'--'.$boundary.'--'.chr(10).chr(10);
         $this->body = str_replace(chr(13), '', $this->body);
-        return;
     }
 
     /**
@@ -301,7 +299,6 @@ Content-Transfer-Encoding: base64
                                         'name' => $filename,
                                     );
         }
-        return;
     }
 
     /**

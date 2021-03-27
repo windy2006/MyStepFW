@@ -66,7 +66,7 @@ switch($method) {
             $result = '<h4 class="text-center">'.$mystep->getLanguage('plugin_no_setting').'</h4>';
         } else {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
-            $list = $config->build(PLUGIN.$idx.'/config/'.$s->gen->language.'.php');
+            $list = $config->build(PLUGIN.$idx.'/config/'.$ms_setting->gen->language.'.php');
             $result = '';
             foreach($list as $v) {
                 if(isset($v['idx'])) {
@@ -143,7 +143,7 @@ switch($method) {
                 'message' => 'No file uploaded!'
             ];
         }
-        echo myString::toJson($result, $s->gen->charset);
+        echo myString::toJson($result, $ms_setting->gen->charset);
         $mystep->end();
         break;
     default:

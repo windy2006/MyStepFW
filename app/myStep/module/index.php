@@ -11,13 +11,13 @@ if($module=='phpinfo') {
     $content = str_replace('<table', '<table class="table"', $content);
     $t->assign('info', '<div id="phpinfo" >'.$content.'</div>');
 } elseif($module=='error') {
-    $method = r::g('m');
+    $method = myReq::get('m');
     $err_file = ROOT.'error.log';
     if($method=='clean') {
-        f::del($err_file);
+        myFile::del($err_file);
         myStep::redirect();
     } elseif($method=='download') {
-        $content = f::getLocal($err_file);
+        $content = myFile::getLocal($err_file);
         if(!empty($content)) {
             getOB();
             $content = preg_replace('/[\r\n]+/', "\r\n", $content);
@@ -35,7 +35,7 @@ if($module=='phpinfo') {
     } else {
         $err_msg = '';
         $err_output = '';
-        $err_content= f::getLocal($err_file);
+        $err_content= myFile::getLocal($err_file);
         if($err_content=='') {
             $err_msg = $mystep->getLanguage('page_error_msg');
         } else {

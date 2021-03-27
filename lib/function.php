@@ -194,7 +194,7 @@ function isHttps() {
  * @return false|mixed|string
  */
 function myEval($code, $return = false) {
-    $file = tempnam(sys_get_temp_dir(), 'ms_');
+    $file = @tempnam(sys_get_temp_dir(), 'ms_');
     if($file==false) {
         f::mkdir(CACHE.'temp/');
         $file = CACHE.'temp/'.getMicrotime();

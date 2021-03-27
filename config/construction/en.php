@@ -38,7 +38,7 @@ $setting_detail['gen'] = array(
             'name' => 'SA Password',
             'name2' => 'Repeat',
             'describe' => 'Password of the super user',
-            'type' => array('password_md5', '', '40')
+            'type' => array('password', 'md5', '40')
         ),
         'close' => array(
             'name' => 'Close Page',
@@ -194,6 +194,11 @@ $setting_detail['cookie'] = array(
             'name' => 'Prefix',
             'describe' => 'The prefix will add to the name of every cookie',
             'type' => array('text', 'alpha', '10')
+        ),
+        'domain' => array(
+            'name' => 'Domain',
+            'describe' => 'Cookie will only avilable in the domain',
+            'type' => array('text', '', '20')
         ),
     ]
 );

@@ -2,10 +2,10 @@
 namespace app\myStep;
 
 function logCheck($show = true) {
-    $user = \r::s('ms_user');
+    $user = \myReq::session('ms_user');
     if(empty($user)) {
-        $url = \r::svr('REQUEST_URI');
-        if(\r::s('url')=='' && !preg_match('#'.$GLOBALS['s']->gen->path_admin.'/$#', $url)) \r::s('url', $url);
+        $url = \myReq::server('REQUEST_URI');
+        if(\myReq::session('url')=='' && !preg_match('#'.$GLOBALS['ms_setting']->gen->path_admin.'/$#', $url)) \myReq::session('url', $url);
         if($show) \myStep::getModule('login');
         return false;
     }
@@ -14,8 +14,8 @@ function logCheck($show = true) {
 
 function getData($tbl_name) {
     if(!logCheck(false)) return [];
-    global $db, $s;
-    if(!$db->check()) $db->connect(0, $s->db->name);
+    global $db, $ms_setting;
+    if(!$db->check()) $db->connect(0, $ms_setting->db->name);
     $result = array();
     $result['total'] = 0;
     $result['rows'] = [];
@@ -45,7 +45,7 @@ function getError() {
     $err_file = ROOT.'error.log';
     $count = 0;
     if(is_file($err_file)) {
-        $err_content= \f::getLocal($err_file);
+        $err_content= \myFile::getLocal($err_file);
         $err_lst = preg_split("/\n+[\-]{20,}\n+/", $err_content);
         $count = count($err_lst) - 1;
     }
@@ -53,8 +53,8 @@ function getError() {
 }
 
 function autoComplete($mode, $keyword) {
-    global $s;
-    $keyword = \myString::sc($keyword, $s->gen->charset);
+    global $ms_setting;
+    $keyword = \myString::setCharset($keyword, $ms_setting->gen->charset);
     $result = array(
         'query' => $keyword,
         'suggestions' => array(),
@@ -68,7 +68,7 @@ function autoComplete($mode, $keyword) {
         $keyword = strtolower($keyword);
         for($i=0,$m=count($data);$i<$m;$i++) {
             if(strpos(strtolower(implode('|', $data[$i])), $keyword)!==false) {
-                if($s->gen->language=='en') {
+                if($ms_setting->gen->language=='en') {
                     $result['suggestions'][] = $data[$i][1];
                     $result['data'][] = $data[$i][1];
                 } else {

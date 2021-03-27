@@ -105,6 +105,7 @@ table td.cat {
     margin: 10px;
 }
 </style>
+
 <div id="page_main">
     <div id="main_show">
         <div id="main_nav">
@@ -152,21 +153,18 @@ table td.cat {
                     <td class="cat" colspan="8">Block-SWITCH test</td>
                 </tr>
                 <!--switch:start key='sw_show'-->
-                <!--1-->
+                <!--(1)-->
                 <tr align="center">
                     <td colspan="8">11111</td>
                 </tr>
-                <!--break-->
-                <!--2-->
+                <!--(2)-->
                 <tr align="center">
                     <td colspan="8">222222</td>
                 </tr>
-                <!--break-->
-                <!--3-->
+                <!--(3)-->
                 <tr align="center">
-                    <td colspan="8">3333331</td>
+                    <td colspan="8">333333</td>
                 </tr>
-                <!--break-->
                 <!--switch:end-->
 
 
@@ -177,11 +175,11 @@ table td.cat {
                 <tr align="center">
                     <td colspan="8">aaaaaa</td>
                 </tr>
-                <line>
+                <!--(s)-->
                 <tr align="center">
                     <td colspan="8">bbbbbbb</td>
                 </tr>
-                <line>
+                <!--(s)-->
                 <tr align="center">
                     <td colspan="8">ccccccc</td>
                 </tr>
@@ -197,7 +195,7 @@ table td.cat {
             <!--test_var var1='$test1' var2='$test2["a"]' var3='$_get["c"]'-->
             <div>&nbsp;</div>
             <div style="font-weight:bold">Sub-template with Loop Block</div>
-            <!--test_loop name='list - name' author="myStep" time='Y-m-d' loop='5'-->
+            <!--test_loop name='$_get["c"]' author="myStep" time='Y-m-d' loop='5'-->
             <div>&nbsp;</div>
             <div style="font-weight:bold">Sub-template with If Block</div>
             <!--test_if key='$test_if'-->

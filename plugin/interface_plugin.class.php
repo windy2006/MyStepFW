@@ -59,7 +59,7 @@ function regPluginRoute($idx) {
         $list = [];
     }
     $list[$idx] = PLUGIN.$idx.'/route.php';
-    f::s($file, '<?PHP
+    myFile::saveFile($file, '<?PHP
 return '.var_export($list, true).';
 ');
 }
@@ -74,7 +74,7 @@ function removePluginRoute($idx) {
     } else {
         $list = [];
     }
-    f::s($file, '<?PHP
+    myFile::saveFile($file, '<?PHP
 return '.var_export($list, true).';
 ');
 }

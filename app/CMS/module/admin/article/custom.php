@@ -2,7 +2,7 @@
 global $web_cur;
 if($web_id===1) $web_id = r::r('web_id');
 if(!empty($id)) {
-    $db->build($s->db->pre.'info')
+    $db->build($S->db->pre.'info')
         ->field('web_id')
         ->where('id', 'n=', $id);
     $web_id = $db->result();
@@ -28,7 +28,7 @@ switch($method) {
         break;
     case 'delete':
         cms::$log = $mystep->getLanguage('admin_art_custom_delete');
-        $db->build($s->db->pre.'info')
+        $db->build($S->db->pre.'info')
             ->where('id', 'n=', $id);
         $db->delete();
         cms::redirect();
@@ -42,11 +42,11 @@ switch($method) {
         $data['content'] = htmlspecialchars_decode($data['content']);
         if($method=='add_ok') {
             cms::$log = $mystep->getLanguage('admin_art_custom_add');
-            $db->build($s->db->pre.'info')->field($data);
+            $db->build($S->db->pre.'info')->field($data);
             $db->insert();
         } else {
             cms::$log = $mystep->getLanguage('admin_art_custom_edit');
-            $db->build($s->db->pre.'info')
+            $db->build($S->db->pre.'info')
                 ->field($data)
                 ->where('id', 'n=', $id);
             $db->update();
@@ -58,16 +58,16 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db;
+    global $mystep, $tpl_setting, $S, $db;
     global $id, $web_id, $website, $web_info, $group_info;;
 
     $tpl_setting['name'] = 'art_custom_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
     if($method == 'list') {
-        $db->build($s->db->pre.'info')->order('id');
-        if(!empty($web_id)) $db->build($s->db->pre.'info')->where('web_id','n=',$web_id);
-        if(!checkPower('web')) $db->build($s->db->pre.'info')->where('web_id', 'nin', $group_info['power_web'], 'and');
+        $db->build($S->db->pre.'info')->order('id');
+        if(!empty($web_id)) $db->build($S->db->pre.'info')->where('web_id','n=',$web_id);
+        if(!checkPower('web')) $db->build($S->db->pre.'info')->where('web_id', 'nin', $group_info['power_web'], 'and');
         $db->select();
         $n = 0;
         while($record = $db->getRS()) {
@@ -83,7 +83,7 @@ function build_page($method) {
         $tpl->assign('title', $mystep->getLanguage('admin_art_custom_title'));
     } else {
         if($method == 'edit') {
-            $db->build($s->db->pre.'info')
+            $db->build($S->db->pre.'info')
                 ->where('id', 'n=', $id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_art_custom_erro');

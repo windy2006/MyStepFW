@@ -1,5 +1,5 @@
 <div id="main" class="border-left">
-    <div class="mb-3 h-75">
+    <div class="mb-3 h-100">
         <div class="title"><!--record_subject--></div>
         <nav aria-label="breadcrumb" class="w-100">
             <ol class="breadcrumb">
@@ -9,7 +9,7 @@
             </ol>
         </nav>
         <div class="w-100 h-100">
-            <div id="content" class="py-3">
+            <div id="content" class="py-3 h-100">
                 <div class="mb-3 font-weight-bold font-md <!--multi_page-->">
                     文章分页：
                     <select onchange="location.href=this.value">
@@ -37,7 +37,7 @@
                     </ul>
                 </nav>
             </div>
-            <div id="side_cat" class="pt-4">
+            <div id="side_cat" class="pt-4 h-100">
                 <div id="cat_list" class="position-sticky">
                     <div class="side-bar">
                         <span class="fa fa-circle start"></span>

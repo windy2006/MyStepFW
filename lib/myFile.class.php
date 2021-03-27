@@ -66,7 +66,7 @@ class myFile {
             'g' => 'getLocal',
             'url' => 'getRemote_curl',
             'grab' => 'getRemoteFile',
-    );
+        );
     public
         $file = '',
         $remote = false,
@@ -113,7 +113,6 @@ class myFile {
         $this->info['fullname'] = $info['basename'];
         $this->info['name'] = $info['filename'];
         $this->info['ext'] = isset($info['extension'])?$info['extension']:'';
-        return;
     }
 
     /**
@@ -394,8 +393,8 @@ class myFile {
         }
         $attr = substr(DecOct(fileperms($file)), -3);
         if($show_txt) {
-            $att_list    = array('---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx');
-            $the_attrib    = '';
+            $att_list = array('---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx');
+            $the_attrib = '';
             for($i=0; $i<3; $i++) {
                 $this_char=(int)substr($attr, $i, 1);
                 $the_attrib .= $att_list[$this_char];
@@ -416,7 +415,6 @@ class myFile {
         } else {
             trigger_error("Cannot Find File{$file} !");
         }
-        return;
     }
 
     /**
@@ -591,7 +589,6 @@ class myFile {
         } else {
             trigger_error("Cannot Find File{$file} !");
         }
-        return;
     }
 
     /**
@@ -605,10 +602,13 @@ class myFile {
 
     /**
      * 保存实例文件
+     * @param string $content
      * @return bool|int|resource
      */
-    public function save() {
-        return self::saveFile($this->file, $this->get());
+    public function save($content = '') {
+        if($this->remote) return false;
+        if(empty($content)) $content = $this->get();
+        return self::saveFile($this->file, $content);
     }
 
     /**
@@ -872,7 +872,6 @@ class myFile {
         if($content = self::getRemote($remote_file)) {
             self::saveFile($local_file, $content);
         }
-        return;
     }
 
     /**

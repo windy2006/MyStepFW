@@ -18,6 +18,7 @@ MSSQL数据库查询
     $MSSQL->reconnect($the_db)                        // Rebuild a Connection to MySQL to $mysql->DB_conn
     $MSSQL->SelectDB($the_db)                         // Select a Database of MSSQL to $MSSQL->select (Must Build Connect First)
     $MSSQL->convertSQL($sql)                          // Convert MySQL query to MSSQL
+    $MSSQL->convertLimit($sql)                        // convert sql query string include limit grammar of mysql to mssql sql query string
     $MSSQL->query($sql)                               // Execute a Query of MSSQL, Result into $MSSQL->resut
     $MSSQL->getRS()                                   // Return The Current Result as an Array and Set the Point of Result to the Next Result
     $MSSQL->record($sql, $mode)                       // Get the first line of the recordset
@@ -34,7 +35,6 @@ MSSQL数据库查询
     $MSSQL->getStat()                                 // Get the Current Status of MSSQL
     $MSSQL->file($file)                               // Read SQL File and execute it
     $MSSQL->handleSQL($strSQL)                        // Split the SQL Query String into a array from a whole String
-    $MSSQL->build($tbl, $join)                        // Set or get a SQL builder to create a sql script
     $MSSQL->create($name, $para, $type)               // Create Object
     $MSSQL->drop($name, $para, $type)                 // Drop Object
     $MSSQL->select()                                  // Build a select query use the SQL builder and execute it
@@ -42,7 +42,6 @@ MSSQL数据库查询
     $MSSQL->delete()                                  // Build a delete query use the SQL builder and execute it
     $MSSQL->replace()                                 // Build a replace query use the SQL builder and execute it
     $MSSQL->batchExec($SQLs)                          // Execute Multi Query from an Array (Use HandleSQL First)
-    $MSSQL->convertLimit($sql)                        // convert sql query string include limit grammar of mysql to mssql sql query string
     $MSSQL->check($obj, $type)                        // Check if a db object works
     $MSSQL->free()                                    // Free the $MSSQL->result in order to Release the System Resource
     $MSSQL->close()                                   // Close Current MSSQL Link
@@ -78,6 +77,7 @@ class MSSQL extends myBase implements interface_db, interface_sql {
         $this->user = $user;
         $this->pwd = $pwd;
         $this->charset = $charset;
+        $this->delimiter = ['[', ']'];
         return $this;
     }
 
@@ -134,7 +134,8 @@ class MSSQL extends myBase implements interface_db, interface_sql {
      * @return mixed
      */
     public function convertSQL($sql) {
-        $sql = preg_replace('#`(\w+)`#', '[\1]', trim($sql,"\r\n"));
+        $sql = str_ireplace('LOW_PRIORITY', '', $sql);
+
         if(preg_match('#^(\w+)\s+(\w+)\s+(if\s+(not\s+)?exists\s+)([\[\]\w]+)([\w\W]+)$#im', $sql, $match)) {
             $sql = $match[3].' ';
             $match[5] = trim($match[5], '[]');
@@ -191,13 +192,57 @@ class MSSQL extends myBase implements interface_db, interface_sql {
     }
 
     /**
+     * 转换返回行限制
+     * @param $sql
+     * @param string $the_order
+     * @return null|string|string[]
+     */
+    public function convertLimit($sql) {
+        if(stripos($sql, 'limit')!==false) {
+            if(preg_match('/limit\s+(\d+)$/i', $sql, $matches)) {
+                $sql = preg_replace('/limit\s+(\d+)$/i', '', $sql);
+                $sql = preg_replace('/^(select|update|delete)/i', '\1 top('.$matches[1].')', $sql);
+            } elseif(stripos($sql, "select")===0 && preg_match('/limit\s+(\d+)[\s, ]+(\d+)$/i', $sql, $matches)) {
+                $start = $matches[1];
+                $size = $matches[2];
+                $the_order = $the_order_2 = '';
+                if(preg_match('/order by\s+(.+?)\s+limit/i', $sql, $matches)) {
+                    $the_order = $matches[1];
+                    $the_order = preg_replace('/\s*,\s*/',',', $the_order);
+                    $order_list = explode(',', $the_order);
+                    $tmp_field = '';
+                    for($i=0,$m=count($order_list);$i<$m;$i++) {
+                        if(strpos($order_list[$i], ' ')===false) $order_list[$i] .= ' asc';
+                        $tmp_field .= ', '.preg_replace('/\s\w+$/', ' as tmp_limit_'.$i, $order_list[$i]);
+                        $order_list[$i] = preg_replace('/^.+(\s\w+)$/', 'tmp_limit_'.$i.'\1', $order_list[$i]);
+                    }
+                    $the_order = implode(',', $order_list);
+                    $the_order_2 = str_ireplace('desc', '[xxxx]', $the_order);
+                    $the_order_2 = str_ireplace('asc', 'desc', $the_order_2);
+                    $the_order_2 = str_ireplace('[xxxx]', 'asc', $the_order_2);
+                } else {
+                    $the_order_2 = $the_order.' desc';
+                }
+                $sql = str_ireplace(' from', $tmp_field.' from', $sql);
+                $sql = preg_replace('/limit\s+(\d+)[\s, ]+(\d+)$/i', '', $sql);
+                $sql = preg_replace('/^select/i', 'select top('.($start+$size).')', $sql);
+                $sql = 'select top('.$size.') * from ('.$sql.') as tmp_1 order by '.$the_order_2;
+                $sql = 'select * from ('.$sql.') as tmp_2 order by '.$the_order;
+            }
+        }
+        return $sql;
+    }
+
+    /**
      * 执行查询
      * @param $sql
      * @return bool|int
      */
     public function query($sql) {
         if(!$this->check()) return false;
+        $this->build('[reset]');
         $this->free();
+        $this->count++;
         $sql = $this->convertSQL($sql);
         $this->sql = $sql;
         $ifsel = strstr('select', strtolower(substr(trim($sql), 0, 6)));
@@ -208,17 +253,16 @@ class MSSQL extends myBase implements interface_db, interface_sql {
         } else {
             $num_rows = sqlsrv_rows_affected($this->result);
         }
-        $this->count++;
-        $this->build('[reset]');
         if($this->checkError()) $this->error('Error Occur in Query !');
         return $num_rows;
     }
 
     /**
      * 取得结果行
-     * @return array|bool|false|null
+     * @param int $mode
+     * @return array|false|null
      */
-    public function getRS($mode = SQLSRV_FETCH_ASSOC) {
+    public function getRS($mode = 2) {
         if(!$this->check('result')) return false;
         $row = sqlsrv_fetch_array($this->result, $mode);
         $this->sql    = 'none(Get Recordset)';
@@ -226,66 +270,6 @@ class MSSQL extends myBase implements interface_db, interface_sql {
         $i = 0;
         while(isset($row['tmp_limit_'.$i])) unset($row['tmp_limit_'.$i++]);
         return $row;
-    }
-
-    /**
-     * 取得单行结果
-     * @param $sql
-     * @param int $mode
-     * @return array|bool|false|mixed|null
-     */
-    public function record($sql, $mode = 2) {
-        if(!preg_match('/^select\s+top/i', $sql)) $sql = preg_replace('/^select/i', 'select top(1)', $sql);
-        $key = md5($sql);
-        if(($result = $this->getCache($key))===false) {
-            $row_num = $this->query($sql);
-            if($row_num>0) {
-                $result = $this->getRS($mode);
-                $this->writeCache($key, $result);
-            }
-            $this->free();
-        }
-        $this->build('[reset]');
-        return $result;
-    }
-
-    /**
-     * 返回所有结果行
-     * @param $sql
-     * @param int $mode
-     * @return bool|mixed
-     */
-    public function records($sql, $mode = 2) {
-        $key = md5($sql);
-        if(($result = $this->getCache($key))===false) {
-            $this->query($sql);
-            while($result[] = $this->getRS($mode)) {}
-            array_pop($result);
-            if(!empty($result)) $this->writeCache($key, $result);
-            $this->free();
-        }
-        $this->build('[reset]');
-        return $result;
-    }
-
-    /**
-     * 取得某字段内容
-     * @param $sql
-     * @return array|bool|false|mixed|null
-     */
-    public function result($sql) {
-        $key = md5($sql);
-        if(($result = $this->getCache($key))===false) {
-            if($result = $this->record($sql, 1)) {
-                $result = $result[0];
-                $this->writeCache($key, $result);
-            } else {
-                $result = false;
-            }
-            $this->free();
-        }
-        $this->build('[reset]');
-        return $result;
     }
 
     /**
@@ -575,29 +559,6 @@ ORDER BY a.id');
     }
 
     /**
-     * 构建数据查询
-     * @param $tbl
-     * @param null $join
-     * @return mixed|void
-     */
-    public function build($tbl, $join=null) {
-        if($tbl=='[reset]') {
-            foreach($this->builder as $k => $v) {
-                $this->builder[$k]->reset();
-                unset($this->builder[$k]);
-            }
-            return;
-        }
-        $tbl = $this->safeName($tbl);
-        if(!isset($this->builder[$tbl])) {
-            $this->builder[$tbl] = new SQLBuilder($tbl, $join, 't'.count($this->builder), ['[', ']']);
-        } else {
-            if(!empty($join)) $this->builder[$tbl]->join = $join;
-        }
-        return $this->builder[$tbl];
-    }
-
-    /**
      * 创建对象
      * @param $name
      * @param array $para
@@ -611,15 +572,15 @@ ORDER BY a.id');
             case 'tbl':
             case 'table':
                 if(is_string($para)) {
-                    $para=['cols'=>$para];
+                    $para=['col'=>$para];
                 }
                 if(!isset($para['col'])) {
                     $this->error('Column data for table is missing!');
                 }
-                $sql = 'create table IF NOT EXISTS '.$this->safeName($name).' ('.chr(10);
+                $sql = 'create table IF NOT EXISTS ['.$this->safeName($name).'] ('.chr(10);
                 if(is_string($para['col'])) {
                     if(preg_match('#^\w+$#', $para['col'])) {
-                        $sql = 'select * into `'.$this->safeName($name).'` from `'.$para['col'].'` where 1=0';
+                        $sql = 'select * into ['.$this->safeName($name).'] from ['.$para['col'].'] where 1=0';
                         break;
                     } else {
                         $sql .= $para['col'];
@@ -628,10 +589,10 @@ ORDER BY a.id');
                     $cols =& $para['col'];
                     for($i=0,$m=count($cols);$i<$m;$i++) {
                         if(is_string($cols[$i])){
-                            $cols[$i] = preg_replace('#^(\w+)#', '`\1`', $cols[$i]);
+                            $cols[$i] = preg_replace('#^(\w+)#', '[\1]', $cols[$i]);
                             $sql .= $cols[$i].','.chr(10);
                         } else {
-                            $sql .= '`'.$cols[$i]['name'].'` '.$cols[$i]['type'].' '.(isset($cols[$i]['null'])?'NULL':'NOT NULL').chr(10);
+                            $sql .= '['.$cols[$i]['name'].'] '.$cols[$i]['type'].' '.(isset($cols[$i]['null'])?'NULL':'NOT NULL').chr(10);
                         }
                     }
                     if(isset($para['idx'])) {
@@ -641,9 +602,9 @@ ORDER BY a.id');
                             $sql .= 'INDEX '.$para['idx'][0].'('.$para['idx'][1].'),'.chr(10);
                         }
                     }
-                    if(isset($para['uni'])) $sql .= 'UNIQUE (`'.$para['uni'].'`),'.chr(10);
+                    if(isset($para['uni'])) $sql .= 'UNIQUE (['.$para['uni'].']),'.chr(10);
                     if(isset($para['pri'])) {
-                        $sql .= 'PRIMARY KEY (`'.$para['pri'].'`)';
+                        $sql .= 'PRIMARY KEY (['.$para['pri'].'])';
                     } else {
                         $sql = substr($sql, 0, -2);
                     }
@@ -659,7 +620,7 @@ ORDER BY a.id');
                 }
                 if(is_array($para['col'])) $para['col'] = implode(',', $para['col']);
                 if(!isset($para['name'])) $para['name'] = 'idx_'.md5($para['col']);
-                $sql = 'create index `'.$this->safeName($para['name']).'` on '.$this->safeName($name).'('.$para['col'].')';
+                $sql = 'create index ['.$this->safeName($para['name']).'] on '.$this->safeName($name).'('.$para['col'].')';
                 break;
             default:
                 $sql = 'create database IF NOT EXISTS ['.$this->safeName($name).']';
@@ -667,106 +628,6 @@ ORDER BY a.id');
                 $sql .= ' COLLATE '.strtoupper($para).'_CI_AS';
         }
         return $run ? $this->query($sql) : $sql;
-    }
-
-    /**
-     * 移除对象
-     * @param $name
-     * @param string $type
-     * @param bool $run
-     * @return bool|int|string
-     */
-    public function drop($name, $type='db', $run = true) {
-        $sql = 'drop ';
-        switch($type) {
-            case 't':
-            case 'tbl':
-            case 'table':
-                $sql .= 'table IF EXISTS `'.$this->safeName($name).'`';
-                break;
-            case 'i':
-            case 'idx':
-            case 'index':
-                $sql .= 'index IF EXISTS `'.$this->safeName($name[0]).'` on `'.$this->safeName($name[1]).'`';
-                break;
-            default:
-                $sql .= 'database IF EXISTS `'.$this->safeName($name).'`';
-        }
-        return $run ? $this->query($sql) : $sql;
-    }
-
-    /**
-     * 插入数据
-     * @param bool $show
-     * @return bool|int
-     */
-    public function insert($show = false) {
-        reset($this->builder);
-        $sql = current($this->builder)->insert();
-        if($show) {
-            return $sql;
-        } else {
-            $this->build('[reset]');
-            return $this->query($sql);
-        }
-    }
-
-    /**
-     * 查询数据
-     * @param bool $show
-     * @return bool|int|string
-     */
-    public function select($show = false) {
-        if(count($this->builder)==1) {
-            $sql = current($this->builder)->select();
-        } else {
-            $sql = 'select ';
-            $fields = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_field = $cur_tbl->field();
-                if($the_field=='*') {
-                    $the_field = $cur_tbl->dl.$cur_tbl->idx.$cur_tbl->dr.'.*';
-                }
-                if(!empty($the_field)) $fields[] = $the_field;
-            }
-            $sql .= implode(',', $fields);
-
-            reset($this->builder);
-            $cur_tbl = current($this->builder);
-            $sql .= ' from '.$cur_tbl->tbl.' as '.$cur_tbl->idx.' ';
-            while(($cur_tbl=next($this->builder))!==false) {
-                if(empty($cur_tbl->join)) continue;
-                $sql .= $cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
-                if(empty($cur_tbl->join['field_join'])) {
-                    $sql .= ' using('.$cur_tbl->join['field'].')';
-                } else {
-                    $sql .= ' on '.$cur_tbl->idx.'.'.$cur_tbl->join['field'].'='.$cur_tbl->join['field_join'];
-                }
-            }
-
-            $conditions = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_condition = $cur_tbl->where();
-                if(!empty($the_condition)) $conditions[] = $the_condition;
-            }
-            if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-
-            $orders = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_order = $cur_tbl->order();
-                if(!empty($the_order)) $orders[] = $the_order;
-            }
-            if(!empty($orders)) $sql .= ' order by '.implode(',', $orders);
-
-            reset($this->builder);
-            $sql .= current($this->builder)->limit();
-        }
-        if($show) {
-            return $sql;
-        } else {
-            $this->build('[reset]');
-            return $this->query($sql);
-        }
     }
 
     /**
@@ -783,8 +644,8 @@ ORDER BY a.id');
             $sql = 'update '.$cur_tbl->idx;
             $sql .= ' set ';
             $fields = array();
-            $the_field = $cur_tbl->field('update');
-            if(!empty($the_field)) $fields[] = $the_field;
+            $the_field = $cur_tbl->field();
+            if($the_field!=='*') $fields[] = $the_field;
             $sql .= implode(',', $fields);
 
             reset($this->builder);
@@ -809,40 +670,6 @@ ORDER BY a.id');
         if($show) {
             return $sql;
         } else {
-            $this->build('[reset]');
-            return $this->query($sql);
-        }
-    }
-
-    /**
-     * 删除数据
-     * @param bool $show
-     * @return bool|int|mixed|string
-     */
-    public function delete($show = false) {
-        if(count($this->builder)==1) {
-            $sql = current($this->builder)->delete();
-        } else {
-            reset($this->builder);
-            $cur_tbl = current($this->builder);
-            $sql = 'delete '.$cur_tbl->idx.' from '.$cur_tbl->tbl.' as '.$cur_tbl->idx.' ';
-            $idx = $cur_tbl->idx;
-            while(($cur_tbl=next($this->builder))!==false) {
-                $sql .= $cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
-                $sql .= ' on '.$cur_tbl->idx.'.'.$cur_tbl->join['field'].'='.$cur_tbl->join['field_join'];
-            }
-
-            $conditions = array();
-            foreach($this->builder as $cur_tbl) {
-                $the_condition = $cur_tbl->where();
-                if(!empty($the_condition)) $conditions[] = $the_condition;
-            }
-            if(!empty($conditions)) $sql .= ' where '.implode(' and ', $conditions);
-        }
-        if($show) {
-            return $sql;
-        } else {
-            $this->build('[reset]');
             return $this->query($sql);
         }
     }
@@ -861,48 +688,6 @@ ORDER BY a.id');
             $result[] = array($SQLs[$i], $this->query($SQLs[$i]));
         }
         return $result;
-    }
-
-    /**
-     * 转换返回行限制
-     * @param $sql
-     * @param string $the_order
-     * @return null|string|string[]
-     */
-    public function convertLimit($sql) {
-        if(stripos($sql, 'limit')!==false) {
-            if(preg_match('/limit\s+(\d+)$/i', $sql, $matches)) {
-                $sql = preg_replace('/limit\s+(\d+)$/i', '', $sql);
-                $sql = preg_replace('/^(select|update|delete)/i', '\1 top('.$matches[1].')', $sql);
-            } elseif(stripos($sql, "select")===0 && preg_match('/limit\s+(\d+)[\s, ]+(\d+)$/i', $sql, $matches)) {
-                $start = $matches[1];
-                $size = $matches[2];
-                $the_order = $the_order_2 = '';
-                if(preg_match('/order by\s+(.+?)\s+limit/i', $sql, $matches)) {
-                    $the_order = $matches[1];
-                    $the_order = preg_replace('/\s*,\s*/',',', $the_order);
-                    $order_list = explode(',', $the_order);
-                    $tmp_field = '';
-                    for($i=0,$m=count($order_list);$i<$m;$i++) {
-                        if(strpos($order_list[$i], ' ')===false) $order_list[$i] .= ' asc';
-                        $tmp_field .= ', '.preg_replace('/\s\w+$/', ' as tmp_limit_'.$i, $order_list[$i]);
-                        $order_list[$i] = preg_replace('/^.+(\s\w+)$/', 'tmp_limit_'.$i.'\1', $order_list[$i]);
-                    }
-                    $the_order = implode(',', $order_list);
-                    $the_order_2 = str_ireplace('desc', '[xxxx]', $the_order);
-                    $the_order_2 = str_ireplace('asc', 'desc', $the_order_2);
-                    $the_order_2 = str_ireplace('[xxxx]', 'asc', $the_order_2);
-                } else {
-                    $the_order_2 = $the_order.' desc';
-                }
-                $sql = str_ireplace(' from', $tmp_field.' from', $sql);
-                $sql = preg_replace('/limit\s+(\d+)[\s, ]+(\d+)$/i', '', $sql);
-                $sql = preg_replace('/^select/i', 'select top('.($start+$size).')', $sql);
-                $sql = 'select top('.$size.') * from ('.$sql.') as tmp_1 order by '.$the_order_2;
-                $sql = 'select * from ('.$sql.') as tmp_2 order by '.$the_order;
-            }
-        }
-        return $sql;
     }
 
     /**

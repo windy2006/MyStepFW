@@ -53,6 +53,7 @@ $(function(){
         $('<option>').val(list[i]['rule']).text(list[i]['idx']+" - "+list[i]['rule']).appendTo($('#tpl').find('select'));
     }
     for(let x in rule_list) {
+        if(typeof rule_list[x]!=='string') continue;
         obj = $('#tpl').clone().attr('id', null).removeClass('d-none').appendTo('#rule_list');
         obj.find('input').val(x);
         obj.find('select').val(rule_list[x]);

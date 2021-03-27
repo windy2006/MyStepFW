@@ -155,12 +155,19 @@ input.search-query {
     border:1px gray solid;
     border-radius: 5px;
     padding:2px 3px;
+    white-space: nowrap;
+}
+#content ul {
+    margin-bottom: 3px;
 }
 #content li {
   line-height: 2rem;
 }
 #content p {
     text-indent: 2rem;
+    text-align:left;
+    line-height: 2rem;
+    margin-bottom: 3px;
 }
 #content .sub-title {
     padding: 5px 0;
@@ -172,15 +179,17 @@ input.search-query {
 #content .sub_title.level_1 {
     font-size:1.6rem;
     border-bottom:1px #EEEEEE solid;
-    margin-top:20px;
+    margin-top:30px;
 }
 #content .sub_title.level_1:first-child {
     margin-top:0;
 }
 #content .sub_title.level_2 {
+    margin-top:20px;
     font-size:1.3rem;
 }
 #content .sub_title.level_3 {
+    margin-top:10px;
     font-size:1.1rem;
 }
 #content .anchor:before {
@@ -258,4 +267,15 @@ input.search-query {
     #side_cat {
         display:none;
     }
+}
+
+.news_list .item {
+    display:block;
+}
+.news_list .item:hover {
+    background-color:#eeeeee;
+}
+.news_list .item a {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
 }

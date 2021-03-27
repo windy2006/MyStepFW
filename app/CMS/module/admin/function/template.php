@@ -75,7 +75,7 @@ switch($method) {
             }
             unset($upload, $zip);
         }
-        echo myString::toJson($result, $s->gen->charset);
+        echo myString::toJson($result, $S->gen->charset);
         break;
     case 'add_ok':
     case 'edit_ok':
@@ -101,7 +101,7 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $idx, $tpl_path, $website;
+    global $mystep, $tpl_setting, $S, $idx, $tpl_path, $website;
 
     $tpl_setting['name'] = 'func_template';
     if($method!='show') $tpl_setting['name'] .= '_'.($method=='list'?'list':'input');
@@ -128,7 +128,7 @@ function build_page($method) {
             ));
             $the_list[] = $tpl_list[$i];
         }
-        $tpl->assign('tpl_list', s::toJson($the_list, $s->gen->charset));
+        $tpl->assign('tpl_list', s::toJson($the_list, $S->gen->charset));
 
         for($i=0,$m=count($website); $i<$m; $i++) {
             if(!checkPower('web', $website[$i]['web_id'])) continue;

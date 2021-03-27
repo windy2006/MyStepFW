@@ -2,6 +2,7 @@
 require 'inc.php';
 // Basic Parameter init
 global $id, $web_info, $web_id, $group, $group_info;
+$mystep->regTag('pages', 'app\CMS\parsePages');
 $db->cache(0);
 $id = $info_app['para']['id']??r::r('id');
 if(isset($info_app['para']['method'])) {

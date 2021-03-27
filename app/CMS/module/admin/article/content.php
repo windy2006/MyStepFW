@@ -28,7 +28,7 @@ if(!empty($id)) {
         if(!checkPower('web', $web_id)) {
             cms::redirect();
         }
-        if(checkPower('func') && ($s->info->time/1000-strtotime($add_date))/(60*60*24)>60) {
+        if(checkPower('func') && ($S->info->time/1000-strtotime($add_date))/(60*60*24)>60) {
             myStep::info('admin_art_content_locked');
         }
     }
@@ -84,9 +84,9 @@ switch($method) {
             $cat['type'] = 0;
             $cat['show'] = 7;
             $cat['link'] = '';
-            $db->build($s->db->pre.'news_cat')->field('max(`order`)');
+            $db->build($S->db->pre.'news_cat')->field('max(`order`)');
             $cat['order'] = 1 + $db->result();
-            $db->build($s->db->pre.'news_cat')
+            $db->build($S->db->pre.'news_cat')
                 ->field($cat);
             $db->insert();
             $data['cat_id'] = $db->getInsertId();
@@ -128,16 +128,15 @@ switch($method) {
                 if(empty($file_info['extension'])) $file_info['extension'] = 'jpg';
                 if(strlen($file_info['basename'])>120) $old_name = substr($file_info['basename'], -120);
                 $the_name = getMicrotime().'.'.$file_info['extension'];
-                $the_path = FILE.date($s->upload->path_mode);
+                $the_path = FILE.date($S->upload->path_mode);
                 myFile::getRemoteFile($matches[2][$i], $the_path.'/'.$the_name);
-                myFile::saveFile(FILE.date($s->upload->path_mode).'/log.txt', $the_name.'::'.$file_info['basename'].'::'.chr(10), 'a');
+                myFile::saveFile(FILE.date($S->upload->path_mode).'/log.txt', $the_name.'::'.$file_info['basename'].'::'.chr(10), 'a');
                 $content = str_replace($matches[2][$i], '/api/CMS/attachment/'.$the_name, $content);
             }
         }
-        $content = str_replace('<div class="table-responsive">', '', $content);
-        $content = preg_replace('#<table.*>#i', '<div class="table-responsive"><table class="table table-sm table-striped table-hover table-bordered my-3">', $content);
+        $content = preg_replace('#<div class="table-responsive">[\r\n]*(<table.+?</table>)[\r\n]*</div>#s', '\1', $content);
+        $content = preg_replace('#<table.*>#i', '<div class="table-responsive"><table class="table table-sm table-striped table-hover table-bordered mb-3">', $content);
         $content = str_replace('</table>', '</table></div>', $content);
-        $content = preg_replace('#</table></div>[\r\n]+</div>#', '</table></div>', $content);
         $content = explode('<!-- pagebreak -->', $content);
         $sub_title = array();
         for($i=0,$m=count($content); $i<$m; $i++) {
@@ -201,7 +200,7 @@ switch($method) {
             $id = $db->getInsertId();
             $data['news_id'] = $id;
             if(isset($cat)) {
-                $db->build($s->db->pre.'news_cat')
+                $db->build($S->db->pre.'news_cat')
                     ->field(['link'=>\app\CMS\getLink($data)])
                     ->where('cat_id', 'n=', $data['cat_id']);
                 $db->update();
@@ -258,23 +257,24 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db;
+    global $mystep, $tpl_setting, $S, $db;
     global $news_cat_plat, $id, $cat_id, $web_id, $web_info, $web_cur, $cat_info, $group_info;
 
     $tpl_setting['name'] = 'art_content_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
-    $pos = explode(',', $s->content->push_pos);
+    $pos = explode(',', $S->content->push_pos);
     for($i=0,$m=count($pos); $i<$m; $i++) {
         $tpl->setLoop('push_pos', ['idx'=>pow(2, $i),'name'=>$pos[$i]]);
     }
-    $mode = explode(',', $s->content->push_mode);
+    $mode = explode(',', $S->content->push_mode);
     for($i=0,$m=count($mode); $i<$m; $i++) {
         $tpl->setLoop('push_mode', ['idx'=>$i,'name'=>$mode[$i]]);
     }
 
     //if(empty($group['power_cat'])) $group['power_cat'] = 0;
     if($method == 'list') {
+        global $page, $query, $count, $page_size;
         $page = r::r('page')??1;
         $keyword = r::r('keyword')??'';
         $order = r::r('order')??'news_id';
@@ -292,13 +292,13 @@ function build_page($method) {
         $db->build($web_cur['setting']->db->pre.'news_show')
             ->field('count(*)')
             ->where($condition);
-        $counter = $db->result();
+        $count = $db->result();
 
-        if($counter==1 && !empty($cat_id) && empty($keyword)) {
+        if($count==1 && !empty($cat_id) && empty($keyword)) {
             $db->build($web_cur['setting']->db->pre.'news_show')
                 ->field('news_id')
                 ->where($condition);
-            $db->build($s->db->pre.'news_cat',[
+            $db->build($S->db->pre.'news_cat',[
                 'mode' => 'left',
                 'field' => 'cat_id'
             ])->field('idx,link,name');
@@ -311,10 +311,8 @@ function build_page($method) {
                 goto edit;
             }
         }
-
-        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'keyword='.$keyword.'&cat_id='.$id.'&web_id='.$web_cur['web_id'].'&order='.$order.'&order_type='.$order_type);
-        $tpl->assign($page_info);
-        $tpl->assign('record_count', $counter);
+        $query = 'keyword='.$keyword.'&cat_id='.$id.'&web_id='.$web_cur['web_id'].'&order='.$order.'&order_type='.$order_type;
+        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
         //main list
         $db->build($web_cur['setting']->db->pre.'news_show')
@@ -322,7 +320,7 @@ function build_page($method) {
             ->where($condition)
             ->order($order, $order_type=='desc')->order('order', $order_type=='desc')
             ->limit($record_start, $page_size);
-        $db->build($s->db->pre.'news_cat',[
+        $db->build($S->db->pre.'news_cat',[
                 'mode' => 'left',
                 'field' => 'cat_id'
             ])->field('idx','name as cat_name');
@@ -337,7 +335,7 @@ function build_page($method) {
         if(empty($cat_id)) {
             $title = $mystep->getLanguage('admin_art_content_list_all');
         } else {
-            $db->build($s->db->pre.'news_cat')->field('name')->where('cat_id','n=',$cat_id);
+            $db->build($S->db->pre.'news_cat')->field('name')->where('cat_id','n=',$cat_id);
             $title = $db->result();
         }
         $tpl->assign('keyword', $keyword);
@@ -415,16 +413,17 @@ function build_page($method) {
             'prefix'=>$news_cat_plat[$i]['prefix']
         ));
     }
-    $tpl->assign('get_remote_file', $s->content->get_remote_img?'checked':'');
+    $tpl->assign('get_remote_file', $S->content->get_remote_img?'checked':'');
     $tpl->assign('method', $method);
     $tpl->assign('web_id', $web_id);
     $tpl->assign('web_id_site', $web_info['web_id']);
     $tpl->assign('cat_id', $cat_id);
     $tpl->assign('news_id', $id);
-    $url = r::svr('HTTP_REFERER');
-    if(trim(substr($url, -(strlen($s->web->path_admin)+1)),'/')==$s->web->path_admin) {
-        $url = preg_replace('#/'.$s->web->path_admin.'/.*$#', '/'.$s->web->path_admin.'/article/content', r::svr('HTTP_REFERER'));
+    $url = r::svr('HTTP_REFERER') ?? r::svr('REQUEST_URI');
+    if(trim(substr($url, -(strlen($S->web->path_admin)+1)),'/')==$S->web->path_admin) {
+        $url = preg_replace('#/'.$S->web->path_admin.'/.*$#', '/'.$S->web->path_admin.'/article/content', r::svr('HTTP_REFERER'));
     }
+    $url .= '&web_id='.$web_id;
     $tpl->assign('back_url', $url);
     setWeb($tpl, $web_id);
     return $mystep->render($tpl);

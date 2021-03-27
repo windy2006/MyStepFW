@@ -6,7 +6,7 @@ $rule = array(
     array('/ms_setting/[any]', 'myStep::setting'),
     array('/captcha/[any]', 'myStep::captcha,4,3'),
     array('/error/[int]', 'myStep::header,$1'),
-    array('/'.$GLOBALS['s']->gen->path_admin.'/[any]', array('app\myStep\logCheck', 'myStep::getModule')),
+    array('/'.$GLOBALS['ms_setting']->gen->path_admin.'/[any]', array('app\myStep\logCheck', 'myStep::getModule')),
 );
 $api = array(
     'error' => 'app\myStep\getError',

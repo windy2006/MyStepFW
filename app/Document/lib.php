@@ -1,2 +1,2 @@
 <?PHP
-$s->db->auto = false;
+$ms_setting->db->auto = false;

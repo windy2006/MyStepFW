@@ -1,4 +1,5 @@
 <?PHP
+global $page, $query, $count, $page_size;
 $tpl_setting['name'] = 'info_count';
 $t = new myTemplate($tpl_setting);
 
@@ -7,15 +8,14 @@ if(empty($order)) $order='date';
 $order_type = r::g('order_type');
 if(empty($order_type)) $order_type = 'desc';
 
-$db->build($s->db->pre.'counter')->field('count(*)');
-$counter = $db->result();
+$db->build($S->db->pre.'counter')->field('count(*)');
+$count = $db->result();
 
 $page = r::g('page', 'int');
-list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'order='.$order.'&order_type='.$order_type);
-$t->assign($page_info);
-$t->assign('record_count', $counter);
+$query = 'order='.$order.'&order_type='.$order_type;
+list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
-$db->build($s->db->pre.'counter')
+$db->build($S->db->pre.'counter')
     ->order($order, $order_type=='desc')
     ->limit($record_start, $page_size);
 $db->select();

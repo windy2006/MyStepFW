@@ -31,7 +31,7 @@ return array(
             'name' => '密码测试',
             'name2' => '重新输入',
             'describe' => '请输入两次密码，限长15位',
-            'type' => array('password', '', '15')
+            'type' => array('password', 'md5', '6-10')
         ),
         'para_7' => array(
             'name' => '开关测试',
@@ -40,7 +40,7 @@ return array(
         ),
         'para_8' => array(
             'name' => '多行文本',
-            'describe' => '相当于只有一个项目的复选框',
+            'describe' => '用于输入多行长文本内容',
             'type' => array('textarea', '', 5)
         ),
     ]

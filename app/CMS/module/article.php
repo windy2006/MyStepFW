@@ -10,11 +10,11 @@ if($page!='all') {
     $page = intval($page);
     if($page<1) $page = 1;
 }
-$db->build($s->db->pre_sub.'news_show')
+$db->build($S->db->pre_sub.'news_show')
     ->field('news_id,cat_id,add_date,subject,tag,image,describe,view_lvl,original,views,link,active,expire')
     ->where(is_numeric($id) ? ['news_id', 'n=', $id] : ['idx', '=', md5($id)]);
 
-$db->build($s->db->pre_sub.'news_detail', array(
+$db->build($S->db->pre_sub.'news_detail', array(
         'mode' => 'left',
         'field' => 'news_id'
     ))->field('sub_title,content')->order('page');
@@ -29,17 +29,17 @@ $id = $record['news_id'];
 $cat_id = $record['cat_id'];
 if(!is_null($record['active'])
     && ($record['active']=strtotime($record['active']))>0
-    && $record['active'] > $s->info->time
+    && $record['active'] > $S->info->time
 ) {
     myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
 }
 if(!is_null($record['expire'])
     && ($record['expire']=strtotime($record['expire']))>0
-    && $record['expire'] < $s->info->time
+    && $record['expire'] < $S->info->time
 ) {
     myStep::info('page_article_expired', ROOT_WEB.$info_app['app']);
 }
-$db->build($s->db->pre_sub.'news_show')
+$db->build($S->db->pre_sub.'news_show')
     ->field(['views'=>'(views + 1)'])
     ->where('news_id','n=',$id);
 $db->update();
@@ -83,13 +83,13 @@ $tpl_setting['name'] = 'article';
 $t = new myTemplate($tpl_setting);
 if(isset($page_info))$t->assign($page_info);
 
-$s->web->title = $record['subject'].'_'.$cat_info['name'].'_'.$s->web->title;
-$s->web->keyword = $record['tag'].','.$cat_info['name'];
-$s->web->description = $record['describe'];
+$S->web->title = $record['subject'].'_'.$cat_info['name'].'_'.$S->web->title;
+$S->web->keyword = $record['tag'].','.$cat_info['name'];
+$S->web->description = $record['describe'];
 
-$s->watermark->mode = explode(',', $s->watermark->mode);
-$s->watermark->mode = array_sum($s->watermark->mode);
-if($s->watermark->mode & 1) $record['content'] = myString::watermark($record['content'], 2, 5, $s->watermark->credit);
+$S->watermark->mode = explode(',', $S->watermark->mode);
+$S->watermark->mode = array_sum($S->watermark->mode);
+if($S->watermark->mode & 1) $record['content'] = myString::watermark($record['content'], 2, 5, $S->watermark->credit);
 if(empty($record['original'])) $record['original'] = $mystep->getLanguage('page_original');
 if(empty($record['image'])) $record['image'] = ROOT_WEB.'static/images/dummy.png';
 $t->assign('record', $record);

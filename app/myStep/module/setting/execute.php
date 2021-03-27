@@ -1,10 +1,10 @@
 <?PHP
-$code = htmlspecialchars_decode(r::p('code'));
+$code = htmlspecialchars_decode(myReq::post('code'));
 $result = '';
 if(isset($info_app['path'][3])) {
     $module = $info_app['path'][3];
     $file = APP . 'Document/module/' . $module . '.php';
-    $code = htmlspecialchars(f::g($file));
+    $code = htmlspecialchars(myFile::getLocal($file));
     ob_clean();
     include($file);
     $result = ob_get_contents();

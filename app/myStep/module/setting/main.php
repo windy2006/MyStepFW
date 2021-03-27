@@ -1,13 +1,13 @@
 <?PHP
 $app = $info_app['path'][2] ?? '';
 if(!empty($app)) {
-    $builder = APP.$app.'/config/'.$s->gen->language.'.php';
+    $builder = APP.$app.'/config/'.$ms_setting->gen->language.'.php';
     if(!is_file($builder)) myStep::info('page_error_setting');
     $file = APP.$app.'/config.php';
     if(!is_file($file)) myStep::info('page_error_setting');
 } else {
     $file = CONFIG.'config.php';
-    $builder = CONFIG.'construction/'.$s->gen->language.'.php';
+    $builder = CONFIG.'construction/'.$ms_setting->gen->language.'.php';
 }
 $config = new myConfig($file);
 if(myReq::check('post')) {

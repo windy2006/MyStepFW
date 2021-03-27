@@ -1,20 +1,21 @@
 <?PHP
+global $page, $query, $count, $page_size;
 if($method=='clean') {
     cms::$log = $mystep->getLanguage('admin_info_log_clean');
     $db->query('truncate table '.$db->safeName($web_info['setting']->db->pre.'sys_log'));
     cms::redirect();
 } elseif($method=='download') {
     cms::$log = $mystep->getLanguage('admin_info_log_download');
-    $db->build($s->db->pre.'sys_log')
+    $db->build($S->db->pre.'sys_log')
         ->order('id', true);
     $db->select();
     $content = '';
     while($record = $db->getRS()) {
-        $content .= join(',', $record).'\n';
+        $content .= join(',', $record).chr(10);
     }
     getOB();
-    $content = preg_replace('/\n+/', '\n', $content);
-    $content = str_replace('\n', '\r\n', $content);
+    $content = preg_replace('/\n+/', chr(10), $content);
+    $content = str_replace(chr(10), chr(13).chr(10), $content);
     header('Content-type: text/plain');
     header('Accept-Ranges: bytes');
     header('Accept-Length: '.strlen($content));
@@ -32,18 +33,17 @@ if(empty($order)) $order='id';
 $order_type = r::g('order_type');
 if(empty($order_type)) $order_type = 'desc';
 
-$db->build($s->db->pre.'sys_log')->field('count(*)');
-$counter = $db->result();
-$t->setIf('empty', ($counter==0));
+$db->build($S->db->pre.'sys_log')->field('count(*)');
+$count = $db->result();
+$t->setIf('empty', ($count==0));
 
-list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'order='.$order.'&order_type='.$order_type);
-$t->assign($page_info);
-$t->assign('record_count', $counter);
+$query = 'order='.$order.'&order_type='.$order_type;
+list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
-$db->build($s->db->pre.'sys_log')
+$db->build($S->db->pre.'sys_log')
     ->order($order, $order_type=='desc')
     ->limit($record_start, $page_size);
-if($order!='id') $db->build($s->db->pre.'sys_log')->order('id', true);
+if($order!='id') $db->build($S->db->pre.'sys_log')->order('id', true);
 $db->select();
 while($record = $db->getRS()) {
     s::htmlTrans($record);

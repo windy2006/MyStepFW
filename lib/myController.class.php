@@ -22,8 +22,10 @@
     $this->getLanguage($idx)                            // 获取语言项目
     $this->regApi($name, $method)                       // 设置应用接口（用于数据传输）
     $this->runApi($name)                                // 调用应用接口
+    $this->regPlugin($plugin)                           // 注册插件
+    $this->plugin()                                     // 执行现有插件
     $this->regModule($module, $page)                    // 设置模块脚本（用于功能页面）
-    self::module($module, $global_vars)                 // 调用模块
+    $this->module($module, $global_vars)                // 调用模块
     $this->regTag($tag_name, $tag_func)                 // 添加模版标签解析方法
     $this->regUrl($mode, $func)                         // 添加URL生成规则
     $this->url($mode)                                   // 生成URL
@@ -42,8 +44,6 @@
     self::etag($etag)                                   // 通过过期标签显示内容
     self::file($file)                                   // 显示文件
     self::guid($para)                                   // 生成唯一ID
-    $this->regPlugin($plugin)                           // 注册插件
-    $this->plugin()                                     // 执行现有插件
     $this->setFunction($func, $position)                // 添加钩子程序
     $this->run($position, $desc)                        // 执行钩子代码
     $this->start($charset)                              // 页面脚本执行初始化
@@ -234,6 +234,29 @@ class myController extends myBase {
     }
 
     /**
+     * 注册插件
+     * @param $plugin
+     * @return $this
+     */
+    public function regPlugin($plugin, &$info = array()) {
+        $plugin = myFile::realPath($plugin);
+        if (is_dir($plugin) && is_file($plugin . '/index.php')) {
+            $this->plugins[] = $plugin;
+            if (is_file($plugin . '/info.php')) $info = include($plugin . '/info.php');
+        }
+        return $this;
+    }
+
+    /**
+     * 设置插件
+     */
+    public function plugin() {
+        for ($i = 0, $m = count($this->plugins); $i < $m; $i++) {
+            include($this->plugins[$i] . '/index.php');
+        }
+    }
+
+    /**
      * 注册功能模块
      * @param $module
      * @param $page
@@ -322,14 +345,14 @@ class myController extends myBase {
 
     /**
      * 用户登录
-     * @param $user_name
-     * @param $user_pwd
+     * @param $usr
+     * @param $pwd
      * @return bool
      */
-    public function login($user_name, $user_pwd) {
+    public function login(&$usr, $pwd) {
         $result = false;
         if (isset($this->func_log['login'])) {
-            $result = call_user_func($this->func_log['login'], $user_name, $user_pwd);
+            $result = call_user_func($this->func_log['login'], $usr, $pwd);
         }
         return $result;
     }
@@ -349,14 +372,14 @@ class myController extends myBase {
     /**
      * 变更密码
      * @param $id
-     * @param $psw_old
+     * @param $psw_org
      * @param $psw_new
      * @return bool
      */
-    public function chg_psw($id, $psw_old, $psw_new) {
+    public function chg_psw($id, $psw_org, $psw_new) {
         $result = false;
         if (isset($this->func_log['chg_psw'])) {
-            $result = call_user_func($this->func_log['chg_psw'], $id, $psw_old, $psw_new);
+            $result = call_user_func($this->func_log['chg_psw'], $id, $psw_org, $psw_new);
         }
         return $result;
     }
@@ -385,6 +408,8 @@ class myController extends myBase {
     public function removeCSS($idx) {
         if (is_file($idx)) {
             $idx = md5_file($idx);
+        } else if(strpos($idx, ' ')>0) {
+            $idx = md5($idx);
         }
         unset($this->css[$idx]);
         return $this;
@@ -442,6 +467,8 @@ class myController extends myBase {
     public function removeJS($idx) {
         if (is_file($idx)) {
             $idx = md5_file($idx);
+        } else if(strpos($idx, ' ')>0) {
+            $idx = md5($idx);
         }
         unset($this->js[$idx]);
         return $this;
@@ -547,30 +574,6 @@ class myController extends myBase {
             substr($hash, 20, 12) .
             '';
         return $guid;
-    }
-
-    /**
-     * 注册插件
-     * @param $plugin
-     * @return $this
-     */
-    public function regPlugin($plugin, &$info = array()) {
-        $plugin = myFile::realPath($plugin);
-        if (is_dir($plugin) && is_file($plugin . '/index.php')) {
-            $this->plugins[] = $plugin;
-            if (is_file($plugin . '/info.php')) $info = include($plugin . '/info.php');
-        }
-        return $this;
-    }
-
-    /**
-     * 设置插件
-     */
-    public function plugin() {
-        for ($i = 0, $m = count($this->plugins); $i < $m; $i++) {
-            include($this->plugins[$i] . '/index.php');
-        }
-        return;
     }
 
     /**
@@ -759,7 +762,6 @@ class myController extends myBase {
         foreach ($list as $k => $v) {
             if(class_exists($k)) class_alias($k, $v);
         }
-        return;
     }
 
     /**

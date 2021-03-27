@@ -62,3 +62,25 @@ $('html').bind('keydown',function(e){
         $('html').animate({scrollTop: "+="+$(window).height()/1.5}, 1000);
     }
 });
+
+if(global.mobile) {
+    let touch_start, touch_end;
+    let obj = null;
+    document.addEventListener('touchstart', function (e) {
+        touch_start = e.touches[0].pageX;
+    });
+    document.addEventListener('touchmove', function (e) {
+        touch_end = e.touches[0].pageX;
+        if(touch_start - touch_end > 20){
+            obj = $('#article_next');
+            if(obj.length>0) {
+                location.href = obj.attr('href');
+            }
+        }else if(touch_start - touch_end < -20){
+            obj = $('#article_prev');
+            if(obj.length>0) {
+                location.href = obj.attr('href');
+            }
+        }
+    });
+}

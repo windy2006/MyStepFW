@@ -35,6 +35,6 @@ for($i=0,$m=count($guide);$i<$m;$i++) {
 }
 $tpl_setting['name'] = 'guide';
 $t = new myTemplate($tpl_setting);
-$t->assign('detail', myString::toJson($detail, $s->gen->charset));
+$t->assign('detail', myString::toJson($detail, $ms_setting->gen->charset));
 $t->assign('path_admin', $app_root);
 $content = $mystep->render($t);

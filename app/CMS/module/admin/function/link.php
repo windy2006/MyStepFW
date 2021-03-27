@@ -17,7 +17,7 @@ switch($method) {
         break;
     case 'delete':
         cms::$log = $mystep->getLanguage('admin_func_link_delete');
-        $db->build($s->db->pre.'links')
+        $db->build($S->db->pre.'links')
             ->where('id', 'n=', $id);
         $db->delete();
         \app\CMS\deleteCache('link');
@@ -29,11 +29,11 @@ switch($method) {
             $data = r::p('[ALL]');
             if($method=='add_ok') {
                 cms::$log = $mystep->getLanguage('admin_func_link_add');
-                $db->build($s->db->pre.'links')->field($data);
+                $db->build($S->db->pre.'links')->field($data);
                 $db->insert();
             } else {
                 cms::$log = $mystep->getLanguage('admin_func_link_edit');
-                $db->build($s->db->pre.'links')->field($data)->where('id','n=',$id);
+                $db->build($S->db->pre.'links')->field($data)->where('id','n=',$id);
                 $db->update();
             }
             \app\CMS\deleteCache('link');
@@ -46,34 +46,34 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db;
+    global $mystep, $tpl_setting, $S, $db;
     global $id, $idx, $web_id, $website, $web_info;
 
     $tpl_setting['name'] = 'func_link_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
     if($method == 'list') {
+        global $page, $query, $count, $page_size;
         $condition = array();
         if(!empty($idx)) $condition[] = array('idx','=',$idx);
         if(!empty($web_id)) $condition[] = array('web_id','n=',$web_id);
-        $db->build($s->db->pre.'links')
+        $db->build($S->db->pre.'links')
             ->field('count(*)')->where($condition);
-        $counter = $db->result();
+        $count = $db->result();
         $order = r::g('order');
         if(empty($order)) $order = 'id';
         $order_type = r::g('order_type');
         if(empty($order_type)) $order_type = 'desc';
 
         $page = r::g('page', 'int');
-        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'web_id='.$web_info['web_id'].'&order='.$order.'&order_type='.$order_type);
-        $tpl->assign($page_info);
-        $tpl->assign('record_count', $counter);
+        $query = 'web_id='.$web_info['web_id'].'&order='.$order.'&order_type='.$order_type;
+        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
-        $db->build($s->db->pre.'links')
+        $db->build($S->db->pre.'links')
             ->where($condition)
             ->order($order, $order_type=='desc')
             ->limit($record_start, $page_size);
-        if($order!='id') $db->build($s->db->pre.'links')->order('id', true);
+        if($order!='id') $db->build($S->db->pre.'links')->order('id', true);
         $db->select();
         while($record = $db->getRS()) {
             s::htmlTrans($record);
@@ -96,7 +96,7 @@ function build_page($method) {
         $tpl->assign('idx', $idx??'');
     } else {
         if($method == 'edit') {
-            $db->build($s->db->pre.'links')->where('id','n=',$id);
+            $db->build($S->db->pre.'links')->where('id','n=',$id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_func_link_error');
             }
@@ -122,7 +122,7 @@ function build_page($method) {
     $tpl->assign('web_id', $web_id??'');
     $tpl->assign('web_id_site', $web_info['web_id']);
 
-    $db->build($s->db->pre.'links')->field('distinct')->field('idx');
+    $db->build($S->db->pre.'links')->field('distinct')->field('idx');
     $db->select();
     while($record = $db->getRS()) {
         $record['selected'] = $record['idx']==$idx?'selected':'';

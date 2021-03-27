@@ -34,12 +34,11 @@ class myTemplate extends myBase {
 
     public static $tpl_para = array();
 
-    public
-        $delimiter_l = '<!--',
-        $delimiter_r = '-->',
-        $allow_script = false;
+    public $allow_script = false;
 
     protected
+        $delimiter_l = '<!--',
+        $delimiter_r = '-->',
         $hash = '',
         $setting = array('name'=>'', 'style'=>'', 'path'=>'', 'path_compile'=>'', 'file'=>'', 'content'=>''),
         $tags = array(),
@@ -52,13 +51,18 @@ class myTemplate extends myBase {
     /**
      * 变量初始化
      * @param $setting
-     * @param bool $cache
-     * @param bool $allow_script
+     * @param false $cache
+     * @param false $allow_script
+     * @param null $delimiter
      */
-    public function init($setting, $cache = false, $allow_script = false) {
+    public function init($setting, $cache = false, $allow_script = false, $delimiter = null) {
         $this->allow_script = $allow_script;
         $this->setTplPara($setting);
+        if($cache===true) $cache = [];
         $this->setCacheMode($cache);
+        if(is_array($delimiter) && count($delimiter)==2) {
+            list($this->delimiter_l, $this->delimiter_r) = $delimiter;
+        }
     }
 
     /**
@@ -77,7 +81,7 @@ class myTemplate extends myBase {
         $this->setting['file'] = $setting['path'].'/'.$setting['style'].'/'.$setting['name'].'.'.$setting['ext'];
         $this->setting['path'] = myFile::realPath($this->setting['path']);
         $this->setting['file'] = myFile::realPath($this->setting['file']);
-        $this->setting['content'] = $this->getTemplate($this->setting['file']);
+        $this->setting['content'] = $this->getTemplate($this->setting['file'], $this->setting['file']);
         $this->hash = 't'.substr(md5($this->setting['file']), 0, 10);
         if(!isset(self::$tpl_para[$this->hash])) {
             self::$tpl_para[$this->hash] = array();
@@ -124,7 +128,7 @@ class myTemplate extends myBase {
      * @param string $file2
      * @return string
      */
-    public function getTemplate($file1, $file2='') {
+    public function getTemplate($file1, &$file2='') {
         if(is_file($file1)) {
             return myFile::getLocal($file1);
         } elseif(!empty($file2) && is_file($file2)) {
@@ -132,6 +136,7 @@ class myTemplate extends myBase {
         } else {
             $file1 = $this->setting['path'].'/default/'.basename($file1);
             if(is_file($file1)) {
+                $file2 = $file1;
                 return myFile::getLocal($file1);
             } else {
                 if(!empty($file2)) {
@@ -273,24 +278,21 @@ class myTemplate extends myBase {
             $tpl_cache = preg_replace('/<\?php.+?\?>/is', '', $tpl_cache);
             $tpl_cache = preg_replace('/<\?php.+$/is', '', $tpl_cache);
         }
-        $tpl_cache = '
-<?PHP
+        $tpl_cache = '<?PHP
 $tpl_para = myTemplate::$tpl_para[\''.$this->hash.'\'];
 ?>
 '.$tpl_cache;
         preg_match_all('/'.preg_quote($this->delimiter_l).'(\w+):start(\s+\w+\s*=\s*("|\')[^\3]+\3)*'.preg_quote($this->delimiter_r).'.*'.preg_quote($this->delimiter_l).'\1:end'.preg_quote($this->delimiter_r).'/isU', $tpl_cache, $block_all);
         for($i=0,$m=count($block_all[0]); $i<$m; $i++) {
             $cur_attrib = array();
-            $cur_content = "";
-            $cur_result = "";
+            $cur_content = '';
+            $cur_result = '';
             preg_replace_callback("/".preg_quote($this->delimiter_l)."(\w+):start((\s+\w+\s*=\s*(\"|')[^\\4]+\\4)*)".preg_quote($this->delimiter_r)."(.*)".preg_quote($this->delimiter_l)."\\1+:end".preg_quote($this->delimiter_r)."/isU", function($matches) use (&$cur_attrib, &$cur_content) {
                $this->parseBlock($matches[2], $matches[5], $cur_attrib, $cur_content);
             }, $block_all[0][$i]);
             switch($block_all[1][$i]) {
                 case 'loop':
-                    $time = isset($cur_attrib['time']) ? $cur_attrib['time'] : 0;
-                    $time += 0;
-                    if(!is_numeric($time)) $time = 0;
+                    $time = isset($cur_attrib['time']) ? intval($cur_attrib['time']) : 0;
                     $key = isset($cur_attrib['key']) ? $cur_attrib['key'] : '';
                     $unit_blank = preg_replace('/'.preg_quote($this->delimiter_l).'.*?'.preg_quote($this->delimiter_r).'/is', '', $cur_content);
                     $unit_blank = preg_replace('/<(td|li|p|dd|dt)([^>]*?)>.*?<\/\1>/is', '<\1\2>&nbsp;</\1>', $unit_blank);
@@ -327,7 +329,7 @@ mytpl;
                     $cur_result = str_replace('{myTemplate::unit_blank}', $unit_blank, $cur_result);
                     break;
                 case "if":
-                    $part = explode("<!--else-->", $cur_content);
+                    $part = explode($this->delimiter_l.'else'.$this->delimiter_r, $cur_content);
                     if(isset($cur_attrib['key'])) {
                         if(!isset(self::$tpl_para[$this->hash]['if'][$cur_attrib['key']])) self::$tpl_para[$this->hash]['if'][$cur_attrib['key']] = false;
                         $cur_result = <<<'mytpl'
@@ -354,7 +356,8 @@ mytpl;
                     }
                     break;
                 case "switch":
-                    preg_match_all("/<!--(.*)-->(.*)<!--break-->/isU", $cur_content, $part);
+                    $cur_content = preg_replace('#^[\s\r\n]+(.+[^\s\r\n])[\s\r\n]+$#s', '\1', $cur_content);
+                    preg_match_all('#('.preg_quote($this->delimiter_l).'\((.*?)\)'.preg_quote($this->delimiter_r).'((.(?!'.preg_quote($this->delimiter_l).'))+))+#s', $cur_content, $part);
                     $cur_result = <<<'mytpl'
 <?PHP
 switch($tpl_para['switch']['{myTemplate::key}']) {
@@ -367,10 +370,12 @@ mytpl;
         break;
 
 mytpl;
-                        $cur_result = str_replace('{myTemplate::part_1}', addslashes($part[1][$j]), $cur_result);
-                        $cur_result = str_replace('{myTemplate::part_2}', addslashes($part[2][$j]), $cur_result);
+                        $cur_result = str_replace('{myTemplate::part_1}', addslashes($part[2][$j]), $cur_result);
+                        $cur_result = str_replace('{myTemplate::part_2}', addslashes($part[3][$j]), $cur_result);
                     }
                     $cur_result .= <<<'mytpl'
+    default:
+        echo "";
 }
 ?>
 mytpl;
@@ -379,14 +384,15 @@ mytpl;
                 case "random":
                     $cur_result =  <<<'mytpl'
 <?PHP
-$parts = explode("<line>", "{myTemplate::content}");
+$parts = explode("{myTemplate::separator}", "{myTemplate::content}");
 echo $parts[rand(0, count($parts)-1)];
 mytpl;
                     $cur_result .= chr(10).'?>';
+                    $cur_result = str_replace('{myTemplate::separator}', $this->delimiter_l.'(s)'.$this->delimiter_r, $cur_result);
                     $cur_result = str_replace('{myTemplate::content}', addslashes($cur_content), $cur_result);
                     break;
                 default:
-                    $cur_result = "";
+                    $cur_result = '';
                     break;
             }
             $cur_result = preg_replace('/'.preg_quote($this->delimiter_l).'(\w+?)'.preg_quote($this->delimiter_r).'/', '{$tpl_para[\'para\'][\'\1\']}', $cur_result);
@@ -396,7 +402,6 @@ mytpl;
         $tpl_cache = $this->parseTag($tpl_cache);
         $tpl_cache = preg_replace('/'.preg_quote($this->delimiter_l).'(\w+)'.preg_quote($this->delimiter_r).'/', '<?=$tpl_para[\'para\'][\'\1\']?>', $tpl_cache);
         $tpl_cache = preg_replace('/[\r\n]+/', chr(10), $tpl_cache);
-        $tpl_cache = '<!--'.filemtime($this->setting['file']).'-->'.$tpl_cache;
         myFile::saveFile($cache_file, $tpl_cache, 'wb');
         return $cache_file;
     }
@@ -490,7 +495,11 @@ mytpl;
                 }
                 $cur_result = $code.$cur_result;
                 foreach($cur_attrib as $k => $v) {
-                    $cur_result = str_replace($this->delimiter_l.$k.$this->delimiter_r, $v, $cur_result);
+                    if(strpos($v, '$')===0) {
+                        $cur_result = str_replace($this->delimiter_l.$k.$this->delimiter_r, '<?='.$v.'?>', $cur_result);
+                    } else {
+                        $cur_result = str_replace($this->delimiter_l.$k.$this->delimiter_r, $v, $cur_result);
+                    }
                     $cur_result = str_replace('{myTemplate::'.$k.'}', $v, $cur_result);
                 }
                 unset($cur_attrib['unit'],$cur_attrib['unit_blank'],$cur_attrib['sql']);
@@ -530,13 +539,14 @@ mytpl;
                     $addon = addslashes($addon);
                     break;
                 case 'switch':
-                    preg_match_all('/'.preg_quote($this->delimiter_l).'(.+?)'.preg_quote($this->delimiter_r).'(.+?)'.preg_quote($this->delimiter_l).'break'.preg_quote($this->delimiter_r).'/sm', str_replace($this->delimiter_l.'switch:start', '', $block), $matches);
+                    $block_t = str_replace($this->delimiter_l.'switch:start'.$this->delimiter_r, '', $block);
+                    $block_t = str_replace($this->delimiter_l.'switch:end'.$this->delimiter_r, '', $block_t);
+                    $block_t = preg_replace('#^[\s\r\n]+(.+[^\s\r\n])[\s\r\n]+$#s', '\1', $block_t);
+                    preg_match_all('#('.preg_quote($this->delimiter_l).'\((.*?)\)'.preg_quote($this->delimiter_r).'((.(?!'.preg_quote($this->delimiter_l).'))+))+#s', $block_t, $matches);
                     $unit = array();
-                    for($i=0,$m=count($matches[1]);$i<$m;$i++) {
-                        $unit[$matches[1][$i]] = $matches[2][$i];
+                    for($i=0,$m=count($matches[2]);$i<$m;$i++) {
+                        $unit[$matches[2][$i]] = $matches[3][$i];
                     }
-                    //$unit = $matches[1];
-                    //$addon = $matches[2];
                     break;
             }
         } else {

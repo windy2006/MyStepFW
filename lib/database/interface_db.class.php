@@ -28,4 +28,5 @@ interface interface_sql {
     public function handleSQL($strSQL);
     public function file($file);
     public function check($obj);
+    public function setCache($cache, $ttl);
 }

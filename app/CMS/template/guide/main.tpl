@@ -26,8 +26,8 @@
             </li>
             <!--loop:end-->
         </ul>
-        <form action="">
-            <input id="search_input" type="text" class="form-control search-query" placeholder="检索" />
+        <form action="<!--url_prefix_app-->search">
+            <input id="search_input" type="text" name="k" class="form-control search-query" placeholder="检索" />
         </form>
     </div>
 </header>
@@ -133,6 +133,10 @@ $(function(){
     })
     setURL();
     resizeMain();
+    $('#search_input').click(function(e){
+        e.cancelBubble = true;
+        e.stopPropagation();
+    });
 });
 function resizeMain() {
     $('#main').css('min-height', 0);

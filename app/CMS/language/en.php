@@ -8,6 +8,8 @@ return array (
     'page_article_expired' => 'The specified article is expired!',
     'page_nopower' => 'You have no power to view current content！',
     'page_original' => 'Internet',
+    'page_search' => 'Search',
+    'page_search_error' => 'Longer keyword needed!',
     'page_show_all' => 'Show All',
     'page_registered' => 'User registered, please check email to activate your account!',
     'page_register_failed' => 'User register failed!',

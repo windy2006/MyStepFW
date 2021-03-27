@@ -58,6 +58,17 @@ $db->build('cms_news_detail', array(
                             ))->field('sub_title,content')->where('page', 'n>=', '1')->order('page');
 echo $db->select(1).';<br /><br />';
 
+$db->build('tbl2', array(
+    'mode' => 'left',
+    'field' => 'news_id'
+))->field('col1, col2');
+$db->build('table_name')->field(['field_name', 'count(*) as cnt'])
+    ->group('field_name')
+    ->group(['field_name', 'cnt>3'])
+    ->group('field_name', ['cnt','n>',3])
+    ->group(['field'=>'field_name,field2_name', 'having'=>'cnt>3']);
+echo $db->select(1).';<br /><br />';
+
 //insert
 $db->build('[reset]');
 $db->build('cms_admin_cat')->field(array(
@@ -80,9 +91,13 @@ echo $db->replace(1).';<br /><br />';
 
 //update
 $db->build('[reset]');
-$db->build('cms_news_show')->field(array('path'=>''))->where('news_id', 'n>', '10')->order('news_id', 1)->limit(5, 6);
+$db->build('cms_news_show')
+    ->field(array('path'=>''))
+    ->where('news_id', 'n>', '10')
+    ->order('news_id', 1)->limit(5, 6);
 echo $db->update(1).';<br /><br />';
 $db->build('cms_news_show')->reset();
+
 $db->build('cms_news_show')->field(array(
                             'views' => 5,
                             'tag' => 'tag',
@@ -106,6 +121,7 @@ echo $db->update(1).';<br /><br />';
 $db->build('[reset]');
 $db->build('cms_admin_cat')->where('id', 'n>', '38')->order('id', 1)->limit(5);
 echo $db->delete(1).';<br /><br />';
+
 $db->build('[reset]');
 $db->build('cms_news_show')->where('subject', '<>', 'xxxx')
                             ->where('news_id', 'n=', '1')
@@ -124,11 +140,11 @@ echo $db->delete(1).';<br /><br />';
 //echo $db->close();
 
 //create
-//echo $db->create('my_db', '', 'db', 0).'<br /><br />';
-//echo $db->create('my_tbl', 'my_col_1, my_col_2', 'idx', 0).'<br /><br />';
-//echo $db->create('my_tbl', 'tbl2', 'tbl', 0).'<br /><br />';
-//echo $db->create('my_table', 'my_col char(1000)', 'tbl', 0).'<br /><br />';
-debug_show($db->create('my_table', [
+echo $db->create('my_db', '', 'db', 1).'<br /><br />';
+echo $db->create('my_tbl', 'my_col_1, my_col_2', 'idx', 1).'<br /><br />';
+echo $db->create('my_tbl', 'tbl2', 'tbl', 1).'<br /><br />';
+echo $db->create('my_table', 'my_col char(1000)', 'tbl', 1).'<br /><br />';
+echo $db->create('my_table', [
     'col' => [
         'id int identity(1,1)',
         'my_col_1 char(1000)',
@@ -139,4 +155,4 @@ debug_show($db->create('my_table', [
     'idx' => 'my_col_2',
     'charset' => 'GBK',
     'comment' => 'comments'
-], 'tbl', 0));
+], 'tbl', 1);

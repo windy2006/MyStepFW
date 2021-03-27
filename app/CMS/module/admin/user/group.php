@@ -9,9 +9,9 @@ switch($method) {
     case 'delete':
         if($id>3) {
             cms::$log = $mystep->getLanguage('admin_user_group_delete');
-            $db->build($s->db->pre.'users')->field(array('group_id'=>2))->where('group_id','n=',$id);
+            $db->build($S->db->pre.'users')->field(array('group_id'=>2))->where('group_id','n=',$id);
             $db->update();
-            $db->build($s->db->pre.'user_group')->where('group_id','n=',$id);
+            $db->build($S->db->pre.'user_group')->where('group_id','n=',$id);
             $db->delete();
             \app\CMS\deleteCache('user_group');
             cms::redirect();
@@ -26,7 +26,7 @@ switch($method) {
         }
         $data = r::p('[ALL]');
         cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_group_add':'admin_user_group_edit');
-        $db->build($s->db->pre.'user_group')->field($data);
+        $db->build($S->db->pre.'user_group')->field($data);
         $db->replace();
         \app\CMS\deleteCache('user_group');
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
@@ -36,14 +36,14 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db, $id, $power;
+    global $mystep, $tpl_setting, $S, $db, $id, $power;
 
     $tpl_setting['name'] = 'user_group_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
     $power = \app\CMS\getCache('user_power');
 
     if($method == 'list') {
-        $db->build($s->db->pre.'user_group')->order('group_id');
+        $db->build($S->db->pre.'user_group')->order('group_id');
         $db->select();
         while($record = $db->getRS()) {
             s::htmlTrans($record);
@@ -56,7 +56,7 @@ function build_page($method) {
         $tpl->assign('title', $mystep->getLanguage('admin_user_group_title'));
     } else {
         if($method == 'edit') {
-            $db->build($s->db->pre.'user_group')->where(array('group_id','n=',$id));
+            $db->build($S->db->pre.'user_group')->where(array('group_id','n=',$id));
             if(($record = $db->record())===false) {
                 myStep::info('admin_user_group_error');
             }

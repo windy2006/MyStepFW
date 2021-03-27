@@ -11,7 +11,7 @@ switch($method) {
         if($id==1) {
             myStep::info('admin_sys_group_no_del');
         }
-        $db->build($s->db->pre.'sys_group')
+        $db->build($S->db->pre.'sys_group')
             ->where('group_id', 'n=', $id);
         $db->delete();
         \app\CMS\deleteCache('sys_group');
@@ -32,7 +32,7 @@ switch($method) {
                 $data['power_web'] = join(',', $data['power_web']);
             }
             cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_sys_group_add':'admin_sys_group_edit');
-            $db->build($s->db->pre.'sys_group')->field($data);
+            $db->build($S->db->pre.'sys_group')->field($data);
             $db->replace();
             \app\CMS\deleteCache('sys_group');
         }
@@ -42,7 +42,7 @@ switch($method) {
         $content = build_page('list');
 }
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db, $id, $website;
+    global $mystep, $tpl_setting, $S, $db, $id, $website;
     if(($admin_cat=\app\CMS\getCache('admin_cat'))===false) {
         myStep::info('error_para');
     } else {
@@ -52,7 +52,7 @@ function build_page($method) {
     $tpl = new myTemplate($tpl_setting, false);
 
     if($method == 'list') {
-        $db->build($s->db->pre.'sys_group')
+        $db->build($S->db->pre.'sys_group')
             ->order('group_id');
         $db->select();
         while($record = $db->getRS()) {
@@ -88,7 +88,7 @@ function build_page($method) {
         $tpl->assign('title', $mystep->getLanguage('admin_sys_group_title'));
     } else {
         if($method == 'edit') {
-            $db->build($s->db->pre.'sys_group')
+            $db->build($S->db->pre.'sys_group')
                 ->where('group_id','n=',$id);
             if(($record=$db->record()) === false) {
                 myStep::info('admin_sys_group_error');

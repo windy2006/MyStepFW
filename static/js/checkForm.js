@@ -36,7 +36,7 @@ function checkForm(the_form, myChecker){
         the_need = the_obj.getAttribute("need");
         the_len = the_obj.getAttribute("len");
         the_length = typeof(String.prototype.blen)==="undefined"?the_value.length:the_value.blen();
-        if(the_len!=null) {
+        if(the_len!=null && !((the_obj.type==='password' && the_length===0))) {
             if(the_len.match(/^(\d+)(\!)?$/)) {
                 if(RegExp.$2==="!") {
                     if(the_length !== RegExp.$1) {

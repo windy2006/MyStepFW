@@ -18,40 +18,28 @@ function installCheck($module) {
 }
 
 function getAttachment() {
-    global $s, $info_app;
+    global $S, $info_app;
+    if(!\myStep::checkPower('download')) return;
     $file = array_pop($info_app['path']);
     $idx = explode('.', $file);
-    $path = FILE.date($s->upload->path_mode, $idx[0]);
+    $path = FILE.date($S->upload->path_mode, intval($idx[0]));
     if(is_file($path.$file)) {
-        $s->watermark->mode = explode(',', $s->watermark->mode);
-        $s->watermark->mode = array_sum($s->watermark->mode);
-        if(($s->watermark->mode & 2) && in_array(strtolower($idx[2]), ['png','jpg'])) {
-            $cache = CACHE.'app/CMS/img/'.date($s->upload->path_mode, $idx[0]).$file;
+        if(strpos($S->watermark->mode, '2')!==false && in_array(strtolower($idx[2]), ['png','jpg'])) {
+            $cache = CACHE.'app/CMS/img/'.date($S->upload->path_mode, intval($idx[0])).$file;
             if(!is_file($cache)) {
                 $img = new \myImg($path.$file);
-                $img->watermark(ROOT.$s->watermark->img, $s->watermark->position, $cache, [
-                    'rate' => $s->watermark->img_rate,
-                    'alpha' => $s->watermark->alpha,
-                    'font' => ROOT.$s->watermark->txt_font,
-                    'fontsize' => $s->watermark->txt_fontsize,
-                    'fontcolor' => $s->watermark->txt_fontcolor,
-                    'bgcolor' => $s->watermark->txt_bgcolor,
+                $img->watermark(ROOT.$S->watermark->img, $S->watermark->position, $cache, [
+                    'rate' => $S->watermark->img_rate,
+                    'alpha' => $S->watermark->alpha,
+                    'font' => ROOT.$S->watermark->txt_font,
+                    'fontsize' => $S->watermark->txt_fontsize,
+                    'fontcolor' => $S->watermark->txt_fontcolor,
+                    'bgcolor' => $S->watermark->txt_bgcolor,
                 ])->destory();
             }
             \myStep::file($cache);
         } else {
-            $name = '';
-            if(is_file($path.'log.txt')) {
-                $list = file($path.'log.txt');
-                for($i=0,$m=count($list);$i<$m;$i++) {
-                    if(strpos($list[$i], $file)===0) {
-                        $list[$i] = explode('::', $list[$i]);
-                        $name = $list[$i][1];
-                        break;
-                    }
-                }
-            }
-            \myStep::file($path.$file, $name);
+            \myStep::download($file);
         }
     } else {
         \myController::header('404');
@@ -59,7 +47,7 @@ function getAttachment() {
 }
 
 function getUserInfo() {
-    global $db, $s;
+    global $db, $S;
     $db_cache = $db->cache();
     $db->cache(0);
     $user_group = \app\CMS\getCache('user_group');
@@ -76,7 +64,7 @@ function getUserInfo() {
         $user_info = null;
         if(!is_null($ms_user)) {
             list($usr, $pwd) = explode(chr(9), $ms_user);
-            $db->build($s->db->pre.'users')
+            $db->build($S->db->pre.'users')
                 ->field('group_id,hash')
                 ->where('username','=',$usr)
                 ->where('password','=',$pwd);
@@ -152,7 +140,7 @@ function getCache($idx) {
 }
 
 function buildList($idx) {
-    global $db, $s, $mystep;
+    global $db, $S, $mystep;
     $mystep->setInstance();
     $cache_para = array();
     $db_cache = $db->cache();
@@ -161,7 +149,7 @@ function buildList($idx) {
         case 'admin_cat':
             $theList = array();
             $plat = array();
-            $db->build($s->db->pre.'admin_cat')
+            $db->build($S->db->pre.'admin_cat')
                ->where('pid', 'n=', 0)
                ->order('order', 1)->order('id', 0);
             $db->select();
@@ -173,7 +161,7 @@ function buildList($idx) {
                 $plat[] = $theList[$i];
                 $theList[$i]['sub'] = array();
                 $db->build('[reset]');
-                $db->build($s->db->pre.'admin_cat')
+                $db->build($S->db->pre.'admin_cat')
                     ->where('pid', 'n=', $theList[$i]['id'])
                     ->order('order', 1)->order('id', 0);
                 $db->select();
@@ -187,7 +175,7 @@ function buildList($idx) {
             $cache_para[$idx.'_plat'] = $plat;
             break;
         case 'news_cat':
-            $db->build($s->db->pre.'news_cat')
+            $db->build($S->db->pre.'news_cat')
                ->field('cat_id,web_id,pid,name,idx,show,order,type,link,layer,view_lvl,prefix,keyword,comment')
                ->order('web_id')->order('cat_id');
             $cat = $db->records();
@@ -231,7 +219,7 @@ function buildList($idx) {
         case 'link':
             $link_txt = array();
             $link_img = array();
-            $db->build($s->db->pre.'links')
+            $db->build($S->db->pre.'links')
                 ->order('level', 1)->order('id', 0);
             $db->select();
             while($record=$db->getRS()) {
@@ -245,7 +233,7 @@ function buildList($idx) {
             $cache_para['img'] = $link_img;
             break;
         case 'website':
-            $db->build($s->db->pre.'website')
+            $db->build($S->db->pre.'website')
                 ->order('web_id', 0);
             $db->select();
             while($record=$db->getRS()) {
@@ -255,7 +243,7 @@ function buildList($idx) {
         case 'sys_group':
         case 'user_group':
             $theIdx = preg_replace('/[a-z]+_/i', '', $idx);
-            $db->build($s->db->pre.$idx)
+            $db->build($S->db->pre.$idx)
                ->order($theIdx.'_id', 0);
             $db->select();
             while($record=$db->getRS()) {
@@ -263,7 +251,7 @@ function buildList($idx) {
             }
             break;
         default:
-            $db->build($s->db->pre.$idx)
+            $db->build($S->db->pre.$idx)
                 ->order('id', 0);
             $db->select();
             if($db->checkError()) return false;
@@ -308,14 +296,14 @@ function getPara($list, $key, $val) {
 }
 
 function removeNewsCache($news_id, $web_id=0) {
-    global $db, $s, $web_info;
-    if(!$s->gen->cache_page) return false;
+    global $db, $S, $web_info;
+    if(!$S->gen->cache_page) return false;
     if($web_id==0) $web_id=$web_info['web_id'];
     $db->build('[reset]');
-    $db->build($s->db->pre_sub.'news_show')
+    $db->build($S->db->pre_sub.'news_show')
         ->field('add_date,pages')
         ->where('news_id', 'n=', $news_id);
-    $db->build($s->db->pre.'news_cat', array(
+    $db->build($S->db->pre.'news_cat', array(
             'mode' => 'left',
             'field' => 'cat_id'
         ))->field('cat_idx')
@@ -331,7 +319,7 @@ function removeNewsCache($news_id, $web_id=0) {
 }
 
 function getPageList($total, $page=1, $page_size=20, $qstr='') {
-    if(!is_numeric($page)) $page = 1;
+    if(!is_numeric($page) || $page < 1) $page = 1;
     $page = (INT)$page;
     $page_count = ceil($total/$page_size);
     if($page < 1) $page = 1;
@@ -341,7 +329,7 @@ function getPageList($total, $page=1, $page_size=20, $qstr='') {
     $record_start = ($page-1) * $page_size;
     if($record_start < 0) $record_start = 0;
     $page_arr = array();
-    $page_arr['page_total'] = $total;
+    $page_arr['total'] = $total;
     $page_arr['page_current'] = $page;
     $page_arr['page_count'] = $page_count;
     $page_arr['link_first'] = ($page<=1 ? 'javascript:' : $qstr.'1');
@@ -424,7 +412,7 @@ $sql = '{myTemplate::sql}';
 if(empty($sql)) {
     $sql = \app\CMS\buildSQL($tag_attrs);
 }
-$result = $cache->getData($sql, 'all', $s->expire->catalog);
+$result = $cache->getData($sql, 'all', $S->expire->catalog);
 $n = 0;
 foreach($result as $news) {
     if(!isset($tag_attrs['show_cat'])) $news['catalog'] = '';
@@ -493,21 +481,21 @@ mytpl;
 }
 
 function parseNewsNext(\myTemplate &$tpl, &$tag_attrs = array()) {
-    global $s, $db;
+    global $S, $db;
     if(!isset($tag_attrs['id'])) return '';
     if(!isset($tag_attrs['mode'])) $tag_attrs['mode'] = 'next';
     $result = <<<'mytpl'
 <?php
-$db->build($s->db->pre_sub.'news_show')
+$db->build($S->db->pre_sub.'news_show')
     ->field('news_id,subject')
     ->limit(1);
 if(isset($tag_attrs['catalog'])) {
-    $db->build($s->db->pre_sub.'news_show')->where('cat_id', 'n=', $tag_attrs['catalog']);
+    $db->build($S->db->pre_sub.'news_show')->where('cat_id', 'n=', $tag_attrs['catalog']);
 }
 if($tag_attrs['mode']=='next') {
-    $db->build($s->db->pre_sub.'news_show')->where('news_id', 'n>', $tag_attrs['id'])->order('news_id');
+    $db->build($S->db->pre_sub.'news_show')->where('news_id', 'n>', $tag_attrs['id'])->order('news_id');
 } else {
-    $db->build($s->db->pre_sub.'news_show')->where('news_id', 'n<', $tag_attrs['id'])->order('news_id', true);
+    $db->build($S->db->pre_sub.'news_show')->where('news_id', 'n<', $tag_attrs['id'])->order('news_id', true);
 }
 if($news = $db->record()) {
     $url = app\CMS\getLink($news);
@@ -523,7 +511,7 @@ mytpl;
 }
 
 function parseInfo(\myTemplate &$tpl, &$tag_attrs = array()) {
-    global $s, $db, $web_info;
+    global $S, $db, $web_info;
     $result = '';
     $condition = array();
     if(isset($tag_attrs['id'])) {
@@ -533,7 +521,7 @@ function parseInfo(\myTemplate &$tpl, &$tag_attrs = array()) {
     }
     if(!empty($condition)) {
         $condition[] = array(array('web_id', 'n=', $web_info['web_id']), array('web_id', 'n=', 0,'or'),'and');
-        $db->build($s->db->pre.'info')->where($condition)->field('content');
+        $db->build($S->db->pre.'info')->where($condition)->field('content');
         $tag_attrs['sql'] = addslashes($db->select(true));
         $db->build('[reset]');
         $result = <<<'mytpl'
@@ -580,7 +568,7 @@ mytpl;
     return str_replace($block, $result, $tpl_content);
 }
 function parseTag(\myTemplate &$tpl, &$tag_attrs = array()) {
-    global $tpl_setting, $db, $s;
+    global $tpl_setting, $db, $S;
     if(!isset($tag_attrs['count'])) $tag_attrs['count'] = 0;
     if(!is_numeric($tag_attrs['count'])) $tag_attrs['count'] = 0;
     if(!isset($tag_attrs['limit'])) $tag_attrs['limit'] = 20;
@@ -590,8 +578,8 @@ function parseTag(\myTemplate &$tpl, &$tag_attrs = array()) {
     $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_tag.tpl');
     list($block, $tag_attrs['unit'], $tag_attrs['unit_blank'])= $tpl->getBlock($tpl_content, 'loop', 'tag');
 
-    $db->build($s->db->pre_sub.'news_tag')->field('tag,count')->order($tag_attrs['order'])->limit($tag_attrs['limit']);
-    if($tag_attrs['count']>0)  $db->build($s->db->pre_sub.'news_tag')->where('count', 'n>', $tag_attrs['count']);
+    $db->build($S->db->pre_sub.'news_tag')->field('tag,count')->order($tag_attrs['order'])->limit($tag_attrs['limit']);
+    if($tag_attrs['count']>0)  $db->build($S->db->pre_sub.'news_tag')->where('count', 'n>', $tag_attrs['count']);
     $tag_attrs['sql'] = addslashes($db->select(true));
     $db->build('[reset]');
     $result = <<<'mytpl'
@@ -601,7 +589,7 @@ $base_size = 8;
 $dyn_size = 32;
 $count_max = 0;
 $tag_list = array();
-$result = $cache->getData($sql, 'all', $s->expire->tag);
+$result = $cache->getData($sql, 'all', $S->expire->tag);
 for($i=0,$m=count($result); $i<$m; $i++) {
     $record = $result[$i];
     $record['link'] = \app\CMS\getLink($record, 'tag');
@@ -655,6 +643,30 @@ mytpl;
     }
     return $result;
 }
+function parsePages(\myTemplate &$tpl, &$tag_attrs = array()){
+    global $tpl_setting;
+    $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_pages.tpl');
+    list($block, $tag_attrs['unit'], $tag_attrs['unit_blank']) = $tpl->getBlock($tpl_content, 'if');
+    $tag_attrs['unit'] = preg_replace('#<!--(link_\w+)-->#', '<?=$page_info[\'\1\']?>', $tag_attrs['unit']);
+    $tag_attrs['unit'] = str_replace('<!--page_count-->', '<?=$page_info[\'page_count\']?>', $tag_attrs['unit']);
+    $tag_attrs['unit'] = stripslashes($tag_attrs['unit']);
+    $tag_attrs['unit_blank'] = stripslashes($tag_attrs['unit_blank']);
+    $content = <<<'mytpl'
+<?PHP
+list($page_info) = \app\CMS\getPageList({myTemplate::count}, {myTemplate::page}, {myTemplate::size}, {myTemplate::query});
+if($page_info['page_count']>1) {
+?>
+{myTemplate::unit}
+<?PHP
+} else {
+?>
+{myTemplate::unit_blank}
+<?PHP
+}
+?>
+mytpl;
+    return str_replace($block, $content, $tpl_content);
+}
 
 function getSubcat($id='', &$cat_info=false) {
     global $news_cat, $news_cat_plat, $web_info;
@@ -695,7 +707,7 @@ function getSubcat($id='', &$cat_info=false) {
 }
 
 function buildSQL($paras) {
-    global $s, $db, $website, $web_info;
+    global $S, $db, $website, $web_info;
     $web = false;
     if(isset($paras['web'])) {
         if(is_numeric($paras['web'])) {
@@ -708,15 +720,15 @@ function buildSQL($paras) {
         $web = $web_info;
     }
     $web['setting'] = new \myConfig(PATH.'website/config_'.$web['idx'].'.php');
-    if(!isset($web['setting']->db->pre)) $web['setting']->db->pre = $s->db->pre;
+    if(!isset($web['setting']->db->pre)) $web['setting']->db->pre = $S->db->pre;
     $tbl = $web['setting']->db->pre.'news_show';
     $db->build($tbl);
-    $db->build($s->db->pre.'news_cat', array(
+    $db->build($S->db->pre.'news_cat', array(
         'mode' => 'left',
         'field' => 'cat_id'
     ))->field('idx','name as catalog');
-    if(isset($paras['catalog'])) {
-        $db->build($s->db->pre.'news_cat')->where([
+    if(isset($paras['catalog']) && $paras['catalog']!=0) {
+        $db->build($S->db->pre.'news_cat')->where([
                 ['cat_id', 'n=', $paras['catalog']],
                 ['pid', 'n=', $paras['catalog'], 'or']
             ], 'and'
@@ -729,13 +741,13 @@ function buildSQL($paras) {
         if(!isset($paras['order'][1])) $paras['order'][1] = false;
         $db->build($tbl)->order($paras['order'][0], $paras['order'][1]);
     } else {
-        if(isset($paras['catalog'])) {
+        if(isset($paras['catalog']) && $paras['catalog']!=0) {
             $db->build($tbl)->order('order', true);
         }
         $db->build($tbl)->order('news_id', true);
     }
     if(isset($paras['setop'])) {
-        $db->build($tbl)->where('(setop & '.intval($paras['setop']).')', 'n=', $paras['setop'], 'and');
+        $db->build($tbl)->where('(`setop` & '.intval($paras['setop']).')', 'n=', $paras['setop'], 'and');
     }
     if(isset($paras['image'])) {
         $db->build($tbl)->where('image', '!=', '', 'and');
@@ -752,12 +764,20 @@ function buildSQL($paras) {
     if(isset($paras['prefix']) && !empty($paras['prefix'])) {
         $db->build($tbl)->where('subject', 'like', '['.$paras['prefix'].']%', 'and');
     }
+    if(isset($paras['keyword']) && strlen($paras['keyword'])>=6) {
+        $db->build($web['setting']->db->pre.'news_detail', array(
+            'mode' => 'left',
+            'field' => 'news_id'
+        ))->where('content', 'like', $paras['keyword']);
+    }
     $db->build($tbl)->where([
             ['expire', 'is', null],
+            ['expire', '=', '0000-00-00', 'or'],
             ['expire', 'f>', 'now()', 'or']
         ], 'and');
     $db->build($tbl)->where([
             ['active', 'is', null],
+            ['active', '=', '0000-00-00', 'or'],
             ['active', 'f<', 'now()', 'or']
         ], 'and');
     if(isset($paras['tag']) && !empty($paras['tag'])) {

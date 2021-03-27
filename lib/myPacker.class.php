@@ -40,7 +40,6 @@ class myPacker extends myBase {
         $this->pack_file = myFile::realPath($pack_file);
         if(!empty($separator)) $this->separator = $separator;
         $this->addIgnore(basename($pack_file));
-        return;
     }
 
     /**
@@ -49,7 +48,6 @@ class myPacker extends myBase {
     public function addIgnore() {
         $args_list = func_get_args();
         $this->file_ignore = array_merge($this->file_ignore, $args_list);
-        return;
     }
 
     /**
@@ -62,7 +60,6 @@ class myPacker extends myBase {
         $this->charset['to'] = $charset;
         $this->charset['lng_type'] = $lng_type;
         $this->charset['file_ext'] = $file_ext;
-        return;
     }
 
     /**
@@ -71,7 +68,6 @@ class myPacker extends myBase {
     public function addFile() {
         $args_list = func_get_args();
         $this->file_list += $args_list;
-        return;
     }
 
     /**
@@ -81,7 +77,6 @@ class myPacker extends myBase {
         for($i=0,$m=count($this->file_list); $i<$m; $i++) {
             $this->packFile($this->file_list[$i]);
         }
-        return;
     }
 
     /**
@@ -143,7 +138,6 @@ class myPacker extends myBase {
             $this->file_count++;
             $this->pack_result[] = ['Packing File', str_replace($root, '/', $dir), myFile::getSize($dir)];
         }
-        return;
     }
 
     /**

@@ -1,8 +1,8 @@
 <?PHP
 if(myReq::check('post')) {
-    $path = myReq::p('path');
-    $ext = myReq::p('ext');
-    $idx = myReq::p('idx');
+    $path = myReq::post('path');
+    $ext = myReq::post('ext');
+    $idx = myReq::post('idx');
     $m = count($path);
     $result = array();
     for($i=0;$i<$m;$i++) {

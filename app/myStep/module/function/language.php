@@ -1,5 +1,5 @@
 <?PHP
-$app = myReq::r('app');
+$app = myReq::request('app');
 if(empty($app) || !is_dir(APP.$app)) {
     myStep::info('app_missing');
 }
@@ -9,7 +9,7 @@ if($list==false) {
     myStep::info('page_error_setting');
 }
 $list = array_map(function ($v) {return basename($v);} , $list);
-$type = myReq::g('type');
+$type = myReq::get('type');
 if(empty($type)) $type = 'default';
 if($type == 'default') {
     $content = myFile::getLocal($dir.'default.php');
@@ -18,8 +18,8 @@ if($type == 'default') {
     }
 }
 if(myReq::check('post')) {
-    $lng = myReq::p('language');
-    $new = myReq::p('lng_new_idx');
+    $lng = myReq::post('language');
+    $new = myReq::post('lng_new_idx');
     if(!empty($new)) {
         $type = $new;
         $list[] = $type.'.php';

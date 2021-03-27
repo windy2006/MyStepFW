@@ -50,8 +50,9 @@ $template->assign('url', $ctrl->url('test', 'aaa', 'bbb', 'ccc'));
 $ctrl->regLog(function () {return 'login';}, function() {return 'logout';}, function() {return 'chg_psw';});
 
 echo '<div><b>登陆函数测试: </b></div>';
+$user = 'name';
 debug_show(
-    $ctrl->login('name', 'pwd'),
+    $ctrl->login($user, 'pwd'),
     $ctrl->logout(),
     $ctrl->chg_psw('id', 'psw_old', 'psw_new')
 );

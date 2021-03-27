@@ -2,7 +2,7 @@
 if(is_file(PATH.'config.php')) {
     myStep::redirect('/CMS/');
 }
-global $mystep, $s, $info_app;
+global $mystep, $S, $info_app;
 $tpl = new myTemplate($tpl_setting, $tpl_cache);
 if($info_app['path'][0]!='install') {
     $info_app['path'][0] = 'install';
@@ -19,8 +19,8 @@ switch ($info_app['path'][1]) {
     case 1:
         break;
     case 2:
-        $s->merge(PATH.'config_default.php');
-        $list = $s->build(PATH.'config/'.$s->gen->language.'.php');
+        $S->merge(PATH.'config_default.php');
+        $list = $S->build(PATH.'config/'.$S->gen->language.'.php');
         foreach($list as $v) {
             if(isset($v['idx'])) {
                 $t->setLoop('setting', ['content'=> '</tbody>

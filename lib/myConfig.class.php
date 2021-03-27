@@ -25,6 +25,7 @@ class myConfig extends myBase {
         $file = '',
         $construction = '',
         $type = '',
+        $parser = [],
         $setting = array();
 
     /**
@@ -147,6 +148,21 @@ class myConfig extends myBase {
     }
 
     /**
+     * 设置自定义解析函数
+     * @param $ext
+     * @param $func_load
+     * @param $func_save
+     */
+    public  function setParser($ext, $func_load, $func_save) {
+        if(!empty($ext) && is_callable($func_load) && is_callable($func_save)) {
+            $this->parser[$ext] = [
+                'load' => $func_load,
+                'save' => $func_save
+            ];
+        }
+    }
+
+    /**
      * 生成配置信息
      * @param $file
      */
@@ -160,22 +176,20 @@ class myConfig extends myBase {
                 $construction = [];
                 if(isset($detail['name']) && isset($detail['list'])) {
                     foreach($detail['list'] as $k => $v) {
-                        if(preg_match('#^password(_(\w+))?$#', $v['type'][0], $match)) {
-                            $v['type'][0] = 'password';
-                        }
                         if(!isset($construction[$v['type'][0]])) $construction[$v['type'][0]] = [];
                         $construction[$v['type'][0]][] = $k;
-                        if(isset($match[2])) $construction[$v['type'][0]]['func'][$k] = $match[2];
+                        if($v['type'][0]==='password' && !empty($v['type'][1])) {
+                            $construction[$v['type'][0]]['func'][$k] = $v['type'][1];
+                        }
                     }
                 } else {
                     foreach($detail as $k0 => $v0) {
                         foreach($v0['list'] as $k => $v) {
-                            if(preg_match('#^password(_(\w+))?$#', $v['type'][0], $match)) {
-                                $v['type'][0] = 'password';
-                            }
                             if(!isset($construction[$v['type'][0]])) $construction[$v['type'][0]] = [];
                             $construction[$v['type'][0]][] = $k0.'.'.$k;
-                            if(isset($match[2])) $construction[$v['type'][0]]['func'][$k0.'.'.$k] = $match[2];
+                            if($v['type'][0]==='password' && !empty($v['type'][1])) {
+                                $construction[$v['type'][0]]['func'][$k0.'.'.$k] = $v['type'][1];
+                            }
                         }
                     }
                 }
@@ -210,8 +224,12 @@ class myConfig extends myBase {
                     $result = myString::fromJson(myFile::getLocal($file), true);
                     break;
                 default:
-                    $this->error('Unsupported format - '. $type);
-                    exit;
+                    if(isset($this->parser[$type])) {
+                        $result = call_user_func($this->parser[$type]['load'], myFile::getLocal($file));
+                    } else {
+                        $this->error('Unsupported format - '. $type);
+                        exit;
+                    }
             }
         }
         if($return_object) $result = self::a2o($result);
@@ -334,8 +352,12 @@ return '.var_export($setting, true).';';
                 $result = myString::toJson($setting);
                 break;
             default:
-                $type = $this->type;
-                goto start;
+                if(isset($this->parser[$type])) {
+                    $result = call_user_func($this->parser[$type]['save'], $setting);
+                } else {
+                    $type = $this->type;
+                    goto start;
+                }
         }
         if(empty($file)) {
             $file = $this->file;
@@ -400,21 +422,20 @@ return '.var_export($setting, true).';';
             $k = str_replace('single_setting][', '', $k);
             switch($v['type'][0]) {
                 case 'text':
-                    $item['html'] = '<input type="text" name="setting['.$k.']" value="'.$the_value.'" maxlength="'.$v['type'][2].'"'.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).' />';
+                    $item['html'] = '<input type="text" name="setting['.$k.']" value="'.$the_value.'" len="'.$v['type'][2].'"'.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).' />';
                     break;
                 case 'textarea':
                     $item['html'] = '<textarea name="setting['.$k.']" wrap="off" rows="'.$v['type'][2].'" '.($v['type'][1]===false?'':(' need="'.$v['type'][1].'"')).' >'.$the_value.'</textarea>';
                     break;
                 case 'password':
-                case 'password_md5':
                     $item['describe'] = '';
-                    $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'" name="setting['.$k.']" value="" maxlength="'.$v['type'][2].'" />';
+                    $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'" name="setting['.$k.']" value="" len="'.$v['type'][2].'" />';
                     $result[] = $item;
                     $item = array(
                         'name' => $v['name2'],
                         'describe' => $v['describe'],
                     );
-                    $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'_r" name="setting['.$k.'_pwd_r]" value="" maxlength="'.$v['type'][2].'" />';
+                    $item['html'] = '<input type="password" id="'.str_replace('][', '_', $k).'_r" name="setting['.$k.'_pwd_r]" value="" len="'.$v['type'][2].'" />';
                     break;
                 case 'checkbox':
                     $cur_component = '';

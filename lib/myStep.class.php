@@ -32,8 +32,8 @@
     $this->editorGetPlugin()                         // 生成编辑器插件缓存脚本
     self::info($msg, $url)                           // 信息提示，需先声明mystep类
     self::captcha($len, $scope)                      // 生成验证码
-    self::language($module, $type)                   // JS语言包接口
-    self::setting($module, $type)                    // JS设置信息接口
+    self::language($app_name, $type)                   // JS语言包接口
+    self::setting($app_name, $type)                    // JS设置信息接口
     self::api($para)                                 // 框架API执行接口
     self::module($m)                                 // 框架模块调用接口
     self::upload()                                   // 文件上传接口
@@ -54,6 +54,7 @@ require_once(VENDOR.'autoload.php');
 require_once('myController.class.php');
 class myStep extends myController {
     public static
+        $variant_alias = [],
         $url_prefix = '',
         $plugin_ignore = ['ms_language', 'ms_setting', 'captcha'];
     public $setting;
@@ -69,12 +70,11 @@ class myStep extends myController {
      * 构造函数
      */
     public function __construct() {
-        $this->setting = &$GLOBALS['s'];
+        $this->setting = &$GLOBALS['ms_setting'];
         date_default_timezone_set($this->setting->gen->timezone);
         set_time_limit(30);
         ini_set('memory_limit', '128M');
         ini_set('default_socket_timeout', 300);
-        return;
     }
 
     /**
@@ -94,10 +94,10 @@ class myStep extends myController {
 
     /**
      * 框架执行入口，初始化所有变量
-     * @param string $dummy1
-     * @param string $dummy2
+     * @param string $charset
+     * @param bool $set_plugin
      */
-    public function start($dummy1 = '', $dummy2 = '') {
+    public function start($charset = 'UTF-8', $set_plugin = true) {
         $this->mem_start = memory_get_usage();
         $this->time_start = getMicrotime();
         $alias = include(CONFIG.'class_alias.php');
@@ -136,13 +136,12 @@ class myStep extends myController {
             sess_mysql::set((array)$this->setting->db);
         }
         myReq::sessionStart($this->setting->session->mode, true);
-        myReq::setCookie('sign_local', 'yes', 600);
         $this->login();
 
         global $plugin_ignore;
         if(is_string($plugin_ignore)) $plugin_ignore = explode(',', str_replace(' ', '', $plugin_ignore));
         if(is_array($plugin_ignore)) self::$plugin_ignore = array_merge(self::$plugin_ignore, $plugin_ignore);
-        $path = explode('/', trim(r::gl('info_app')['route'], '/'));
+        $path = explode('/', trim(myReq::globals('info_app')['route'], '/'));
         $set_plugin = !in_array(array_shift($path), self::$plugin_ignore);
 
         parent::start($this->setting->gen->charset, $set_plugin);
@@ -190,6 +189,7 @@ class myStep extends myController {
             'page_keywords' => $this->setting->web->keyword,
             'page_description' => $this->setting->web->description,
             'charset' => $this->setting->gen->charset,
+            'app' => $info_app['app'],
             'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', PATH),
             'url_prefix' => self::$url_prefix,
@@ -210,7 +210,13 @@ class myStep extends myController {
             $this->setAddedContent('start', '<script type="application/javascript" src="'.ROOT_WEB.'cache/script/'.basename($this->setting->js).'"></script>');
         }
         $this->setAddedContent('end', '<script type="application/javascript">$(ms_func_run);</script>');
-        parent::show($tpl, $this->setting->web->minify, 's,db,cache,mystep');
+
+        $variants = '';
+        if(!empty(self::$variant_alias)) {
+            $variants = implode(',', self::$variant_alias);
+        }
+        $variants .= (empty($variants) ? '' : ',').'ms_setting,db,cache,mystep';
+        parent::show($tpl, $this->setting->web->minify, $variants);
     }
 
     /**
@@ -236,7 +242,13 @@ class myStep extends myController {
         }
         $tpl->assign('lng', $this->language);
         $tpl->regTag($this->func_tag);
-        return call_user_func_array([$tpl, 'render'], ['s,db,cache,mystep', false, false]);
+
+        $variants = '';
+        if(!empty(self::$variant_alias)) {
+            $variants = implode(',', self::$variant_alias);
+        }
+        $variants .= (empty($variants) ? '' : ',').'ms_setting,db,cache,mystep';
+        return call_user_func_array([$tpl, 'render'], [$variants, false, false]);
     }
 
     /**
@@ -270,7 +282,7 @@ class myStep extends myController {
      * @param string $pwd
      * @return bool
      */
-    public function login($usr='', $pwd='') {
+    public function login(&$usr='', $pwd='') {
         if(!empty($usr) && !empty($pwd)) {
             $pwd = md5($pwd);
             $ms_user = $usr.chr(9).$pwd;
@@ -282,6 +294,7 @@ class myStep extends myController {
             list($usr, $pwd) = explode(chr(9), $ms_user);
             if($usr == $this->setting->gen->s_usr && $pwd == $this->setting->gen->s_pwd) {
                 myReq::session('ms_user', $usr);
+                myReq::session('sysop', 'y');
                 $result = true;
             }
         }
@@ -300,12 +313,12 @@ class myStep extends myController {
 
     /**
      * 变更密码接口
-     * @param string $id
+     * @param $id
      * @param $psw_org
      * @param $psw_new
      * @return bool
      */
-    public function chg_psw($id='', $psw_org, $psw_new) {
+    public function chg_psw($id, $psw_org, $psw_new) {
         $result = false;
         $username = myReq::session('username');
         if(!empty($username) && $psw_org!=$psw_new) {
@@ -363,13 +376,18 @@ class myStep extends myController {
     /**
      * 添加页面CSS文件
      * @param $file
-     * @return $this|myController
+     * @param false $code
+     * @return $this|myStep
      */
-    public function addCSS($file) {
-        if(is_file($file)) {
-            $time = filemtime($file);
-            if($time>$this->time_css) $this->time_css = $time;
-            $this->css[md5_file($file)] = $file;
+    public function addCSS($file, $code=false) {
+        if($code) {
+            $this->js[md5($file)] = $file;
+        } else {
+            if(is_file($file)) {
+                $time = filemtime($file);
+                if($time>$this->time_css) $this->time_css = $time;
+                $this->css[md5_file($file)] = $file;
+            }
         }
         return $this;
     }
@@ -388,13 +406,14 @@ class myStep extends myController {
             $code = parent::CSS(false);
             myFile::saveFile($cache, $code);
         }
+        return $this;
     }
 
     /**
      * 添加页面脚本文件
      * @param $file
-     * @param bool $code
-     * @return $this|myController
+     * @param false $code
+     * @return $this|myStep
      */
     public function addJS($file, $code=false) {
         if($code) {
@@ -423,6 +442,7 @@ class myStep extends myController {
             $code = parent::JS(false);
             myFile::saveFile($cache, $code);
         }
+        return $this;
     }
 
     /**
@@ -432,7 +452,7 @@ class myStep extends myController {
      * @return $this
      */
     public function editorSetPlugin($code, $btn='') {
-        if(is_file($code)) $code = f::g($code);
+        if(is_file($code)) $code = myFile::getLocal($code);
         $this->editor_plugin[] = $code;
         if(!empty($btn)) $this->editor_btn[] = $btn;
         return $this;
@@ -471,15 +491,15 @@ code;
      * @param string $url
      */
     public static function info($msg, $url = '') {
-        global $mystep, $s;
+        global $mystep, $ms_setting;
         ob_end_clean();
         if($mystep==null) {
             $mystep = new myController();
-            $mystep->setLanguagePack(APP.'myStep/language/', $s->gen->language);
+            $mystep->setLanguagePack(APP.'myStep/language/', $ms_setting->gen->language);
             $paras = [
-                'web_title' => $s->web->title,
-                'web_url' => $s->web->url,
-                'charset' => $s->gen->charset,
+                'web_title' => $ms_setting->web->title,
+                'web_url' => $ms_setting->web->url,
+                'charset' => $ms_setting->gen->charset,
                 'path_root' => str_replace(myFile::rootPath(), '/', ROOT),
                 'lng_page_info' => $mystep->getLanguage('page_info'),
                 'lng_page_info_refresh' => $mystep->getLanguage('page_info_refresh'),
@@ -521,13 +541,13 @@ code;
 
     /**
      * JS语言包接口
-     * @param $module
+     * @param $app_name
      * @param string $type
      */
-    public static function language($module, $type='default') {
+    public static function language($app_name, $type='default') {
         header('Content-Type: application/x-javascript');
         $type = preg_replace('#&.+$#', '', $type);
-        $cache = ROOT.'cache/language/'.$module.'_'.$type.'.js';
+        $cache = ROOT.'cache/language/'.$app_name.'_'.$type.'.js';
         if(is_file($cache)) {
             $result = myFile::getLocal($cache);
         } else {
@@ -537,8 +557,8 @@ code;
                 $language = include($dir.'/'.$type.'.php');
                 if($language==1) $language = array();
             }
-            if($module!='myStep') {
-                $dir = APP.$module.'/language/';
+            if($app_name!='myStep') {
+                $dir = APP.$app_name.'/language/';
                 if(!is_file($dir.'/'.$type.'.php')) $type='default';
                 if(is_file($dir.'/'.$type.'.php')) {
                     $language = array_merge($language, include($dir.'/'.$type.'.php'));
@@ -556,26 +576,26 @@ code;
 
     /**
      * JS设置信息接口
-     * @param $module
+     * @param $app_name
      * @param string $type
      */
-    public static function setting($module) {
-        $module = preg_replace('#&.+$#', '', $module);
-        if(empty($module) || !is_dir(APP.$module)) $module='myStep';
+    public static function setting($app_name) {
+        $app_name = preg_replace('#&.+$#', '', $app_name);
+        if(empty($app_name) || !is_dir(APP.$app_name)) $app_name='myStep';
         $setting = new myConfig(CONFIG.'config.php');
-        if($module!='myStep') {
-            $setting->merge(APP.$module.'/config.php');
+        if($app_name!='myStep') {
+            $setting->merge(APP.$app_name.'/config.php');
         }
         $setting = myConfig::o2a($setting);
         $setting_js = array(
             'language' => $setting['setting']['gen']['language'],
             'debug' => $setting['setting']['gen']['debug'],
-            'app' => $module,
+            'app' => $app_name,
             'path_root' => ROOT_WEB,
-            'path_app' => str_replace(myFile::rootPath(), '/', APP.$module),
+            'path_app' => str_replace(myFile::rootPath(), '/', APP.$app_name),
             'url_fix' => defined('URL_FIX')?URL_FIX:'',
             'url_prefix' => self::$url_prefix,
-            'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':$module),
+            'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':$app_name),
         );
         if(isset($setting['setting']['js'])) $setting_js = array_merge($setting_js, $setting['setting']['js']);
 
@@ -589,48 +609,48 @@ code;
 
     /**
      * 框架API执行接口
-     * @param $para
+     * @param $path
      */
-    public static function api($para) {
-        global $s, $info_app;
-        $para = preg_replace('#&.+$#', '', $para);
-        $para = explode('/', trim($para, '/'));
-        $module = $para[0];
+    public static function api($path) {
+        global $ms_setting, $info_app;
+        $path = preg_replace('#&.+$#', '', $path);
+        $path = explode('/', trim($path, '/'));
+        $app_name = $path[0];
         include(CONFIG.'route.php');
         $result = '{"error":"Module is Missing!"}';
         if(isset($api_list)) {
-            if(isset($api_list[$module])) {
-                if(strpos($para[0], 'plugin_')!==0) {
-                    $name = $para[1];
-                    array_shift($para);
+            if(isset($api_list[$app_name])) {
+                if(strpos($path[0], 'plugin_')!==0) {
+                    $name = $path[1];
+                    array_shift($path);
                 } else {
-                    $plugin = array_shift($para);
-                    $name = array_shift($para);
+                    $plugin = array_shift($path);
+                    $name = array_shift($path);
                 }
             } else {
-                $name = $module;
-                $module = 'myStep';
+                $name = $app_name;
+                $app_name = 'myStep';
             }
             $flag = false;
             if(isset($plugin) && isset($api_list[$plugin][$name])) {
-                $s->merge(APP.$module.'/config.php');
+                $ms_setting->merge(APP.$app_name.'/config.php');
                 $method = $api_list[$plugin][$name];
-                $type = end($para);
+                $type = end($path);
                 $flag = true;
-            } elseif(isset($api_list[$module][$name])) {
-                $s->merge(APP.$module.'/config.php');
-                $method = $api_list[$module][$name];
-                $type = end($para);
-                $para = array_slice($para, 1);
+            } elseif(isset($api_list[$app_name][$name])) {
+                $ms_setting->merge(APP.$app_name.'/config.php');
+                $method = $api_list[$app_name][$name];
+                $type = end($path);
+                $path = array_slice($path, 1);
                 $flag = true;
             }
             if($flag) {
-                $para = array_merge(myReq::getValue(myReq::check('get')?'get':'post', '[ALL]'), $para);
-                if(is_file(APP.$module.'/lib.php')) require_once(APP.$module.'/lib.php');
+                $path = array_merge(myReq::getValue(myReq::check('get')?'get':'post', '[ALL]'), $path);
+                if(is_file(APP.$app_name.'/lib.php')) require_once(APP.$app_name.'/lib.php');
                 if(is_callable($method)) {
                     $api = new myApi();
                     $api->regMethod($name, $method);
-                    $result = call_user_func([$api, 'run'], $name, $para, $type, $s->gen->charset);
+                    $result = call_user_func([$api, 'run'], $name, $path, $type, $ms_setting->gen->charset);
                 }
             }
         }
@@ -642,15 +662,15 @@ code;
 
     /**
      * 框架模块调用接口
-     * @param $m
+     * @param $path
      * @param string $dummy
      */
-    public static function module($m, $dummy = '') {
-        $path = explode('/', trim($m, '/'));
-        $module = array_shift($path);
-        if(isset(self::$modules[$module])) {
+    public static function module($path, $dummy = '') {
+        $path = explode('/', trim($path, '/'));
+        $app_name = array_shift($path);
+        if(isset(self::$modules[$app_name])) {
             global $mystep, $db, $cache;
-            require(self::$modules[$module]);
+            require(self::$modules[$app_name]);
             exit();
         } else {
             self::redirect('/');
@@ -661,14 +681,14 @@ code;
      * 文件上传
      */
     public static function upload() {
-        if(self::checkPower('upload')) {
-            global $s;
-            $path = FILE.date($s->upload->path_mode);
+        if(self::checkPower('upload') && myReq::check('files')) {
+            global $ms_setting;
+            $path = FILE.date($ms_setting->upload->path_mode);
             set_time_limit(0);
-            $upload = new myUploader($path, true, $s->upload->ban_ext);
+            $upload = new myUploader($path, true, $ms_setting->upload->ban_ext);
             $upload->do(false);
             if($upload->result[0]['error'] == 0) {
-                $upload->result[0]['name'] = myString::sc(urldecode($upload->result[0]['name']), $s->gen->charset);
+                $upload->result[0]['name'] = myString::setCharset(urldecode($upload->result[0]['name']), $ms_setting->gen->charset);
                 $ext = strtolower(strrchr($upload->result[0]['name'], '.'));
                 $name = str_replace($ext, '', $upload->result[0]['name']);
                 $upload->result[0]['name'] = myString::substr($name, 0, 80).$ext;
@@ -686,10 +706,10 @@ code;
      * @param $idx
      */
     public static function download($idx) {
-        global $s;
-        if($s->upload->free_dl || self::checkPower('download')) {
+        global $ms_setting;
+        if(self::checkPower('download')) {
             $idx = explode('.', $idx);
-            $path = FILE.date($s->upload->path_mode, $idx[0]);
+            $path = FILE.date($ms_setting->upload->path_mode, intval($idx[0]));
             set_time_limit(0);
             $file = $path.'/log.txt';
             if(!file_exists($file)) {
@@ -714,35 +734,38 @@ code;
 
     /**
      * 删除上传文件
-     * @param $idx
-     * @return array|string
+     * @param string $idx
+     * @return string[]
      */
-    public static function remove_ul($idx) {
-        global $s;
+    public static function remove_ul($idx='') {
+        global $ms_setting;
         $result = ['error' => '-1', 'message' => 'Cannot remove the file!'];
         if(self::checkPower('remove_ul')) {
             $idx = explode('.', $idx);
-            $path = FILE.date($s->upload->path_mode, $idx[0]);
+            $path = FILE.date($ms_setting->upload->path_mode, intval($idx[0]));
             $log = $path.'/log.txt';
-            $list = file($log);
-            for($i=0,$m=count($list);$i<$m;$i++) {
-                if(strpos($list[$i], implode('.', $idx))===0) {
-                    $list[$i] = explode('::', $list[$i]);
-                    $file = $path.'/'.$list[$i][0];
-                    if(file_exists($file.'.upload')) $file = $file.'.upload';
-                    if(myFile::del($file)===false) return $result;
-                    break;
+            if(file_exists($log)) {
+                $list = file($log);
+                for($i=0,$m=count($list);$i<$m;$i++) {
+                    if(strpos($list[$i], implode('.', $idx))===0) {
+                        $list[$i] = explode('::', $list[$i]);
+                        $file = $path.'/'.$list[$i][0];
+                        $file = str_replace('..', '', $file);
+                        if(file_exists($file.'.upload')) $file = $file.'.upload';
+                        if(myFile::del($file)===false) return $result;
+                        break;
+                    }
                 }
-            }
-            if($i<$m) {
-                $content = myFile::getLocal($log);
-                $content = str_replace(implode('::', $list[$i]), '', $content);
-                if(strlen($content)<5) {
-                    myFile::del(dirname($log));
-                } else {
-                    myFile::saveFile($log, $content);
+                if($i<$m) {
+                    $content = myFile::getLocal($log);
+                    $content = str_replace(implode('::', $list[$i]), '', $content);
+                    if(strlen($content)<5) {
+                        myFile::del(dirname($log));
+                    } else {
+                        myFile::saveFile($log, $content);
+                    }
+                    $result = ['error' => '0', 'message' => 'The File has been removed!'];
                 }
-                $result = ['error' => '0', 'message' => 'The File has been removed!'];
             }
         }
         return $result;
@@ -758,7 +781,7 @@ code;
         global $mystep;
         switch($idx) {
             case '404':
-                myStep::info(sprintf($mystep->getLanguage('page_error_404'), r::svr('REQUEST_URI')));
+                myStep::info(sprintf($mystep->getLanguage('page_error_404'), myReq::server('REQUEST_URI')));
                 break;
             case '403':
             case '500':
@@ -775,10 +798,10 @@ code;
      * @return string
      */
     public static function setURL($url='') {
-        global $s;
+        global $ms_setting;
         if(strpos($url, '://')===false && strpos($url, 'index.php')===false) {
             $url = preg_replace('@^'.preg_quote(ROOT_WEB).'@', '/', $url);
-            switch($s->router->mode) {
+            switch($ms_setting->router->mode) {
                 case 'path_info':
                     $url = 'index.php'.$url;
                     break;
@@ -850,33 +873,32 @@ code;
             'callback_type' => E_ALL & ~(E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_NOTICE),
             'exit_on_error' =>  true
         ));
-        $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
-        $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
-        $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
-        if(strpos($path, 'static')===0 || in_array($ext, ['js','css'])) myController::file($the_file);
 
         if(is_file(CONFIG.'config.php')) {
             self::go();
         } else {
+            $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
+            $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
+            $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
+            if(strpos($path, 'static')===0 || in_array($ext, ['js','css'])) myController::file($the_file);
             require(APP.'myStep/module/init.php');
         }
-        return;
     }
 
     /**
      * 执行框架
      */
     public static function go() {
-        global $s, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
-        $s = new myConfig(CONFIG.'config.php');
-        if($s->gen->debug) self::setOp('reset');
+        global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
+        $ms_setting = new myConfig(CONFIG.'config.php');
+        if($ms_setting->gen->debug) self::setOp('reset');
         $host = myReq::server('HTTP_HOST');
         if(is_file(CONFIG.'domain.php')) {
             $domain = include(CONFIG.'domain.php');
             if(isset($domain[$host])) {
                 $rule = $domain[$host];
                 if(preg_match('@^\w+$@', $rule)) {
-                    $s->router->default_app = $rule;
+                    $ms_setting->router->default_app = $rule;
                     define('URL_FIX', $rule);
                 } else {
                     $rule = preg_replace('@^/(\w+)/.*$@', '\1', $rule);
@@ -884,18 +906,29 @@ code;
                 }
             }
         }
-        $router = new myRouter((array)$s->router);
+        $router = new myRouter((array)$ms_setting->router);
         $the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);
         $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
-        $ext_list = explode(',', $s->gen->static);
+        $ext_list = explode(',', $ms_setting->gen->static);
         if(strpos(trim($the_file, '/'), 'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
-        if(($s->cookie->domain = strstr($host, ':', true))===false) {
-            $s->cookie->domain = $host;
+        if(empty($ms_setting->cookie->domain) && ($ms_setting->cookie->domain = strstr($host, ':', true))===false) {
+            $ms_setting->cookie->domain = $host;
         }
-        $s->cookie->path = str_replace('\\', '/', dirname(myReq::server('SCRIPT_NAME')));
-        $s->web->url = 'http://'.$host;
+        $ms_setting->cookie->path = str_replace('\\', '/', dirname(myReq::server('SCRIPT_NAME')));
+        $ms_setting->web->url = 'http://'.$host;
         $router->setRules(CONFIG.'route.php');
+
+        if(is_file(CONFIG.'variant_alias.php')) {
+            $variant_alias = require CONFIG.'variant_alias.php';
+            foreach ($variant_alias as $k => $v) {
+                if(isset($$v)) {
+                    $GLOBALS[$k] = &$$v;
+                    global $$k;
+                }
+            }
+            self::$variant_alias = array_keys($variant_alias);
+        }
         if(!$router->check()) {
             $info_app = $router->info;
             $info_app['route'] = $router->route['p'];
@@ -904,7 +937,7 @@ code;
                 myStep::info('app_missing', ROOT_WEB);
             }
             if(is_file(APP.$info_app['app'].'/config.php')) {
-                $s->merge(APP.$info_app['app'].'/config.php');
+                $ms_setting->merge(APP.$info_app['app'].'/config.php');
             }
             if(defined('URL_FIX')) {
                 if(strpos($info_app["route"], '/'.URL_FIX)!==0) {
@@ -912,15 +945,19 @@ code;
                 }
             }
             if(isset($info_app['path'][1]) && $info_app['path'][0]=='asset') {
-                $file = APP.$info_app['app'].'/asset/'. $s->template->style.'/'.$info_app['path'][1];
+                $file = APP.$info_app['app'].'/asset/'. $ms_setting->template->style.'/'.$info_app['path'][1];
                 if(is_file($file)) {
                     myController::file($file);
                     exit;
                 }
             }
             myStep::setPara();
-            if(is_file(PATH.'/global.php')) require_once(PATH.'/global.php');
-            require(PATH.'/index.php');
+            foreach(self::$variant_alias as $v) {
+                global $$v;
+            }
+            if(is_file(PATH.'route.php')) $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
+            if(is_file(PATH.'global.php')) require_once(PATH.'global.php');
+            require(PATH.'index.php');
             if(isset($tpl)) $mystep->show($tpl);
             $mystep->end();
         }
@@ -930,7 +967,10 @@ code;
      * 应用模块初始化参数设置
      */
     public static function setPara() {
-        global $mystep, $info_app, $tpl_setting, $tpl_cache, $s;
+        global $mystep, $info_app, $tpl_setting, $tpl_cache, $ms_setting;
+        foreach(self::$variant_alias as $v) {
+            global $$v;
+        }
         if($mystep!=null) return;
         define('PATH', APP.$info_app['app'].'/');
         if(is_file(PATH.$info_app['app'].'.class.php')) {
@@ -944,23 +984,23 @@ code;
 
         if(is_file(PATH.'lib.php')) require_once(PATH.'lib.php');
         if(is_callable(array($mystep, 'preload'))) $mystep->preload();
-        if(!$s->gen->debug && !empty($s->gen->close)) self::redirect($s->gen->close);
-        $s->web->css = explode(',', $s->web->css);
-        foreach($s->web->css as $k) {
+        if(!$ms_setting->gen->debug && !empty($ms_setting->gen->close)) self::redirect($ms_setting->gen->close);
+        $ms_setting->web->css = explode(',', $ms_setting->web->css);
+        foreach($ms_setting->web->css as $k) {
             $mystep->addCSS(STATICS.'css/'.$k.'.css');
         }
         $mystep->addCSS(STATICS.'css/global.css');
         $mystep->addCSS(PATH.'asset/style.css');
-        $mystep->addCSS(PATH.'asset/'.$s->template->style.'/style.css');
-        $s->css = CACHE.'script/'.$info_app['app'].'_'.$s->template->style.'.css';
+        $mystep->addCSS(PATH.'asset/'.$ms_setting->template->style.'/style.css');
+        $ms_setting->css = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.css';
 
-        $s->web->js = explode(',', $s->web->js);
-        foreach($s->web->js as $k) {
+        $ms_setting->web->js = explode(',', $ms_setting->web->js);
+        foreach($ms_setting->web->js as $k) {
             $mystep->addJS(STATICS.'js/'.$k.'.js');
         }
         $mystep->addJS(STATICS.'js/global.js');
         $mystep->addJS(PATH.'asset/function.js');
-        $mystep->addJS(PATH.'asset/'.$s->template->style.'/function.js');
+        $mystep->addJS(PATH.'asset/'.$ms_setting->template->style.'/function.js');
         $mystep->addJS('
 $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
     $.getScript("'.ROOT_WEB.'index.php?ms_language/'.$info_app['app'].'/"+setting.language);
@@ -969,16 +1009,16 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
     }
 });
         ', true);
-        $s->js = CACHE.'script/'.$info_app['app'].'_'.$s->template->style.'.js';
+        $ms_setting->js = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.js';
 
         $tpl_setting = array(
-            'name' => $s->template->name,
-            'path' => PATH.$s->template->path,
-            'style' => $s->template->style,
+            'name' => $ms_setting->template->name,
+            'path' => PATH.$ms_setting->template->path,
+            'style' => $ms_setting->template->style,
             'path_compile' => CACHE.'template/'.$info_app['app'].'/'
         );
 
-        $tpl_cache = ($s->gen->debug || !$s->gen->cache_page) ? false : array(
+        $tpl_cache = ($ms_setting->gen->debug || !$ms_setting->gen->cache_page) ? false : array(
             'path' => CACHE.'app/'.$info_app['app'].'/html/',
             'expire' => 60*60*24
         );
@@ -989,9 +1029,12 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      * 应用模块调用
      */
     public static function getModule($m) {
-        global $mystep, $tpl_setting, $tpl_cache, $info_app, $s, $db, $cache, $router;
+        global $mystep, $tpl_setting, $tpl_cache, $info_app, $ms_setting, $db, $cache, $router;
+        foreach(self::$variant_alias as $v) {
+            global $$v;
+        }
         $tpl = new myTemplate($tpl_setting, $tpl_cache);
-        if(is_file(PATH.'/global.php')) require_once(PATH.'/global.php');
+        if(is_file(PATH.'global.php')) require_once(PATH.'global.php');
         $idx = preg_replace('#(/|&|\?).*$#', '', $m);
         $files = [
             PATH.'module/'.$tpl_setting['style'].'/'.$idx.'.php',
@@ -1020,6 +1063,7 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      * @throws ReflectionException
      */
     public static function vendor() {
+        global $mystep;
         $args = func_get_args();
         $name = array_shift($args);
         if(is_array($name)) {
@@ -1035,13 +1079,10 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
         $file .= is_file($file.'.php') ? '.php':'.class.php';
 
         if(!is_file($file)) {
-            global $mystep;
             myStep::info('module_missing');
         }
         require_once($file);
-
         if(!class_exists($class)) {
-            global $mystep;
             myStep::info('module_missing');
         }
         $r = new ReflectionClass($class);
@@ -1080,6 +1121,17 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      * @return bool
      */
     public static function checkPower($idx) {
-        return myReq::cookie('sign_local')!='';
+        global $ms_setting;
+        $op = myReq::session('sysop');
+        switch($idx) {
+            case 'upload':
+            case 'remove_ul':
+                $flag = !is_null($op);
+                break;
+            default:
+                $referer = myReq::server('http_referer');
+                $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl;
+        }
+        return $flag;
     }
 }

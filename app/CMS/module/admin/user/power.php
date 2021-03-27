@@ -10,10 +10,10 @@ switch($method) {
         cms::$log = $mystep->getLanguage('admin_user_power_delete');
         if($power_info = \app\CMS\getPara($power, 'id', $id)) {
             cms::$log = $mystep->getLanguage('admin_user_power_delete');
-            $db->build($s->db->pre.'user_power')
+            $db->build($S->db->pre.'user_power')
                 ->where('id','n=',$id);
             $db->delete();
-            $db->query('alter table `'.$s->db->pre.'user_group` drop column `'.$power_info['idx'].'`');
+            $db->query('alter table `'.$S->db->pre.'user_group` drop column `'.$power_info['idx'].'`');
             \app\CMS\deleteCache('user_group');
             \app\CMS\deleteCache('user_power');
         }
@@ -39,17 +39,17 @@ switch($method) {
         unset($data['idx_org'], $data['format_org']);
         cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_power_add':'admin_user_power_edit');
 
-        $db->build($s->db->pre.'user_power')->field($data);
+        $db->build($S->db->pre.'user_power')->field($data);
         $db->replace();
         if($method=='add_ok') {
-            $db->query('alter table `'.$s->db->pre.'user_group` add `'.$data['idx'].'` '.$the_format);
-            $db->build($s->db->pre.'user_group')->field(array($data['idx']=>$data['value']));
+            $db->query('alter table `'.$S->db->pre.'user_group` add `'.$data['idx'].'` '.$the_format);
+            $db->build($S->db->pre.'user_group')->field(array($data['idx']=>$data['value']));
             $db->update();
         } else {
             if($idx_org!=$data['idx']) {
-                $db->query('alter table `'.$s->db->pre.'user_group` change `'.$idx_org.'` `'.$data['idx'].'` '.$the_format);
+                $db->query('alter table `'.$S->db->pre.'user_group` change `'.$idx_org.'` `'.$data['idx'].'` '.$the_format);
             } elseif($format_org!=$data['format']) {
-                $db->query('alter table `'.$s->db->pre.'user_group` modify `'.$data['idx'].'` '.$the_format);
+                $db->query('alter table `'.$S->db->pre.'user_group` modify `'.$data['idx'].'` '.$the_format);
             }
         }
         \app\CMS\deleteCache('user_group');
@@ -61,7 +61,7 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db, $id;
+    global $mystep, $tpl_setting, $S, $db, $id;
 
     $tpl_setting['name'] = 'user_power_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
@@ -73,7 +73,7 @@ function build_page($method) {
     );
 
     if($method == 'list') {
-        $db->build($s->db->pre.'user_power')->order('id');
+        $db->build($S->db->pre.'user_power')->order('id');
         $db->select();
         while($record = $db->getRS()) {
             s::htmlTrans($record);
@@ -83,7 +83,7 @@ function build_page($method) {
         $tpl->assign('title', $mystep->getLanguage('admin_user_power_title'));
     } else {
         if($method == 'edit') {
-            $db->build($s->db->pre.'user_power')->where('id','n=',$id);
+            $db->build($S->db->pre.'user_power')->where('id','n=',$id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_user_power_error');
             }

@@ -56,22 +56,22 @@ mytpl;
 
     $tpl_test->regTag('test_var', 'test_var')
         ->regTag('test_loop', function(myTemplate &$tpl_test, &$att_list = array()) {
-        $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_loop.tpl');
-        list($block, $att_list['unit'], $att_list['unit_blank'])= $tpl_test->getBlock($tpl_test_content, 'loop', 'news');
-        $result = <<<'mytpl'
+            $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_loop.tpl');
+            list($block, $att_list['unit'], $att_list['unit_blank'])= $tpl_test->getBlock($tpl_test_content, 'loop', 'news');
+            $result = <<<'mytpl'
 <?PHP
 $result = array(
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
-            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'Y-m-d'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
+            ['style'=>'style', 'catalog'=>'catalog', 'link'=>'###', 'subject'=>'subject', 'add_date'=>'0'],
         );
 $n = 0;
 foreach($result as $news) {
-    $news['add_date'] = date($news['add_date']);
+    $news['add_date'] = date('{myTemplate::time}', $news['add_date']);
     echo <<<content
  {myTemplate::unit}
 content;
@@ -84,27 +84,27 @@ content;
 }
 ?>
 mytpl;
-        return str_replace($block, $result, $tpl_test_content);
-    })->regTag('test_if', function(myTemplate &$tpl_test, &$att_list = array()) {
-        $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_if.tpl');
-        list($block, $att_list['yes'], $att_list['no'])= $tpl_test->getBlock($tpl_test_content, 'if');
-        $result = <<<'mytpl'
+            return str_replace($block, $result, $tpl_test_content);
+        })->regTag('test_if', function(myTemplate &$tpl_test, &$att_list = array()) {
+            $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_if.tpl');
+            list($block, $att_list['yes'], $att_list['no'])= $tpl_test->getBlock($tpl_test_content, 'if');
+            $result = <<<'mytpl'
 <?PHP
 echo ( {myTemplate::key}) ? "{myTemplate::yes}" : "{myTemplate::no}";
 ?>
 mytpl;
-        return str_replace($block, $result, $tpl_test_content);
-    })->regTag('test_switch', function(myTemplate &$tpl_test, &$att_list = array()) {
-        $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_switch.tpl');
-        list($block, $cases)= $tpl_test->getBlock($tpl_test_content, 'switch');
-        $result = <<<'mytpl'
+            return str_replace($block, $result, $tpl_test_content);
+        })->regTag('test_switch', function(myTemplate &$tpl_test, &$att_list = array()) {
+            $tpl_test_content = $tpl_test->getTemplate(PATH.'data/template/block_switch.tpl');
+            list($block, $cases)= $tpl_test->getBlock($tpl_test_content, 'switch');
+            $result = <<<'mytpl'
 <?PHP
 switch("{{myTemplate::key}}") {
 mytpl;
-        foreach($cases as $k => $v) {
-            $k = addslashes($k);
-            $v = addslashes($v);
-            $result .= <<<mytpl
+            foreach($cases as $k => $v) {
+                $k = addslashes($k);
+                $v = addslashes($v);
+                $result .= <<<mytpl
             
     case "{$k}":
         echo "{$v}";
@@ -116,7 +116,7 @@ mytpl;
 }
 ?>
 mytpl;
-        return str_replace($block, $result, $tpl_test_content);
-    })->loadSet(PATH.'data/template/setting.ini', 'pre', 1);
+            return str_replace($block, $result, $tpl_test_content);
+        })->loadSet(PATH.'data/template/setting.ini', 'pre', 1);
 }
 $tpl_test->render('$test', true, false);

@@ -45,6 +45,7 @@ $setting['session']['trans_sid'] = false;
 
 $setting['cookie'] = array();
 $setting['cookie']['prefix'] = 'ms_';
+$setting['cookie']['domain'] = '';
 
 $setting['router'] = array();
 $setting['router']['mode'] = 'query_string';

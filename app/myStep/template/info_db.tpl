@@ -5,8 +5,8 @@
     <div class="card-body p-0 table-responsive">
         <table class="table table-striped table-hover m-0 font-sm">
 <?php
-$db->reconnect(0, $s->db->name);
-$db_stat = array('Database Type'=>$s->db->type);
+$db->reconnect(0, $S->db->name);
+$db_stat = array('Database Type'=>$S->db->type);
 $db_stat += $db->getStat();
 foreach($db_stat as $key => $value) {
 $value = nl2br($value);

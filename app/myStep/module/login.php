@@ -1,21 +1,21 @@
 <?PHP
-if(r::svr('QUERY_STRING')=='out') {
-    r::removeCookie('ms_user');
-    r::sessionEnd();
+if(myReq::server('QUERY_STRING')=='out') {
+    myReq::removeCookie('ms_user');
+    myReq::sessionEnd();
     myStep::info('login_logout', $app_root);
-} elseif(r::s('ms_user')!='') {
+} elseif(myReq::session('ms_user')!='') {
     myStep::redirect($app_root);
-} elseif(!is_null($captcha = r::p('captcha'))) {
-    if(strtolower($captcha) == strtolower(r::s('captcha'))) {
-        $usr = r::p('username');
-        $pwd = r::p('password');
+} elseif(!is_null($captcha = myReq::post('captcha'))) {
+    if(strtolower($captcha) == strtolower(myReq::session('captcha'))) {
+        $usr = myReq::post('username');
+        $pwd = myReq::post('password');
         if(($result = $mystep->login($usr, $pwd))===true) {
-            r::setCookie('ms_user', $usr.chr(9).md5($pwd), 60*60*24);
-            $url = r::s('url');
+            myReq::setCookie('ms_user', $usr.chr(9).md5($pwd), 60*60*24);
+            $url = myReq::session('url');
             if(empty($url)) {
                 $url = $app_root;
             } else {
-                r::s('url', null);
+                myReq::session('url', null);
             }
             myStep::info('login_ok', $url);
         }

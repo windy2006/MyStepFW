@@ -36,12 +36,12 @@ class plugin_manager implements interface_plugin {
         removePluginLink('manager');
     }
     public static function main() {
-        global $mystep, $info_app, $s;
+        global $mystep, $info_app, $ms_setting;
         if(!isset($info_app['path'][1])) $info_app['path'][1] = '';
         $header = array();
         $header['Referer'] = 'http://'.myReq::server('HTTP_HOST');
         $header['ms_sign'] = time();
-        $url = 'http://'.$s->web->update.'/api/plugin_manager/';
+        $url = 'http://'.$ms_setting->web->update.'/api/plugin_manager/';
         $dir = __DIR__;
         switch($info_app['path'][1]) {
             case 'build':
@@ -56,14 +56,14 @@ class plugin_manager implements interface_plugin {
                     foreach($ver_remote['info'] as $k => $v) {
                         $ver_remote['info'][$k] = preg_replace('#\r\n\s+#', chr(10), trim($v));
                     }
-                    echo '{"version":"'.$ver_remote['version'].'", "detail":'.myString::toJson($ver_remote['info'], $s->gen->charset).'}';
+                    echo '{"version":"'.$ver_remote['version'].'", "detail":'.myString::toJson($ver_remote['info'], $ms_setting->gen->charset).'}';
                 } else {
                     echo '{"version":""}';
                 }
                 break;
             case 'check_local':
                 $result = self::checkFile();
-                echo myString::toJson($result, $s->gen->charset);
+                echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             case 'check_server':
                 $check_info = myFile::getRemote_curl($url.'check', $header);
@@ -82,7 +82,7 @@ class plugin_manager implements interface_plugin {
                         $content .= '$list_file_md5 = '.var_export($list_file_md5, true).";\n";
                         myFile::saveFile($the_file, $content);
                         $result = self::checkFile();
-                        echo myString::toJson($result, $s->gen->charset);
+                        echo myString::toJson($result, $ms_setting->gen->charset);
                         @unlink($the_file);
                         if(file_exists($the_file.'.bak')) rename($the_file.'.bak', $the_file);
                     }
@@ -162,7 +162,7 @@ class plugin_manager implements interface_plugin {
                         'message' => 'No file uploaded!'
                     ];
                 }
-                echo myString::toJson($result, $s->gen->charset);
+                echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             case 'download':
                 $ver = require(CONFIG.'version.php');
@@ -255,7 +255,7 @@ class plugin_manager implements interface_plugin {
                 myFile::del(CACHE.'data');
                 if($mode==1) self::checkFile(ROOT, true, 0);
                 ob_clean();
-                echo myString::toJson($result, $s->gen->charset);
+                echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             default:
                 list($tpl, $tpl_sub) = setPluginTemplate('manager');
@@ -271,9 +271,9 @@ class plugin_manager implements interface_plugin {
         $mystep->end();
     }
     public static function remote() {
-        global $s, $info_app;
+        global $ms_setting, $info_app;
         $setting = new myConfig(__DIR__.'/config.php');
-        if(!$setting->update && !$s->gen->debug) myStep::header('404');
+        if(!$setting->update && !$ms_setting->gen->debug) myStep::header('404');
         $method = end($info_app['path']);
         switch($method) {
             case 'version':
@@ -286,7 +286,7 @@ class plugin_manager implements interface_plugin {
                         $result['version'] = $k;
                     }
                 }
-                echo myString::toJson($result, $s->gen->charset);
+                echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             case 'download':
                 $v = require(CONFIG.'version.php');
@@ -357,13 +357,13 @@ class plugin_manager implements interface_plugin {
                 } else {
                     $check_info = ['error'=>'No verify data found from the update server!'];
                 }
-                echo myString::toJson($check_info, $s->gen->charset);
+                echo myString::toJson($check_info, $ms_setting->gen->charset);
         }
     }
     public static function pack() {
-        global $s;
+        global $ms_setting;
         $setting = new myConfig(__DIR__.'/config.php');
-        if(!$setting->pack && !$s->gen->debug) myStep::header('404');
+        if(!$setting->pack && !$ms_setting->gen->debug) myStep::header('404');
         $ver = require(CONFIG.'version.php');
         $idx = 'mystep_v'.$ver;
         $dir = __DIR__.'/pack/';

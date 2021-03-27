@@ -9,10 +9,12 @@ if(myReq::check('post')) {
     myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($result, 1).';');
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");location.href=document.referrer;</script>');
 }
+$list = [];
 if(is_file(CONFIG.'domain.php')) {
     $list = include(CONFIG.'domain.php');
-    $t->assign('rule_list', myString::toJson($list));
 }
+$t->assign('rule_list', myString::toJson($list));
+
 $list = [];
 $dirs = myFile::find('', APP, false, myFile::DIR);
 $dirs = array_map(function ($v) {return basename($v);} , $dirs);

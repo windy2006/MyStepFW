@@ -42,6 +42,23 @@ $rule_list = array (
       ),
     ),
   ),
+  'plugin_manager' => 
+  array (
+    0 => 
+    array (
+      0 => '/manager/[any]',
+      1 => 
+      array (
+        0 => 'app\\myStep\\logCheck',
+        1 => 'plugin_manager::main',
+      ),
+    ),
+    1 => 
+    array (
+      0 => '/pack/[any]',
+      1 => 'plugin_manager::pack',
+    ),
+  ),
   'myStep' => 
   array (
     0 => 
@@ -110,6 +127,12 @@ $api_list = array (
   'recruit' => 
   array (
     'data' => 'app\\recruit\\getData',
+  ),
+  'plugin_manager' => 
+  array (
+    'check' => 'plugin_manager::remote',
+    'update' => 'plugin_manager::remote',
+    'download' => 'plugin_manager::remote',
   ),
 );
 

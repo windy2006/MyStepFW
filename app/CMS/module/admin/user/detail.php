@@ -8,7 +8,7 @@ switch($method) {
         break;
     case 'delete':
         cms::$log = $mystep->getLanguage('admin_user_detail_delete');
-        $db->build($s->db->pre.'users')
+        $db->build($S->db->pre.'users')
             ->where('user_id','n=',$id);
         $db->delete();
         cms::redirect();
@@ -20,7 +20,7 @@ switch($method) {
         }
         $data = r::p('[ALL]');
         if($data['username'] != $data['username_org']) {
-            $db->build($s->db->pre.'users')->field('user_id')->where('username','=',$data['username']);
+            $db->build($S->db->pre.'users')->field('user_id')->where('username','=',$data['username']);
             if($db->result()!==false) {
                 myStep::info(sprintf($mystep->getLanguage('admin_user_detail_error2'), $data['username']));
             }
@@ -33,11 +33,11 @@ switch($method) {
         }
         unset($data['user_id'], $data['username_org'], $data['password_r']);
         if($method=='add_ok') {
-            $data['reg_date'] = $s->info->time;
-            $db->build($s->db->pre.'users')->field($data);
+            $data['reg_date'] = $S->info->time;
+            $db->build($S->db->pre.'users')->field($data);
             $db->insert();
         } else {
-            $db->build($s->db->pre.'users')->field($data)->where('user_id','n=',$id);
+            $db->build($S->db->pre.'users')->field($data)->where('user_id','n=',$id);
             $db->update();
         }
         myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
@@ -47,13 +47,14 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db, $id, $user_group;
+    global $mystep, $tpl_setting, $S, $db, $id, $user_group;
 
     $tpl_setting['name'] = 'user_detail_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
     $user_group = \app\CMS\getCache('user_group');
 
     if($method == 'list') {
+        global $page, $query, $count, $page_size;
         $order = r::g('order');
         if(empty($order)) $order='user_id';
         $order_type = r::g('order_type');
@@ -65,20 +66,19 @@ function build_page($method) {
         if(!empty($keyword)) $condition[] = array('username', 'like', $keyword);
         if(!empty($group_id)) $condition[] = array('group_id', 'n=', $group_id);
 
-        $db->build($s->db->pre.'users')
+        $db->build($S->db->pre.'users')
             ->field('count(*)')->where($condition);
-        $counter = $db->result();
+        $count = $db->result();
 
         $page = r::g('page', 'int');
-        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($counter, $page, $s->list->txt, 'keyword='.$keyword.'&group_id='.$group_id.'&order='.$order.'&order_type='.$order_type);
-        $tpl->assign($page_info);
-        $tpl->assign('record_count', $counter);
+        $query = 'keyword='.$keyword.'&group_id='.$group_id.'&order='.$order.'&order_type='.$order_type;
+        list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
-        $db->build($s->db->pre.'users')
+        $db->build($S->db->pre.'users')
             ->where($condition)
             ->order($order, $order_type=='desc')
             ->limit($record_start, $page_size);
-        if($order!='user_id') $db->build($s->db->pre.'users')->order('user_id', true);
+        if($order!='user_id') $db->build($S->db->pre.'users')->order('user_id', true);
         $db->select();
         while($record = $db->getRS()) {
             s::htmlTrans($record);
@@ -95,7 +95,7 @@ function build_page($method) {
         $tpl->assign('order_type', $order_type=='asc'?'desc':'asc');
         $tpl->assign('title', $mystep->getLanguage('admin_user_detail_title'));
     } elseif($method=='edit') {
-        $db->build($s->db->pre.'users')->where('user_id','n=',$id);
+        $db->build($S->db->pre.'users')->where('user_id','n=',$id);
         if(($record = $db->record())===false) {
             myStep::info('admin_user_detail_error');
         }

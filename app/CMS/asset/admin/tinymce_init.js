@@ -56,7 +56,7 @@ function insertContent(str) {
     tinyMCE.activeEditor.execCommand("mceInsertContent", false, str);
 }
 function setHighlight(editor, brush) {
-    let str = editor.selection.getContent();
+    let str = editor.selection.getContent({format:'html'});
     if(str.length===0) return;
     if(/^<pre class="highlight".+?><code.+?>(.+?)<\/code><\/pre>$/ism.test(str)) {
         str = RegExp.$1;
@@ -178,23 +178,29 @@ $(function(){
         init : function(editor, url) {
             editor.addCommand("ms_format", function() {
                 let content = editor.getContent();
-                let tag = 'div';
+                let tag = 'p';
+                if(/<(p|div)/i.test(content)) {
+                    tag = RegExp.$1;
+                }
                 if(content.indexOf("<div")===-1) {
-                    content = content.replace(/(<br(\s\/)?>)+/ig, "</p><p>");
+                    //content = content.replace(/(<br(\s\/)?>)+/ig, "</p><p>");
                     content = content.replace(/<p(.*?)>[\r\n]+/ig, "<p$1>");
                     content = content.replace(/<\/p><p/g, "<\/p>\n<p");
                     tag = 'p';
                 } else {
-                    content = content.replace(/(<br(\s\/)?>)+/ig, "</div><div>");
+                    //content = content.replace(/(<br(\s\/)?>)+/ig, "</div><div>");
                     content = content.replace(/<div(.*?)>[\r\n]+/ig, "<div$1>");
                     content = content.replace(/<\/div><div/g, "<\/div>\n<div");
                 }
-                content = content.replace(/<\/td>/g, "&nbsp;</td>");
-                content = content.replace(/(<a id=.+>)(<\/a>)/g, "$1&nbsp;$2");
+                content = content.replace(/><\/td>/g, ">xxx</td>\n");
+                content = content.replace(/(<a id=.+>)(<\/a>)/g, "$1xxx$2");
                 while(content.search(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/g, "<!-- pagebreak -->");
-                while(content.search(/<(\w+)[^>]*>[\s\r\n]*<\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*>[\s\r\n]*<\/\1>[\r\n\s]*/g, "");
+                while(content.search(/<(\w+)[^>]*>[\r\n]*<\/\1>[\r\n]*/)!==-1) content = content.replace(/<(\w+)[^>]*>[\r\n]*<\/\1>[\r\n\s]*/g, "");
                 while(content.search(/<\/(\w+)><\1([^>]*)>/g)!==-1) content = content.replace(/<\/(\w+)><\1([^>]*)>/g, "");
+                content = content.replace(/(<a id=.+>)xxx(<\/a>)/g, "$1$2");
+                content = content.replace(/>xxx<\/td>/g, "></td>");
                 content = content.replace(/  /g, String.fromCharCode(160)+" ");
+                content = content.replace(/(<(\w+)>[\s]*<\/\2>[\r\n]*)+$/g, "");
                 content += "<"+tag+"></"+tag+">";
                 editor.setContent(content);
             });
@@ -298,6 +304,7 @@ $(function(){
                     { text: 'HTML', value: 'html' },
                     { text: 'CSS', value: 'css' },
                     { text: 'JAVASCRIPT', value: 'javascript' },
+                    { text: 'SQL', value: 'sql' },
                     { text: '取消高亮', value: '' },
                 ],
                 onselect: function(e) {
@@ -350,8 +357,8 @@ $(function(){
                     }
                     str = str.replace(/<(p|div).*?>/g, '');
                     str = str.replace(/<\/(p|div)>/g, '<br />');
-                    str = str.replace(/<br \/>/g, '</p><p>');
-                    insertContent('<div class="alert alert-'+brush+' my-3" data-type="'+brush+'"><p>'+str+'</p></div>');
+                    str = str.replace(/<br \/>/g, '</div><div>');
+                    insertContent('<div class="alert alert-'+brush+' my-3" data-type="'+brush+'"><div>'+str+'</div></div>');
                 },
                 onPostRender: function() {
                     let ctrl = this;
@@ -386,12 +393,13 @@ $(function(){
             });
             editor.on('paste',function(e){
                 let cd = (e.originalEvent || e).clipboardData || window.clipboardData;
-                let content = '';
-                if(global.pastetext) {
-                    content = cd.getData('text/plain').replace(/[\r\n]+/g, '</p><p>');
-                    content = '<p>' + content + '</p>'
+                let content = cd.getData('text/html');
+                let re = null;
+                if(content.length===0 || global.pastetext) {
+                    content = cd.getData('text/plain').replace(/[\r\n]+/g, '<br />');
+                    content = content.replace(/\t/g, ' &nbsp; &nbsp;');
                 } else {
-                    content = cd.getData('text/html');
+                    content = content.replace(/style=("|')(.+?)\1/sg, '');
                     if(content.indexOf('schemas-microsoft')>=0) {
                         global.content = content;
                         content = content.replace(/\r/g, '');
@@ -425,15 +433,17 @@ $(function(){
                                 '并将对应文件拖拽到编辑框即可完成上传！' );
                         }
                     }
-                    content = content.replace(/style=("|')(.+?)\1/sg, '');
                 }
                 if(content.length>0) {
+                    content = content.replace(/&#32;/g, " ");
+                    content = content.replace(/  /g, String.fromCharCode(160)+" ");
                     insertContent(content);
                     e.preventDefault();
                     e.returnValue = false;
                     return false;
                 }
                 /*
+                // items[0] - "text/plain"， items[1] - "text/html"
                 let item = cd.items[0];
                 if(item==null) return;
                 if (item.kind === "string" && item.type === "text/plain") {

@@ -3,17 +3,18 @@
 namespace app\sample;
 
 //设置无需尝试数据库连接
-$s->db->auto = false;
+$ms_setting->db->auto = false;
 
 //以下为各类接口的执行函数
 
 //应用api对应的函数，直接返回数据，框架会自动根据参数调整为所需格式
 function api() {
-    global $s;
+    global $S;
     $para = func_get_args();
     //需要注意 $para 中的最后一个参数可能是格式变量（如json或xml）
-    $result = \myConfig::o2a($s);
+    $result = \myConfig::o2a($S);
     $result = $result['setting'];
+    unset($result['db'], $result['gen']['s_usr'], $result['gen']['s_pwd']);
     foreach($para as $v) {
         if(isset($result[$v])) {
             $result = $result[$v];
@@ -26,7 +27,7 @@ function api() {
 
 //自定义路由的处理函数，代码说明参考index.php，需要注意的是相关全局变量需要声明后才能使用
 function route($para) {
-    global $mystep, $router, $db, $cache, $s, $info_app, $tpl_setting, $tpl_cache;
+    global $mystep, $router, $db, $cache, $S, $info_app, $tpl_setting, $tpl_cache;
     $tpl = new \myTemplate($tpl_setting, false);
     $tpl_setting['name'] = 'route';
     $tpl_sub = new \myTemplate($tpl_setting, false, true);

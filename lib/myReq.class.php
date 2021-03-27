@@ -28,8 +28,8 @@
         self::pingURL($url)                             // Get the request time of some url
 
         self::setCookieOpt($setting)                                                // Set cookie settings
-        self::setCookie($name, $value, $expire, $path, $domain, $secure)            // Set a cookie
-        self::setCookie_nopre($name, $value, $expire, $path, $domain, $secure)      // Set a cookie without prefix
+        self::setCookie($name, $value, $expire, $path, $domain, $httponly)          // Set a cookie
+        self::setCookie_nopre($name, $value, $expire, $path, $domain, $httponly)    // Set a cookie without prefix
         self::removeCookie($name, $pre)                                             // Remove a cookie
         self::cookie($para)                                                         // Get variable from _COOKIE
 
@@ -280,7 +280,7 @@ class myReq extends myBase {
      * @return mixed
      */
     public static function globals($name, $value = null) {
-        if(is_null($value)) return $GLOBALS[$name];
+        if(is_null($value)) return self::getValue('globals', $name);
         $GLOBALS[$name] = $value;
         return true;
     }
@@ -290,13 +290,13 @@ class myReq extends myBase {
      * @return null|string|string[]
      */
     public static function ip() {
-        $ip = $ip_org = $_SERVER['REMOTE_ADDR'];
-        if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        $ip = $ip_org = self::server('REMOTE_ADDR');
+        if(!is_null(self::server('HTTP_X_FORWARDED_FOR'))) {
+            $ip = self::server('HTTP_X_FORWARDED_FOR');
             $ip_list = explode(',', $ip);
             if(count($ip_list)>1) $ip = $ip_list[0];
-        } elseif(isset($_SERVER['HTTP_CLIENT_IP'])) {
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif(!is_null(self::server('HTTP_CLIENT_IP'))) {
+            $ip = self::server('HTTP_CLIENT_IP');
         }
         if(!empty($ip) && $ip!=$ip_org) {
             $ip = $ip_org.', '.$ip;
@@ -390,9 +390,9 @@ class myReq extends myBase {
             return false;
         }
         if($expire<=0) {
-            $expire = $_SERVER['REQUEST_TIME'] - 3600;
+            $expire = self::server('REQUEST_TIME') - 3600;
         } else {
-            $expire = $_SERVER['REQUEST_TIME'] + $expire;
+            $expire = self::server('REQUEST_TIME') + $expire;
         }
         if(empty($path) && !empty(self::$cookie_opt['path'])) {
             $path = self::$cookie_opt['path'];
@@ -542,7 +542,6 @@ class myReq extends myBase {
         session_destroy();
         session_commit();
         if(!headers_sent()) setcookie(session_name(), '', 0);
-        return;
     }
 
     /**

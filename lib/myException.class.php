@@ -52,7 +52,6 @@ class myException extends ErrorException {
         $this->file = $err_file;
         $this->line = $err_line;
         self::errorHandle($err_no, $err_msg, $err_file, $err_line);
-        return;
     }
 
     /**
@@ -178,7 +177,6 @@ class myException extends ErrorException {
             self::clear();
             if(self::$exit_on_error) exit();
         }
-        return;
     }
 
     /**
@@ -199,7 +197,6 @@ class myException extends ErrorException {
             $line = $matches[3];
         }
         self::errorHandle($e->getSeverity(), $err, $file, $line);
-        return;
     }
 
     /**
@@ -217,7 +214,6 @@ class myException extends ErrorException {
             }
             self::errorHandle($error['type'], $err, $file, $line);
         }
-        return;
     }
 
     /**
@@ -251,7 +247,6 @@ class myException extends ErrorException {
             fclose($fp);
             unset($fp);
         }
-        return;
     }
 
     /**
@@ -261,7 +256,6 @@ class myException extends ErrorException {
         self::$err_last = array();
         self::$err_all = array();
         error_clear_last();
-        return;
     }
 
     /**

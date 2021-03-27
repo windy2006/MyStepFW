@@ -4,7 +4,7 @@ $tpl_setting['name'] = $info_app['path'][2] ?? '';
 $content = '';
 if(is_file($tpl_setting['path'].$tpl_setting['name'].'.tpl')) {
     $t = new myTemplate($tpl_setting);
-    r::s('sign_upload', 'y');
+    myReq::session('sign_upload', 'y');
     $content = $mystep->render($t);
     unset($t);
 }

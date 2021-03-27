@@ -1,6 +1,6 @@
 <?PHP
 if(empty($id)) $id = r::r('cat_id');
-if(!empty($id)) {
+if(!empty($id) && !is_array($id)) {
     if($cat_info = \app\CMS\getPara($news_cat_plat, "cat_id", $id)) {
         if(!checkPower('web', $cat_info['web_id'])) {
             myStep::info('admin_art_catalog_error');
@@ -18,11 +18,11 @@ switch($method) {
     case 'delete':
         cms::$log = $mystep->getLanguage('admin_art_catalog_delete');
         function multiDelData($cat_id) {
-            global $db, $s, $web_info;
-            $db->build($s->db->pre.'news_cat')
+            global $db, $S, $web_info;
+            $db->build($S->db->pre.'news_cat')
                 ->where('cat_id', 'n=', $cat_id);
             $db->delete();
-            $db->build($s->db->pre.'news_show')
+            $db->build($S->db->pre.'news_show')
                 ->where('cat_id', 'n=', $cat_id);
             $db->delete();
             $db->build($web_info['setting']->db->pre.'news_show')
@@ -32,7 +32,7 @@ switch($method) {
                 ->where('cat_id', 'n=', $cat_id);
             $db->delete();
             $cat_id_list = array();
-            $db->build($s->db->pre.'news_cat')
+            $db->build($S->db->pre.'news_cat')
                 ->field('cat_id')
                 ->where('pid', 'n=', $cat_id);
             $db->select();
@@ -41,7 +41,6 @@ switch($method) {
             for($i=0,$m=count($cat_id_list); $i<$m; $i++) {
                 multiDelData($cat_id_list[$i]);
             }
-            return;
         }
         multiDelData($id);
         \app\CMS\deleteCache('news_cat');
@@ -54,7 +53,7 @@ switch($method) {
         $cat_order_list = r::p('cat_order');
         $cat_layer_list = r::p('cat_layer');
         for($i=0,$m=count($cat_id_list);$i<$m;$i++) {
-            $db->build($s->db->pre.'news_cat')
+            $db->build($S->db->pre.'news_cat')
                ->field([
                    'order'=>$cat_order_list[$i],
                    'layer'=>$cat_layer_list[$i]
@@ -64,6 +63,7 @@ switch($method) {
         }
         \app\CMS\deleteCache('news_cat');
         $cache->func('\app\CMS\setCatList', [$news_cat], null);
+        $id = '';
         cms::redirect();
         break;
     case 'add_ok':
@@ -73,14 +73,14 @@ switch($method) {
             if($data['pid']==0) {
                 $data['layer'] = 1;
             } else {
-                $db->build($s->db->pre.'news_cat')
+                $db->build($S->db->pre.'news_cat')
                    ->where('cat_id', 'n=', $data['pid'])
                    ->field('layer');
                 $data['layer'] = 1 + $db->result();
             }
-            $db->build($s->db->pre.'news_cat')->field('idx')->where('idx', '=', $data['idx'])->where('web_id', 'n=', $data['web_id']);
+            $db->build($S->db->pre.'news_cat')->field('idx')->where('idx', '=', $data['idx'])->where('web_id', 'n=', $data['web_id']);
             if($method=='edit_ok') {
-                $db->build($s->db->pre.'news_cat')->where('cat_id', 'n!=', $data['cat_id'], 'and');
+                $db->build($S->db->pre.'news_cat')->where('cat_id', 'n!=', $data['cat_id'], 'and');
             }
             if($db->result()) {
                 myStep::info('admin_art_catalog_error_idx');
@@ -97,40 +97,40 @@ switch($method) {
             if($data['type']==3 && $template=='') $data['type'] = 1;
             if($method=='add_ok') {
                 cms::$log = $mystep->getLanguage('admin_art_catalog_add');
-                $db->build($s->db->pre.'news_cat')->field('max(`order`)');
+                $db->build($S->db->pre.'news_cat')->field('max(`order`)');
                 $data['order'] = 1 + $db->result();
-                $db->build($s->db->pre.'news_cat')
+                $db->build($S->db->pre.'news_cat')
                    ->field($data);
                 $db->insert();
             } else {
                 if($merge==1 && $data['pid']!=0 && $data['pid']!=$data['cat_id']) {
                     cms::$log = $mystep->getLanguage('admin_art_catalog_merge');
-                    $db->build($s->db->pre.'news_cat')
+                    $db->build($S->db->pre.'news_cat')
                        ->field(['pid'=>$data['pid']])
                        ->where('pid', 'n=', $data['cat_id']);
                     $db->update();
-                    $db->build($s->db->pre.'news_show')
+                    $db->build($S->db->pre.'news_show')
                        ->field(['cat_id'=>$data['pid']])
                        ->where('cat_id', 'n=', $data['cat_id']);
                     $db->update();
-                    $db->build($s->db->pre.'news_detail')
+                    $db->build($S->db->pre.'news_detail')
                        ->field(['cat_id'=>$data['pid']])
                        ->where('cat_id', 'n=', $data['cat_id']);
                     $db->update();
-                    $db->build($s->db->pre.'news_cat')
+                    $db->build($S->db->pre.'news_cat')
                         ->where('cat_id', 'n=', $data['cat_id']);
                     $db->delete();
                 } else {
                     cms::$log = $mystep->getLanguage('admin_art_catalog_edit');
                     function multiChange($cat_id, $layer) {
-                        global $db, $s;
+                        global $db, $S;
                         if($layer>100) myStep::info('admin_art_catalog_error');
-                        $db->build($s->db->pre.'news_cat')
+                        $db->build($S->db->pre.'news_cat')
                            ->field(['layer'=>$layer])
                            ->where('cat_id', 'n=', $cat_id);
                         $db->update();
                         $id_list = array();
-                        $db->build($s->db->pre.'news_cat')
+                        $db->build($S->db->pre.'news_cat')
                            ->field('cat_id')
                            ->where('pid', 'n=', $cat_id);
                         $db->select();
@@ -139,10 +139,9 @@ switch($method) {
                         for($i=0,$m=count($id_list); $i<$m; $i++) {
                             multiChange($id_list[$i], $layer+1);
                         }
-                        return;
                     }
                     multiChange($data['cat_id'], $data['layer']);
-                    $db->build($s->db->pre.'news_cat')
+                    $db->build($S->db->pre.'news_cat')
                        ->field($data)
                        ->where('cat_id', 'n=', $data['cat_id']);
                     $db->update();
@@ -176,14 +175,14 @@ switch($method) {
 }
 
 function build_page($method) {
-    global $mystep, $tpl_setting, $s, $db, $cache;
+    global $mystep, $tpl_setting, $S, $db, $cache;
     global $news_cat_plat, $id, $website, $web_info;
 
     $tpl_setting['name'] = 'art_catalog_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
     if($method == 'list') {
-        $tpl->assign('news_cat', myString::toJson($news_cat_plat, $s->gen->charset));
+        $tpl->assign('news_cat', myString::toJson($news_cat_plat, $S->gen->charset));
         for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
             if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
             if($web_info['web_id']!=1 && $web_info['web_id']!=$news_cat_plat[$i]['web_id']) continue;
@@ -199,7 +198,7 @@ function build_page($method) {
     } else {
         if($method == 'edit') {
             $show_merge = 'inline';
-            $db->build($s->db->pre.'news_cat')
+            $db->build($S->db->pre.'news_cat')
                ->where('cat_id','n=',$id);
             if(($record = $db->record())===false) {
                 myStep::info('admin_art_catalog_error');
@@ -233,7 +232,7 @@ function build_page($method) {
             $website[$i]['selected'] = $website[$i]['web_id']==$record['web_id']?'selected':'';
             $tpl->setLoop('website', $website[$i]);
         }
-        $positions = explode(',', $s->content->cat_pos);
+        $positions = explode(',', $S->content->cat_pos);
         for($i=0,$m=count($positions); $i<$m; $i++) {
             $tpl->setLoop('positions', ['idx'=>pow(2, $i),'name'=>$positions[$i]]);
         }
