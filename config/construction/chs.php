@@ -51,9 +51,9 @@ $setting_detail['gen'] = array(
             'type' => array('text', '', '80')
         ),
         'debug' => array(
-            'name' => '错误信息',
-            'describe' => '显示相关程序错误信息',
-            'type' => array('radio', array('显示'=>'true', '隐藏'=>'false'))
+            'name' => '除错模式',
+            'describe' => '显示更多的错误信息',
+            'type' => array('radio', array('启用'=>'true', '关闭'=>'false'))
         ),
     ]
 );
@@ -89,7 +89,7 @@ $setting_detail['web'] = array(
         'etag' => array(
             'name' => '过期标识',
             'describe' => '用于 Etag 标识，减少未更改页面的传输',
-            'type' => array('text', '', '10')
+            'type' => array('text', '', '20')
         ),
         'css' => array(
             'name' => '样式表文件',
@@ -162,7 +162,7 @@ $setting_detail['session'] = array(
         'name' => array(
             'name' => '名称设置',
             'describe' => '程序用于存储Session索引的名称',
-            'type' => array('text', 'alpha', '10')
+            'type' => array('text', 'alpha', '20')
         ),
         'mode' => array(
             'name' => '处理模式',
@@ -198,7 +198,7 @@ $setting_detail['cookie'] = array(
         'domain' => array(
             'name' => '作用域名',
             'describe' => 'Cookie仅在该域名下生效',
-            'type' => array("text", "", "20")
+            'type' => array("text", "_", "20")
         ),
     ]
 );

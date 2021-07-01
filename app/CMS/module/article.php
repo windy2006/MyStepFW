@@ -1,6 +1,6 @@
 <?PHP
 global $id, $cat_id;
-$id = intval(end($info_app['path']));
+$id = end($info_app['path']);
 
 $page = r::g('page');
 if($page!='all') {

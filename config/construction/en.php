@@ -51,9 +51,9 @@ $setting_detail['gen'] = array(
             'type' => array('text', '', '80')
         ),
         'debug' => array(
-            'name' => 'Error',
+            'name' => 'DEBUG',
             'describe' => 'Open the option to show all of the script error message',
-            'type' => array('radio', array('Show'=>'true', 'Hide'=>'false'))
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
         ),
     ]
 );
@@ -89,7 +89,7 @@ $setting_detail['web'] = array(
         'etag' => array(
             'name' => 'Etag Fix',
             'describe' => 'Append to Etag with which to avoid non-modification HTML pages transfer',
-            'type' => array('text', '', '10')
+            'type' => array('text', '', '20')
         ),
         'css' => array(
             'name' => 'CSS Files',
@@ -162,7 +162,7 @@ $setting_detail['session'] = array(
         'name' => array(
             'name' => 'Name',
             'describe' => 'Name of the Framework Session',
-            'type' => array('text', 'alpha', '10')
+            'type' => array('text', 'alpha', '20')
         ),
         'mode' => array(
             'name' => 'Mode',
@@ -198,7 +198,7 @@ $setting_detail['cookie'] = array(
         'domain' => array(
             'name' => 'Domain',
             'describe' => 'Cookie will only avilable in the domain',
-            'type' => array('text', '', '20')
+            'type' => array('text', '_', '20')
         ),
     ]
 );

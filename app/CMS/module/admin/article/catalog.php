@@ -78,6 +78,7 @@ switch($method) {
                    ->field('layer');
                 $data['layer'] = 1 + $db->result();
             }
+            $data['idx'] = preg_replace('/[\s`~!@#$%^&*()_\-+=<>?:"{}|,.\/;\'\\[\]]/', '', $data['idx']);
             $db->build($S->db->pre.'news_cat')->field('idx')->where('idx', '=', $data['idx'])->where('web_id', 'n=', $data['web_id']);
             if($method=='edit_ok') {
                 $db->build($S->db->pre.'news_cat')->where('cat_id', 'n!=', $data['cat_id'], 'and');
