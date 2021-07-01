@@ -110,7 +110,7 @@ switch($method) {
         $back_url = preg_replace('#cat_id=\d+#', 'cat_id='.$cat_id, $back_url);
         unset($data['back_url']);
 
-        $get_remote_file = $data['get_remote_file'];
+        $get_remote_file = $data['get_remote_file']??false;
         unset($data['get_remote_file']);
         if($get_remote_file) {
             preg_match_all('/<img.+?src=(.?)(http.+?)\\1.*?>/is', $content, $matches);
@@ -425,6 +425,7 @@ function build_page($method) {
     }
     $url .= '&web_id='.$web_id;
     $tpl->assign('back_url', $url);
+    $tpl->assign('tpl_style', $web_info['setting']->template->style);
     setWeb($tpl, $web_id);
     return $mystep->render($tpl);
 }

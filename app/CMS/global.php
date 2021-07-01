@@ -1,6 +1,6 @@
 <?PHP
 global $news_cat, $news_cat_plat, $website, $web_info;
-
+app\CMS\installCheck();
 if(($news_cat=\app\CMS\getCache('news_cat'))===false) {
     myStep::info('error_para');
 }

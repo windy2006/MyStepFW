@@ -25,15 +25,3 @@
         </div>
     </div>
 </div>
-<script type="application/javascript">
-$(function(){
-    $('input[name=jump]').keypress(function(e){
-        if(e.keyCode==13) {
-            location.href=global.root_fix+'?pre=<!--prefix-->&page='+this.value;
-        }
-    });
-    $('button[name=jump]').click(function(e){
-        location.href=global.root_fix+'?pre=<!--prefix-->&page='+$('input[name=jump]').val();
-    });
-});
-</script>

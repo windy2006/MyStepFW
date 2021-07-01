@@ -1,9 +1,6 @@
 <?PHP
 global $id, $cat_id;
-if(isset($info_app['path'][2]) && is_numeric($info_app['path'][2])) {
-    $id = $info_app['path'][2];
-}
-$id = $info_app['path'][1]??0;
+$id = intval(end($info_app['path']));
 
 $page = r::g('page');
 if($page!='all') {
@@ -94,6 +91,7 @@ if(empty($record['original'])) $record['original'] = $mystep->getLanguage('page_
 if(empty($record['image'])) $record['image'] = ROOT_WEB.'static/images/dummy.png';
 $t->assign('record', $record);
 $t->assign('cat_id', $cat_id);
+$t->assign('cat_name', $cat_info['name']);
 
 global $tag;
 $tag = explode(',', $record['tag']);

@@ -664,10 +664,12 @@ class myFile {
             $data = file_get_contents($file);
         } else {
             if($length==0) $length = 8192;
-            $fp = fopen($file, 'rb');
-            fseek($fp, $offset);
-            $data = fread($fp, $length);
-            fclose($fp);
+            $data = '';
+            if($fp = @fopen($file, 'rb')) {
+                fseek($fp, $offset);
+                $data = fread($fp, $length);
+                fclose($fp);
+            }
         }
         return self::removeBom($data);
     }
@@ -951,7 +953,8 @@ class myFile {
                     $dir = dirname($dir);
                 }
             }
-            $tmpfname = tempnam($dir, 'chk');
+            $dir = realpath($dir);
+            $tmpfname = $dir.'/'.basename(tempnam($dir, 'chk_'));
             if($fp = @fopen($tmpfname, "w")) {
                 $flag = true;
                 fclose($fp);

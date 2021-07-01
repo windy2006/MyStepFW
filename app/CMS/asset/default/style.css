@@ -52,7 +52,7 @@ header .navbar-nav .dropdown-menu {
 .top-banner {
     width:100%;
     height:150px;
-    background-image:url("/CMS/asset/top-banner.jpg");
+    background-image:url("/asset/top-banner.jpg");
     background-size:100% 100%;
     background-repeat:no-repeat;
     color:white;
@@ -286,10 +286,6 @@ footer p {
 }
 .card {
     margin-bottom:10px;
-}
-.card .card-header .nav {
-    margin-top:-1px;
-    margin-left:-1px
 }
 .card .card-header .nav {
     margin-top:-1px;

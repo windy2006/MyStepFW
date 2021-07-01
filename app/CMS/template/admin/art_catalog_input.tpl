@@ -167,7 +167,7 @@ function setCata(){
     $("select[name=pid]").val('<!--cat_pid-->');
 }
 function showTpl() {
-    if($("select[name=type]").val()===3) {
+    if($("select[name=type]").val()==3) {
         $("#tpl").show();
     } else {
         $("#tpl").hide();

@@ -66,14 +66,6 @@
         $('button[name=keyword]').click(function(e){
             location.href=global.root_fix+'?web_id=<!--web_id-->&keyword='+$('input[name=keyword]').val();
         });
-        $('input[name=jump]').keypress(function(e){
-            if(e.keyCode==13) {
-                location.href=global.root_fix+'?web_id=<!--web_id-->&keyword=<!--keyword-->&order=<!--order-->&order_type=<!--order_type_org-->&page='+this.value;
-            }
-        });
-        $('button[name=jump]').click(function(e){
-            location.href=global.root_fix+'?web_id=<!--web_id-->&keyword=<!--keyword-->&order=<!--order-->&order_type=<!--order_type_org-->&page='+$('input[name=jump]').val();
-        });
         global.root_fix += 'article/tag/';
     });
 </script>

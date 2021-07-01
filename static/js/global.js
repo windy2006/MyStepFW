@@ -484,6 +484,18 @@ function c(){
 function a(){
     for(let x in arguments) alert(arguments[x]);
 }
+function info(msg) {
+    if(typeof window.myInfo === 'undefined') {
+        window.myInfo = $("<div>")
+            .css({position:'sticky',top:0,left:0,display:'inline',border:'1px gray solid',background:'#eee',padding:'10px','z-index':99999})
+            .prependTo('body');
+    }
+    if(msg == null) {
+        window.myInfo.hide();
+    } else {
+        window.myInfo.show().html(msg);
+    }
+}
 
 //查看对象属性
 function checkObj(obj, func_show) {

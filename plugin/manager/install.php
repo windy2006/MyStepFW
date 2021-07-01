@@ -1,4 +1,53 @@
 <?PHP
+$lng = array();
+if (preg_match("/zh/i", $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+    $lng[0] = ' 扩展未启用！';
+    $lng[1] = '当前目录不可写！';
+    $lng[2] = '完成！';
+    $lng[3] = '失败！';
+    $lng[4] = '释放文件';
+    $lng[5] = '建立目录';
+    $lng[6] = '安装包读取失败！';
+    $lng[7] = '文件统计: 共释放 %u 个文件，共计 %s';
+    $lng[8] = '安装';
+    $lng[9] = '设置';
+    $lng[10] = '安装进度';
+    $lng[11] = '所有文件释放完毕，准备开始安装！';
+    $lng[12] = '迈思PHP框架安装';
+    $lng[13] = '开始安装';
+    $lng[14] = '框架设置';
+    $lng[15] = '安装进度';
+    $lng[16] = '所有文件解压完毕，请设置基本参数！';
+    $lng[17] = '检测到 Nginx 系统，请将框架根目录下的 Nginx 文件中的 rewrite 配置信息添加至配置文件！';
+} else {
+    $lng[0] = ' extension is unavailable!';
+    $lng[1] = 'The target direction is read only!';
+    $lng[2] = 'Successfully!';
+    $lng[3] = 'Failed!';
+    $lng[4] = 'Unpacking File';
+    $lng[5] = 'Build Directory';
+    $lng[6] = 'Error Occurs In Reading Pack File!';
+    $lng[7] = 'File Count: %u File(s), %s in size';
+    $lng[8] = 'Install';
+    $lng[9] = 'Setting';
+    $lng[10] = 'Installation progress';
+    $lng[11] = 'All files are unpacked and ready to be installed.';
+    $lng[12] = 'MyStep PHP Framework';
+    $lng[13] = 'Start';
+    $lng[14] = 'Setting';
+    $lng[15] = 'Installation progress';
+    $lng[16] = 'All files are unpacked and will jump to the setting page.';
+    $lng[17] = 'Framework is under Nginx system, please check the Nginx file under the framework directory for the setting!';
+}
+$ext_list = ['zlib', 'zip', 'sockets', 'curl', 'gd', 'curl', 'iconv', 'mysqli','openssl'];
+foreach ($ext_list as $v) {
+    if (!extension_loaded($v)) {
+        die($v.$lng[0]);
+    }
+}
+if(!rewritable('./')) {
+    die($lng[1]);
+}
 class unpacker {
     protected
         $file_count = 0,
@@ -17,13 +66,14 @@ class unpacker {
     }
 
     protected function UnpackFile($outdir="./", $separator="|") {
+        global $lng;
         if(!is_dir($outdir)) mkdir($outdir, 0777);
         while(!feof($this->pack_fp)) {
             $data = explode($separator, trim(fgets($this->pack_fp, 1024), "\r\n"));
             if($data[0]=="dir") {
                 if(trim($data[1], ".") != "") {
                     $flag = mkdir($outdir."/".$data[1], 0777);
-                    $this->log("<b>Build Directory</b> $outdir/$data[1] ".($flag?"<span style='color:green'>Successfully!</span>":"<span style='color:red'>failed!</span>"));
+                    $this->log("<b>".$lng[5]."</b> $outdir/$data[1] ".($flag?"<span style='color:green'>".$lng[2]."</span>":"<span style='color:red'>".$lng[3]."</span>"));
                 }
             }elseif($data[0]=="file") {
                 if($data[1]=='.htaccess' || $data[1]=='web.config') $data[1] .= '.bak';
@@ -41,7 +91,7 @@ class unpacker {
                     $flag = fwrite($fp_w, $content);
                 }
                 $this->file_count++;
-                $this->log("<b>Unpacking File</b> $outdir/$data[1] ".($flag?"<span style='color:green'>Successfully!</span>(".GetFileSize($this->pack_dir."/".$data[1]).")":"<span style='color:red'>failed!</span>"));
+                $this->log("<b>".$lng[4]."</b> $outdir/$data[1] ".($flag?"<span style='color:green'>".$lng[2]."</span>(".GetFileSize($this->pack_dir."/".$data[1]).")":"<span style='color:red'>".$lng[3]."</span>"));
             }
         }
         return;
@@ -50,12 +100,12 @@ class unpacker {
     public function DoIt($separator="|") {
         WriteFile($this->pack_file, gzuncompress(GetFile($this->pack_file)));
         $this->pack_fp = fopen($this->pack_file, "rb");
-        if(!$this->pack_fp) die("Error Occurs In Reading Pack File !");
+        if(!$this->pack_fp) die($lng[6]);
         $this->UnpackFile($this->pack_dir, $separator);
         fclose($this->pack_fp);
         $filename    = $this->pack_file;
         $filesize    = GetFileSize($filename);
-        $this->log("<br />File Count: {$this->file_count} File(s) ".$filesize);
+        $this->log("<br />". sprintf($lng[7], $this->file_count, $filesize));
         unlink($this->pack_file);
         return $filename;
     }
@@ -148,8 +198,33 @@ function GetFileSize($para) {
     }
     return $filesize;
 }
+function rewritable($file) {
+    $flag = false;
+    if(is_file($file)) {
+        $flag = is_writable($file);
+    } else {
+        if(is_dir($file)) {
+            $dir = $file;
+        } else {
+            $dir = dirname($file);
+            $n = 10;
+            while(!is_dir($dir) && --$n>0) {
+                $dir = dirname($dir);
+            }
+        }
+        $dir = realpath($dir);
+        $tmpfname = $dir.'/'.basename(tempnam($dir, 'chk_'));
+        if($fp = @fopen($tmpfname, "w")) {
+            $flag = true;
+            fclose($fp);
+            unlink($tmpfname);
+        }
+    }
+    return $flag;
+}
 
 $step = isset($_GET['step']) ? $_GET['step'] : 1;
+$svr = strtolower($_SERVER['SERVER_SOFTWARE']);
 switch($step) {
     case 1:
         @unlink('install.php');
@@ -174,12 +249,12 @@ switch($step) {
     <div class="row">
         <div class="col-md-10 offset-md-1 col-sm-12">
             <div class="text-center mb-3">
-                <button id="install" class="btn btn-primary btn-lg p-4">Install</button>
-                <button id="jump" class="btn btn-primary btn-lg p-4 d-none">Setting</button>
+                <button id="install" class="btn btn-primary btn-lg p-4">{$lng[8]}</button>
+                <button id="jump" class="btn btn-primary btn-lg p-4 d-none">{$lng[9]}}</button>
             </div>
             <div id="show" class="card mb-3 d-none">
                 <div class="card-header p-2 bg-info">
-                    <h5 class="text-white card-title m-0">Installation progress</h5>
+                    <h5 class="text-white card-title m-0">{$lng[10]}</h5>
                 </div>
                 <div class="card-body" style="height:400px;overflow-y:auto;" id="detail"></div>
             </div>
@@ -187,18 +262,18 @@ switch($step) {
     </div>
 </div>
 <footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
-    <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
+    <p>Powered by  MyStep Framework &nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
 <script type="application/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </body>
 <script type="application/javascript">
-let txt_done = 'All files are unpacked and ready to be installed.';
+let txt_done = '{$lng[11]}';
 if((navigator.browserLanguage || navigator.language).toLowerCase().indexOf('zh-')>-1) {
-    $('title').text('迈思PHP框架安装');
-    $('#install').text('开始安装');
-    $('#jump').text('框架设置');
-    $('#show h5').text('安装进度');
-    txt_done = '所有文件解压完毕，请设置基本参数！';
+    $('title').text('{$lng[12]}');
+    $('#install').text('{$lng[13]}');
+    $('#jump').text('{$lng[14]}');
+    $('#show h5').text('{$lng[15]}');
+    txt_done = '{$lng[16]}';
 }
 $('#install').click(function(){
     $(this).hide();
@@ -219,7 +294,11 @@ $('#install').click(function(){
         $('#jump').removeClass('d-none').click(function(){
             location.href="install.php?step=3";
         });
-        setTimeout(function(){location.href="install.php?step=3";}, 5000);
+        if(('{$svr}').indexOf('nginx')!==-1) {
+            alert('{$lng[17]}');
+        } else {
+            setTimeout(function(){location.href="install.php?step=3";}, 5000);
+        }
     })
 });
 </script>
@@ -238,13 +317,6 @@ myStep;
         break;
     default:
         @unlink('index.php');
-        $tmp_file = tempnam("./", "mystep");
-        if($fp = fopen($tmp_file, "w")) {
-            fclose($fp);
-            unlink($tmp_file);
-        } else {
-            die("Current directory cannot be writen!");
-        }
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $pack_file = "mystep.pack";
@@ -258,5 +330,6 @@ return array();
         WriteFile('config/domain.php', $empty);
         WriteFile('config/route_plugin.php', $empty);
         WriteFile('config/route.php', '');
-        echo 'done';
+        @unlink('config/config.php');
+        echo 'done!';
 }

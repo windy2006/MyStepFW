@@ -602,18 +602,23 @@ mytpl;
                 }
             }
             if(headers_sent()) $this->error('Headers have already been sent, content create failed....');
-            if(count(ob_list_handlers())==0) {
-                ob_start();
-                include($this->compileTemplate());
-                $content = ob_get_contents();
-                ob_end_clean();
+            $script = $this->compileTemplate();
+            if(is_file($script)) {
+                if(count(ob_list_handlers())==0) {
+                    ob_start();
+                    include($script);
+                    $content = ob_get_contents();
+                    ob_end_clean();
+                } else {
+                    $temp = ob_get_contents();
+                    ob_clean();
+                    include($script);
+                    $content = ob_get_contents();
+                    ob_clean();
+                    echo $temp;
+                }
             } else {
-                $temp = ob_get_contents();
-                ob_clean();
-                include($this->compileTemplate());
-                $content = ob_get_contents();
-                ob_clean();
-                echo $temp;
+                $this->error('Template compile failed !');
             }
             if($minify) {
                 $content = str_replace('//<![CDATA[', '', $content);

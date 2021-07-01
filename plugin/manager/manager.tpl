@@ -145,7 +145,11 @@ $('#link_4').click(function(){
     window.open("manager/export");
 });
 $('#link_5').click(function(){
-    window.open("pack/");
+    loadingShow("正在打包框架系统，完成后将自动开始下载！");
+    $.get("pack/", function(url) {
+        loadingShow();
+        location.replace(url);
+    }, 'text');
 });
 let update_info = null;
 function checkUpdate() {

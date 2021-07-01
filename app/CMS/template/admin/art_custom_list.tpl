@@ -16,8 +16,8 @@
             <thead class="thead-light">
             <tr class="text-center no-wrap">
                 <th width="40">编号</th>
-                <th width="250">所属网站</th>
-                <th>索引</th>
+                <th width="100">所属网站</th>
+                <th width="100">索引</th>
                 <th>内容</th>
                 <th width="92">操作</th>
             </tr>

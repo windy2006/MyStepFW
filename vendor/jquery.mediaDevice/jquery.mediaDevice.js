@@ -96,6 +96,7 @@
         }
     }();
 
+    // Video Functions
     $.fn.camera = function(opt) {
         let videoObj = this.get(0);
         if(typeof(opt)==='object') {
@@ -129,7 +130,7 @@
             case 'start':
             default:
                 videoObj.volume = 0;
-                this.css('transform', 'rotateY(180deg)');
+                if(constraints.mirror) this.css('transform', 'rotateY(180deg)');
                 if(typeof constraints.audio === 'undefined') {
                     constraints = JSON.parse(JSON.stringify(default_constraints));
                 }
@@ -146,6 +147,7 @@
                     // 旧的浏览器可能没有srcObject
                     if ("srcObject" in videoObj) {
                         videoObj.srcObject = stream;
+                        videoObj.setAttribute("playsinline", true);
                     } else {
                         // 防止在新的浏览器里使用它，应为它已经不再支持了
                         videoObj.src = window.URL.createObjectURL(stream);
@@ -167,6 +169,8 @@
                                 constraints.video.resizeMode = 'crop-and-scale';
                             }
                             track.applyConstraints(constraints.video);
+                            default_constraints.video.width = constraints.video.width;
+                            default_constraints.video.height = constraints.video.height;
                         }
                     })
                     $(videoObj).data('recorder', null);
@@ -202,7 +206,6 @@
                             if(typeof result[kind] === 'undefined') result[kind] = [];
                             result[kind].push(device);
                         });
-                        console.log(JSON.stringify(result));
                         func(result);
                     })
                     .catch(function(err) {
@@ -252,6 +255,7 @@
         return this;
     };
 
+    //audio Functions
     $.fn.audio = function(opt) {
         let canvasObj = this.get(0);
         let audioObj = this.get(0);
@@ -487,21 +491,30 @@
         return this;
     }
 
+    // Fullscreen Functions
     $.fn.fullscreen = function(opt) {
         let isFullscreen = document.fullscreenEnabled || document.webkitFullscreenEnabled || document.msFullscreenEnabled || document.mozFullScreenEnabled;
         if(!isFullscreen) return false;
         let theObj = this.get(0);
+        if(typeof opt === 'function') {
+            arguments[1] = opt;
+            opt = undefined;
+        }
         if(typeof opt === 'undefined') {
             opt = check() ? 'exit' : 'run';
         }
+        if(typeof arguments[1] !== 'function') {
+            arguments[1] = function(){return true;};
+        }
+        let func = arguments[1];
         switch(opt) {
             case 'r':
             case 'run':
-                run();
+                run(func);
                 break;
             case 'e':
             case 'exit':
-                exit();
+                exit(func);
                 break;
             case 'c':
             case 'check':
@@ -510,7 +523,7 @@
                 return getElement();
         }
 
-        function run() {
+        function run(callback) {
             if(check()) exit();
             if(theObj.requestFullscreen) {
                 theObj.requestFullscreen();
@@ -523,7 +536,10 @@
             } else if(theObj.webkitRequestFullscreen) {
                 theObj.webkitRequestFullScreen();
             }else{
-                let  css = {
+                let css = {
+                    position:'absolute',
+                    top:0,
+                    left:0,
                     width:'100%',
                     height:'100%',
                     overflow:'hidden'
@@ -531,10 +547,17 @@
                 $(document.documentElement).css(css);
                 $(document.body).css(css);
                 $(theObj).css(css).addClass('m-0 p-0');
+                document.fullscreenElement = theObj;
+                $(window).one('keydown', function(e){
+                    if(e.keyCode===27) {
+                        $(theObj).fullscreen('exit');
+                    }
+                });
             }
-            theObj.data('fullscreen', 'y');
+            $(theObj).data('fullscreen', 'y');
+            if(typeof callback === 'function') callback();
         }
-        function exit() {
+        function exit(callback) {
             if(!check()) return;
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -548,6 +571,9 @@
                 document.webkitExitFullscreen();
             }else{
                 let  css = {
+                    position:'static',
+                    top:'auto',
+                    left:'auto',
                     width:'auto',
                     height:'auto',
                     overflow:'auto',
@@ -555,16 +581,17 @@
                 $(document.documentElement).css(css);
                 $(document.body).css(css);
                 $(theObj).css(css).addClass('m-0 p-0');
-                document.fullscreenElement = theObj;
+                document.fullscreenElement = undefined;
             }
-            theObj.data('fullscreen', null);
+            $(theObj).data('fullscreen', null);
+            if(typeof callback === 'function') callback();
         }
         function check(){
             let list = [document.isFullScreen, document.webkitIsFullScreen, document.msFullscreenEnabled, document.mozIsFullScreen, document.oIsFullScreen, window.fullScreen];
             for(let x in list) {
                 if(typeof list[x] === 'boolean') return list[x];
             }
-            return !!theObj.data('fullscreen');
+            return !!$(theObj).data('fullscreen');
         }
         function getElement(){
             return document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;

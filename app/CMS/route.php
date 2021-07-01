@@ -1,7 +1,7 @@
 <?PHP
 $rule = array(
     array(
-        '/'.$GLOBALS['ms_setting']->web->path_admin.'/[any]',
+        '/'.($GLOBALS['ms_setting']->web->path_admin??'admin_cms').'/[any]',
         array(
             'app\CMS\installCheck,index',
             'app\CMS\logCheck',

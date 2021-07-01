@@ -24,7 +24,7 @@ let setting_tinymce = {
         },
 
         // Custom settings
-        content_css : global.root + "static/css/bootstrap.css",
+        content_css : [global.root + "static/css/bootstrap.css"],
         convert_urls: false,
         remove_script_host: false,
         preformatted : false,
@@ -474,6 +474,7 @@ $(function(){
         global.editor_btn += ' upload change'
         if(typeof(setting_tinymce_ext)!='undefined') $.extend(setting_tinymce, setting_tinymce_ext);
         if(typeof(setting_tinymce_btn)!='undefined') setting_tinymce.toolbar2 += ' | '+setting_tinymce_btn;
+        if(typeof(setting_tinymce_css)!='undefined') setting_tinymce.content_css.push(setting_tinymce_css);
         setting_tinymce.toolbar2 = global.editor_btn + ' | ' + setting_tinymce.toolbar2;
         tinyMCE.init(setting_tinymce);
     });

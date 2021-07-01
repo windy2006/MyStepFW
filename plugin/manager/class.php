@@ -398,7 +398,7 @@ class plugin_manager implements interface_plugin {
             $zip->zip($dir.$idx);
             myFile::del($dir.$idx);
         }
-        myStep::redirect(str_replace(ROOT, '/', $dir.$idx.'.zip'));
+        echo str_replace(ROOT, '/', $dir.$idx.'.zip');
     }
     public static function checkFile($dir='', $build=false, $layer=0) {
         global $list_file, $list_file_md5;

@@ -1,7 +1,7 @@
 <?PHP
 namespace app\CMS;
 
-function installCheck($module) {
+function installCheck($module = '') {
     global $tpl_setting, $tpl_cache;
     if(!is_file(PATH.'config.php') || $module=='install') {
         $tpl_setting = array(
@@ -521,7 +521,7 @@ function parseInfo(\myTemplate &$tpl, &$tag_attrs = array()) {
     }
     if(!empty($condition)) {
         $condition[] = array(array('web_id', 'n=', $web_info['web_id']), array('web_id', 'n=', 0,'or'),'and');
-        $db->build($S->db->pre.'info')->where($condition)->field('content');
+        $db->build($S->db->pre.'info')->where($condition)->field('content')->order('web_id', true);
         $tag_attrs['sql'] = addslashes($db->select(true));
         $db->build('[reset]');
         $result = <<<'mytpl'
@@ -541,11 +541,13 @@ function parseLink(\myTemplate &$tpl, &$tag_attrs = array()) {
     if(!isset($tag_attrs['limit']) || !is_numeric($tag_attrs['limit'])) $tag_attrs['limit'] = 0;
     if($tag_attrs['type']=='image' || $tag_attrs['type']=='img') {
         $tag_attrs['type'] = 'img';
-        $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_link_img.tpl');
-    } else {
-        if($tag_attrs['type']!='all') $tag_attrs['type'] = 'txt';
-        $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_link_txt.tpl');
+    } elseif($tag_attrs['type']=='text' || $tag_attrs['type']=='txt') {
+        $tag_attrs['type'] = 'txt';
     }
+    if($tag_attrs['type']=='all') $tag_attrs['type'] = 'txt';
+    if(!isset($tag_attrs['template'])) $tag_attrs['template'] = $tag_attrs['type'];
+    $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_link_'.$tag_attrs['template'].'.tpl');
+
     list($block, $tag_attrs['unit'], $tag_attrs['unit_blank'])= $tpl->getBlock($tpl_content, 'loop', 'show');
     $result = <<<'mytpl'
 <?php
@@ -554,6 +556,7 @@ $link_idx = '{myTemplate::idx}';
 $link_type = '{myTemplate::type}';
 $link_list = $link_type=='all' ? array_merge($link['txt'],$link['img']) : $link[$link_type];
 foreach($link_list as $cur_link) {
+    if($link_idx!=='' && $link_idx!==$cur_link['idx']) continue;
     $show = [
         'link' => $cur_link['url'],
         'image' => $cur_link['image'],
@@ -617,7 +620,11 @@ function parseCatalog(\myTemplate &$tpl, &$tag_attrs = array()) {
     if(!isset($tag_attrs['id'])) $tag_attrs['id'] = 0;
     if(!isset($tag_attrs['deep'])) $tag_attrs['deep'] = 1;
     if(!isset($tag_attrs['show'])) $tag_attrs['show'] = 1023;
-    if(!isset($tag_attrs['template'])) $tag_attrs['template'] = 'catalog';
+    if(!isset($tag_attrs['template'])) {
+        $tag_attrs['template'] = 'catalog';
+    } else {
+        $tag_attrs['template'] = 'catalog_'.$tag_attrs['template'];
+    }
     $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_'.$tag_attrs['template'].'.tpl');
     list($block, $tag_attrs['unit'], $tag_attrs['unit_blank'])= $tpl->getBlock($tpl_content, 'loop', 'cat');
     $result = <<<'mytpl'
@@ -628,7 +635,8 @@ $tag_attrs['name'] = $cat_info===false?$mystep->getLanguage('page_catalog'):$cat
 /*split*/
 if(!empty($list)) {
     for($i=0,$m=count($list); $i<$m; $i++) {
-        if(($tag_attrs['show'] & $list[$i]['show'])!==$tag_attrs['show']) continue;
+        if(($tag_attrs['show'] & $list[$i]['show'])!=$list[$i]['show']) continue;
+        if(($tag_attrs['name']??'')===$list[$i]['name']) continue;
         $cat = $list[$i];
         $cat['link'] = \app\CMS\getLink($list[$i], 'catalog');
         echo <<<content

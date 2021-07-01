@@ -85,6 +85,7 @@ switch($method) {
             if($db->result()) {
                 myStep::info('admin_art_catalog_error_idx');
             }
+            if(!isset($data['show'])) $data['show'] = [0];
             $data['show'] = array_sum($data['show']);
             if(is_null($data['show'])) $data['show'] = 0;
             $view_lvl_org = $data['view_lvl_org'];

@@ -183,6 +183,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $sql = str_replace('(1=1)', '1=1', $sql);
         $sql = str_replace('1=1 and', '', $sql);
         $sql = str_replace('where 1=1 order', 'order', $sql);
+        $sql = str_ireplace('CHARSET=utf-8', 'CHARSET=utf8', $sql);
         $this->sql = $sql;
         if($this->result = mysqli_query($this->connect, $sql)) {
             if(strpos('selec|show |descr|expla|repai|check|optim', strtolower(substr(trim($sql), 0, 5)))!==false && $this->check('result')) {

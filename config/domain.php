@@ -7,4 +7,5 @@ return array (
   'api.mystep.com' => '/api/(\\w+)/(.*?)',
   'guide.mystep.com' => 'CMS',
   '/' => 'CMS',
+  'bike.mystep.com' => 'CMS',
 );

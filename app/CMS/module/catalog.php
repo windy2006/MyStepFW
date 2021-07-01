@@ -10,6 +10,7 @@ if(!empty($catalog)) {
     if(is_numeric($catalog)) {
         $cat_info = \app\CMS\getPara($news_cat_plat, 'cat_id', $catalog);
     } else {
+        $catalog = str_replace('+', ' ', $catalog );
         $cat_info = \app\CMS\getPara($news_cat_plat, 'idx', $catalog);
     }
     if($cat_info!==false) {
@@ -61,6 +62,9 @@ if(!empty($catalog)) {
     for($i=count($path_list)-1;$i>=0;$i--) {
         $t->setLoop('cat_list', $path_list[$i]);
     }
+    if($cat_info['name']!=$path_list[0]['name']) {
+        $t->setLoop('cat_list', ['name'=>$cat_info['name'], 'link'=>\app\CMS\getLink($cat_info, 'catalog')]);
+    }
 } else {
     $page_size = $S->list->txt;
     $S->web->title = $mystep->getLanguage('page_update').'_'.$S->web->title;
@@ -90,5 +94,6 @@ if(!empty($prefix)) $query = 'pre='.$prefix;
 $t->assign('prefix', $prefix);
 $t->assign('cat_name', $cat_info['name']??$mystep->getLanguage('page_update'));
 $t->assign('cat_id', $catalog);
+$t->assign('news_cat', myString::toJson($news_cat_plat));
 $limit = (($page-1)*$page_size).','.$page_size;
 $loop = $S->list->txt;

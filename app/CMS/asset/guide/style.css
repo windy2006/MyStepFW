@@ -156,6 +156,7 @@ input.search-query {
     border-radius: 5px;
     padding:2px 3px;
     white-space: nowrap;
+    color: #990000;
 }
 #content ul {
     margin-bottom: 3px;

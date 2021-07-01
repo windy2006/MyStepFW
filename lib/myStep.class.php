@@ -856,8 +856,7 @@ code;
             }
             @unlink(CONFIG.'class.php');
             file_put_contents(CONFIG.'class.php', '<?PHP'.chr(10).'return '.var_export($class, true).';');
-            $setting_class = include(CONFIG.'class.php');
-            self::regClass($setting_class);
+            self::regClass($class);
             myFile::del(CONFIG.'route.php');
             myFile::del(CACHE.'template');
             myFile::del(CACHE.'session');
@@ -944,6 +943,7 @@ code;
                     $info_app['route'] = '/'.URL_FIX.$info_app['route'];
                 }
             }
+            myStep::setPara();
             if(isset($info_app['path'][1]) && $info_app['path'][0]=='asset') {
                 $file = APP.$info_app['app'].'/asset/'. $ms_setting->template->style.'/'.$info_app['path'][1];
                 if(is_file($file)) {
@@ -951,7 +951,6 @@ code;
                     exit;
                 }
             }
-            myStep::setPara();
             foreach(self::$variant_alias as $v) {
                 global $$v;
             }

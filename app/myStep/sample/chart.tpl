@@ -42,7 +42,7 @@
 <script type="application/javascript">
 jQuery.vendor('chart', {
     add_css:true,
-    name_fix:'.bundle.min',
+    name_fix:'.min',
     callback:function(){
         jQuery.getScript('vendor/Chart/utils.js', function(){
             let getData = function(m=2, pie=false) {
