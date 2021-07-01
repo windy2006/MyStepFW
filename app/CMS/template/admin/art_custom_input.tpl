@@ -38,6 +38,7 @@
 <script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
 <script type="application/javascript" src="app/CMS/asset/admin/tinymce_init.js"></script>
 <script type="text/javascript">
+let setting_tinymce_css = '/asset/<!--tpl_style-->/style.css';
 $(function(){
     let web_id = '<!--web_id_site-->';
     if(web_id !== '1') {

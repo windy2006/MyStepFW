@@ -106,6 +106,7 @@ function build_page($method) {
     $db->free();
     $tpl->assign('web_id', $web_id??'');
     $tpl->assign('web_id_site', $web_info['web_id']);
+    $tpl->assign('tpl_style', $web_info['setting']->template->style);
     setWeb($tpl, $web_id);
     return $mystep->render($tpl);
 }
