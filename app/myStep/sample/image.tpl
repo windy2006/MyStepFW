@@ -38,7 +38,7 @@
     </div>
 </div>
 <script type="application/javascript">
-    jQuery.vendor('jquery.showimage', {
+    jQuery.vendor('jquery.showImage', {
         add_css:true,
         callback:function(){
             $("#pic_container").showImage({

@@ -29,6 +29,7 @@
         </ul>
     </div>
     <ul id="user_info" class="nav">
+        <li class="nav-item"><a id="btn_search" class="nav-link text-white" href="javascript:"><span class="glyphicon glyphicon-search"></span> 检索</a></li>
         <li class="nav-item"><a class="nav-link text-white" href="<!--url_prefix_app-->user/login"><span class="glyphicon glyphicon-log-in"></span> 登录</a></li>
         <li class="nav-item"><a class="nav-link text-white" href="<!--url_prefix_app-->user/register"><span class="glyphicon glyphicon-registration-mark"></span> 注册</a></li>
     </ul>
@@ -37,8 +38,43 @@
 <footer class="footer fixed-bottom">
     <!--info idx="copyright"-->
 </footer>
+<div id="search">
+    <form class="search" method="get" action="<!--url_prefix_app-->search">
+        <div class="input-group">
+            <input type="text" name="k" class="form-control form-control-lg" style="border-right-width: 0;" placeholder="检索" required>
+            <div class="input-group-append">
+                <span class="input-group-text"><button type="submit"><span class="fa fa-search"></span></button></span>
+            </div>
+        </div>
+    </form>
+</div>
 <script type="application/javascript">
 let news_cat = <!--news_cat-->;
+$('img').on('error', function(){
+    this.src = '/static/images/noimage.gif';
+});
+function showSearch() {
+    let obj = $('#search');
+    if(obj.is(":visible")) {
+        $('body').css('overflow-y', 'auto');
+        obj.slideUp(500);
+    } else {
+        $('body').css('overflow-y', 'hidden');
+        obj.css('top', $(window).scrollTop());
+        obj.slideDown(500);
+        $('body').keyup(function(e){
+            if(e.keyCode===27) {
+                showSearch();
+                $('body').unbind('keyup');
+            }
+        });
+    }
+}
+$('#btn_search').click(showSearch);
+$('#search').click(showSearch);
+$('#search > form').click(function(e){
+    e.stopPropagation();
+});
 $(function(){
     $(document).off('click.bs.dropdown.data-api');
     let objs = $('.navbar-nav').find('[idx]');
@@ -67,8 +103,9 @@ $(function(){
     }
     $.get("<!--url_prefix-->api/CMS/user", function(user_info){
         if(user_info.name!=='') {
-            $('#user_info').html('<li class="nav-item" title="'+user_info.group+'"><a class="nav-link text-white" href="<!--url_prefix_app-->user/profile"><span class="glyphicon glyphicon-user"></span> '+user_info.name+'</a></li>\n' +
-                '            <li class="nav-item"><a class="nav-link text-white" href="<!--url_prefix_app-->user/logout"><span class="glyphicon glyphicon-log-out"></span> 退出</a></li>');
+            let objs = $('#user_info').find('li');
+            $(objs[1]).attr('title', user_info.group).html('<a class="nav-link text-white" href="<!--url_prefix_app-->user/profile"><span class="glyphicon glyphicon-user"></span> '+user_info.name+'</a>');
+            $(objs[2]).html('<a class="nav-link text-white" href="<!--url_prefix_app-->user/logout"><span class="glyphicon glyphicon-log-out"></span> 退出</a>');
         };
     },'json');
     setURL();

@@ -7,7 +7,7 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_sys_group_delete');
+        CMS::$log = $mystep->getLanguage('admin_sys_group_delete');
         if($id==1) {
             myStep::info('admin_sys_group_no_del');
         }
@@ -15,7 +15,7 @@ switch($method) {
             ->where('group_id', 'n=', $id);
         $db->delete();
         \app\CMS\deleteCache('sys_group');
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
@@ -31,7 +31,7 @@ switch($method) {
             } else {
                 $data['power_web'] = join(',', $data['power_web']);
             }
-            cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_sys_group_add':'admin_sys_group_edit');
+            CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_sys_group_add':'admin_sys_group_edit');
             $db->build($S->db->pre.'sys_group')->field($data);
             $db->replace();
             \app\CMS\deleteCache('sys_group');

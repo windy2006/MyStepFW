@@ -137,7 +137,7 @@
     function setTbl(tbl_idx) {
         $tbl = $(tbl_idx);
         $tbl.bootstrapTable({
-            url: '<!--url_prefix-->api/myStep/data/&tbl=cms_admin_cat',         //表格数据
+            url: '<!--url_prefix-->api/myStep/data/&tbl=mystep_cms.cms_admin_cat',         //表格数据
             dataType : "json",                     //从服务端接收数据类型定义。
             contentType : "application/json",   //请求体类型定义。
             method: 'post',                     //请求方式（*）
@@ -266,7 +266,7 @@
 
         $('#btn_query').click(function() {
             $tbl.bootstrapTable('refresh', {
-                url : '<!--url_prefix-->api/myStep/data/?tbl=cms_admin_cat'
+                url : '<!--url_prefix-->api/myStep/data/?tbl=mystep_cms.cms_admin_cat'
             });
         });
 

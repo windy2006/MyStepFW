@@ -25,7 +25,7 @@ if(myReq::check('post')) {
             if(strtolower($data['captcha']) == strtolower(r::s('captcha'))) {
                 $usr = r::p('username');
                 $pwd = r::p('password');
-                if(($result = $mystep->login($usr, $pwd))===2) {
+                if(($result = $mystep->login($usr, $pwd))!==0) {
                     r::setCookie('ms_cms_user', $usr.chr(9).md5($pwd), $data['expire']);
                     myStep::info('login_ok', ROOT_WEB.$info_app['app']);
                 }

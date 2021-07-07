@@ -27,25 +27,25 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_art_custom_delete');
+        CMS::$log = $mystep->getLanguage('admin_art_custom_delete');
         $db->build($S->db->pre.'info')
             ->where('id', 'n=', $id);
         $db->delete();
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
         if(!myReq::check('post') || !checkPower('web', r::p('web_id'))) {
-            cms::redirect();
+            CMS::redirect();
         }
         $data = r::p('[ALL]');
         $data['content'] = htmlspecialchars_decode($data['content']);
         if($method=='add_ok') {
-            cms::$log = $mystep->getLanguage('admin_art_custom_add');
+            CMS::$log = $mystep->getLanguage('admin_art_custom_add');
             $db->build($S->db->pre.'info')->field($data);
             $db->insert();
         } else {
-            cms::$log = $mystep->getLanguage('admin_art_custom_edit');
+            CMS::$log = $mystep->getLanguage('admin_art_custom_edit');
             $db->build($S->db->pre.'info')
                 ->field($data)
                 ->where('id', 'n=', $id);

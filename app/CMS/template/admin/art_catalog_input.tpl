@@ -41,11 +41,11 @@
                 </div>
                 <input name="idx" class="form-control" placeholder="作为栏目网址路径的一部分，不能与其他分类索引相同" type="text" maxlength="20" value="<!--cat_idx-->" need="" />
             </div>
-            <div class="input-group mb-2" title="改分类新闻所能使用的前缀，多个请用半角逗号间隔">
+            <div class="input-group mb-2" title="该分类新闻所能使用的前缀，多个请用半角逗号间隔">
                 <div class="input-group-prepend">
                     <span class="input-group-text item-name">子 分 类</span>
                 </div>
-                <input name="prefix" class="form-control" placeholder="改分类新闻所能使用的前缀，多个请用半角逗号间隔" type="text" maxlength="80" value="<!--cat_prefix-->" />
+                <input name="prefix" class="form-control" placeholder="该分类新闻所能使用的前缀，多个请用半角逗号间隔" type="text" maxlength="80" value="<!--cat_prefix-->" />
             </div>
             <div class="input-group mb-2" title="向搜索引擎告知当前栏目的关键词">
                 <div class="input-group-prepend">

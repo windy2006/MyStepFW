@@ -1,11 +1,11 @@
 <?PHP
 global $page, $query, $count, $page_size;
 if($method=='clean') {
-    cms::$log = $mystep->getLanguage('admin_info_log_clean');
+    CMS::$log = $mystep->getLanguage('admin_info_log_clean');
     $db->query('truncate table '.$db->safeName($web_info['setting']->db->pre.'sys_log'));
-    cms::redirect();
+    CMS::redirect();
 } elseif($method=='download') {
-    cms::$log = $mystep->getLanguage('admin_info_log_download');
+    CMS::$log = $mystep->getLanguage('admin_info_log_download');
     $db->build($S->db->pre.'sys_log')
         ->order('id', true);
     $db->select();

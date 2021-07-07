@@ -7,9 +7,9 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_user_power_delete');
+        CMS::$log = $mystep->getLanguage('admin_user_power_delete');
         if($power_info = \app\CMS\getPara($power, 'id', $id)) {
-            cms::$log = $mystep->getLanguage('admin_user_power_delete');
+            CMS::$log = $mystep->getLanguage('admin_user_power_delete');
             $db->build($S->db->pre.'user_power')
                 ->where('id','n=',$id);
             $db->delete();
@@ -17,12 +17,12 @@ switch($method) {
             \app\CMS\deleteCache('user_group');
             \app\CMS\deleteCache('user_power');
         }
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
         if(!myReq::check('post')) {
-            cms::redirect();
+            CMS::redirect();
         }
         $format_list = array(
             'string' => ' Char(100) NOT NULL DEFAULT ""',
@@ -37,7 +37,7 @@ switch($method) {
         $idx_org = $data['idx_org'];
         $format_org = $data['format_org'];
         unset($data['idx_org'], $data['format_org']);
-        cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_power_add':'admin_user_power_edit');
+        CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_power_add':'admin_user_power_edit');
 
         $db->build($S->db->pre.'user_power')->field($data);
         $db->replace();

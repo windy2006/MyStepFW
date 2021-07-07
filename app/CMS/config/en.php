@@ -54,7 +54,7 @@ $setting_detail['db'] = array(
         'charset' => array(
             'name' => 'Charset',
             'describe' => 'Default Charset of DB',
-            'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf-8', 'Latin1'=>'latin1'))
+            'type' => array('select', array('UTF-8'=>'utf-8', 'GBK'=>'gbk', 'Latin1'=>'latin1'))
         ),
         'name' => array(
             'name' => 'DB name',
@@ -117,6 +117,17 @@ $setting_detail['template'] = array(
             'name' => 'Style',
             'describe' => 'Style for template',
             'type' => array('text', '_', '20')
+        ),
+    ]
+);
+
+$setting_detail['session'] = array(
+    'name' => 'Session Setting',
+    'list' => [
+        'mode' => array(
+            'name' => 'Mode',
+            'describe' => 'Which mode will be used to save the Session data',
+            'type' => array('select', array('MyStep mode'=>'sess_mystep', 'DB mode'=>'sess_mysql', 'File Mode'=>'sess_file'))
         ),
     ]
 );

@@ -7,7 +7,7 @@ class sess_mystep implements interface_session {
 
     public static function open($sess_path, $sess_name) {
         self::$run = 3; // 1 - read ; 2 - write
-        $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $agent = strtolower($_SERVER['HTTP_USER_AGENT']??'null');
         if(strpos($agent, 'spider')!==false || strpos($agent, 'bot')!==false) self::$run = 0;
         global $info_app;
         if(isset($info_app['path'][0]) && in_array($info_app['path'][0],['api','module','ms_language','ms_setting','pack'])) self::$run ^= 2;

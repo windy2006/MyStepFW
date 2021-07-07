@@ -29,6 +29,9 @@
   }, {
     "name": "域名绑定",
     "link": "console\/setting\/domain"
+  }, {
+    "name": "代码测试",
+    "link": "console\/setting\/execute"
   }]
 }, {
   "name": "功能",
@@ -42,6 +45,9 @@
   }, {
     "name": "插件管理",
     "link": "console\/function\/plugin"
+  }, {
+    "name": "附件管理",
+    "link": "console\/function\/attachment"
   }]
 }, {
   "name": "文档",

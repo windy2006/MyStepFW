@@ -8,13 +8,13 @@ switch($method) {
         break;
     case 'delete':
         if($id>3) {
-            cms::$log = $mystep->getLanguage('admin_user_group_delete');
+            CMS::$log = $mystep->getLanguage('admin_user_group_delete');
             $db->build($S->db->pre.'users')->field(array('group_id'=>2))->where('group_id','n=',$id);
             $db->update();
             $db->build($S->db->pre.'user_group')->where('group_id','n=',$id);
             $db->delete();
             \app\CMS\deleteCache('user_group');
-            cms::redirect();
+            CMS::redirect();
         } else {
             myStep::info('admin_user_group_error');
         }
@@ -22,10 +22,10 @@ switch($method) {
     case 'add_ok':
     case 'edit_ok':
         if(!myReq::check('post')) {
-            cms::redirect();
+            CMS::redirect();
         }
         $data = r::p('[ALL]');
-        cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_group_add':'admin_user_group_edit');
+        CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_group_add':'admin_user_group_edit');
         $db->build($S->db->pre.'user_group')->field($data);
         $db->replace();
         \app\CMS\deleteCache('user_group');

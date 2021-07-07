@@ -7,16 +7,16 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_user_detail_delete');
+        CMS::$log = $mystep->getLanguage('admin_user_detail_delete');
         $db->build($S->db->pre.'users')
             ->where('user_id','n=',$id);
         $db->delete();
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
         if(!myReq::check('post')) {
-            cms::redirect();
+            CMS::redirect();
         }
         $data = r::p('[ALL]');
         if($data['username'] != $data['username_org']) {
@@ -25,7 +25,7 @@ switch($method) {
                 myStep::info(sprintf($mystep->getLanguage('admin_user_detail_error2'), $data['username']));
             }
         }
-        cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_detail_add':'admin_user_detail_edit');
+        CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_detail_add':'admin_user_detail_edit');
         if(empty($data['password'])) {
             unset($data['password']);
         } else {

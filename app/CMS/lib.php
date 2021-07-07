@@ -190,30 +190,24 @@ function buildList($idx) {
                 }
             }
             usort($cat, function($a, $b) {
-                return ($a['layer'] == $b['layer']) ? 0 : (
-                        ($a['layer'] < $b['layer']) ? 1 : -1);
+                if($a['layer'] == $b['layer']) {
+                    return ($a['order'] == $b['order']) ? 0 : (
+                        version_compare($a['order'], $b['order'])==-1 ? -1 : 1
+                    );
+                } else {
+                    return ($a['layer'] < $b['layer']) ? 1 : -1;
+                }
             });
             $id_list = array_column($cat, 'cat_id');
             for($i=0,$m=count($cat);$i<$m;$i++) {
                 if($cat[$i]['layer']>1) {
                     $pid = array_search($cat[$i]['pid'], $id_list);
-                    $cat[$pid]['sub'] = $cat[$pid]['sub'] ?? array();
+                    if(!isset($cat[$pid]['sub'])) $cat[$pid]['sub'] = [];
                     $cat[$pid]['sub'][] = $cat[$i];
                     unset($cat[$i]);
                 }
             }
-            usort($cat, function($a, $b) {
-                return ($a['order'] == $b['order']) ? 0 : (
-                        ($a['order'] < $b['order']) ? -1 : 1);
-            });
-            for($i=0,$m=count($cat);$i<$m;$i++) {
-                if(isset($cat[$i]['sub'])) {
-                    usort($cat[$i]['sub'], function($a, $b) {
-                        return ($a['order'] == $b['order']) ? 0 : (
-                        ($a['order'] < $b['order']) ? -1 : 1);
-                    });
-                }
-            }
+            $cat = array_values($cat);
             $cache_para = $cat;
             break;
         case 'link':
@@ -325,7 +319,8 @@ function getPageList($total, $page=1, $page_size=20, $qstr='') {
     if($page < 1) $page = 1;
     if($page > $page_count) $page = $page_count;
     if(!empty($qstr)) $qstr .= '&';
-    $qstr = '?'.$qstr.'page=';
+    $keys = array_keys(\myReq::r('[ALL]'));
+    $qstr = reset($keys).'?'.$qstr.'page=';
     $record_start = ($page-1) * $page_size;
     if($record_start < 0) $record_start = 0;
     $page_arr = array();
@@ -340,9 +335,9 @@ function getPageList($total, $page=1, $page_size=20, $qstr='') {
 }
 
 function getLink($data, $mode='news') {
-    global $news_cat_plat, $website, $web_info, $info_app;
+    global $news_cat_plat, $website, $web_info, $info_app, $S;
     $link = ROOT_WEB;
-    if(!defined('URL_FIX')) $link .= $info_app['app'].'/';
+    if(!defined('URL_FIX') && $info_app['app']!=$S->router->default_app) $link .= $info_app['app'].'/';
     if(isset($data['cat_id']))  {
         if($cat = checkVal($news_cat_plat, 'cat_id', $data['cat_id'])) {
             $data['web_id'] = $cat['web_id'];
@@ -402,6 +397,7 @@ function parseNews(\myTemplate &$tpl, &$tag_attrs = array()) {
     if(!isset($tag_attrs['loop'])) $tag_attrs['loop'] = 0;
     $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_news_'.$tag_attrs['template'].'.tpl');
     list($block, $tag_attrs['unit'], $tag_attrs['unit_blank'])= $tpl->getBlock($tpl_content, 'loop', 'news');
+    if(!isset($tag_attrs['custom'])) $tag_attrs['custom'] = '';
 
     $tag_attrs['cat_link'] = getLink($catalog??[], 'catalog');
     $tag_attrs['cat_name'] = $catalog ? $catalog['name'] : $mystep->getLanguage('page_update');
@@ -420,6 +416,13 @@ foreach($result as $news) {
         $news['add_date'] = formatDate($news['add_date'], $tag_attrs['date']);
     } else {
         $news['add_date'] = '';
+    }
+    $news['custom'] = $tag_attrs['custom'];
+    if(preg_match_all('#\{(.+?)\}#', $news['custom'], $matches)) {
+        for($i=0,$m=count($matches[1]);$i<$m;$i++) {
+            $news['custom'] = str_replace('{'.$matches[1][$i].'}', $news[$matches[1][$i]], $news['custom']);
+        }
+        $news['custom'] = myEval($news['custom'], true);
     }
     $news['style'] = explode(',', $news['style']);
     $news['subject_styled'] = $news['subject'];
@@ -635,10 +638,14 @@ $tag_attrs['name'] = $cat_info===false?$mystep->getLanguage('page_catalog'):$cat
 /*split*/
 if(!empty($list)) {
     for($i=0,$m=count($list); $i<$m; $i++) {
-        if(($tag_attrs['show'] & $list[$i]['show'])!=$list[$i]['show']) continue;
+        if(($tag_attrs['show'] & $list[$i]['show'])!=$tag_attrs['show']) continue;
         if(($tag_attrs['name']??'')===$list[$i]['name']) continue;
         $cat = $list[$i];
-        $cat['link'] = \app\CMS\getLink($list[$i], 'catalog');
+        if(empty($list[$i]['link'])) {
+            $cat['link'] = \app\CMS\getLink($list[$i], 'catalog');
+        } else {
+            $cat['link'] = $list[$i]['link'];
+        }
         echo <<<content
 {myTemplate::unit}
 content;
@@ -666,7 +673,7 @@ if($page_info['page_count']>1) {
 ?>
 {myTemplate::unit}
 <?PHP
-} else {
+} elseif({myTemplate::count}>0) {
 ?>
 {myTemplate::unit_blank}
 <?PHP
@@ -738,7 +745,8 @@ function buildSQL($paras) {
     if(isset($paras['catalog']) && $paras['catalog']!=0) {
         $db->build($S->db->pre.'news_cat')->where([
                 ['cat_id', 'n=', $paras['catalog']],
-                ['pid', 'n=', $paras['catalog'], 'or']
+                ['pid', 'n=', $paras['catalog'], 'or'],
+                ['pid', 'in', '(select cat_id from '.$S->db->pre.'news_cat where pid='.intval($paras['catalog']).')', 'or'],
             ], 'and'
         );
     } else {
@@ -772,7 +780,7 @@ function buildSQL($paras) {
     if(isset($paras['prefix']) && !empty($paras['prefix'])) {
         $db->build($tbl)->where('subject', 'like', '['.$paras['prefix'].']%', 'and');
     }
-    if(isset($paras['keyword']) && strlen($paras['keyword'])>=6) {
+    if(isset($paras['keyword']) && strlen($paras['keyword'])>=4) {
         $db->build($web['setting']->db->pre.'news_detail', array(
             'mode' => 'left',
             'field' => 'news_id'

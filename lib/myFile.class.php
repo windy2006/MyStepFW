@@ -263,7 +263,7 @@ class myFile {
         if(is_dir($dir)) return true;
         $flag = true;
         $oldumask=umask(0);
-        if(!is_dir($dir) && mkdir($dir, 0777, true)===false) {
+        if(!file_exists($dir) && mkdir($dir, 0777, true)===false) {
             $dir_list = explode('/', $dir);
             if($dir_list[0]=='') $dir_list[0]='/';
             $cur_dir = '';

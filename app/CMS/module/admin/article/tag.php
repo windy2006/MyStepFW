@@ -7,7 +7,7 @@ if(($web_cur = \app\CMS\checkVal($website, 'web_id', $web_id))!==false) {
 }
 switch($method) {
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_art_tag_delete');
+        CMS::$log = $mystep->getLanguage('admin_art_tag_delete');
         $db->build($web_cur['setting']->db->pre.'news_tag')->field('tag')->where('id','n=',$id);
         if($tag = $db->result()) {
             $db->build($web_cur['setting']->db->pre.'news_show')
@@ -21,11 +21,11 @@ switch($method) {
             $db->build($web_cur['setting']->db->pre.'news_tag')->where('id','n=',$id);
             $db->delete();
         }
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'rebuild':
         set_time_limit(0);
-        cms::$log = $mystep->getLanguage('admin_art_tag_rebuild');
+        CMS::$log = $mystep->getLanguage('admin_art_tag_rebuild');
         $db2 = new myDB('mysql', $S->db->host, $S->db->user, $S->db->password, $S->db->charset);
         $db2->connect(false, $S->db->name);
         $db2->build($web_cur['setting']->db->pre.'news_tag')
@@ -110,7 +110,7 @@ switch($method) {
         $db2->delete();
         $db2->close();
         unset($db2);
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'list':
     default:

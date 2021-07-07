@@ -14,7 +14,7 @@ if(myReq::check('post')) {
     $content = '';
     switch($method) {
         case 'import':
-            cms::$log = $mystep->getLanguage('admin_func_backup_import');
+            CMS::$log = $mystep->getLanguage('admin_func_backup_import');
             $path = CACHE.'tmp/';
             $upload = new myUploader($path, true, $S->upload->ban_ext);
             $upload->do(false);
@@ -82,7 +82,7 @@ if(myReq::check('post')) {
             }
             break;
         case 'export':
-            cms::$log = $mystep->getLanguage('admin_func_backup_export');
+            CMS::$log = $mystep->getLanguage('admin_func_backup_export');
             $dir = CACHE.'tmp/';
             if($the_tbl == 'all') {
                 $dir = $dir.date('Ymd').'_db_all/';
@@ -112,7 +112,7 @@ if(myReq::check('post')) {
             exit();
             break;
         case 'optimize':
-            cms::$log = $mystep->getLanguage('admin_func_backup_optimize');
+            CMS::$log = $mystep->getLanguage('admin_func_backup_optimize');
             $op_info = '<h4>Optimize Table Done! </h4>';
             if($the_tbl == 'all') {
                 $tbl_list = $db->getTbls();
@@ -134,7 +134,7 @@ if(myReq::check('post')) {
             }
             break;
         case 'repair':
-            cms::$log = $mystep->getLanguage('admin_func_backup_repair');
+            CMS::$log = $mystep->getLanguage('admin_func_backup_repair');
             $op_info = '<h4>Repair Table Done! </h4>';
             if($the_tbl == 'all') {
                 $tbl_list = $db->getTbls();

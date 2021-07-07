@@ -21,6 +21,8 @@ if(!empty($catalog)) {
     } else {
         $catalog = '';
     }
+}
+if(!empty($catalog)) {
     if(is_file(PATH.'template/custom/cat_'.$cat_info['cat_id'].'.tpl')) {
         $tpl_setting['style'] = 'custom';
         $tpl_setting['name'] = 'cat_'.$cat_info['cat_id'];
@@ -83,7 +85,8 @@ if($catalog>0) {
         'field' => 'cat_id'
     ))->where([
             ['cat_id', 'n=', $catalog],
-            ['pid', 'n=', $catalog, 'or']
+            ['pid', 'n=', $catalog, 'or'],
+            ['pid', 'in', '(select cat_id from '.$S->db->pre.'news_cat where pid='.intval($catalog).')', 'or'],
         ], 'and'
     );
 }

@@ -199,24 +199,26 @@ function myEval($code, $return = false) {
         f::mkdir(CACHE.'temp/');
         $file = CACHE.'temp/'.getMicrotime();
     }
-    $fp = fopen($file, 'w');
-    if(!preg_match('#^<\?PHP#i', $code)) {
-        if($return && !preg_match('#^[\r\n\s]*return#i', $code)) {
-            $code = 'return '.$code.';';
+    $result = '';
+    if($fp = @fopen($file, 'w')) {
+        if(!preg_match('#^<\?PHP#i', $code)) {
+            if($return && !preg_match('#^[\r\n\s]*return#i', $code)) {
+                $code = 'return '.$code.';';
+            }
+            $code = '<?PHP'.chr(10).$code;
         }
-        $code = '<?PHP'.chr(10).$code;
+        fwrite($fp, $code);
+        if($return) {
+            $result = include($file);
+        } else {
+            ob_clean();
+            include($file);
+            $result = ob_get_contents();
+            ob_clean();
+        }
+        fclose($fp);
+        @unlink($file);
     }
-    fwrite($fp, $code);
-    if($return) {
-        $result = include($file);
-    } else {
-        ob_clean();
-        include($file);
-        $result = ob_get_contents();
-        ob_clean();
-    }
-    fclose($fp);
-    @unlink($file);
     return $result;
 }
 

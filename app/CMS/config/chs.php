@@ -53,8 +53,8 @@ $setting_detail['db'] = array(
         ),
         'charset' => array(
             'name' => '数据库编码',
-            'describe' => '开启数据库持久连接，减少反复连接数据库造成的资源消耗',
-            'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf-8', 'Latin1'=>'latin1'))
+            'describe' => '数据库编码集设置',
+            'type' => array('select', array('UTF-8'=>'utf-8', 'GBK'=>'gbk', 'Latin1'=>'latin1'))
         ),
         'name' => array(
             'name' => '所用数据库',
@@ -117,6 +117,17 @@ $setting_detail['template'] = array(
             'name' => '模版样式',
             'describe' => '如果程序有多个模版，可通过本选项设置（即为模板路径下的子目录名）',
             'type' => array('text', '_', '20')
+        ),
+    ]
+);
+
+$setting_detail['session'] = array(
+    'name' => 'Session 设置',
+    'list' => [
+        'mode' => array(
+            'name' => '处理模式',
+            'describe' => '存储Session的模式（非mystep模式会影响到在线统计）',
+            'type' => array('select', array('MyStep模式'=>'sess_mystep', '数据库存储'=>'sess_mysql', '文件存储'=>'sess_file'))
         ),
     ]
 );

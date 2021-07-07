@@ -26,7 +26,7 @@ if(!empty($id)) {
             ->where('news_id', 'n=', $id);
         list($cat_id, $web_id, $add_date) = array_values($db->record());
         if(!checkPower('web', $web_id)) {
-            cms::redirect();
+            CMS::redirect();
         }
         if(checkPower('func') && ($S->info->time/1000-strtotime($add_date))/(60*60*24)>60) {
             myStep::info('admin_art_content_locked');
@@ -40,7 +40,7 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_art_content_delete');
+        CMS::$log = $mystep->getLanguage('admin_art_content_delete');
         $db->build($web_cur['setting']->db->pre.'news_show')
             ->where('news_id', 'n=', $id);
         $db->delete();
@@ -48,22 +48,22 @@ switch($method) {
             ->where('news_id', 'n=', $id);
         $db->delete();
         \app\CMS\removeNewsCache($id, $web_cur['web_id']);
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'unlock':
         if(checkPower('func')) {
-            cms::$log = $mystep->getLanguage('admin_art_content_unlock');
+            CMS::$log = $mystep->getLanguage('admin_art_content_unlock');
             $db->build($web_cur['setting']->db->pre.'news_show')
                 ->field(['add_date'=>'(now())'])
                 ->where('news_id', 'n=', $id);
             $db->update();
         }
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
         if(!myReq::check('post') || !checkPower('web', r::p('web_id'))) {
-            cms::redirect();
+            CMS::redirect();
         }
         $data = r::p('[ALL]');
         if(empty($data['active'])) unset($data['active']);
@@ -170,7 +170,7 @@ switch($method) {
         unset($data['setop_mode']);
 
         if($method=='add_ok') {
-            cms::$log = $mystep->getLanguage('admin_art_content_add');
+            CMS::$log = $mystep->getLanguage('admin_art_content_add');
             $data['add_user'] = r::s('ms_cms_op');
             $data['add_date'] = 'now()';
 
@@ -206,7 +206,7 @@ switch($method) {
                 $db->update();
             }
         } else {
-            cms::$log = $mystep->getLanguage('admin_art_content_edit');
+            CMS::$log = $mystep->getLanguage('admin_art_content_edit');
             unset($data['news_id']);
             $db->build($web_cur['setting']->db->pre.'news_detail')
                 ->where('news_id', 'n=', $id);

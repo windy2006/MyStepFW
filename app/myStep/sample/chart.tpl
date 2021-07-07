@@ -40,7 +40,7 @@
     </div>
 </div>
 <script type="application/javascript">
-jQuery.vendor('chart', {
+jQuery.vendor('Chart', {
     add_css:true,
     name_fix:'.min',
     callback:function(){

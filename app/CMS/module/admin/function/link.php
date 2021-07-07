@@ -16,23 +16,23 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_func_link_delete');
+        CMS::$log = $mystep->getLanguage('admin_func_link_delete');
         $db->build($S->db->pre.'links')
             ->where('id', 'n=', $id);
         $db->delete();
         \app\CMS\deleteCache('link');
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
         if(myReq::check('post')) {
             $data = r::p('[ALL]');
             if($method=='add_ok') {
-                cms::$log = $mystep->getLanguage('admin_func_link_add');
+                CMS::$log = $mystep->getLanguage('admin_func_link_add');
                 $db->build($S->db->pre.'links')->field($data);
                 $db->insert();
             } else {
-                cms::$log = $mystep->getLanguage('admin_func_link_edit');
+                CMS::$log = $mystep->getLanguage('admin_func_link_edit');
                 $db->build($S->db->pre.'links')->field($data)->where('id','n=',$id);
                 $db->update();
             }

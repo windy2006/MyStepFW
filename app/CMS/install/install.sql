@@ -266,7 +266,6 @@ CREATE TABLE `{pre}users` (
 CREATE TABLE `{pre}user_online` (
     `sid` char(32) UNIQUE NOT NULL COMMENT 'SessionID',
     `ip` Char(50) NOT NULL UNIQUE COMMENT 'ip地址',
-    `username` Char(40) NOT NULL DEFAULT 'guest' COMMENT '用户名称',
     `refresh` Char(15) DEFAULT 0 COMMENT '最近刷新时间（unixtimestamp）',
     `url` Char(200) COMMENT '当前访问页面',
     `data` Char(255) default 0 COMMENT '用户信息',

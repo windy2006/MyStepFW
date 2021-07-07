@@ -376,11 +376,11 @@ let setting_tinymce_ext = {
         editor.on('dblclick', function(e) {
             e = e.target;
             if(e.nodeName === 'IMG' && $id("image")!=null) {
-                if(confirm("是否将 "+e.src+" 设定为新闻标题图?")) {
+                if($id("image").value==='' || confirm("是否将 "+e.src+" 设定为新闻标题图?")) {
                     $id("image").value = e.src;
                 }
             } else if(e.nodeName === 'A' && $id("link")!=null) {
-                if(confirm("是否将 "+e.href+" 设定为跳转网址?")) {
+                if($id("link").value==='' || confirm("是否将 "+e.href+" 设定为跳转网址?")) {
                     $id("link").value = e.href;
                 }
             }

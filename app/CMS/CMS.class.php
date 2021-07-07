@@ -1,5 +1,5 @@
 <?PHP
-class cms extends myStep {
+class CMS extends myStep {
     public static $log = '';
 
     /**

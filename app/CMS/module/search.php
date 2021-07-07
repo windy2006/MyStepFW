@@ -1,7 +1,7 @@
 <?PHP
 global $k, $query, $count, $page, $page_size, $limit;
 $k = r::r('k');
-if(strlen($k)<6) myStep::info('page_search_error');
+if(strlen($k)<4) myStep::info('page_search_error');
 
 $tpl_setting['name'] = 'search';
 $t = new myTemplate($tpl_setting);

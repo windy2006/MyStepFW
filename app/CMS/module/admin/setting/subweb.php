@@ -27,7 +27,7 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_web_subweb_delete');
+        CMS::$log = $mystep->getLanguage('admin_web_subweb_delete');
         if(isset($web_cur['idx'])) {
             $cfg_file = PATH.'website/config_'.$web_cur['idx'].'.php';
             $config = new myConfig($cfg_file);
@@ -56,14 +56,14 @@ switch($method) {
             myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
             \app\CMS\deleteCache('website');
         }
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
         if(!myReq::check('post') || (!checkPower() && $method=='add_ok')) {
-            cms::redirect();
+            CMS::redirect();
         }
-        cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_web_subweb_add':'admin_web_subweb_edit');
+        CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_web_subweb_add':'admin_web_subweb_edit');
         $data = r::p('[ALL]');
         $setting = $data['setting'];
         unset($data['setting']);
@@ -80,7 +80,7 @@ switch($method) {
         } else {
             unset($domain[$web_cur['domain']]);
         }
-        if(isset($domain[$data['domain']])) {
+        if(isset($domain[$data['domain']]) && $domain[$data['domain']]!=$info_app['app']) {
             mystep::info('admin_web_subweb_domain');
         }
         $domain[$data['domain']] = 'CMS';

@@ -12,31 +12,31 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_web_template_delete');
+        CMS::$log = $mystep->getLanguage('admin_web_template_delete');
         f::del($tpl_path.$idx.'/'.r::g('file'));
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'remove':
-        cms::$log = $mystep->getLanguage('admin_web_template_remove');
+        CMS::$log = $mystep->getLanguage('admin_web_template_remove');
         if(in_array($idx, ['admin', 'default', 'custom'])) {
             myStep::info('admin_web_template_remove_error');
         }
         f::del($tpl_path.$idx);
         f::del(PATH.'asset/'.$idx.'/');
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'set':
-        cms::$log = $mystep->getLanguage('admin_web_template_set');
+        CMS::$log = $mystep->getLanguage('admin_web_template_set');
         $data = r::p('[ALL]');
         for($i=0,$m=count($data['idx']);$i<$m;$i++) {
             $cfg = new myConfig(PATH.'website/config_'.$data['idx'][$i].'.php');
             $cfg->template->style = $data['tpl'][$i];
             $cfg->save('php');
         }
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'export':
-        cms::$log = $mystep->getLanguage('admin_web_template_export');
+        CMS::$log = $mystep->getLanguage('admin_web_template_export');
         $dir = CACHE.'tmp/';
         $file = $dir.'template_'.$idx.'.zip';
         $files = [];
@@ -54,7 +54,7 @@ switch($method) {
         }
         break;
     case 'upload':
-        cms::$log = $mystep->getLanguage('admin_web_template_upload');
+        CMS::$log = $mystep->getLanguage('admin_web_template_upload');
         $result = [
             'error' => 1,
             'message' => $mystep->getLanguage('admin_web_template_upload_error')
@@ -82,7 +82,7 @@ switch($method) {
         if(myReq::check('post')) {
             $data = r::p('[ALL]');
             $idx = $data['idx'];
-            cms::$log = $mystep->getLanguage('admin_web_template_edit');
+            CMS::$log = $mystep->getLanguage('admin_web_template_edit');
             if($data['file_name']=='style.css') {
                 $file = PATH.'asset/'.$idx.'/style.css';
             } else {

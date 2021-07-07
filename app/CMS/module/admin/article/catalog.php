@@ -16,7 +16,7 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_art_catalog_delete');
+        CMS::$log = $mystep->getLanguage('admin_art_catalog_delete');
         function multiDelData($cat_id) {
             global $db, $S, $web_info;
             $db->build($S->db->pre.'news_cat')
@@ -45,10 +45,10 @@ switch($method) {
         multiDelData($id);
         \app\CMS\deleteCache('news_cat');
         $cache->func('\app\CMS\setCatList', [$news_cat], null);
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'order':
-        cms::$log = $mystep->getLanguage('admin_art_catalog_change');
+        CMS::$log = $mystep->getLanguage('admin_art_catalog_change');
         $cat_id_list = r::p('cat_id');
         $cat_order_list = r::p('cat_order');
         $cat_layer_list = r::p('cat_layer');
@@ -64,7 +64,7 @@ switch($method) {
         \app\CMS\deleteCache('news_cat');
         $cache->func('\app\CMS\setCatList', [$news_cat], null);
         $id = '';
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
@@ -98,7 +98,7 @@ switch($method) {
             unset($data['template']);
             if($data['type']==3 && $template=='') $data['type'] = 1;
             if($method=='add_ok') {
-                cms::$log = $mystep->getLanguage('admin_art_catalog_add');
+                CMS::$log = $mystep->getLanguage('admin_art_catalog_add');
                 $db->build($S->db->pre.'news_cat')->field('max(`order`)');
                 $data['order'] = 1 + $db->result();
                 $db->build($S->db->pre.'news_cat')
@@ -106,7 +106,7 @@ switch($method) {
                 $db->insert();
             } else {
                 if($merge==1 && $data['pid']!=0 && $data['pid']!=$data['cat_id']) {
-                    cms::$log = $mystep->getLanguage('admin_art_catalog_merge');
+                    CMS::$log = $mystep->getLanguage('admin_art_catalog_merge');
                     $db->build($S->db->pre.'news_cat')
                        ->field(['pid'=>$data['pid']])
                        ->where('pid', 'n=', $data['cat_id']);
@@ -123,7 +123,7 @@ switch($method) {
                         ->where('cat_id', 'n=', $data['cat_id']);
                     $db->delete();
                 } else {
-                    cms::$log = $mystep->getLanguage('admin_art_catalog_edit');
+                    CMS::$log = $mystep->getLanguage('admin_art_catalog_edit');
                     function multiChange($cat_id, $layer) {
                         global $db, $S;
                         if($layer>100) myStep::info('admin_art_catalog_error');

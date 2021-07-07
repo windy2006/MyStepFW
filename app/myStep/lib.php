@@ -4,9 +4,11 @@ namespace app\myStep;
 function logCheck($show = true) {
     $user = \myReq::session('ms_user');
     if(empty($user)) {
-        $url = \myReq::server('REQUEST_URI');
-        if(\myReq::session('url')=='' && !preg_match('#'.$GLOBALS['ms_setting']->gen->path_admin.'/$#', $url)) \myReq::session('url', $url);
-        if($show) \myStep::getModule('login');
+        if($show) {
+            $url = \myReq::server('REQUEST_URI');
+            if(\myReq::session('url')=='' && !preg_match('#'.$GLOBALS['ms_setting']->gen->path_admin.'/$#', $url)) \myReq::session('url', $url);
+            \myStep::getModule('login');
+        }
         return false;
     }
     return true;
@@ -14,8 +16,14 @@ function logCheck($show = true) {
 
 function getData($tbl_name) {
     if(!logCheck(false)) return [];
-    global $db, $ms_setting;
-    if(!$db->check()) $db->connect(0, $ms_setting->db->name);
+    global $db, $ms_setting, $db_name;
+    $db_name = $ms_setting->db->name;
+    if(strpos($tbl_name, '.')>0) {
+        $tbl_name = explode('.', $tbl_name);
+        $db_name = $tbl_name[0];
+        $tbl_name = $tbl_name[1];
+    }
+    if(!$db->check()) $db->connect(0, $db_name);
     $result = array();
     $result['total'] = 0;
     $result['rows'] = [];

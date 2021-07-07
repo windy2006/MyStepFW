@@ -29,6 +29,9 @@ $setting['template']['name'] = 'main';
 $setting['template']['path'] = 'template';
 $setting['template']['style'] = 'default';
 
+$setting['session'] = array();
+$setting['session']['mode'] = 'sess_mystep';
+
 $setting['list'] = array();
 $setting['list']['txt'] = 20;
 $setting['list']['img'] = 24;

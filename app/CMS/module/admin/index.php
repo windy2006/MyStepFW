@@ -22,7 +22,7 @@ if(($group = \app\CMS\getCache('sys_group'))===false) {
 if(($group_info = \app\CMS\checkVal($group, 'group_id', r::s('ms_cms_group')))===false) {
     r::removeCookie('ms_cms_op');
     r::sessionEnd();
-    cms::redirect($path_admin);
+    CMS::redirect($path_admin);
 }
 function checkPower($idx='func', $val='', &$list=[]) {
     global $group_info;
@@ -48,7 +48,7 @@ $web_id = r::r('web_id');
 if(empty($web_id)) $web_id = 1;
 if(!checkPower('web', $web_id, $list)) {
     if(count($list)==0) {
-        cms::redirect($path_admin.'log&out');
+        CMS::redirect($path_admin.'log&out');
     } else {
         $web_id = $list[0];
     }

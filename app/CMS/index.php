@@ -1,5 +1,5 @@
 <?PHP
-if(!empty($S->gen->close)) cms::redirect($S->gen->close);
+if(!empty($S->gen->close)) CMS::redirect($S->gen->close);
 $mystep->regTag('news', 'app\CMS\parseNews');
 $mystep->regTag('news_next', 'app\CMS\parseNewsNext');
 $mystep->regTag('info', 'app\CMS\parseInfo');

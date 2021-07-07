@@ -36,7 +36,7 @@
                         </div>
                         <input name="captcha" type="text" class="form-control" placeholder="<!--lng_login_captcha_msg-->" need="" />
                         <div class="input-group-append">
-                            <img id="captcha" src="captcha/&ms_app=cms&" height="33" keep-url />
+                            <img id="captcha" src="captcha/&ms_app=CMS&" height="33" keep-url />
                         </div>
                         <div class="input-group-append">
                             <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src+=(new Date().getTime());return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>

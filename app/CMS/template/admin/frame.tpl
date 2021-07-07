@@ -334,7 +334,7 @@ $(function(){
                     if(list_func!==',all,' && list_func.indexOf(','+list[i].id+',')===-1) continue;
                     obj = $('' +
                         '<li class="nav-item">\n' +
-                        '    <a class="nav-link" href="'+list[i].path+'" title="'+list[i].comment+'">'+list[i].name+'</a>\n' +
+                        '    <a class="nav-link" href="'+global.root_fix+list[i].path+'" title="'+list[i].comment+'">'+list[i].name+'</a>\n' +
                         '</li>');
                     if(typeof list[i].sub!='undefined' && list[i].sub.length>0) {
                         obj.addClass("dropdown").append('<div class="dropdown-menu"></div>');
@@ -369,7 +369,7 @@ $(function(){
                     if(list[i].public==='0') continue;
                     $('' +
                     '<li class="nav-item">\n' +
-                    '    <a class="nav-link" href="'+list[i].path+'" title="'+list[i].comment+'">'+list[i].name+'</a>\n' +
+                    '    <a class="nav-link" href="'+global.root_fix+list[i].path+'" title="'+list[i].comment+'">'+list[i].name+'</a>\n' +
                     '</li>').prependTo('#nav > ul');
                 }
                 $('' +
@@ -384,6 +384,7 @@ $(function(){
     });
     let sidebar_top = 70;
     $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
+        c(data);
         if(typeof data.error==='undefined') {
             let obj = $('#sidebar');
             obj.append(getList(data).removeClass('sub-menu'));

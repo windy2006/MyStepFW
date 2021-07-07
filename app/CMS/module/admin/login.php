@@ -5,7 +5,7 @@ if(r::svr('QUERY_STRING')=='out') {
     r::sessionEnd();
     myStep::info('login_logout', $path_admin);
 } elseif(r::s('ms_cms_op')!='') {
-    cms::redirect($path_admin);
+    CMS::redirect($path_admin);
 } elseif(!is_null($captcha = r::p('captcha'))) {
     $err_no = 0;
     if(strtolower($captcha) == strtolower(r::s('captcha'))) {

@@ -773,18 +773,20 @@ class SQLBuilder {
             case 'nin':
             case 'not in':
             case 'not nin':
-                if(is_string($value)) {
-                    $value = str_replace("'", '', $value);
-                    $value = str_replace('"', '', $value);
-                    $value = str_replace(', ', ',', $value);
-                    $value = explode(',', $value);
-                }
-                if(strlen($condition)==2 || strlen($condition)==6) {
-                    $value = array_map(array($this, 'safeValue'), $value);
-                    $value = "('".implode("', '", $value)."')";
-                } else {
-                    $value = array_map('intval', $value);
-                    $value = '('.implode(',', $value).')';
+                if(!is_string($value) || !preg_match('#^\((.+)\)$#', $value)) {
+                    if(is_string($value)) {
+                        $value = str_replace("'", '', $value);
+                        $value = str_replace('"', '', $value);
+                        $value = str_replace(', ', ',', $value);
+                        $value = explode(',', $value);
+                    }
+                    if(strlen($condition)==2 || strlen($condition)==6) {
+                        $value = array_map(array($this, 'safeValue'), $value);
+                        $value = "('".implode("', '", $value)."')";
+                    } else {
+                        $value = array_map('intval', $value);
+                        $value = '('.implode(',', $value).')';
+                    }
                 }
                 $condition = str_replace('nin', 'in', $condition);
                 break;

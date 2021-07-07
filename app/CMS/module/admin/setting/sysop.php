@@ -9,11 +9,11 @@ switch($method) {
         $content = build_page($method);
         break;
     case 'delete':
-        cms::$log = $mystep->getLanguage('admin_sys_op_delete');
+        CMS::$log = $mystep->getLanguage('admin_sys_op_delete');
         $db->build($S->db->pre.'sys_op')
             ->where('id', 'n=', $id);
         $db->delete();
-        cms::redirect();
+        CMS::redirect();
         break;
     case 'add_ok':
     case 'edit_ok':
@@ -28,7 +28,7 @@ switch($method) {
             if($flag!==false) {
                 myStep::info(sprintf($mystep->getLanguage('admin_sys_op_error2'), $data['username']));
             }
-            cms::$log = $mystep->getLanguage($method=='add_ok'?'admin_sys_op_add':'admin_sys_op_edit');
+            CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_sys_op_add':'admin_sys_op_edit');
             if(empty($data['password'])) {
                 unset($data['password']);
             } else {
