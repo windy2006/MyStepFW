@@ -86,8 +86,8 @@ function uploadInit() {
                 title: '请选择需要上传的文件',
                 mode: 'browse',
                 max_files: 5,
-                max_file_size: 8,
-                errors: ["浏览器不支持", "上传文件过多", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
+                max_file_size: setting.max_size,
+                errors: ["浏览器不支持", "上传文件过多", "每个文件必须小于"+setting.max_size+"MB", "未设置上传目标", "更新文件未选择"],
             }
             $('#upload').powerUpload($.extend({}, opts, {
                 max_files: 1,
@@ -119,7 +119,13 @@ function uploadInit() {
                         } else {
                             let file = setting.url_prefix+'api/CMS/attachment/'+result.new_name;
                             if(result.type.match(/^image/) || result.name.match(/\.png$/)) {
-                                insertContent('<br /><img src="'+file+'" title="'+result.name+'" style="max-width:90%;" /><br />');
+                                insertContent('<br /><img src="' + file + '" title="' + result.name + '" style="max-width:90%;" /><br />');
+                            } else if(result.type.match(/^video/)) {
+                                insertContent('<br />' +
+                                    '<video class="mx-auto" controls="controls" autoplay="autoplay" width="100%" height="auto">' +
+                                    '<source src="' + file + '" type="'+result.type+'" />\n' +
+                                    'Your browser does not support the video tag.</video>' +
+                                    '<br />');
                             } else {
                                 insertContent('<br /><a href="'+file+'" />'+result.name+'</a><br />');
                             }
@@ -192,13 +198,13 @@ $(function(){
                     content = content.replace(/<div(.*?)>[\r\n]+/ig, "<div$1>");
                     content = content.replace(/<\/div><div/g, "<\/div>\n<div");
                 }
-                content = content.replace(/><\/td>/g, ">xxx</td>\n");
+                content = content.replace(/><\/(td|iframe)>/g, ">xxx</$1>\n");
                 content = content.replace(/(<a id=.+>)(<\/a>)/g, "$1xxx$2");
                 while(content.search(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/)!==-1) content = content.replace(/<(\w+)[^>]*><!-- pagebreak --><\/\1>[\r\n\s]*/g, "<!-- pagebreak -->");
                 while(content.search(/<(\w+)[^>]*>[\r\n]*<\/\1>[\r\n]*/)!==-1) content = content.replace(/<(\w+)[^>]*>[\r\n]*<\/\1>[\r\n\s]*/g, "");
                 while(content.search(/<\/(\w+)><\1([^>]*)>/g)!==-1) content = content.replace(/<\/(\w+)><\1([^>]*)>/g, "");
                 content = content.replace(/(<a id=.+>)xxx(<\/a>)/g, "$1$2");
-                content = content.replace(/>xxx<\/td>/g, "></td>");
+                content = content.replace(/>xxx<\//g, "></");
                 content = content.replace(/  /g, String.fromCharCode(160)+" ");
                 content = content.replace(/(<(\w+)>[\s]*<\/\2>[\r\n]*)+$/g, "");
                 content += "<"+tag+"></"+tag+">";

@@ -470,7 +470,7 @@ jQuery.event.addProp("dataTransfer");
 
     function dragEnter(e) {
         clearTimeout(doc_leave_timer);
-        e.preventDefault();
+        e && e.preventDefault();
         opts.dragEnter(e);
     }
 
@@ -484,7 +484,7 @@ jQuery.event.addProp("dataTransfer");
     function dragLeave(e) {
         clearTimeout(doc_leave_timer);
         opts.dragLeave(e);
-        e.stopPropagation();
+        e && e.stopPropagation();
     }
 
     function docDrop(e) {
@@ -531,6 +531,8 @@ jQuery.event.addProp("dataTransfer");
         } else {
             alert(err);
         }
+        $('#uploader').modal('hide');
+        dragLeave();
     }
 
     function dummy(){

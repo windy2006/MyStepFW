@@ -28,6 +28,9 @@ for($i=0,$m=count($list);$i<$m;$i++) {
 if(!empty($years)) {
     $months = [];
     $logs = [];
+    if(!is_dir(FILE.$the_year)) {
+        $the_year = $years[0];
+    }
     $list = myFile::find('*', FILE.$the_year, false, 1);
     for($i=0,$m=count($list);$i<$m;$i++) {
         $tmp = myFile::find('log.txt', $list[$i], true, 2);
@@ -43,6 +46,9 @@ if(!empty($years)) {
             ];
             $t->setLoop('months', $tmp);
         }
+    }
+    if(!is_dir(FILE.$the_year.'/'.$the_month)) {
+        $the_month = $months[0]??'';
     }
     $files = myFile::getTree(FILE.$the_year.'/'.$the_month);
     $the_log = myFile::getLocal(FILE.$the_year.'/'.$the_month.'/log.txt');

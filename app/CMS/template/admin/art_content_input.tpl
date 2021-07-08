@@ -191,7 +191,7 @@ function myChecker(theForm) {
     if(theForm.link.value!=="" && $id("content").value==="") {
         $id("content").value = theForm.link.value;
     }
-    if(theForm.cat_id.value==='' && !theForm.independent_article.checked) {
+    if(theForm.cat_id.value==='') {
         alert("请选择文章所属栏目！");
         theForm.cat_id.focus();
         return false;
@@ -275,7 +275,7 @@ $(function(){
             obj.value = "[" + prefix + "]" + obj.value;
         }
     });
-    $('#cat_id').change(function(){
+    $('select[name=cat_id]').change(function(){
         setPrefix(this.value);
         $('select[name=web_id]').val(this.options[this.selectedIndex].getAttribute('web_id'));
         $('input[name=view_lvl]').val(this.options[this.selectedIndex].getAttribute('view_lvl'));
@@ -284,7 +284,9 @@ $(function(){
         let val = this.value;
         let objs = $('select[name=cat_id]');
         objs.find('option').hide();
+        objs.find('option').first().show().prop('selected', true);
         objs.find('option[web_id='+val+']').show();
+        setPrefix();
     });
     $("#subject").blur(getKeyword);
     $("#keyword").focus(getKeyword);
@@ -314,7 +316,6 @@ $(function(){
         }
         $('[title]').tooltip('hide');
     });
-    setPrefix();
     let style = '<!--record_style-->'.split(',');
     for(let i=0,m=style.length;i<m;i++) {
         switch(style[i].substr(0,1).toLocaleLowerCase()) {
@@ -351,6 +352,7 @@ $(function(){
         $('input[name=independent_article]').parent().remove();
     }
     $('select[name=web_id]').trigger('change');
+    $('select[name=cat_id]').val(<!--record_cat_id-->);
     global.root_fix += 'article/content/';
 });
 let setting_tinymce_ext = {

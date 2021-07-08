@@ -586,6 +586,10 @@ code;
         if($app_name!='myStep') {
             $setting->merge(APP.$app_name.'/config.php');
         }
+        $m1 = intval(ini_get('post_max_size'));
+        $m2 = intval(ini_get('upload_max_filesize'));
+        if($m1==0) $m1=32;
+        if($m2==0) $m2=32;
         $setting = myConfig::o2a($setting);
         $setting_js = array(
             'language' => $setting['setting']['gen']['language'],
@@ -593,6 +597,7 @@ code;
             'app' => $app_name,
             'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', APP.$app_name),
+            'max_size' => min($m1, $m2),
             'url_fix' => defined('URL_FIX')?URL_FIX:'',
             'url_prefix' => self::$url_prefix,
             'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':$app_name),

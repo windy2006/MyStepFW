@@ -11,7 +11,7 @@ if(($web_cur = \app\CMS\checkVal($website, 'web_id', $web_id))!==false) {
 } else {
     $web_cur = $web_info;
 }
-if(empty($id)) $id = r::r('news_id');
+if(empty($id)) $id = r::r('news_id')??0;
 if(!empty($id)) {
     $db->build($web_cur['setting']->db->pre.'news_show')
         ->field('web_id')
@@ -397,7 +397,7 @@ function build_page($method) {
     if(empty($web_cur['web_id'])) $web_cur['web_id']=1;
     for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
         if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
-        if($web_id!=$news_cat_plat[$i]['web_id']) continue;
+        if($web_id!=1 && $web_id!=$news_cat_plat[$i]['web_id']) continue;
         $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
         $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
         $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));

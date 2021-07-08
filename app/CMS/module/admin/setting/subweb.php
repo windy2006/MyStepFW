@@ -140,8 +140,12 @@ function build_page($method) {
 
         $files = myFile::find('', PATH.'language', false, myFile::FILE);
         $files = array_map(function($v){return str_replace('.php', '', basename($v));}, $files);
+        $dirs = myFile::find('', PATH.'template', false, myFile::DIR);
+        $dirs = array_map(function ($v) {return basename($v);}, $dirs);
+        $dirs = array_slice($dirs, 1);
         $ext_setting = array(
             'gen'=>['language'=>['select', $files]],
+            'template'=>['style'=>['select', $dirs]]
         );
         $list = $config->build($builder, $ext_setting);
         foreach($list as $v) {

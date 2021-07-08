@@ -31,6 +31,8 @@
     </div>
 </div>
 <script type="application/javascript">
+function init() {
+    if(!checkSetting()) return;
     jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
@@ -39,8 +41,8 @@
                 title: '文件上传',
                 mode: 'drop',
                 max_files: 5,
-                max_file_size: 32,
-                errors: ["浏览器不支持", "一次只能上传5个文件", "每个文件必须小于32MB", "未设置上传目标", "请至少选择一个文件"],
+                max_file_size: setting.max_size,
+                errors: ["浏览器不支持", "一次只能上传5个文件", "每个文件必须小于"+setting.max_size+"MB", "未设置上传目标", "请至少选择一个文件"],
 
                 uploadFinished:function(i,file,result,timeDiff){
                     let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
@@ -83,4 +85,6 @@
             });
         }
     });
+}
+init();
 </script>
