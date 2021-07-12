@@ -1,6 +1,6 @@
 <?PHP
 $db->cache(0);
-$tpl_setting['name'] = $info_app['path'][1];
+$tpl_setting['name'] = $info_app['path'][1] ?? 'login';
 if($tpl_setting['name']=='logout') {
     myReq::removeCookie('ms_cms_op');
     myReq::removeCookie('ms_cms_user');
