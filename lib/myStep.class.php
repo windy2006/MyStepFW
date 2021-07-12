@@ -710,8 +710,9 @@ code;
      * 文件下载
      * @param $idx
      */
-    public static function download($idx) {
+    public static function download($idx='') {
         global $ms_setting;
+        if(empty($idx)) self::header('404');
         if(self::checkPower('download')) {
             $idx = explode('.', $idx);
             $path = FILE.date($ms_setting->upload->path_mode, intval($idx[0]));
@@ -1125,17 +1126,39 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      * @return bool
      */
     public static function checkPower($idx) {
-        global $ms_setting;
-        $op = myReq::session('sysop');
-        switch($idx) {
-            case 'upload':
-            case 'remove_ul':
-                $flag = !is_null($op);
-                break;
-            default:
-                $referer = myReq::server('http_referer');
-                $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl;
+        $core = self::getCore();
+        if($core == __CLASS__) {
+            global $ms_setting;
+            $op = myReq::session('sysop');
+            switch($idx) {
+                case 'upload':
+                case 'remove_ul':
+                    $flag = !is_null($op);
+                    break;
+                default:
+                    $referer = myReq::server('http_referer');
+                    $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl;
+            }
+        } else {
+            $flag = $core::checkPower($idx);
         }
         return $flag;
+    }
+
+    /**
+     * 获取指定核心类名称
+     * @return string
+     */
+    public static function getCore() {
+        $core = myReq::get('core')??__CLASS__;
+        if($core!=__CLASS__) {
+            $file = APP.$core.'/'.$core.'.class.php';
+            if(is_file($file)) {
+                require_once($file);
+            } else {
+                $core = __CLASS__;
+            }
+        }
+        return $core;
     }
 }

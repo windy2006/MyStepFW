@@ -1,12 +1,14 @@
 <?PHP
 global $id, $cat_id;
 $id = end($info_app['path']);
+if(preg_match('#(%[A-E0-9])#', $id)) $id = urldecode($id);
 
 $page = r::g('page');
 if($page!='all') {
     $page = intval($page);
     if($page<1) $page = 1;
 }
+if(!isset($S->db->pre_sub)) $S->db->pre_sub = $S->db->pre;
 $db->build($S->db->pre_sub.'news_show')
     ->field('news_id,cat_id,add_date,subject,tag,image,describe,view_lvl,original,views,link,active,expire')
     ->where(is_numeric($id) ? ['news_id', 'n=', $id] : ['idx', '=', md5($id)]);
@@ -21,6 +23,7 @@ $records = $cache->getData($db->select(true),1);
 if(empty($records)) {
     myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
 }
+
 $record = $records[0];
 $id = $record['news_id'];
 $cat_id = $record['cat_id'];

@@ -82,7 +82,7 @@ function uploadInit() {
     $.vendor('jquery.powerUpload', {
         callback:function(){
             let opts = {
-                url: setting.url_prefix+'api/myStep/upload',
+                url: setting.url_prefix+'api/myStep/upload?core=CMS',
                 title: '请选择需要上传的文件',
                 mode: 'browse',
                 max_files: 5,
@@ -107,10 +107,7 @@ function uploadInit() {
                 title: '附件上传',
                 uploadFinished:function(i,file,result,timeDiff){
                     let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
-                    if(result.error!=="0") {
-                        obj.html(obj.html()+' - upload failed! ('+result.message+')');
-                    } else {
-                        obj.html(obj.html()+' - uploaded!');
+                    if(result.error == 0) {
                         let editor = tinyMCE.activeEditor;
                         let content = editor.getContent();
                         if(content.match(new RegExp('"(file://.+?/'+result.name+')"'))) {
@@ -269,7 +266,7 @@ $(function(){
                             name = RegExp.$2;
                         }
                         $('<li class="list-group-item d-flex justify-content-between align-items-center">\n' +
-                            '<a href='+setting.url_prefix+'"api/myStep/download/'+idx+'">'+name+'</a>\n' +
+                            '<a href="'+setting.url_prefix+'api/myStep/download/'+idx+'">'+name+'</a>\n' +
                             '<a data-name="remove" data-idx="'+idx+'" data-file="'+name+'" href="javascript:" class="badge badge-danger badge-pill">X</a>\n' +
                             '</li>').appendTo(container);
                     }

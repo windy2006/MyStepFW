@@ -143,7 +143,7 @@ jQuery.event.addProp("dataTransfer");
         files_count = 0;
         files_done = 0;
         files_rejected = 0;
-        files_loaded = 0,
+        files_loaded = 0;
         files = [];
         result = [];
         reject_list = [];
@@ -442,10 +442,16 @@ jQuery.event.addProp("dataTransfer");
                     info = jQuery.parseJSON(xhr.responseText);
                     result.push("<"+file.name+"> uploaded!");
                 } catch(e) {
-                    info = {error: e};
+                    info = {error: e.number, message: e.message};
                     result.push("<"+file.name+"> error!");
                 }
-                obj.addClass('bg-success').css('width','100%');
+                if(typeof info.error != 'undefined' && info.error != 0) {
+                    obj.addClass('bg-danger').css('width','100%')
+                        .text(files[index].name + ' - ' + info.message);
+                } else {
+                    obj.addClass('bg-success').css('width','100%')
+                        .text(files[index].name + ' - uploaded!');;
+                }
                 flag = opts.uploadFinished(index, file, info, (new Date().getTime() - start_time));
                 files_done++;
                 if (files_done === files_count - files_rejected) allDone();

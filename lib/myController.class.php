@@ -530,7 +530,7 @@ class myController extends myBase {
         if (is_file($file)) {
             if(empty($name)) $name = basename($file);
             self::etag(md5(filemtime($file)));
-            $content = myFile::getLocal($file);
+            $size = filesize($file);
             $type = myFile::getMime($file);
             header("Date: " . date("D, j M Y H:i:s", strtotime("now")) . " GMT");
             header("Expires: " . date("D, j M Y H:i:s", strtotime("now + 10 years")) . " GMT");
@@ -538,11 +538,21 @@ class myController extends myBase {
             if ($type !== 'text/html') {
                 header('Pragma: public');
                 header('Accept-Ranges: bytes');
-                header('Accept-Length: ' . strlen($content));
+                header('Accept-Length: ' . $size);
                 header('Content-Disposition: attachment; filename=' . $name);
                 header('Content-Transfer-Encoding: binary');
             }
-            myFile::show($content);
+            if($size*2 >= myFile::getByte(ini_get('memory_limit'))) {
+                ob_clean();
+                if($fp = @fopen($file,"r")) {
+                    while(($buffer = fgets($fp, 4096)) !== false) {
+                        echo $buffer;
+                    }
+                    fclose($fp);
+                }
+            } else {
+                myFile::show(myFile::getLocal($file));
+            }
         }
     }
 

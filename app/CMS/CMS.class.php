@@ -70,7 +70,7 @@ class CMS extends myStep {
      */
     public static function log() {
         global $db, $S, $group_info, $id;
-        $link = 'http://'.r::svr('SERVER_NAME').r::svr('REQUEST_URI');
+        $link = 'http://'.r::svr('HTTP_HOST').r::svr('REQUEST_URI');
         if(strpos($link, '_ok')) $link = r::svr('REFERER');
         if(!empty($id)) {
             $link = str_replace('&id=' . $id, '', $link);
@@ -109,7 +109,7 @@ class CMS extends myStep {
         if(($website = \app\CMS\getCache('website'))===false) {
             myStep::info('error_para');
         }
-        if(($web_info = \app\CMS\checkVal($website, 'domain', myReq::server('SERVER_NAME')))===false) {
+        if(($web_info = \app\CMS\checkVal($website, 'domain', myReq::server('HTTP_HOST')))===false) {
             $web_info = \app\CMS\checkVal($website, 'web_id', 1);
         }
         if(($info_app['path'][0]??'')===$S->web->path_admin) {
@@ -175,5 +175,25 @@ class CMS extends myStep {
             'online' => $online
         ]);
         return $db->replace();
+    }
+
+    /**
+     * 权限检测接口
+     * @param $idx
+     * @return bool
+     */
+    public static function checkPower($idx) {
+        global $ms_setting;
+        $op = myReq::cookie('ms_cms_op');
+        switch($idx) {
+            case 'upload':
+            case 'remove_ul':
+                $flag = !is_null($op);
+                break;
+            default:
+                $referer = myReq::server('http_referer');
+                $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl;
+        }
+        return $flag;
     }
 }

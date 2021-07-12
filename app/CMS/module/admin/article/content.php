@@ -419,9 +419,9 @@ function build_page($method) {
     $tpl->assign('web_id_site', $web_info['web_id']);
     $tpl->assign('cat_id', $cat_id);
     $tpl->assign('news_id', $id);
-    $url = r::svr('HTTP_REFERER') ?? r::svr('REQUEST_URI');
-    if(trim(substr($url, -(strlen($S->web->path_admin)+1)),'/')==$S->web->path_admin) {
-        $url = preg_replace('#/'.$S->web->path_admin.'/.*$#', '/'.$S->web->path_admin.'/article/content', r::svr('HTTP_REFERER'));
+    $url = r::svr('HTTP_REFERER');
+    if(is_null($url) || trim(substr($url, -(strlen($S->web->path_admin)+1)),'/')==$S->web->path_admin) {
+        $url = preg_replace('#/'.$S->web->path_admin.'.*$#', '/'.$S->web->path_admin.'/article/content', r::svr('HTTP_REFERER'));
     }
     $url .= '&web_id='.$web_id;
     $tpl->assign('back_url', $url);

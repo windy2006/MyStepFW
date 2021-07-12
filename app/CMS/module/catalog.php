@@ -1,6 +1,7 @@
 <?PHP
 global $catalog, $prefix, $page, $limit, $loop, $query, $count, $page_size;
 $catalog = $info_app['path'][1]??'';
+if(preg_match('#(%[A-E0-9])#', $catalog)) $catalog = urldecode($catalog);
 $cat_info = false;
 $prefix = r::g('pre')??'';
 $tpl_setting['name'] = 'catalog';

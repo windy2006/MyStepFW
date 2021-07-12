@@ -72,6 +72,7 @@ class myRouter extends myBase {
                 $qstr = $path_info.'?'.$qstr;
             }
         }
+        $qstr = str_replace('?/index.php&', '?', $qstr);
         $qstr = trim(str_replace('?', '&', trim($qstr, '?')), '/');
 
         $detail = explode('&', $qstr);
@@ -223,9 +224,11 @@ class myRouter extends myBase {
             if(is_file(APP.$info_app['app'].'/config_'.$path.'.php')) {
                 $ms_setting->merge(APP.$info_app['app'].'/config_'.$path.'.php');
             }
-            if(isset($info_app['para']['ms_app']) && is_dir(APP.$info_app['para']['ms_app'])) {
-                if(is_file(APP.$info_app['para']['ms_app'].'/config.php')) $ms_setting->merge(APP.$info_app['para']['ms_app'].'/config.php');
+            $core = myStep::getCore();
+            if(isset($info_app['para']['core']) && is_file(APP.$core.'/config.php')) {
+                $ms_setting->merge(APP.$core.'/config.php');
             }
+
             myStep::setPara();
             if(is_array($rule['method'])) {
                 $match = array_slice($match, 0, 1);

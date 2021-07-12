@@ -109,7 +109,7 @@ function build_page($method) {
             $record['idx'] = '';
             $record['name'] = '';
             $record['url'] = 'http://';
-            $record['level'] = '1';
+            $record['level'] = '0';
             $record['image'] = '';
         }
         $tpl->assign($record);

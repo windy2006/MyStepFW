@@ -122,7 +122,7 @@
 jQuery.vendor('jquery.powerUpload', {
     callback:function(){
         $('#upload').powerUpload({
-            url: '<!--url_prefix-->api/myStep/upload',
+            url: '<!--url_prefix-->api/myStep/upload?core=CMS',
             title: '请选择需要上传的图标文件',
             mode: 'browse',
             maxfiles: 1,

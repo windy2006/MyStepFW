@@ -1,6 +1,6 @@
  server {
     // Add the code below to server(location) section
-    if($request_uri !～* "\.(jpg|png|gif|ico|css|js|json|html|htm|woff|woff2|eot|svg|ttf|map|zip)$") {
+    if ($request_uri !～* "\.(jpg|png|gif|ico|css|js|json|html|htm|woff|woff2|eot|svg|ttf|map|zip)$") {
         rewrite ^((?!index\.php).+)$    /index.php?$1;
     }
 }
