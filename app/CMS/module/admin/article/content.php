@@ -421,7 +421,7 @@ function build_page($method) {
     $tpl->assign('news_id', $id);
     $url = r::svr('HTTP_REFERER');
     if(is_null($url) || trim(substr($url, -(strlen($S->web->path_admin)+1)),'/')==$S->web->path_admin) {
-        $url = preg_replace('#/'.$S->web->path_admin.'.*$#', '/'.$S->web->path_admin.'/article/content', r::svr('HTTP_REFERER'));
+        $url = preg_replace('#/'.$S->web->path_admin.'.*$#', '/'.$S->web->path_admin.'/article/content', r::svr('request_uri'));
     }
     $url .= '&web_id='.$web_id;
     $tpl->assign('back_url', $url);
