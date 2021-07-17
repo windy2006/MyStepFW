@@ -10,7 +10,7 @@
 <!--page_start-->
 </head>
 <body class="py-5">
-<header class="navbar navbar-expand-sm navbar-dark bd-navbar fixed-top">
+<header class="navbar navbar-expand-md navbar-dark bd-navbar fixed-top">
     <a class="btn navbar-brand d-inline-block mr-3" href="#" onclick="return false;"><b>迈思指南</b></a>
     <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav" aria-expanded="false">
         <span class="navbar-toggler-icon"></span>

@@ -384,7 +384,6 @@ $(function(){
     });
     let sidebar_top = 70;
     $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
-        c(data);
         if(typeof data.error==='undefined') {
             let obj = $('#sidebar');
             obj.append(getList(data).removeClass('sub-menu'));
@@ -498,9 +497,12 @@ $(function(){
         obj.find('.menu-arrow').addClass('collapsed').attr('aria-expanded', false);
     });
     $('#sidebar').css('padding-top', sidebar_top);
-    $(window).resize(resizeMain);
     setTheme($.cookie('ms_theme'));
     $('body').disableSelection();
-    resizeMain();
+    $(window).resize(function(){
+        resizeMain();
+        setTimeout(resizeMain, 2000);
+    });
+    $(window).trigger('resize')
 });
 </script>

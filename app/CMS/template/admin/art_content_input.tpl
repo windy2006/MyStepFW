@@ -191,7 +191,13 @@ function myChecker(theForm) {
     if(theForm.link.value!=="" && $id("content").value==="") {
         $id("content").value = theForm.link.value;
     }
-    if((theForm.cat_id.value==='' && $('input[name=independent_article]').length===0) || ($('input[name=independent_article]').length>0 && !theForm.independent_article.checked)) {
+    if((
+        $('input[name=independent_article]').length===0
+        ||
+        ($('input[name=independent_article]').length>0 && !theForm.independent_article.checked)
+        )
+        && theForm.cat_id.value===''
+    ) {
         alert("请选择文章所属栏目！");
         theForm.cat_id.focus();
         return false;
@@ -235,6 +241,7 @@ function getDescribe() {
         }
         result += "……";
     }
+    if(result.length === 0) result = $("#subject").val();
     obj.val(result);
 }
 function setPrefix(cat_id) {

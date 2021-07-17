@@ -366,14 +366,36 @@ jQuery.event.addProp("dataTransfer");
                     if (i === files_count) return;
                     let reader = new FileReader(), max_file_size = 1048576 * opts.max_file_size;
                     reader.index = i;
-                    if (files[i].size > max_file_size) {
+                    reader.onerror = function (e) {
+                        switch (e.target.error.code) {
+                            case e.target.error.NOT_FOUND_ERR:
+                                console.log('File Not Found!');
+                                break;
+                            case e.target.error.NOT_READABLE_ERR:
+                                console.log('File is not readable');
+                                break;
+                            case e.target.error.ABORT_ERR:
+                                console.log("errorHandler ABORT_ERROR");
+                                break; // noop
+                            default:
+                                console.log('An error occurred reading this file.');
+                        }
+                    };
+                    reader.onabort = function (e) {
+                        console.log('File read cancelled');
+                    };
+                    reader.onloadstart = function (e) {
+                        console.log('loading file...')
+                    };
+
+                    if (files[i].size < max_file_size) {
+                        reader.onloadend = send;
+                        reader.readAsBinaryString(files[i]);
+                    } else {
                         reject_list[i] = errors[2];
                         files_rejected++;
                         error(2, files[i], i);
-                        continue;
                     }
-                    reader.onloadend = send;
-                    reader.readAsBinaryString(files[i]);
                 } else {
                     reject_list[i] = 'Reject by user';
                     files_rejected++;

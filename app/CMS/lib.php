@@ -622,7 +622,7 @@ function parseCatalog(\myTemplate &$tpl, &$tag_attrs = array()) {
     $result = '';
     if(!isset($tag_attrs['id'])) $tag_attrs['id'] = 0;
     if(!isset($tag_attrs['deep'])) $tag_attrs['deep'] = 1;
-    if(!isset($tag_attrs['show'])) $tag_attrs['show'] = 1023;
+    if(!isset($tag_attrs['show'])) $tag_attrs['show'] = 0;
     if(!isset($tag_attrs['template'])) {
         $tag_attrs['template'] = 'catalog';
     } else {
@@ -784,7 +784,10 @@ function buildSQL($paras) {
         $db->build($web['setting']->db->pre.'news_detail', array(
             'mode' => 'left',
             'field' => 'news_id'
-        ))->where('content', 'like', $paras['keyword']);
+        ))->where([
+            ['(t0.subject)', 'like', $paras['keyword']],
+            ['content', 'like', $paras['keyword'], 'or']
+        ]);
     }
     $db->build($tbl)->where([
             ['expire', 'is', null],

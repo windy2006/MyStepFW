@@ -915,7 +915,7 @@ code;
         $the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);
         $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
         $ext_list = explode(',', $ms_setting->gen->static);
-        if(strpos(trim($the_file, '/'), 'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
+        if(strpos(trim($router->route['p'], '/'), 'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
         if(empty($ms_setting->cookie->domain) && ($ms_setting->cookie->domain = strstr($host, ':', true))===false) {
             $ms_setting->cookie->domain = $host;

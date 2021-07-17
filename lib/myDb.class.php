@@ -303,7 +303,7 @@ trait base_sql {
             $sql .= ' from '.$cur_tbl->tbl.' as '.$cur_tbl->idx.' ';
             while(($cur_tbl=next($this->builder))!==false) {
                 if(empty($cur_tbl->join)) continue;
-                $sql .= $cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
+                $sql .= ' '.$cur_tbl->join['mode'].' join '.$cur_tbl->tbl.' as '.$cur_tbl->idx;
                 if(empty($cur_tbl->join['field_join'])) {
                     $sql .= ' using('.$cur_tbl->join['field'].')';
                 } else {
