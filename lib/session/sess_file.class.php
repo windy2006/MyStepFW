@@ -46,6 +46,7 @@ class sess_file implements interface_session {
         while($file = readdir($mydir)) {
             if($file=='.' || $file=='..') continue;
             $the_file = self::$path.'/'.$file;
+            if(!is_file($the_file)) continue;
             if(filemtime($the_file)+$maxlifetime < $_SERVER['REQUEST_TIME']) {
                 myFile::del($the_file);
             }

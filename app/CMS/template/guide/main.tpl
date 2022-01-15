@@ -52,7 +52,7 @@
         <!--main-->
     </div>
 </div>
-<footer class="border-top text-center fixed-bottom bg-light pt-2 font-sm" style="max-height:60px;overflow:hidden;">
+<footer class="border-top text-center fixed-bottom bg-light pt-2" style="max-height:60px;overflow:hidden;">
     <!--info idx="copyright"-->
 </footer>
 <script type="application/javascript">

@@ -10,6 +10,7 @@ function highlight(mode=1, style = 'default') {
                 global.root+'vendor/highlight/clipboard.css',
             ]);
             document.querySelectorAll('pre code').forEach((block) => {
+                block.innerHTML = block.innerHTML.replace(/　　/g, '');
                 hljs.highlightBlock(block);
                 $(block).parent().addClass('highlight');
             });

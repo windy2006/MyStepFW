@@ -122,10 +122,10 @@ switch($method) {
                     continue;
                 }
                 $file_info = pathinfo($matches[2][$i]);
-                $file_info['basename'] = preg_replace('/\?.*$/', '', $file_info['basename']);
-                $file_info['basename'] = preg_replace('/[;,&\=]/', '', $file_info['basename']);
-                $file_info['extension'] = preg_replace('/\?.*$/', '', $file_info['extension']);
                 if(empty($file_info['extension'])) $file_info['extension'] = 'jpg';
+                $file_info['basename'] = preg_replace('/\?.*$/', '', $file_info['basename']);
+                $file_info['basename'] = preg_replace('/[;,&=]/', '', $file_info['basename']);
+                $file_info['extension'] = preg_replace('/\?.*$/', '', $file_info['extension']);
                 if(strlen($file_info['basename'])>120) $old_name = substr($file_info['basename'], -120);
                 $the_name = getMicrotime().'.'.$file_info['extension'];
                 $the_path = FILE.date($S->upload->path_mode);
@@ -134,6 +134,8 @@ switch($method) {
                 $content = str_replace($matches[2][$i], '/api/CMS/attachment/'.$the_name, $content);
             }
         }
+        $content = preg_replace('#(<img.+?)height=.+?[\'|"|\s]+(.*?)>#i', '\1\2>', $content);
+        $content = preg_replace('#(<img.+?)width=.+?[\'|"|\s]+(.*?)>#i', '\1 style="max-width: 90%;" \2>', $content);
         $content = preg_replace('#<div class="table-responsive">[\r\n]*(<table.+?</table>)[\r\n]*</div>#s', '\1', $content);
         $content = preg_replace('#<table.*>#i', '<div class="table-responsive"><table class="table table-sm table-striped table-hover table-bordered mb-3">', $content);
         $content = str_replace('</table>', '</table></div>', $content);
@@ -238,13 +240,18 @@ switch($method) {
 
         $cid_list = explode(',', $multi_cata);
         $the_cat = $data['cat_id'];
+        $data['news_id'] = $id;
         $data['setop'] = 0;
+        $data['web_id'] = $web_id_news ?? $web_id;
+        $data['link'] = \app\CMS\getLink($data);
         for($i=0,$m=count($cid_list);$i<$m;$i++) {
             if(is_numeric($cid_list[$i]) && $the_cat!=$cid_list[$i]) {
+                $data['news_id'] = 0;
                 $data['cat_id'] = $cid_list[$i];
-                //$data['link'] = getUrl('read', array($id, $data['cat_id']), 1, $data['web_id']);
-                $data['link'] = '###';
                 $data['add_user'] = r::s('ms_cms_op');
+                $data['add_date'] = date('Y-m-d H:i:s');
+                $data['active'] = '0000-00-00';
+                $data['expire'] = '0000-00-00';
                 $db->build($web_cur['setting']->db->pre.'news_show')
                     ->field($data);
                 $db->insert();
@@ -285,7 +292,17 @@ function build_page($method) {
         $condition = array();
         if(!checkPower('web')) $condition[] = array('web_id', 'nin', $group_info['power_web'], 'and');
         if(!empty($web_cur['web_id'])) $condition[] = array('web_id', 'n=', $web_cur['web_id'], 'and');
-        if(!empty($cat_id)) $condition[] = array('cat_id', 'n=', $cat_id);
+        if(!empty($cat_id)) {
+            //$condition[] = array('cat_id', 'n=', $cat_id);
+            $subcat = array_filter($news_cat_plat, function($cat) use ($cat_id) {
+                return $cat['pid'] == $cat_id;
+            });
+            $subcat = array_map(function($cat){
+                return $cat['cat_id'];
+            }, $subcat);
+            array_unshift($subcat, $cat_id);
+            $condition[] = array('cat_id', 'nin', $subcat);
+        }
         if(!empty($keyword)) $condition[] = array([['subject', 'like', $keyword], ['tag', 'like', $keyword, 'or']], 'and');
 
         //navigation

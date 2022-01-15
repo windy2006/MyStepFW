@@ -43,8 +43,9 @@
                 resize: true,
                 initLayout: true
             });
-            setTimeout(function(){$('#grid').masonry('layout');},100);
-            window.resizeTo('100%','100%');
+            setTimeout(function(){
+                $('#grid').masonry('layout');
+            },500);
         }
     });
 </script>

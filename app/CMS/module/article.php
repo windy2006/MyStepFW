@@ -21,7 +21,7 @@ $db->build($S->db->pre_sub.'news_detail', array(
 $records = $cache->getData($db->select(true),1);
 
 if(empty($records)) {
-    myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
+    myStep::info('page_article_missing', ROOT_APP);
 }
 
 $record = $records[0];
@@ -31,23 +31,23 @@ if(!is_null($record['active'])
     && ($record['active']=strtotime($record['active']))>0
     && $record['active'] > $S->info->time
 ) {
-    myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
+    myStep::info('page_article_missing', ROOT_APP);
 }
 if(!is_null($record['expire'])
     && ($record['expire']=strtotime($record['expire']))>0
     && $record['expire'] < $S->info->time
 ) {
-    myStep::info('page_article_expired', ROOT_WEB.$info_app['app']);
+    myStep::info('page_article_expired', ROOT_APP);
 }
 $db->build($S->db->pre_sub.'news_show')
     ->field(['views'=>'(views + 1)'])
     ->where('news_id','n=',$id);
 $db->update();
 if(($cat_info = \app\CMS\getPara($news_cat_plat, 'cat_id', $record['cat_id']))===false) {
-    myStep::info('page_article_missing', ROOT_WEB.$info_app['app']);
+    myStep::info('page_article_missing', ROOT_APP);
 }
 if($record['view_lvl']>$user_info['view_lvl']) {
-    myStep::info('page_nopower', ROOT_WEB.$info_app['app']);
+    myStep::info('page_nopower', ROOT_APP);
 }
 $mystep->checkCache($tpl);
 $page_count = count($records);

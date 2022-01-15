@@ -51,18 +51,21 @@ if(!empty($years)) {
         $the_month = $months[0]??'';
     }
     $files = myFile::getTree(FILE.$the_year.'/'.$the_month);
+    usort($files, function($a, $b){
+        return (strtotime($a['time']) < strtotime($b['time'])) ? -1 : 1;
+    });
     $the_log = myFile::getLocal(FILE.$the_year.'/'.$the_month.'/log.txt');
     if(strlen($the_log)>10) {
         foreach($files as $k => $v) {
-            if($k=='log.txt') continue;
+            if($v['name']=='log.txt') continue;
             $tmp = [
-                'idx' => preg_replace('/\.\w+$/','', $k),
-                'name' => $k,
+                'idx' => preg_replace('/\.[^.]+$/','', $v['name']),
+                'name' => $v['name'],
                 'size' => $v['size'],
                 'date' => $v['time'],
             ];
-            if(preg_match('#'.$k.'::(.+?)::#', $the_log, $match)) {
-                $the_log = preg_replace('#'.$k.'\:\:.+?\n#ms', '', $the_log);
+            if(preg_match('#'.preg_quote($v['name']).'::(.+?)::#', $the_log, $match)) {
+                $the_log = preg_replace('#'.preg_quote($v['name']).'\:\:.+?\n#ms', '', $the_log);
                 $tmp['name'] = $match[1];
             } else {
                 $tmp['idx'] = $the_year.'/'.$the_month.'/'.$tmp['name'];

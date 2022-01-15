@@ -32,7 +32,7 @@ class myUploader extends myBase {
      * @param bool $rename
      * @param string $banlst
      */
-    public function init($path = '', $rename = false, $banlst='php, exe, com, bat, pif') {
+    public function init($path = '', $rename = false, $banlst='php,exe,com,bat,pif') {
         if(empty($_FILES)) return;
         if(!empty($path)) {
             $path = myFile::realPath($path);
@@ -125,10 +125,10 @@ class myUploader extends myBase {
                 $this->result[$this->counter]['message'] = 'Empty File !';
                 break;
             case 6:
-                $this->result[$this->counter]['message'] = 'Tempory directory error !';
+                $this->result[$this->counter]['message'] = 'Temporary directory error !';
                 break;
             case 7:
-                $this->result[$this->counter]['message'] = 'File cannot be writen !';
+                $this->result[$this->counter]['message'] = 'File cannot be written !';
                 break;
             default:
                 $this->result[$this->counter]['message'] = 'Unknown error !';

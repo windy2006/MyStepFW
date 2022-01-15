@@ -19,27 +19,45 @@ function installCheck($module = '') {
 
 function getAttachment() {
     global $S, $info_app;
-    if(!\myStep::checkPower('download')) return;
+    if(!\CMS::checkPower('download')) {
+        \myController::header('404');
+    }
     $file = array_pop($info_app['path']);
     $idx = explode('.', $file);
     $path = FILE.date($S->upload->path_mode, intval($idx[0]));
     if(is_file($path.$file)) {
-        if(strpos($S->watermark->mode, '2')!==false && in_array(strtolower($idx[2]), ['png','jpg'])) {
+        if(in_array(strtolower($idx[2]), ['png','jpg']) && is_null(\myReq::get('org'))) {
             $cache = CACHE.'app/CMS/img/'.date($S->upload->path_mode, intval($idx[0])).$file;
             if(!is_file($cache)) {
                 $img = new \myImg($path.$file);
-                $img->watermark(ROOT.$S->watermark->img, $S->watermark->position, $cache, [
-                    'rate' => $S->watermark->img_rate,
-                    'alpha' => $S->watermark->alpha,
-                    'font' => ROOT.$S->watermark->txt_font,
-                    'fontsize' => $S->watermark->txt_fontsize,
-                    'fontcolor' => $S->watermark->txt_fontcolor,
-                    'bgcolor' => $S->watermark->txt_bgcolor,
-                ])->destory();
+                $size = $img->getSize();
+                if($size[0]>$S->watermark->thumb) {
+                    $height = ceil($S->watermark->thumb * ($size[1]/$size[0]));
+                    $img->thumb($S->watermark->thumb, $height, $cache);
+                    $img->destory();
+                    unset($img);
+                } else {
+                    \myFile::copy($path.$file, $cache);
+                }
+                if(strpos($S->watermark->mode, '2')!==false && file_exists(ROOT.$S->watermark->img)) {
+                    \myFile::rename($cache, $cache.'.bak');
+                    $img = new \myImg($cache.'.bak');
+                    $img->watermark(ROOT.$S->watermark->img, $S->watermark->position, $cache, [
+                        'rate' => $S->watermark->img_rate,
+                        'alpha' => $S->watermark->alpha,
+                        'font' => ROOT.$S->watermark->txt_font,
+                        'fontsize' => $S->watermark->txt_fontsize,
+                        'fontcolor' => $S->watermark->txt_fontcolor,
+                        'bgcolor' => $S->watermark->txt_bgcolor,
+                    ]);
+                    \myFile::del($cache.'.bak');
+                    $img->destory();
+                    unset($img);
+                }
             }
-            \myStep::file($cache);
+            \CMS::file($cache);
         } else {
-            \myStep::download($file);
+            \CMS::download($file);
         }
     } else {
         \myController::header('404');
@@ -420,13 +438,13 @@ foreach($result as $news) {
     $news['custom'] = $tag_attrs['custom'];
     if(preg_match_all('#\{(.+?)\}#', $news['custom'], $matches)) {
         for($i=0,$m=count($matches[1]);$i<$m;$i++) {
-            $news['custom'] = str_replace('{'.$matches[1][$i].'}', $news[$matches[1][$i]], $news['custom']);
+            $news['custom'] = str_replace('{'.$matches[1][$i].'}', '"'.$news[$matches[1][$i]].'"', $news['custom']);
         }
         $news['custom'] = myEval($news['custom'], true);
     }
     $news['style'] = explode(',', $news['style']);
     $news['subject_styled'] = $news['subject'];
-    $news['link'] = \app\CMS\getLink($news);
+    if(empty($news['link'])) $news['link'] = \app\CMS\getLink($news);
     switch({myTemplate::pos_img}) {
         case 1:
             $news['show_l'] = 'd-none';
@@ -752,6 +770,7 @@ function buildSQL($paras) {
     } else {
         $db->build($tbl)->where('web_id', 'n=', $web['web_id'], 'and');
     }
+    $db->build($tbl)->order('order', true);
     if(isset($paras['order'])) {
         $paras['order'] = preg_split('#[\s,]+#', $paras['order']);
         if(!isset($paras['order'][1])) $paras['order'][1] = false;

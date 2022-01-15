@@ -32,6 +32,14 @@
                 </tr>
             </table>
 <!--loop:end-->
+            <table class="table table-sm table-striped table-hover mb-4 border-bottom">
+                <tr>
+                    <td width="100"><b>插件路由：</b></td>
+                    <td>
+                        <textarea name="route_plugin" class="form-control" rows="5"><!--route_plugin--></textarea>
+                    </td>
+                </tr>
+            </table>
             <div id="tfoot">
                 <button class="btn btn-primary btn-sm mr-3" type="submit"> 重新应用所有路由信息 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>

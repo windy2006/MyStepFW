@@ -12,6 +12,8 @@ $setting['gen']['s_usr'] = 'mystep';
 $setting['gen']['s_pwd'] = 'e10adc3949ba59abbe56e057f20f883e';
 $setting['gen']['close'] = '';
 $setting['gen']['static'] = 'jpg,png,gif,ico,css,js,json,html,htm,woff,woff2,eot,svg,ttf,map,zip';
+$setting['gen']['memory'] = '256M';
+$setting['gen']['force_domain'] = false;
 $setting['gen']['debug'] = false;
 
 $setting['web'] = array();
@@ -70,12 +72,4 @@ $setting['db']['pconnect'] = false;
 $setting['db']['charset'] = 'utf-8';
 $setting['db']['name'] = 'mystep';
 $setting['db']['pre'] = 'ms_';
-
-$setting['memcached'] = array();
-$setting['memcached']['server'] = '127.0.0.1:11211';
-$setting['memcached']['expire'] = 86400;
-$setting['memcached']['persistent'] = true;
-$setting['memcached']['weight'] = 5;
-$setting['memcached']['timeout'] = 1;
-$setting['memcached']['retry_interval'] = 10;
 return $setting;

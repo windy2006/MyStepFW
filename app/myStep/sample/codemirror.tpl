@@ -28,7 +28,7 @@
             "vendor/codemirror/mode/css/css.js",
             "vendor/codemirror/mode/htmlmixed/htmlmixed.js",
         ], true, function() {
-            $.get('<!--url_prefix-->Document/', function(data) {
+            $.get('<!--url_prefix-->', function(data) {
                 $("#code").val(data);
                 let editor = CodeMirror.fromTextArea($id("code"), {
                     mode: "text/html",

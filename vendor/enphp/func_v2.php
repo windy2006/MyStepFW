@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 $_SERVER['starttime'] = microtime(1);
 
 /**
@@ -233,7 +234,7 @@ function strip_whitespace($content, $options = array()) {
                             break;
                         }*/
                         // 非 function 而且是静态变量
-                        if (!$function_stack[$is_function] && $is_static_var) {
+                        if (isset($function_stack[$is_function]) && !$function_stack[$is_function] && $is_static_var) {
                             break;
                         }
 
@@ -449,7 +450,7 @@ function strip_whitespace($content, $options = array()) {
                         break;
                     }
                     //namespace
-                    if ($list[$key + 1][1] == '\\' || $list[$key - 1]['content'] == '\\') {
+                    if (!isset($list[$key + 1][1]) || $list[$key + 1][1] == '\\' || $list[$key - 1]['content'] == '\\') {
                         break;
                     }
                     //log::info('find2', $is_ob, find_last_token($list, $key, array('->', '::')), $val[1]);
@@ -708,6 +709,7 @@ function strip_whitespace($content, $options = array()) {
                     $is_class && $is_class++;
                     $is_abstract_function && $is_abstract_function = 0;
                     if (!$is_string_var) {
+                        if(!isset($function_stack[$is_function])) $function_stack[$is_function] = 0;
                         $is_function && $function_stack[$is_function]++;
                         // get start point
                         if ($is_function && $function_stack[$is_function] == 1) {
@@ -764,7 +766,7 @@ function strip_whitespace($content, $options = array()) {
                             while ($options['encode_var'] && $index_key-- > -1) {
                                 $token     = $list[$index_key];
                                 $token_str = isset($token['content']) ? strtolower(rtrim($token['content'])) : $token;
-                                $token_var = substr($token['content'], 0, $len_global_var);
+                                $token_var = substr($token['content']??'', 0, $len_global_var);
                                 if (strtr($token_var, $same_quotes) == $str_global_var_same_quote) {
                                     $find_global_var++;
                                 }
@@ -803,6 +805,7 @@ function strip_whitespace($content, $options = array()) {
                                             log::info($token);
                                         }*/
                                         // for anonymous function
+                                        if(!isset($token['content'])) $token['content'] = '';
                                         switch (strtolower(trim($token['content']))) {
                                             case 'function':
                                                 $_function_stack[++$_function_index] = 0;
@@ -816,7 +819,7 @@ function strip_whitespace($content, $options = array()) {
                                                 }
                                                 break;
                                         }
-                                        if ($_function_index == 0 && in_array($token['token_name'], $allow_modify_variables)) {
+                                        if ($_function_index == 0 && in_array($token['token_name']??[], $allow_modify_variables)) {
                                             $is_modify  = substr($token['content'], 0, 3) == '<?=' ? 4 : 1;
                                             $_var_start = substr($token['content'], $is_modify - 1, $len_global_var);
                                             if (strtr($_var_start, $same_quotes) == $str_global_var_same_quote) {
@@ -886,6 +889,7 @@ function strip_whitespace($content, $options = array()) {
                     $index_key    = $key;
                     $token        = 0;
                     while ($index_key-- > -1) {
+                        if(!isset($token['content'])) continue;
                         $token          = $list[$index_key];
                         $old_function[] = $token['content'];
                         if (trim(strtolower($token['content'])) == 'function') {
@@ -1022,6 +1026,7 @@ function strip_whitespace($content, $options = array()) {
             $str .= $insert_list[$key];
         }
         $str .= isset($c['content']) ? $c['content'] : '';
+        if(!isset($c['token_name'])) $c['token_name'] = '';
         if ($c['token_name'] == 'T_NAMESPACE') {
             $is_namespace = true;
         } else if ($is_namespace) {
@@ -1286,6 +1291,7 @@ function find_ob_function($options, $func) {
  */
 function find_last_token(&$list, $index, $keywords) {
     while (--$index && $index > -1) {
+        if(!isset($list[$index]['content'])) $list[$index]['content'] = '';
         $keyword = strtolower(trim($list[$index]['content']));
         if (!$keyword) {
             continue;
@@ -1355,6 +1361,7 @@ function find_left_quote(&$list, $index, $left = 0) {
     $left_quote  = $left;
     $quit        = 0;
     while (--$index && $index > -1) {
+        if(!isset($list[$index]['content'])) continue;
         $word = strtolower(trim($list[$index]['content']));
         switch ($word) {
             case 'protected':

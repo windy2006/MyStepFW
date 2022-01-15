@@ -23,7 +23,7 @@
         </div>
     </div>
     <div type="show" class="card-body p-0 mt-3">
-        <table class="table table-sm table-striped table-bordered table-hover font-sm bg-white m-0">
+        <table class="table table-sm table-striped table-bordered table-hover bg-white m-0">
             <thead class="thead-light">
             <tr>
                 <th>文件名称</th>

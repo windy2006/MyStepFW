@@ -12,6 +12,7 @@
 
 let global = {};
 global.root = $('base').attr('href');
+if(global.root==null) global.root = '/';
 global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
 global.root_fix = global.root_fix.replace(/\/+/g, '/');
 global.editor_btn = '';
@@ -198,7 +199,7 @@ function openWindow(url,width,height) {
     return window.open(url, "new_window","height="+height+", width="+width+", top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no, modal=yes");
 }
 
-//程序终端指定时间
+//程序中断指定时间
 function sleep(the_time) {
     let over_time = new Date(new Date().getTime() + the_time);
     while(over_time > new Date()) {}
@@ -249,7 +250,7 @@ function rndStr(len, t_lst, c_lst) {
     let char_lst = [];
     let rnd_num = 0;
     if(typeof(t_lst)==="undefined") t_lst = "";
-    t_lst += "0000";
+    t_lst += "0110";
     if(t_lst.charAt(0)==="1") char_lst = char_lst.concat(upper.split(/\B/));
     if(t_lst.charAt(1)==="1") char_lst = char_lst.concat(lower.split(/\B/));
     if(t_lst.charAt(2)==="1") char_lst = char_lst.concat(number.split(/\B/));
@@ -263,7 +264,7 @@ function rndStr(len, t_lst, c_lst) {
         rnd_num = rndNum(10);
         if(c_lst.length>0 && rnd_num>7) {
             str += c_lst[rndNum(c_lst.length-1)];
-        }    else if(cn && rnd_num>3) {
+        } else if(cn && rnd_num>3) {
             str += String.fromCharCode(rndNum(19968, 40869));
         } else if(char_lst.length>0){
             str += char_lst[rndNum(char_lst.length-1)];
@@ -647,4 +648,23 @@ $(window).bind('beforeunload',function(e){
         e.returnValue = msg;
         return msg;
     }
+});
+
+$(function(){
+    $('input[type=password]').each(function(){
+        let obj = $('<div>').addClass('password').data('mode', 'off');
+        $(this).after(obj).parent().css('position', 'relative');
+        obj.click(function(){
+            let obj_s = $(this);
+            if(obj_s.data('mode')==='off') {
+                obj_s.prev().attr('type', 'text');
+                obj_s.css('background-position-x', '-32px');
+                obj_s.data('mode', 'on');
+            } else {
+                obj_s.prev().attr('type', 'password');
+                obj_s.css('background-position-x', '0');
+                obj_s.data('mode', 'off');
+            }
+        });
+    });
 });

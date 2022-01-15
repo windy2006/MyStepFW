@@ -1,3 +1,6 @@
+<style>
+body {background-image: url('/static/images/background.jpg');}
+</style>
 <div class="p-5 text-center">
     <img src="static/images/logo.png" keep-url />
 </div>

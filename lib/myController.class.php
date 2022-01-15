@@ -639,7 +639,6 @@ class myController extends myBase {
         header_remove('x-powered-by');
         mb_internal_encoding($charset);
         mb_http_output($charset);
-        mb_http_input($charset);
         mb_regex_encoding($charset);
         header('Content-Type: text/html; charset=' . $charset);
 

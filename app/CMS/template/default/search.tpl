@@ -39,7 +39,7 @@ $(function(){
     if($('.news_list').text().replace(/\s+/g, '').length<3) {
         $('.news_list').html("未检索到相关内容！").css({
             'text-align': 'center',
-            'font-size': '24px',
+            'font-size': '1.5rem',
             'padding': '50px'
         });
     }

@@ -7,7 +7,7 @@ $check_fail = '<font color="red"><b>×</b></font>';
         <b><span class="glyphicon glyphicon-info-sign"></span> PHP 基本信息</b>
     </div>
     <div class="card-body p-0 table-responsive">
-        <table class="table table-striped table-hover m-0 font-sm">
+        <table class="table table-striped table-hover m-0">
             <tr>
                 <td width="200">PHP版本</td>
                 <td><?=PHP_VERSION;?></td>

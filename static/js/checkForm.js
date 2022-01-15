@@ -81,7 +81,7 @@ function checkForm(the_form, myChecker){
                 }
                 break;
             case "url":
-                //if(!/^(http|ftp):\/\/(\w+:\w+@)?([\w\-]+\.)+\w+(\/[\w\.\-]*)*(\?[\w&=%\-,]+)?#*$/ig.test(the_value)) {
+                //if(!/^(http|ftp|https):\/\/(\w+:\w+@)?([\w\-]+\.)+\w+(\/[\w\.\-]*)*(\?[\w&=%\-,]+)?#*$/ig.test(the_value)) {
                 if(!/^(http|ftp|https):\/\/(\w+:\w+@)?([\w\-]+\.)+\w+(\:\d+)?.*/i.test(the_value)) {
                     alert(language.checkform_err_url);
                     highlightIt(the_obj);

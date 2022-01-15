@@ -1,4 +1,5 @@
 <?PHP
+if($GLOBALS['info_app']['app']=='myStep') return;
 if(class_exists('Memcached')) {
     global $cache;
     require_once(__DIR__."/memoryCache.class.php");

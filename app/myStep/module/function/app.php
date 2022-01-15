@@ -4,12 +4,18 @@ if(myReq::check('post')) {
     $name = myReq::post('name');
     $route = myReq::post('route');
     $plugin = myReq::post('plugin');
+    $route_plugin = myReq::post('route_plugin');
     myFile::del(CONFIG.'route.php');
     for($i=0,$m=count($name);$i<$m;$i++) {
-        myFile::saveFile(APP.$name[$i].'/route.php', $route[$i]);
+        myFile::saveFile(APP.$name[$i].'/route.php', htmlspecialchars_decode($route[$i]));
         myFile::saveFile(APP.$name[$i].'/plugin.php', '<?PHP'.chr(10).'return '.var_export(explode(',', $plugin[$i]), true).';');
         $ms_setting->merge(APP.$name[$i].'/config.php');
         $router->checkRoute(CONFIG.'route.php', APP.$name[$i].'/route.php', $name[$i]);
+    }
+    if(empty($route_plugin)) {
+        myFile::del(CONFIG.'route_plugin.php');
+    } else {
+        myFile::saveFile(CONFIG.'route_plugin.php', htmlspecialchars_decode($route_plugin));
     }
     if(is_file(CONFIG.'route_plugin.php')) {
         $list = include(CONFIG.'route_plugin.php');
@@ -43,6 +49,11 @@ foreach($dirs as $k) {
     }
     $t->setLoop('app', $info);
 }
+$route_plugin = '';
+if(is_file(CONFIG.'route_plugin.php')) {
+    $route_plugin = htmlspecialchars(myFile::getLocal(CONFIG.'route_plugin.php'));
+}
+$t->assign('route_plugin', $route_plugin);
 $mydb = new myDb('simpleDB', 'plugin', PLUGIN);
 $plugin = array();
 if($mydb->check()) {

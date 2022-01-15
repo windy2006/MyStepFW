@@ -5,7 +5,7 @@
     </div>
     <div class="card-body p-0 table-responsive mt-5">
         <form class="col-xs-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 p-0" method="post" action="order" onsubmit="return checkForm(this)">
-        <table class="table table-sm table-striped table-bordered table-hover font-sm my-md-3 bg-white">
+        <table class="table table-sm table-striped table-bordered table-hover my-md-3 bg-white">
             <thead class="thead-light">
                 <tr class="text-center">
                     <th width="40">排序</th>
@@ -16,7 +16,7 @@
             </thead>
             <tbody>
 <!--loop:start key="record" time="10"-->
-                <tr title="<!--record_comment-->">
+                <tr title="<!--record_comment-->" data-layer="<!--record_layer-->" data-expand="true">
                     <td>
                         <input name="cat_id[]" type="hidden" value="<!--record_cat_id-->" />
                         <input name="cat_layer[]" type="hidden" value="<!--record_layer-->" />
@@ -47,23 +47,56 @@
 </div>
 <script type="application/javascript">
 $(function(){
-    if(typeof window.parent.getList !== 'undefined') {
-        $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
-            let web_id = '<!--web_id-->';
-            let obj = $(window.parent.document.getElementById('sidebar'));
-            if(typeof data.err==='undefined') {
-                obj.empty();
-                obj.append(window.parent.getList(data).removeClass('sub-menu'));
-                setURL(global.root_fix.replace('article/catalog/', ''), obj);
-                window.parent.setLink();
-                obj.find('.collapse').addClass('show');
-                obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-                if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
-            } else {
-                alert(data.err);
-            }
-        });
+    let refer = '<!--back_url-->';
+    if(refer.match(/method=(\w+)/)) {
+        if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
+            $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
+                let web_id = '<!--web_id-->';
+                let obj = $(window.parent.document.getElementById('sidebar'));
+                if(typeof data.err==='undefined') {
+                    obj.empty();
+                    obj.append(window.parent.getList(data).removeClass('sub-menu'));
+                    setURL(global.root_fix.replace('article/catalog/', ''), obj);
+                    window.parent.setLink();
+                    obj.find('.collapse').addClass('show');
+                    obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
+                    if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
+                } else {
+                    alert(data.err);
+                }
+            });
+        }
     }
     global.root_fix += 'article/catalog/';
+    $('tr[data-layer]').click(function(){
+        let obj = $(this);
+        let layer = parseInt(obj.attr('data-layer'));
+        let expand = (obj.attr('data-expand')==='true');
+        let obj_next = obj;
+        let flag = false;
+        while(true) {
+            obj_next = obj_next.next();
+            if(obj_next.length===0) break;
+            if(obj_next.attr('data-layer') <= layer) break;
+            if(expand) {
+                obj_next.hide();
+            } else {
+                obj_next.show();
+            }
+            obj_next.find('span').remove();
+            obj_next.attr('data-expand', 'true');
+            flag = true;
+        }
+        let td = $(obj.find('td')[2]);
+        td.find('span').remove();
+        if(expand) {
+            if(flag) $('<span class="glyphicon glyphicon-plus-sign ml-3"></span>').appendTo(td);
+            obj.attr('data-expand', 'false');
+        } else {
+            obj.attr('data-expand', 'true');
+        }
+
+        obj.attr('data-expand', (expand?'false':'true'));
+    });
 });
 </script>

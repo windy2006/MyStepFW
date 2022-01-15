@@ -125,17 +125,29 @@
     border-radius:10px 10px 0 0;
     border:1px solid #CCCCCC;
     background-color:#DDDDDD;
+    position:relative;
 }
 #list_tab a.nav-link span {
     font-size:9px;
     position:relative;
-    top:-8px;
-    left:8px;
     color:#CCCCCC;
     z-index:1;
 }
 #list_tab a.nav-link span:hover {
     color:#1e4c7c;
+}
+#list_tab a.nav-link span.glyphicon-remove {
+    top:-8px;
+    left:8px;
+}
+#list_tab a.nav-link span.glyphicon-refresh {
+    display: none;
+    position:absolute;
+    top:20px;
+    right:6px;
+}
+#list_tab a.active span.glyphicon-refresh {
+    display: inline;
 }
 #list_tab a.active {
     font-weight:bold;
@@ -251,7 +263,7 @@
     color:inherit;
 }
 
-#sidebar .nav .nav-item .nav-link i.menu-icon:before {
+#sidebar .nav .nav-item .nav-link i.menu-icon::before {
     vertical-align:middle;
 }
 
@@ -264,7 +276,7 @@
     cursor:s-resize;
 }
 
-#sidebar .nav .nav-item .nav-link i.menu-arrow:before {
+#sidebar .nav .nav-item .nav-link i.menu-arrow::before {
     content:"\f13a";
     font-family: "FontAwesome", serif;
     font-style:normal;
@@ -285,7 +297,7 @@
     cursor:n-resize;
 }
 
-#sidebar .nav .nav-item .nav-link i.menu-arrow[aria-expanded="true"]:before {
+#sidebar .nav .nav-item .nav-link i.menu-arrow[aria-expanded="true"]::before {
     -moz-transform:rotate(180deg);
     -o-transform:rotate(180deg);
     -ms-transform:rotate(180deg);
@@ -335,7 +347,7 @@
     border-top:0;
 }
 
-#sidebar .nav.sub-menu .nav-item .nav-link i.menu-arrow:before {
+#sidebar .nav.sub-menu .nav-item .nav-link i.menu-arrow::before {
     content:"\f0d7";
 }
 

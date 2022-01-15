@@ -16,10 +16,7 @@ if(!empty($id)) {
     }
     $web_cur = \app\CMS\checkVal($website, 'web_id', $id);
 }
-$domain = [];
-if(is_file(CONFIG.'domain.php')) {
-    $domain = include(CONFIG.'domain.php');
-}
+global $domain;
 switch($method) {
     case 'add':
     case 'edit':
@@ -83,7 +80,7 @@ switch($method) {
         if(isset($domain[$data['domain']]) && $domain[$data['domain']]!=$info_app['app']) {
             mystep::info('admin_web_subweb_domain');
         }
-        $domain[$data['domain']] = 'CMS';
+        if(strlen($data['domain'])>2) $domain[$data['domain']] = 'CMS';
         myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
         $config = new myConfig(PATH.'website/config_'.$data['idx'].'.php');
         $config->set($setting);

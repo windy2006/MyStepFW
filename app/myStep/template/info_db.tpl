@@ -3,7 +3,7 @@
         <b><span class="glyphicon glyphicon-info-sign"></span> 数据库基本信息</b>
     </div>
     <div class="card-body p-0 table-responsive">
-        <table class="table table-striped table-hover m-0 font-sm">
+        <table class="table table-striped table-hover m-0">
 <?php
 $db->reconnect(0, $S->db->name);
 $db_stat = array('Database Type'=>$S->db->type);

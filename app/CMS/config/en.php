@@ -1,6 +1,17 @@
 <?PHP
 $setting_detail = array();
 
+$setting_detail['gen'] = array(
+    'name' => 'General Setting',
+    'list' => [
+        'force_domain' => array(
+            'name' => 'Force Domain',
+            'describe' => 'Force jump to the binded domain.',
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
+        ),
+    ]
+);
+
 $setting_detail['web'] = array(
     'name' => 'Website setting',
     'list' => [
@@ -187,6 +198,11 @@ $setting_detail['expire'] = array(
 $setting_detail['watermark'] = array(
     'name' => 'Watermark Setting',
     'list' => [
+        'thumb' => array(
+            'name' => 'Thumb Width',
+            'describe' => 'System will reduce the width of picture to the specified size',
+            'type' => array('text', 'digital', '5')
+        ),
         'mode' => array(
             'name' => 'Mode',
             'describe' => 'Add Watermark to artile content or images',

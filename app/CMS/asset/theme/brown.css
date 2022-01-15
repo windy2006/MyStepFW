@@ -1,4 +1,4 @@
-body:before {
+body::before {
     background: url('https://up.enterdesk.com/edpic/bb/12/64/bb1264aae179a8a13d154563ad381d93.jpg') no-repeat;
     background-size: cover;
     width: 100%;
@@ -26,10 +26,6 @@ body:before {
 
 .navbar-c .navbar-nav .nav-link.active {
     font-weight: 600
-}
-
-.navbar-c .dropdown-menu {
-    font-size: .875rem
 }
 
 .navbar-c .dropdown-item.active {

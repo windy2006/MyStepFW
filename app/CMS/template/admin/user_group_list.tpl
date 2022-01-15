@@ -4,7 +4,7 @@
         <a class="btn btn-primary btn-sm float-right py-0 border" href="add">添加新用户组</a>
     </div>
     <div class="card-body p-0 table-responsive mt-5">
-        <table class="table table-sm table-striped table-bordered border-0 table-hover font-sm my-md-3 bg-white
+        <table class="table table-sm table-striped table-bordered border-0 table-hover my-md-3 bg-white
                         col-xs-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
             <thead class="thead-light">
             <tr class="text-center">

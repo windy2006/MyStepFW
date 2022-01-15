@@ -4,7 +4,7 @@ if(myReq::check('post')) {
     $list = myReq::post('[ALL]');
     for($i=0,$m=count($list['domain']);$i<$m;$i++) {
         if(empty($list['domain'][$i]) || empty($list['rule'][$i])) continue;
-        $result[$list['domain'][$i]] = $list['rule'][$i];
+        if(preg_match('@^/\w+/.*$@', $list['rule'][$i])) $result[$list['domain'][$i]] = $list['rule'][$i];
     }
     myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($result, 1).';');
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");location.href=document.referrer;</script>');

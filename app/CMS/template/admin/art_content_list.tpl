@@ -29,7 +29,7 @@
     </div>
     
     <div class="card-body p-0 table-responsive">
-        <table class="table table-sm table-striped table-bordered table-hover font-sm my-md-3 bg-white">
+        <table class="table table-sm table-striped table-bordered table-hover my-md-3 bg-white">
             <thead class="thead-light">
             <tr class="text-center">
                 <th width="40"><a class="text-dark" href="?keyword=<!--keyword-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->&order_type=<!--order_type-->">编号</a></th>
@@ -87,21 +87,24 @@ $(function(){
     $('button[name=show_all]').click(function(e){
         location.href = global.root_fix;
     });
-    if(typeof window.parent.getList !== 'undefined') {
-        $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
-            let obj = $(window.parent.document.getElementById('sidebar'));
-            if(typeof data.err==='undefined') {
-                obj.empty();
-                obj.append(window.parent.getList(data).removeClass('sub-menu'));
-                setURL(global.root_fix.replace('article/catalog/', ''), obj);
-                window.parent.setLink();
-                obj.find('.collapse').addClass('show');
-                obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-                if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
-            } else {
-                alert(data.err);
-            }
-        });
+    let refer = '<!--back_url-->';
+    if(refer.match(/method=(\w+)/)) {
+        if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
+            $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
+                let obj = $(window.parent.document.getElementById('sidebar'));
+                if(typeof data.err==='undefined') {
+                    obj.empty();
+                    obj.append(window.parent.getList(data).removeClass('sub-menu'));
+                    setURL(global.root_fix.replace('article/catalog/', ''), obj);
+                    window.parent.setLink();
+                    obj.find('.collapse').addClass('show');
+                    obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
+                    if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
+                } else {
+                    alert(data.err);
+                }
+            });
+        }
     }
     global.root_fix += 'article/content/';
 });

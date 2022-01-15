@@ -1,7 +1,7 @@
 <?PHP
 /********************************************
 *                                           *
-* Name    : Controller of the Frameword     *
+* Name    : Controller of the Framework     *
 * Author  : Windy2000                       *
 * Time    : 2010-12-16                      *
 * Email   : windy2006@gmail.com             *
@@ -30,10 +30,11 @@
     $this->JS($cache)                                // 整合页面脚本文件
     $this->editorSetPlugin($code, $btn)              // 富文本编辑器功能扩展
     $this->editorGetPlugin()                         // 生成编辑器插件缓存脚本
+    self::checkClose()                               // 检测框架服务是否关闭
     self::info($msg, $url)                           // 信息提示，需先声明mystep类
     self::captcha($len, $scope)                      // 生成验证码
-    self::language($app_name, $type)                   // JS语言包接口
-    self::setting($app_name, $type)                    // JS设置信息接口
+    self::language($app_name, $type)                 // JS语言包接口
+    self::setting($app_name, $type)                  // JS设置信息接口
     self::api($para)                                 // 框架API执行接口
     self::module($m)                                 // 框架模块调用接口
     self::upload()                                   // 文件上传接口
@@ -45,7 +46,7 @@
     self::go()                                       // 执行框架
     self::setPara()                                  // 应用模块初始化参数设置
     self::getModule($m)                              // 应用模块调用
-    self::vendor($class_name)                        // 调用第三放组件
+    self::vendor($class_name)                        // 调用第三方组件
     self::segment($str)                              // 字符串分词
 */
 
@@ -56,6 +57,7 @@ class myStep extends myController {
     public static
         $variant_alias = [],
         $url_prefix = '',
+        $shown = false,
         $plugin_ignore = ['ms_language', 'ms_setting', 'captcha'];
     public $setting;
     protected
@@ -73,7 +75,6 @@ class myStep extends myController {
         $this->setting = &$GLOBALS['ms_setting'];
         date_default_timezone_set($this->setting->gen->timezone);
         set_time_limit(30);
-        ini_set('memory_limit', '128M');
         ini_set('default_socket_timeout', 300);
     }
 
@@ -135,7 +136,7 @@ class myStep extends myController {
         if($this->setting->session->mode=='sess_mysql') {
             sess_mysql::set((array)$this->setting->db);
         }
-        myReq::sessionStart($this->setting->session->mode, true);
+        myReq::sessionStart($this->setting->session->mode);
         $this->login();
 
         global $plugin_ignore;
@@ -144,9 +145,9 @@ class myStep extends myController {
         $path = explode('/', trim(myReq::globals('info_app')['route'], '/'));
         $set_plugin = !in_array(array_shift($path), self::$plugin_ignore);
 
-        parent::start($this->setting->gen->charset, $set_plugin);
         $this->page_content['start'] = array();
         $this->page_content['end'] = array();
+        parent::start($this->setting->gen->charset, $set_plugin);
         self::$url_prefix = self::setURL();
     }
 
@@ -155,7 +156,7 @@ class myStep extends myController {
      */
     public function setInstance() {
         global $cache, $db;
-        if(is_null($cache)) {
+        if(empty($cache)) {
             switch($this->setting->gen->cache_mode) {
                 case 'MySQL':
                     $cache_setting = myConfig::o2a($this->setting->db);
@@ -165,7 +166,7 @@ class myStep extends myController {
             }
             $cache = $this->getInstance('myCache', 'myCache_'.$this->setting->gen->cache_mode, $cache_setting);
         }
-        if(is_null($db)) {
+        if(empty($db)) {
             $db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
             if($this->setting->db->auto) {
                 $db->connect($this->setting->db->pconnect, $this->setting->db->name);
@@ -217,6 +218,7 @@ class myStep extends myController {
         }
         $variants .= (empty($variants) ? '' : ',').'ms_setting,db,cache,mystep';
         parent::show($tpl, $this->setting->web->minify, $variants);
+        self::$shown = true;
     }
 
     /**
@@ -272,7 +274,7 @@ class myStep extends myController {
         $time_exec = getTimeDiff($this->time_start);
         $mem_peak = memory_get_peak_usage();
         unset($GLOBALS['db'], $GLOBALS['cache']);
-        $this->gzOut($this->setting->web->gzip_level, $query_count, $time_exec, $mem_peak);
+        if(self::$shown) $this->gzOut($this->setting->web->gzip_level, $query_count, $time_exec, $mem_peak);
         exit();
     }
 
@@ -337,6 +339,7 @@ class myStep extends myController {
      * @param int $level
      * @param int $query
      * @param int $time
+     * @param int $mem
      */
     public function gzOut($level = 3, $query = 0, $time = 0, $mem = 0) {
         $encoding = myReq::server('HTTP_ACCEPT_ENCODING');
@@ -347,20 +350,16 @@ class myStep extends myController {
             if (strpos($encoding, 'gzip')!==false) $encoding = 'gzip';
             $content  = ob_get_contents();
             if(count(ob_list_handlers())>0) ob_end_clean();
-            if(is_bool($this->setting->show)) {
-                $rate = ceil(strlen(gzcompress($content, $level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
-                $content = str_ireplace('</body>', '
-<div class="text-right text-secondary my-2 pr-5" style="font-size:12px;">
-<span class="nowrap font-sm">'.$this->getLanguage('info_memory').myFile::formatSize($mem).'</span>&nbsp; | &nbsp;
-<span class="nowrap font-sm">'.$this->getLanguage('info_compressmode').$rate.'</span>&nbsp; | &nbsp;
-<span class="nowrap font-sm">'.$this->getLanguage('info_querycount').(empty($query)?0:$query).'</span>&nbsp; | &nbsp;
-<span class="nowrap font-sm">'.$this->getLanguage('info_exectime').$time.'ms</span>&nbsp; | &nbsp;
-<span class="nowrap font-sm">'.$this->getLanguage('info_cacheuse').$this->setting->gen->cache_mode.'</span>
-</div>
-</body>
-', $content);
-            }
 
+            $rate = ceil(strlen(gzcompress($content, $level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
+            $content .= '
+<!--
+'.$this->getLanguage('info_memory').myFile::formatSize($mem).'
+'.$this->getLanguage('info_compressmode').$rate.'
+'.$this->getLanguage('info_querycount').(empty($query)?0:$query).'
+'.$this->getLanguage('info_exectime').$time.'ms
+'.$this->getLanguage('info_cacheuse').$this->setting->gen->cache_mode.'
+-->';
             header('Content-Encoding: '.$encoding);
             echo "\x1f\x8b\x08\x00\x00\x00\x00\x00";
             $Size = strlen($content);
@@ -396,7 +395,7 @@ class myStep extends myController {
      * 生成整合CSS文件
      * @param string $cache
      * @param string $dummy
-     * @return string|void
+     * @return $this
      */
     public function CSS($cache='', $dummy='') {
         if(!is_file($cache) || filemtime($cache)<$this->time_css) {
@@ -432,7 +431,7 @@ class myStep extends myController {
      * 整合页面脚本文件
      * @param string $cache
      * @param string $dummy
-     * @return string|void
+     * @return myStep
      */
     public function JS($cache='', $dummy='') {
         if(!is_file($cache) || filemtime($cache)<$this->time_js) {
@@ -594,7 +593,7 @@ code;
         $setting_js = array(
             'language' => $setting['setting']['gen']['language'],
             'debug' => $setting['setting']['gen']['debug'],
-            'app' => $app_name,
+            'app' => trim($app_name, '/'),
             'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', APP.$app_name),
             'max_size' => min($m1, $m2),
@@ -617,13 +616,14 @@ code;
      * @param $path
      */
     public static function api($path) {
-        global $ms_setting, $info_app;
+        global $ms_setting;
+        if(strpos($path, 'myStep/plugin_')===0) $path = substr($path, 7);
         $path = preg_replace('#&.+$#', '', $path);
         $path = explode('/', trim($path, '/'));
         $app_name = $path[0];
         include(CONFIG.'route.php');
         $result = '{"error":"Module is Missing!"}';
-        if(isset($api_list)) {
+        if(isset($api_list) && isset($path[1])) {
             if(isset($api_list[$app_name])) {
                 if(strpos($path[0], 'plugin_')!==0) {
                     $name = $path[1];
@@ -672,10 +672,17 @@ code;
      */
     public static function module($path, $dummy = '') {
         $path = explode('/', trim($path, '/'));
-        $app_name = array_shift($path);
-        if(isset(self::$modules[$app_name])) {
-            global $mystep, $db, $cache;
-            require(self::$modules[$app_name]);
+        $name = $path[0];
+        if(isset(self::$modules[$name])) {
+            global $mystep, $db, $cache, $router, $info_app, $ms_setting, $tpl_setting, $tpl_cache;
+            require(self::$modules[$name]);
+            if(isset($tpl) && ($tpl instanceof myTemplate)) {
+                $path_app = APP.$info_app['app'].'/';
+                if(is_file($path_app.'global.php')) include_once($path_app.'global.php');
+                if(is_file($path_app.'plugin_addon.php')) include_once($path_app.'plugin_addon.php');
+                $tpl->assign('main', $content??'');
+                $mystep->show($tpl);
+            }
             exit();
         } else {
             self::redirect('/');
@@ -713,7 +720,7 @@ code;
     public static function download($idx='') {
         global $ms_setting;
         if(empty($idx)) self::header('404');
-        if(self::checkPower('download')) {
+        if(get_called_class()::checkPower('download')) {
             $idx = explode('.', $idx);
             $path = FILE.date($ms_setting->upload->path_mode, intval($idx[0]));
             set_time_limit(0);
@@ -836,7 +843,7 @@ code;
         } else {
             $url = self::setURL($url);
         }
-        if(!is_null($GLOBALS['db'])) $GLOBALS['db']->close();
+        if(!empty($GLOBALS['db'])) $GLOBALS['db']->close();
         unset($GLOBALS['db'], $GLOBALS['cache']);
         header('location: ' . $url, true, $code);
         exit;
@@ -883,7 +890,7 @@ code;
             self::go();
         } else {
             $path = trim(str_replace(ROOT_WEB, '/', myReq::svr('REQUEST_URI')), '/');
-            $the_file = ROOT.preg_replace('#(&|\?).+$#', '', $path);
+            $the_file = ROOT.preg_replace('#[&?].+$#', '', $path);
             $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
             if(strpos($path, 'static')===0 || in_array($ext, ['js','css'])) myController::file($the_file);
             require(APP.'myStep/module/init.php');
@@ -894,21 +901,28 @@ code;
      * 执行框架
      */
     public static function go() {
-        global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache;
+        global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache, $host, $domain;
         $ms_setting = new myConfig(CONFIG.'config.php');
+        ini_set('memory_limit', $ms_setting->gen->memory);
         if($ms_setting->gen->debug) self::setOp('reset');
         $host = myReq::server('HTTP_HOST');
+        $domain = [];
+        $ms_setting->router->url_fix = '';
+        $rule = preg_replace('@^/(\w+)/.*$@', '\1', '/[int]/[str]');
+
         if(is_file(CONFIG.'domain.php')) {
             $domain = include(CONFIG.'domain.php');
             if(isset($domain[$host])) {
                 $rule = $domain[$host];
-                if(preg_match('@^\w+$@', $rule)) {
-                    $ms_setting->router->default_app = $rule;
-                    define('URL_FIX', $rule);
-                } else {
-                    $rule = preg_replace('@^/(\w+)/.*$@', '\1', $rule);
-                    define('URL_FIX', $rule);
+                if(!preg_match('@^\w+$@', $rule)) {
+                    $rule_2 = preg_replace('@^/(\w+)/.*$@', '\1', $rule);
+                    $rule = ($rule==$rule_2) ? '' : $rule_2;
                 }
+                if(!empty($rule)) {
+                    define('URL_FIX', $rule);
+                    $ms_setting->router->url_fix = '/'.$rule;
+                }
+                $ms_setting->router->url_fix = '/'.$rule;
             }
         }
         $router = new myRouter((array)$ms_setting->router);
@@ -922,18 +936,18 @@ code;
         }
         $ms_setting->cookie->path = str_replace('\\', '/', dirname(myReq::server('SCRIPT_NAME')));
         $ms_setting->web->url = 'http://'.$host;
-        $router->setRules(CONFIG.'route.php');
-
         if(is_file(CONFIG.'variant_alias.php')) {
             $variant_alias = require CONFIG.'variant_alias.php';
-            foreach ($variant_alias as $k => $v) {
-                if(isset($$v)) {
-                    $GLOBALS[$k] = &$$v;
-                    global $$k;
-                }
-            }
             self::$variant_alias = array_keys($variant_alias);
+            foreach ($variant_alias as $k => $v) {
+                if(!isset($GLOBALS[$v])) $GLOBALS[$v] = '';
+                $GLOBALS[$k] = &$GLOBALS[$v];
+                global $$k;
+            }
         }
+
+        $router->setRules(CONFIG.'route.php');
+
         if(!$router->check()) {
             $info_app = $router->info;
             $info_app['route'] = $router->route['p'];
@@ -950,6 +964,7 @@ code;
                 }
             }
             myStep::setPara();
+            myStep::checkBind($info_app['app']);
             if(isset($info_app['path'][1]) && $info_app['path'][0]=='asset') {
                 $file = APP.$info_app['app'].'/asset/'. $ms_setting->template->style.'/'.$info_app['path'][1];
                 if(is_file($file)) {
@@ -957,26 +972,21 @@ code;
                     exit;
                 }
             }
-            foreach(self::$variant_alias as $v) {
-                global $$v;
-            }
             if(is_file(PATH.'route.php')) $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
             if(is_file(PATH.'global.php')) require_once(PATH.'global.php');
             require(PATH.'index.php');
             if(isset($tpl)) $mystep->show($tpl);
-            $mystep->end();
         }
+        $mystep->end();
     }
 
     /**
      * 应用模块初始化参数设置
      */
     public static function setPara() {
-        global $mystep, $info_app, $tpl_setting, $tpl_cache, $ms_setting;
-        foreach(self::$variant_alias as $v) {
-            global $$v;
-        }
-        if($mystep!=null) return;
+        global $mystep, $info_app, $tpl_setting, $tpl_cache, $ms_setting, $db, $cache;
+        self::checkClose();
+        if(!empty($mystep)) return;
         define('PATH', APP.$info_app['app'].'/');
         if(is_file(PATH.$info_app['app'].'.class.php')) {
             require_once(PATH.$info_app['app'].'.class.php');
@@ -986,10 +996,9 @@ code;
             $class = __CLASS__;
         }
         $mystep = new $class();
-
         if(is_file(PATH.'lib.php')) require_once(PATH.'lib.php');
         if(is_callable(array($mystep, 'preload'))) $mystep->preload();
-        if(!$ms_setting->gen->debug && !empty($ms_setting->gen->close)) self::redirect($ms_setting->gen->close);
+
         $ms_setting->web->css = explode(',', $ms_setting->web->css);
         foreach($ms_setting->web->css as $k) {
             $mystep->addCSS(STATICS.'css/'.$k.'.css');
@@ -1031,6 +1040,50 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
     }
 
     /**
+     * 检测域名绑定
+     * @param $pattern
+     */
+    public static function checkBind($pattern) {
+        global $host, $domain, $router, $ms_setting;
+        if($ms_setting->gen->force_domain===false) return;
+        if(($bind = array_search($pattern, $domain)) && !isset($domain[$host])) {
+            if($host!=$bind) {
+                $path = $router->route['qstr'];
+                $pattern = trim(preg_replace('#^([^\(]+).*$#', '\1', $pattern), '/');
+                $path = preg_replace('#^/'.$pattern.'#', '', $path);
+                myStep::redirect((isHttps()?'https':'http').'://'.$bind.$path);
+            }
+        }
+    }
+
+    /**
+     * 检测是否网站关闭
+     */
+    public static function checkClose() {
+        global $ms_setting, $info_app;
+        if($info_app['app']=='myStep') return;
+        if(!$ms_setting->gen->debug && !empty($ms_setting->gen->close)) {
+            if(stripos($ms_setting->gen->close, 'http')===0) {
+                self::redirect($ms_setting->gen->close);
+            } elseif(is_file(ROOT.$ms_setting->gen->close)) {
+                myStep::file($ms_setting->gen->close);
+            } else {
+                global $mystep;
+                $mystep->setLanguagePack(APP.'myStep/language/', $ms_setting->gen->language);
+                $paras = [
+                    'web_title' => $ms_setting->web->title,
+                    'web_url' => $ms_setting->web->url,
+                    'charset' => $ms_setting->gen->charset,
+                    'path_root' => str_replace(myFile::rootPath(), '/', ROOT),
+                    'lng_page_info' => $mystep->getLanguage('page_info'),
+                    'lng_page_info_refresh' => $mystep->getLanguage('page_info_refresh'),
+                ];
+                myStep::info($ms_setting->gen->close, '###');
+            }
+        }
+    }
+
+    /**
      * 应用模块调用
      */
     public static function getModule($m) {
@@ -1040,7 +1093,7 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
         }
         $tpl = new myTemplate($tpl_setting, $tpl_cache);
         if(is_file(PATH.'global.php')) require_once(PATH.'global.php');
-        $idx = preg_replace('#(/|&|\?).*$#', '', $m);
+        $idx = preg_replace('#[/&?].*$#', '', $m);
         $files = [
             PATH.'module/'.$tpl_setting['style'].'/'.$idx.'.php',
             PATH.'module/'.$tpl_setting['style'].'/'.($info_app['path'][0]??'').'.php',
@@ -1068,7 +1121,6 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      * @throws ReflectionException
      */
     public static function vendor() {
-        global $mystep;
         $args = func_get_args();
         $name = array_shift($args);
         if(is_array($name)) {
@@ -1092,7 +1144,6 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
         }
         $r = new ReflectionClass($class);
         $instance = $r->newInstanceWithoutConstructor();
-        //$instance = new $class();
         if(count($args) && is_callable([$instance, '__construct'])) {
             call_user_func_array([$instance, '__construct'], $args);
         } elseif(count($args) && is_callable([$instance, 'init'])) {

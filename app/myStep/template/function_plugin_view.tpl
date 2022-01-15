@@ -4,7 +4,7 @@
     </div>
     <div class="card-body p-0 table-responsive">
         <form method="post" class="form-inline">
-        <table class="table table-striped table-hover m-0 font-sm">
+        <table class="table table-striped table-hover m-0">
             <tr>
                 <td class="text-center"><!--info--></td>
             </tr>

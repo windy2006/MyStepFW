@@ -178,8 +178,9 @@ class myReq extends myBase {
                         default:
                             if(is_callable($format)) {
                                 $result = call_user_func($format, $result);
+                            } else {
+                                $result = preg_replace('/[^'.$format.']/i', '', $result);
                             }
-                            $result = preg_replace('/[^'.$format.']/i', '', $result);
                             break;
                     }
                 }

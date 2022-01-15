@@ -15,7 +15,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text item-name">网站域名</span>
                 </div>
-                <input name="domain" class="form-control" placeholder="多个域名请用半角逗号间隔" type="text" maxlength="80" value="<!--domain-->" need="" />
+                <input name="domain" class="form-control" placeholder="多个域名请用半角逗号间隔" type="text" maxlength="80" value="<!--domain-->" />
             </div>
             <div class="input-group mb-2">
                 <h5>子站参数设置：</h5>

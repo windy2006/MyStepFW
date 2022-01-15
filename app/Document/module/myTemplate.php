@@ -119,4 +119,4 @@ mytpl;
             return str_replace($block, $result, $tpl_test_content);
         })->loadSet(PATH.'data/template/setting.ini', 'pre', 1);
 }
-$tpl_test->render('$test', true, false);
+$tpl_test->render('$test,$test1', true, false);

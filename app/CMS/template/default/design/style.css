@@ -23,10 +23,10 @@ header .navbar-nav li:hover .nav-link:hover {
 header .navbar-nav a.dropdown-item:hover {
     background-color: #cccccc;
 }
-header .navbar-nav li.dropdown a.dropdown-toggle:after {
+header .navbar-nav li.dropdown a.dropdown-toggle::after {
     transition: all .4s ease-in;
 }
-header .navbar-nav li.dropdown:hover a.dropdown-toggle:after {
+header .navbar-nav li.dropdown:hover a.dropdown-toggle::after {
     transform: rotate(180deg);
 }
 header .navbar-nav .dropdown-menu {
@@ -61,7 +61,7 @@ header .navbar-nav .dropdown-menu {
     text-shadow: 1px 0 0 #000, 0 1px 0 #000, -1px 0 0 #000, 0 -1px 0 #000;
     transition: all .5s ease;
 }
-.my-title:after {
+.my-title::after {
     content:'Powered By MyStep Framework';
     color:rgb(255,255,255);
     text-shadow: 1px 0 0 #000, 0 1px 0 #000, -1px 0 0 #000, 0 -1px 0 #000;
@@ -305,10 +305,10 @@ footer p {
 .show_txt a {
     margin:5px;
 }
-.show_txt a:before {
+.show_txt a::before {
     content: '[';
 }
-.show_txt a:after {
+.show_txt a::after {
     content: ']';
 }
 .breadcrumb {
@@ -346,10 +346,10 @@ footer p {
     border-top-color: #3498db;
     border-bottom-color: #3498db;
 }
-.breadcrumb-item:last-child:after {
+.breadcrumb-item:last-child::after {
     display: none;
 }
-.breadcrumb-item:after{
+.breadcrumb-item::after{
     content: "";
     border-top: 18px solid transparent;
     border-bottom: 17px solid transparent;
@@ -370,10 +370,10 @@ footer p {
 .breadcrumb-item:hover{
     background-color:#fa5ba5;
 }
-.breadcrumb-item:hover:after{
+.breadcrumb-item:hover::after{
     border-left-color: #fa5ba5;
 }
-.breadcrumb-item:hover:before{
+.breadcrumb-item:hover::before{
     border-top-color: #fa5ba5;
     border-bottom-color: #fa5ba5;
 }

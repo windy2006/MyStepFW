@@ -30,9 +30,9 @@
                     <option value="<!--website_web_id-->"><!--website_name--></option>
                     <!--loop:end-->
                 </select>
-                <div class="font-sm py-2 border-right pl-2">
-                    <button type="button" name="expand" class="btn btn-light btn-sm border"><span class="glyphicon glyphicon-plus-sign"></span> 展开所有</button>
-                    <button type="button" name="collapse" class="btn btn-light btn-sm border"><span class="glyphicon glyphicon-minus-sign"></span> 合并所有</button>
+                <div class="py-2 border-right pl-2">
+                    <button type="button" name="expand" class="font-sm btn btn-light btn-sm border"><span class="glyphicon glyphicon-plus-sign"></span> 展开所有</button>
+                    <button type="button" name="collapse" class="font-sm btn btn-light btn-sm border"><span class="glyphicon glyphicon-minus-sign"></span> 合并所有</button>
                 </div>
                 <span class="sidebar-go sidebar-go-top glyphicon glyphicon-circle-arrow-up" title="滚动到顶部" data-placement="right"></span>
                 <span class="sidebar-go sidebar-go-down glyphicon glyphicon-circle-arrow-down" title="滚动到底部" data-placement="right"></span>
@@ -58,7 +58,7 @@
         </div>
     </div>
 </div>
-<footer class="border-top text-center fixed-bottom bg-light pt-2 font-sm" style="max-height:60px;overflow:hidden;">
+<footer class="border-top text-center fixed-bottom bg-light pt-2" style="max-height:60px;overflow:hidden;">
     <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
 <script type="application/javascript">
@@ -157,18 +157,18 @@ function addFrame(name, url) {
             '<li class="nav-item" idx="'+idx+'">\n' +
             '   <a class="nav-link" data-toggle="tab" href="#'+idx+'"></a>\n' +
             '</li>');
-        tab.find('a').html(name+'<span class="glyphicon glyphicon-remove"></span>');
+        tab.find('a').html(name+'<span class="glyphicon glyphicon-remove"></span><span class="glyphicon glyphicon-refresh"></span>');
         tab.appendTo('#list_tab');
         frame.find('iframe').css('opacity', '1').attr('src', url);
         frame.appendTo('#list_frame');
-        tab.find('a span').click(function(e) {
+        tab.find('a span.glyphicon-remove').click(function(e) {
             e.preventDefault();
             e.stopPropagation();
             removeFrame(idx);
         });
-        tab.click(function(e) {
-            if($(this).find('a').hasClass('active')) {
-                frame.find('iframe').get(0).src = frame.find('iframe').get(0).src;
+        tab.find('a span.glyphicon-refresh').click(function(e) {
+            if($(this).parent().parent().find('a').hasClass('active')) {
+                frame.find('iframe').get(0).contentWindow.location.reload(true);
             }
         });
         if(tab.position().top>0) setTab();

@@ -24,14 +24,20 @@ global $info_app;
 
 <h5 class="mt-4">API接口测试：</h5>
 <ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
-    <li>基础模式（默认json格式）：<a href="api/Sample/setting" target="_blank">api/Sample/setting</a> </li>
-    <li>返回XML格式：<a href="api/Sample/setting/xml" target="_blank">api/Sample/setting/xml</a> </li>
-    <li>返回PHP脚本格式：<a href="api/Sample/setting/code" target="_blank">api/Sample/setting/code</a> </li>
-    <li>返回序列化字符串格式：<a href="api/Sample/setting/string" target="_blank">api/Sample/setting/string</a> </li>
-    <li>返回十六进制编译格式（可通过myString::fromHex解码）：<a href="api/Sample/setting/hex" target="_blank">api/Sample/setting/hex</a> </li>
-    <li>按路径参数返回：<a href="api/Sample/setting/gen/charset" target="_blank">api/Sample/setting/gen/charset</a> </li>
-    <li>按路径参数返回指定格式：<a href="api/Sample/setting/gen/xml" target="_blank">api/Sample/setting/gen/xml</a> </li>
-    <li>URL中的查询字符串优先于路径参数：<a href="api/Sample/setting/json/?p1=gen&p2=charset" target="_blank">api/Sample/setting/json/?p1=gen&p2=charset</a> </li>
+    <li>基础模式（默认json格式）：<a href="api<!--root-->setting" target="_blank">api<!--root-->setting</a> </li>
+    <li>返回XML格式：<a href="api<!--root-->setting/xml" target="_blank">api<!--root-->setting/xml</a> </li>
+    <li>返回PHP脚本格式：<a href="api<!--root-->setting/code" target="_blank">api<!--root-->setting/code</a> </li>
+    <li>返回序列化字符串格式：<a href="api<!--root-->setting/string" target="_blank">api<!--root-->setting/string</a> </li>
+    <li>返回十六进制编译格式（可通过myString::fromHex解码）：<a href="api<!--root-->setting/hex" target="_blank">api<!--root-->setting/hex</a> </li>
+    <li>按路径参数返回：<a href="api<!--root-->setting/gen/charset" target="_blank">api<!--root-->setting/gen/charset</a> </li>
+    <li>按路径参数返回指定格式：<a href="api<!--root-->setting/gen/xml" target="_blank">api<!--root-->setting/gen/xml</a> </li>
+    <li>URL中的查询字符串优先于路径参数：<a href="api<!--root-->setting/json/?p1=gen&p2=charset" target="_blank">api<!--root-->setting/json/?p1=gen&p2=charset</a> </li>
+</ul>
+
+<h5 class="mt-4">模块测试：</h5>
+<ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
+    <li>模块为插件的页面展示方式，可依照不同应用的模版风格将插件数据通过页面的方式显示到客户端</li>
+    <li>点击查看示例：<a href="/module<!--root-->test1" target="_blank">/module<!--root-->test1</a> </li>
 </ul>
 
 <h5 class="mt-4">脚本代码：</h5>

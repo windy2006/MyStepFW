@@ -48,7 +48,17 @@ $setting_detail['gen'] = array(
         'static' => array(
             'name' => '静态文件',
             'describe' => '可直接通过url调用的文件类型',
-            'type' => array('text', '', '80')
+            'type' => array('text', '', '100')
+        ),
+        'memory' => array(
+            'name' => '内存限制',
+            'describe' => 'PHP 可用内存量（-1为不限制）',
+            'type' => array('text', '\d+[GMK]', '128M')
+        ),
+        'force_domain' => array(
+            'name' => '域名跳转',
+            'describe' => '强制跳转至绑定域名',
+            'type' => array('radio', array('启用'=>'true', '关闭'=>'false'))
         ),
         'debug' => array(
             'name' => '除错模式',

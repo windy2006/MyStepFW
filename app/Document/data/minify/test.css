@@ -32,7 +32,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
 }
 
-q:before, q:after {
+q::before, q::after {
     content: '';
 }
 
@@ -92,7 +92,7 @@ input:hover {
     zoom: 1;
 }
 
-.after:after {
+.after::after {
     content: '.';
     visibility: hidden;
     display: block;

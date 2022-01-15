@@ -30,7 +30,7 @@
     </div>
 </div>
 
-<footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
+<footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2">
     <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
 <script type="application/javascript" src="language/myStep/default"></script>

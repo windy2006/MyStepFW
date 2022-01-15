@@ -249,8 +249,8 @@ class myConfig extends myBase {
                 $setting = $this->load($setting, true);
             }
         }
-        if(is_object($setting)) {
-            if(empty($org)) $org = $this->setting;
+        if(empty($org)) $org = $this->setting;
+        if(is_object($setting) && is_object($org)) {
             foreach($setting as $k => $v) {
                 if(isset($org->$k) && is_object($v)) {
                     $this->merge($v, $org->$k);

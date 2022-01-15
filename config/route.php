@@ -4,6 +4,10 @@ $format_list = array (
   array (
     'camel' => '[a-z]+([A-Z][a-z]+)+',
   ),
+  'test' => 
+  array (
+    'Camel' => '([A-Z][a-z]+)+',
+  ),
 );
 
 $rule_list = array (
@@ -39,6 +43,29 @@ $rule_list = array (
       array (
         0 => 'app\\sample\\preCheck,3',
         1 => 'app\\sample\\routeTest',
+      ),
+    ),
+  ),
+  'test' => 
+  array (
+    0 => 
+    array (
+      0 => '/t1/[any]',
+      1 => 'app\\test\\route',
+    ),
+    1 => 
+    array (
+      0 => '/t2/[any]',
+      1 => 'mystep::getModule',
+    ),
+    2 => 
+    array (
+      0 => '/t3/[Camel]/[any]',
+      1 => 
+      array (
+        0 => 'app\\test\\f1,$1',
+        1 => 'app\\test\\f2,$2',
+        2 => 'app\\test\\f3',
       ),
     ),
   ),
@@ -124,9 +151,9 @@ $api_list = array (
     'download' => 'myStep::download',
     'remove' => 'myStep::remove_ul',
   ),
-  'recruit' => 
+  'test' => 
   array (
-    'data' => 'app\\recruit\\getData',
+    'api' => 'app\\test\\api',
   ),
   'plugin_manager' => 
   array (

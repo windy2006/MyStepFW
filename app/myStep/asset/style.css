@@ -25,16 +25,14 @@ caption {
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05), inset 0 -1px 0 rgba(0, 0, 0, .1);
 }
 .bd-navbar .navbar-nav .nav-link {
-    color: #cbbde2
+    color: #cbbde2;
+    white-space: nowrap;
 }
 .bd-navbar .navbar-nav .nav-link.active, .bd-navbar .navbar-nav .nav-link:hover {
     color: #fff;
 }
 .bd-navbar .navbar-nav .nav-link.active {
     font-weight: 600
-}
-.bd-navbar .dropdown-menu {
-    font-size: .875rem
 }
 .bd-navbar .dropdown-item.active {
     font-weight: 600;
@@ -71,7 +69,6 @@ caption {
 .card-body .rotate i {
     color: rgba(20, 20, 20, 0.15);
     position: absolute;
-    left: 0;
     right: -10px;
     bottom: 0;
     display: block;

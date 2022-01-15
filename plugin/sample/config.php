@@ -1,14 +1,16 @@
 <?PHP
 
 $setting = array();
-$setting['para_1'] = 'test1';
-$setting['para_2'] = 123456.78;
-$setting['para_3'] = '2,3';
-$setting['para_4'] = true;
-$setting['para_5'] = 'select_2';
-$setting['para_6'] = '200820e3227815ed1756a6b531e7e0d2';
-$setting['para_7'] = 'y';
+$setting['para_1'] = '中欧';
+$setting['para_2'] = 98.76;
+$setting['para_3'] = '1,4';
+$setting['para_4'] = false;
+$setting['para_5'] = 'select_4';
+$setting['para_6'] = 'e10adc3949ba59abbe56e057f20f883e';
+$setting['para_7'] = '';
 $setting['para_8'] = '111
 222
-333';
+333
+444
+555';
 return $setting;

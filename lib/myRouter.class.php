@@ -31,7 +31,7 @@ class myRouter extends myBase {
     protected
         $setting = array(),
         $formats = array(
-            'any' => '(.*?)',
+            'any' => '(.*)',
             'int' => '(\d+)',
             'str' => '(\w+)'
         );
@@ -46,9 +46,11 @@ class myRouter extends myBase {
         if(!isset($setting['default_app'])) $setting['default_app'] = 'myStep';
         if(!isset($setting['delimiter_path'])) $setting['delimiter_path'] = '/';
         if(!isset($setting['delimiter_para'])) $setting['delimiter_para'] = '&';
+        if(!isset($setting['url_fix'])) $setting['url_fix'] = '';
         $this->setting = $setting;
         $this->route = $this->parseQuery();
         $this->query = $this->route['qstr'];
+        if(strpos($this->route['qstr'], $setting['url_fix'])===0) $this->setting['url_fix'] = '';
         if(preg_match('#^/\w+$#', $this->query)) $this->query .= '/';
         $this->parse();
     }
@@ -61,6 +63,7 @@ class myRouter extends myBase {
     public function parseQuery($qstr='') {
         if(empty($qstr)) {
             $qstr = trim(myReq::svr('QUERY_STRING'));
+            if(strpos($qstr, 'redirect:')===0) $qstr = trim(myReq::svr('REQUEST_URI'), '/');
             $path_info = myReq::svr('PATH_INFO');
             if(empty($path_info)) {
                 $path_info = myReq::server('ORIG_PATH_INFO');
@@ -74,6 +77,8 @@ class myRouter extends myBase {
         }
         $qstr = str_replace('?/index.php&', '?', $qstr);
         $qstr = trim(str_replace('?', '&', trim($qstr, '?')), '/');
+        $qstr = preg_replace('#^([\w\/]+)(\?|&|$)#', '\1/\2', $qstr);
+        $qstr = str_replace('//', '/', $qstr);
 
         $detail = explode('&', $qstr);
         if(count($detail)>1) {
@@ -92,6 +97,7 @@ class myRouter extends myBase {
         }
         $_SERVER["QUERY_STRING"] = $q;
         parse_str($q, $_GET);
+
         if(strpos($qstr, '/')!==0) {
             $qstr = '/'.$qstr;
             $p = '/'.$p;
@@ -106,6 +112,7 @@ class myRouter extends myBase {
      * @return $this
      */
     public function format($name, $pattern) {
+        $pattern = preg_replace('#\((?!\?)#', '(?:', $pattern);
         $this->formats[$name] = '('.$pattern.')';
         return $this;
     }
@@ -180,36 +187,42 @@ class myRouter extends myBase {
      * @return bool
      */
     public function check($qstr='') {
-        if(!empty($qstr)) $this->query = $qstr;
-        if(preg_match('@^/(\w+)@', $this->query, $match) && is_dir(APP.$match[1])) return false;
-        $url_fix = defined('URL_FIX') ? '/'.URL_FIX : '';
+        if(empty($qstr)) $qstr = $this->query;
+        $url_fix = $this->setting['url_fix'];
         $rule = '';
         $fix_mode = true;
         foreach($this->rules as $the_rule) {
-            if(preg_match('#^'.$the_rule['pattern'].'$#', $this->query, $match)) {
+            if(preg_match('#^'.$the_rule['pattern'].'/?$#', $qstr, $match)) {
                 $rule = $the_rule;
                 $fix_mode = false;
                 break;
-            } elseif(preg_match('#^'.$the_rule['pattern'].'$#', $url_fix.$this->query, $match)) {
+            } elseif(preg_match('#^'.$the_rule['pattern'].'/?$#', $url_fix.$qstr, $match)) {
                 $rule = $the_rule;
-                continue;
             }
         }
+        if(!$fix_mode || !empty($url_fix) && strpos($this->route['p'], $url_fix)===0) $url_fix = '';
+        if(preg_match('@^/(\w+)@', $url_fix.$qstr, $m) && is_dir(APP.$m[1])) return false;
+
         if(!empty($rule)) {
             if(empty($match)) {
-                preg_match('#^'.$rule['pattern'].'$#', $url_fix.$this->query, $match);
+                preg_match('#^'.$rule['pattern'].'$#', $url_fix.$qstr, $match);
             }
-            $path = trim(array_shift($match), '/');
-            $path = preg_replace('#/.*$#', '', $path);
-            if(preg_match('#^/(api|module)/#', $rule['pattern'])) {
+            $idx = trim(array_shift($match), '/');
+            $idx = preg_replace('#/.*$#', '', $idx);
+            if(preg_match('#^/api/#', $rule['pattern'])) {
+                if(!is_dir(APP.$match[0])) {
+                    array_unshift($match, 'myStep');
+                }
                 $rule['idx'] = $match[0];
-                $match = [$match[0].'/'.$match[1]];
+                $match = [implode('/', $match)];
+            }elseif(preg_match('#^/module/#', $rule['pattern'])) {
+                $rule['idx'] = $this->setting['default_app'];
+                if(defined('URL_FIX')) $rule['idx'] = URL_FIX;
+                $match = [implode('/', $match)];
             }
-            if(strpos($rule['idx'], 'plugin_')===0) $rule['idx'] = 'myStep';
-            if(!is_dir(APP.$rule['idx'])) {
+            if(!is_dir(APP.$rule['idx']) && strpos($rule['idx'], 'plugin_')!==0) {
                 myStep::info('app_missing');
             }
-            if(!$fix_mode || !empty($url_fix) && strpos($this->route['p'], $url_fix)===0) $url_fix = '';
             if(!file_exists(APP.$rule['idx'].'/info.php')) $rule['idx'] = 'myStep';
             $info_app = include(APP.$rule['idx'].'/info.php');
             $info_app['path'] = explode('/', trim($url_fix.$this->route['p'], '/'));
@@ -221,17 +234,17 @@ class myRouter extends myBase {
             if(is_file(APP.$info_app['app'].'/config.php')) {
                 $ms_setting->merge(APP.$info_app['app'].'/config.php');
             }
-            if(is_file(APP.$info_app['app'].'/config_'.$path.'.php')) {
-                $ms_setting->merge(APP.$info_app['app'].'/config_'.$path.'.php');
+            if(is_file(APP.$info_app['app'].'/config_'.$idx.'.php')) {
+                $ms_setting->merge(APP.$info_app['app'].'/config_'.$idx.'.php');
             }
             $core = myStep::getCore();
             if(isset($info_app['para']['core']) && is_file(APP.$core.'/config.php')) {
                 $ms_setting->merge(APP.$core.'/config.php');
             }
-
             myStep::setPara();
+            myStep::checkBind($rule['pattern']);
+            $result = [];
             if(is_array($rule['method'])) {
-                $match = array_slice($match, 0, 1);
                 $last = array_pop($rule['method']);
                 $flag = true;
                 foreach($rule['method'] as $each) {
@@ -239,7 +252,7 @@ class myRouter extends myBase {
                     $each = explode(',', $each);
                     $method = array_shift($each);
                     foreach($each as $k => $v) {
-                        if(preg_match('#^\$(\d+)$#', $v, $m)) $each[$k] = $match[$m[1]-1] ?? $v;
+                        if(preg_match('#^\$(\d+)$#', $v, $m)) $each[$k] = trim($match[$m[1]-1] ?? $v, '/');
                     }
                     array_push($each, $flag);
                     if(is_callable($method)) {
@@ -247,14 +260,21 @@ class myRouter extends myBase {
                     } else {
                         $flag = false;
                     }
+                    $result[] = $flag;
                     if($flag===false) break;
                 }
-                array_push($match, $flag);
-                if($flag!==false && is_callable($last)) {
-                    call_user_func_array($last, $match);
-                    exit;
+
+                $last = explode(',', $last);
+                $method = array_shift($last);
+                foreach($last as $k => $v) {
+                    if(preg_match('#^\$(\d+)$#', $v, $m)) $last[$k] = trim($match[$m[1]-1] ?? $v, '/');
                 }
-                return true;
+                if($flag!==false && is_callable($method)) {
+                    array_push($last, implode($this->setting['delimiter_path'], $match), $result);
+                    call_user_func_array($method, $last);
+                } else {
+                    myStep::info('app_missing');
+                }
             } else {
                 if(gettype($rule['method'])=='object') {
                     $paras = array();
@@ -270,7 +290,7 @@ class myRouter extends myBase {
                 if(is_callable($method)) {
                     call_user_func_array($method, $paras);
                 } else {
-                    return false;
+                    myStep::info('app_missing');
                 }
             }
             return true;
@@ -284,7 +304,7 @@ class myRouter extends myBase {
     public function parse() {
         extract($this->route);
         $setting = $this->setting;
-        $p = explode($setting['delimiter_path'], trim($p, '/'));
+        $p = explode($setting['delimiter_path'], trim($this->setting['url_fix'].$p, '/'));
         if(strpos($q, $setting['delimiter_para'])!==false || strpos($q, '=')!==false) {
             $para = explode($setting['delimiter_para'], $q);
             foreach($para as $k => $v) {

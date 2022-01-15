@@ -33,40 +33,40 @@ class myApi extends myBase {
         }
     }
 
-    public function run($method, $para=array(), $return="json", $charset="utf-8") {
-        $result = "";
+    public function run($method, $para=array(), $return='json', $charset='utf-8') {
+        $result = '';
         if(isset($this->methods[$method])) {
             if(empty($para)) {
                 $result = call_user_func($this->methods[$method]);
             } else {
-                $result = call_user_func_array($this->methods[$method], $para);
+                $result = call_user_func_array($this->methods[$method], array_values($para));
             }
         }
-        if(empty($charset)) $charset="utf-8";
+        if(empty($charset)) $charset='utf-8';
         switch($return) {
-            case "x":
-            case "xml":
+            case 'x':
+            case 'xml':
                 $result = '<?xml version="1.0" encoding="'.$charset.'"?>
 <mystep>
 '.myString::toXML($result).'
 </mystep>';
                 header('Content-Type: application/xml; charset='.$charset);
                 break;
-            case "s":
-            case "string":
+            case 's':
+            case 'string':
                 $result = myString::fromAny($result);
                 break;
-            case "h":
-            case "hex":
+            case 'h':
+            case 'hex':
                 $result = myString::toHex(myString::fromAny($result));
                 break;
-            case "c":
-            case "code":
-            case "script":
+            case 'c':
+            case 'code':
+            case 'script':
                 $result = myString::toScript(['result'=>$result]);
                 break;
-            case "j":
-            case "json":
+            case 'j':
+            case 'json':
             default:
                 $result = myString::toJson($result, $charset);
                 break;

@@ -59,6 +59,7 @@ function tinymceInit(obj){
         },
         */
         // Custom settings
+        autosave_ask_before_unload: false,
         content_css : setting.path_root+"static/css/bootstrap.css",
         convert_urls: false,
         remove_script_host: false,

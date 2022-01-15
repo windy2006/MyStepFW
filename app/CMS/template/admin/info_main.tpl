@@ -3,7 +3,7 @@
         <i class="glyphicon glyphicon-circle-arrow-right"></i> <b>服务器基本信息</b>
     </div>
     <div class="card-body p-0 table-responsive mt-5">
-        <table class="table table-striped table-hover m-0 font-sm">
+        <table class="table table-striped table-hover m-0">
             <tr>
                 <td width="140">服务器语言环境</td>
                 <td><?=r::svr("HTTP_ACCEPT_LANGUAGE")?></td>

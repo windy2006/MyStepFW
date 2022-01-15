@@ -18,7 +18,7 @@
         </div>
     </div>
     <div class="card-body p-0 table-responsive col-md-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2 p-0">
-        <table class="table table-sm table-striped table-bordered table-hover font-sm my-md-3 bg-white">
+        <table class="table table-sm table-striped table-bordered table-hover my-md-3 bg-white">
             <thead class="thead-light">
             <tr class="text-center">
                 <th width="40"><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order_type=<!--order_type-->">编号</a></th>

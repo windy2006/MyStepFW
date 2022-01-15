@@ -25,6 +25,9 @@ switch($method) {
             $db->build($S->db->pre.'news_show')
                 ->where('cat_id', 'n=', $cat_id);
             $db->delete();
+            $db->build($S->db->pre.'news_detail')
+                ->where('cat_id', 'n=', $cat_id);
+            $db->delete();
             $db->build($web_info['setting']->db->pre.'news_show')
                 ->where('cat_id', 'n=', $cat_id);
             $db->delete();
@@ -188,7 +191,7 @@ function build_page($method) {
         for($i=0,$m=count($news_cat_plat); $i<$m; $i++) {
             if(!checkPower('web', $news_cat_plat[$i]['web_id'])) continue;
             if($web_info['web_id']!=1 && $web_info['web_id']!=$news_cat_plat[$i]['web_id']) continue;
-            $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']==$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
+            $news_cat_plat[$i]['name'] = ((isset($news_cat_plat[$i+1]) && $news_cat_plat[$i+1]['layer']>=$news_cat_plat[$i]['layer'])?'├ ':'└ ').$news_cat_plat[$i]['name'];
             $news_cat_plat[$i]['name'] = str_repeat('&emsp;&nbsp;', $news_cat_plat[$i]['layer']-1).$news_cat_plat[$i]['name'];
             $news_cat_plat[$i]['name'] = preg_replace('/^├ /', '', preg_replace('/^└ /', '', $news_cat_plat[$i]['name']));
             $web = $cache->func('\app\CMS\getPara', [$website, 'web_id', $news_cat_plat[$i]['web_id']]);
@@ -263,8 +266,8 @@ function build_page($method) {
         $tpl->assign('title', $mystep->getLanguage($method=='add'?'admin_art_catalog_add':'admin_art_catalog_edit'));
         $tpl->assign('method', $method);
         $tpl->assign('show_merge', $show_merge);
-        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
     }
+    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
     $tpl->assign('web_id', $web_info['web_id']);
     return $mystep->render($tpl);
 }

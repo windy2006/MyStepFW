@@ -759,7 +759,7 @@ class myImg extends myBase {
      * 输出图像源到浏览器或文件
      * @param string $type
      * @param string $file
-     * @return bool
+     * @return $this|false
      */
     public function make($type='', $file='') {
         if(empty($type)) $type = $this->dst_type;
@@ -854,7 +854,8 @@ class myImg extends myBase {
      */
     public function check($img = NULL) {
         if(is_null($img)) $img = $this->img;
-        return (is_resource($img) && get_resource_type($img)=='gd');
+        if(is_null($img)) return false;
+        return ((is_resource($img) && get_resource_type($img)=='gd') || $img instanceof \GdImage);
     }
 
     /**
@@ -918,7 +919,6 @@ class myImg extends myBase {
         }
         $this->addNoise(max($this->width, $this->height)*2);
         $this->make('jpg');
-        return;
     }
 
     /**
@@ -930,13 +930,11 @@ class myImg extends myBase {
      * @return $this|bool|myImg|void
      */
     public function watermark($watermark, $position=1, $img_dst='', $para=array()) {
-        if(is_file($img_dst)) return $this->init($img_dst);
         $this->dst_type = 'jpg';
         if(!empty($img_dst)) {
             if(!file_exists(dirname($img_dst))) mkdir(dirname($img_dst), 0777, true);
             $this->dst_type = pathinfo($img_dst, PATHINFO_EXTENSION);
         }
-
         if(is_file($watermark)) {
             $new_watermark = $watermark;
             $img_wm = new myImg($new_watermark);

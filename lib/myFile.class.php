@@ -263,7 +263,7 @@ class myFile {
         if(is_dir($dir)) return true;
         $flag = true;
         $oldumask=umask(0);
-        if(!file_exists($dir) && mkdir($dir, 0777, true)===false) {
+        if(!file_exists($dir) && @mkdir($dir, 0777, true)===false) {
             $dir_list = explode('/', $dir);
             if($dir_list[0]=='') $dir_list[0]='/';
             $cur_dir = '';
@@ -584,7 +584,7 @@ class myFile {
                 trigger_error("File{$newname} already exist !");
             } else {
                 self::mkdir(dirname($newname));
-                rename($file, $newname) or trigger_error("Operation Failed in Renaming{$file} ��Please Check Your Power!");
+                rename($file, $newname) or trigger_error("Operation Failed in Renaming {$file} !");
             }
         } else {
             trigger_error("Cannot Find File{$file} !");
@@ -699,7 +699,8 @@ class myFile {
         if(isset($query)) $path .= '?'.$query;
         if(!isset($port)) $port = 80;
         if(false === ($fp = @fsockopen($scheme.$host, $port, $errno, $errmsg, $timeout))) {
-            trigger_error('Error occurs when remote file getting: '.$errno.' - '.$errmsg);
+            if($errno==0 && empty($errmsg)) $errmsg = 'Socket initialize failed!';
+            trigger_error('Error occurs when remote file getting: '.$errno.' - '.$errmsg.'('.$url.')');
             return false;
         }
         stream_set_blocking($fp, true);
@@ -911,6 +912,7 @@ class myFile {
         while(($file = $mydir->read()) !== false) {
             if($file=='.' || $file=='..') continue;
             $theFile = $dir.'/'.$file;
+            $tree[$file]['name'] = $file;
             if(is_dir($theFile)) {
                 if($recursion) $tree[$file]['sub'] = self::getTree($dir.'/'.$file, true);
                 $tree[$file]['size'] = '---';

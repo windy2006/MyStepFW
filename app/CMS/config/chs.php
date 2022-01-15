@@ -1,6 +1,17 @@
 <?PHP
 $setting_detail = array();
 
+$setting_detail['gen'] = array(
+    'name' => '基本设置',
+    'list' => [
+        'force_domain' => array(
+            'name' => '域名跳转',
+            'describe' => '强制跳转至绑定域名',
+            'type' => array('radio', array('启用'=>'true', '关闭'=>'false'))
+        ),
+    ]
+);
+
 $setting_detail['web'] = array(
     'name' => '站点设置',
     'list' => [
@@ -187,6 +198,11 @@ $setting_detail['expire'] = array(
 $setting_detail['watermark'] = array(
     'name' => '水印设置',
     'list' => [
+        'thumb' => array(
+            'name' => '缩略图宽',
+            'describe' => '将会自动将过大尺寸的图缩小为指定的宽度',
+            'type' => array('text', 'digital', '5')
+        ),
         'mode' => array(
             'name' => '水印模式',
             'describe' => '是否在文章内容或图片上添加水印',

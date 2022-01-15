@@ -32,23 +32,6 @@ function removePluginLink($path) {
     myFile::saveFile(APP.'myStep/menu.json', myString::toJson($menu));
 }
 
-function setPluginTemplate($idx, $name='') {
-    $tpl_setting = array(
-        'name' => 'main',
-        'path' => APP.'myStep/template/',
-        'style' => '',
-        'path_compile' => CACHE.'template/plugin_'.$idx.'/'
-    );
-    $path = $idx.'/';
-    if(empty($name)) $name = $idx;
-    $tpl_main = new myTemplate($tpl_setting, false);
-    $tpl_main->assign('path', $path);
-    $tpl_setting['name'] = $name;
-    $tpl_setting['path'] = PLUGIN.$path;
-    $tpl_sub = new myTemplate($tpl_setting, false);
-    return [$tpl_main, $tpl_sub];
-}
-
 function regPluginRoute($idx) {
     global $router;
     $router->checkRoute(CONFIG.'route.php', PLUGIN.$idx.'/route.php', 'plugin_'.$idx);
@@ -77,4 +60,43 @@ function removePluginRoute($idx) {
     myFile::saveFile($file, '<?PHP
 return '.var_export($list, true).';
 ');
+}
+
+function setPluginTemplate($idx, $page='', $mode = true) {
+    if($mode) {
+        $tpl_setting = array(
+            'name' => 'main',
+            'path' => APP.'myStep/template/',
+            'style' => '',
+            'path_compile' => CACHE.'template/plugin/'.$idx.'/'
+        );
+        $tpl_cache = false;
+    } else {
+        global $tpl_setting, $tpl_cache;
+    }
+    if(empty($page)) $page = $idx;
+    $tpl_main = new myTemplate($tpl_setting, $tpl_cache);
+    $tpl_setting = array(
+        'name' => $page,
+        'path' => PLUGIN.$idx.'/template/',
+        'style' => '',
+        'path_compile' => CACHE.'template/plugin/'.$idx.'/'.$GLOBALS['info_app']['app'].'/'
+    );
+    $tpl_sub = new myTemplate($tpl_setting, $tpl_cache);
+    return [$tpl_main, $tpl_sub];
+}
+
+function showPluginPage($idx, $page='') {
+    app\myStep\logCheck();
+    global $mystep;
+    if(empty($page)) $page = $idx;
+    $path_plugin = PLUGIN.$idx.'/';
+    if(!is_file($path_plugin.'template/'.$page.'.tpl')) {
+        myStep::info('page_error_plugin');
+    }
+    list($tpl, $tpl_sub) = setPluginTemplate($idx, $page, true);
+    include(APP.'myStep/global.php');
+    if(is_file($path_plugin.'module/'.$page.'.php')) include($path_plugin.'module/'.$page.'.php');
+    $tpl->assign('main', $mystep->render($tpl_sub));
+    $mystep->show($tpl);
 }

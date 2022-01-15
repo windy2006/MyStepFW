@@ -4,7 +4,7 @@
     </div>
     <div class="card-body p-0 table-responsive">
         <h4 class="text-center py-2"><!--err_msg--></h4>
-        <table class="table table-striped table-hover m-0 font-sm border-bottom">
+        <table class="table table-striped table-hover m-0 border-bottom">
             <!--loop:start key="err"-->
             <tr>
                 <td><!--err_content--></td>

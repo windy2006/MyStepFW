@@ -225,7 +225,7 @@ class myTemplate extends myBase {
         function get($arr, $mode, $idx = '') {
             $result = array();
             foreach($arr as $k => $v) {
-                if($mode) $k = (empty($idx) ? '' : $idx.'.').$k;
+                if($mode) $k = (empty($idx) ? '' : $idx.'_').$k;
                 if(is_array($v)) {
                     $result = array_merge($result, get($v, $mode, $k));
                 } else {
@@ -242,7 +242,8 @@ class myTemplate extends myBase {
                     $vars = get($vars, $mode);
                     break;
                 case 'ini':
-                    $vars = myString::fromIni($file, false);
+                    $vars = myString::fromIni($file, true);
+                    $vars = get($vars, $mode);
                     break;
                 case 'json':
                     $vars = myFile::getLocal($file);
@@ -400,7 +401,7 @@ mytpl;
             unset($cur_attrib, $cur_content);
         }
         $tpl_cache = $this->parseTag($tpl_cache);
-        $tpl_cache = preg_replace('/'.preg_quote($this->delimiter_l).'(\w+)'.preg_quote($this->delimiter_r).'/', '<?=$tpl_para[\'para\'][\'\1\']?>', $tpl_cache);
+        $tpl_cache = preg_replace('/'.preg_quote($this->delimiter_l).'(\w+?)'.preg_quote($this->delimiter_r).'/', '<?=$tpl_para[\'para\'][\'\1\']?>', $tpl_cache);
         $tpl_cache = preg_replace('/[\r\n]+/', chr(10), $tpl_cache);
         myFile::saveFile($cache_file, $tpl_cache, 'wb');
         return $cache_file;
@@ -606,19 +607,22 @@ mytpl;
             if(is_file($script)) {
                 if(count(ob_list_handlers())==0) {
                     ob_start();
-                    include($script);
-                    $content = ob_get_contents();
+                    if((@include $script)==true) {
+                        $content = ob_get_contents();
+                    }
                     ob_end_clean();
                 } else {
                     $temp = ob_get_contents();
                     ob_clean();
-                    include($script);
+                    if((@include $script)==true) {
+                        $content = ob_get_contents();
+                    }
                     $content = ob_get_contents();
                     ob_clean();
                     echo $temp;
                 }
             } else {
-                $this->error('Template compile failed !');
+                //$this->error('Template compile failed !');
             }
             if($minify) {
                 $content = str_replace('//<![CDATA[', '', $content);

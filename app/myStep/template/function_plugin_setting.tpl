@@ -4,7 +4,7 @@
     </div>
     <div class="card-body p-0 table-responsive">
         <form method="post" class="form-inline" onsubmit="return checkForm(this)">
-            <table class="table table-striped table-hover m-0 font-sm">
+            <table class="table table-striped table-hover m-0">
                 <tr>
                     <td style="line-height:22px;">
                         <!--setting-->

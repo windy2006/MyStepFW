@@ -3,7 +3,7 @@
         <b><span class="glyphicon glyphicon-info-sign"></span> 框架更新</b>
     </div>
     <div class="card-body p-0 table-responsive">
-        <table class="table table-striped table-hover m-0 font-sm">
+        <table class="table table-striped table-hover m-0">
             <tr>
                 <td style="width:120px;">当前框架版本</td>
                 <td>
@@ -103,6 +103,7 @@ function checkModify(mode) {
     loadingShow("正在检测系统文件的变更情况，请等待！");
     let url = "<!--url_prefix-->manager/check_" + (mode==1?'server':'local');
     $.get(url, function(info){
+        console.log(info);
         if(info==false || typeof(info.error)!="undefined") {
             alert(mode==0?"校验失败，请确认校验信息是否已成功建立！":"服务器连接失败，或不存在本网站对应字符集的校验信息");
             loadingShow();
@@ -130,7 +131,10 @@ function checkModify(mode) {
         } else {
             alert(result, true);
         }
-    }, "json");
+    }, "json").fail(function (e) {
+        console.log(e);
+        alert('校验失败！');
+    });
 }
 $('#link_3').click(function(){
     $.get("<!--url_prefix-->manager/empty", function(info){
@@ -139,6 +143,9 @@ $('#link_3').click(function(){
         } else {
             alert(info);
         }
+    }).fail(function (e) {
+        console.log(e);
+        alert('操作失败！');
     });
 });
 $('#link_4').click(function(){
@@ -147,9 +154,13 @@ $('#link_4').click(function(){
 $('#link_5').click(function(){
     loadingShow("正在打包框架系统，完成后将自动开始下载！");
     $.get("pack/", function(url) {
+        console.log(url);
         loadingShow();
         location.replace(url);
-    }, 'text');
+    }, 'text').fail(function (e) {
+        console.log(e);
+        alert('文件打包失败！');
+    });
 });
 let update_info = null;
 function checkUpdate() {
@@ -191,7 +202,10 @@ function applyUpdate(mode) {
         } catch(e) {
             alert("更新获取失败，请检查相关设置！");
         }
-    }, "json");
+    }, "json").fail(function (e) {
+        console.log(e);
+        alert('操作失败！');
+    });
 }
 $(function(){
     $.get("<!--url_prefix-->manager/check/version?"+Math.random(), function(info){
@@ -200,6 +214,9 @@ $(function(){
             $('<a href="javascript:" onclick="checkUpdate()">点击更新（v'+info.version+'）</a>').appendTo("#info");
         }
         update_info = info.detail;
-    }, "json");
+    }, "json").fail(function (e) {
+        console.log(e);
+        alert('操作失败！');
+    });
 });
 </script>

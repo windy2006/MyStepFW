@@ -57,6 +57,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
     use base_db, base_sql;
 
     protected
+        $persistent = false,
         $err = false,
         $err_info = '',
         $count = 0;
@@ -90,10 +91,11 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * @return bool
      */
     public function connect($pconnect = false, $the_db = null) {
+        $this->persistent = $pconnect;
         if($pconnect) {
-            $this->connect = mysqli_connect('p:'.$this->host, $this->user, $this->pwd);
+            $this->connect = @mysqli_connect('p:'.$this->host, $this->user, $this->pwd);
         } else {
-            $this->connect = mysqli_connect($this->host, $this->user, $this->pwd);
+            $this->connect = @mysqli_connect($this->host, $this->user, $this->pwd);
         }
         $this->sql = 'none (Connect to MySQL Server)';
         if(mysqli_connect_errno()) {
@@ -116,8 +118,10 @@ class MySQL extends myBase implements interface_db, interface_sql {
      * @param bool $pconnect
      * @param null $the_db
      */
-    public function reconnect($pconnect = false, $the_db = null) {
+    public function reconnect($pconnect = 'keep', $the_db = null) {
         $this->close();
+        sleep(1);
+        if($pconnect == 'keep') $pconnect = $this->persistent;
         return $this->connect($pconnect, $the_db);
     }
 
@@ -185,6 +189,8 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $sql = str_replace('where 1=1 order', 'order', $sql);
         $sql = str_ireplace('CHARSET=utf-8', 'CHARSET=utf8', $sql);
         $this->sql = $sql;
+        $retry = 0;
+        run:
         if($this->result = mysqli_query($this->connect, $sql)) {
             if(strpos('selec|show |descr|expla|repai|check|optim', strtolower(substr(trim($sql), 0, 5)))!==false && $this->check('result')) {
                 $num_rows = mysqli_num_rows($this->result);
@@ -195,9 +201,15 @@ class MySQL extends myBase implements interface_db, interface_sql {
                 $num_rows = 0;
             }
         }
+        $errno = $this->checkError();
         if($this->checkError())    {
-            $this->error('Error Occur in Query !');
-            $num_rows = false;
+            if($errno == 2006 && $retry++ < 3) {
+                $this->reconnect();
+                goto run;
+            } else {
+                $this->error('Error Occur in Query !');
+                $num_rows = false;
+            }
         }
         return $num_rows;
     }
@@ -635,7 +647,7 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     public function checkError(&$err_info = array()) {
         if(mysqli_errno($this->connect)) {
             $this->err_info = mysqli_errno($this->connect).' - '.mysqli_error($this->connect);
-            $this->err = true;
+            $this->err = mysqli_errno($this->connect);
         }
         $err_info = $this->err_info;
         return $this->err;

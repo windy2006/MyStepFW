@@ -48,7 +48,17 @@ $setting_detail['gen'] = array(
         'static' => array(
             'name' => 'Static File',
             'describe' => 'A list of extensions which can be visited through url.',
-            'type' => array('text', '', '80')
+            'type' => array('text', '', '100')
+        ),
+        'memory' => array(
+            'name' => 'Memory Limit',
+            'describe' => 'The maximum amount of memory can be used by PHP script.',
+            'type' => array('text', '\d+[GMK]', '128M')
+        ),
+        'force_domain' => array(
+            'name' => 'Force Domain',
+            'describe' => 'Force jump to the binded domain.',
+            'type' => array('radio', array('Open'=>'true', 'Close'=>'false'))
         ),
         'debug' => array(
             'name' => 'DEBUG',

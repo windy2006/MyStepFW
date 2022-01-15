@@ -16,10 +16,6 @@
     font-weight: 600
 }
 
-.navbar-c .dropdown-menu {
-    font-size: .875rem
-}
-
 .navbar-c .dropdown-item.active {
     font-weight: 600;
     color: #212529;

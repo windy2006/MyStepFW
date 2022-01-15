@@ -112,9 +112,7 @@ class CMS extends myStep {
         if(($web_info = \app\CMS\checkVal($website, 'domain', myReq::server('HTTP_HOST')))===false) {
             $web_info = \app\CMS\checkVal($website, 'web_id', 1);
         }
-        if(($info_app['path'][0]??'')===$S->web->path_admin) {
-            //nothing to do
-        } elseif(($info_app['path'][0]??'') == $info_app['app'] || $S->router->default_app == $info_app['app']) {
+        if(($info_app['path'][0]??'')!==$S->web->path_admin) {
             $db_pre = $S->db->pre;
             $S->merge(PATH.'website/config_'.$web_info['idx'].'.php');
             $S->db->pre_sub = $S->db->pre;
@@ -123,7 +121,7 @@ class CMS extends myStep {
             $S->db->pre_sub = $S->db->pre;
         }
         if(isset($info_app['path'][1]) && $info_app['path'][0]=='asset') {
-            $file = APP.$info_app['app'].'/asset/'. $S->template->style.'/'.end($info_app['path']);
+            $file = APP.$info_app['app'].'/asset/'. (count($info_app['path'])==3?$info_app['path'][1]:$S->template->style).'/'.end($info_app['path']);
             if(is_file($file)) {
                 myController::file($file);
                 exit;
@@ -192,7 +190,7 @@ class CMS extends myStep {
                 break;
             default:
                 $referer = myReq::server('http_referer');
-                $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl;
+                $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl || r::s('sysop');
         }
         return $flag;
     }

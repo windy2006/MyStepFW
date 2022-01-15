@@ -1,18 +1,18 @@
 [
     {
-        "name": "信息",
+        "name": "\u4fe1\u606f",
         "icon": "glyphicon glyphicon-info-sign",
         "items": [
             {
-                "name": "基本信息",
+                "name": "\u57fa\u672c\u4fe1\u606f",
                 "link": "console"
             },
             {
-                "name": "数据库信息",
+                "name": "\u6570\u636e\u5e93\u4fe1\u606f",
                 "link": "console\/db"
             },
             {
-                "name": "PHP信息",
+                "name": "PHP\u4fe1\u606f",
                 "link": "console\/php"
             },
             {
@@ -20,76 +20,76 @@
                 "link": "console\/phpinfo"
             },
             {
-                "name": "错误日志",
+                "name": "\u9519\u8bef\u65e5\u5fd7",
                 "link": "console\/error"
             }
         ]
     },
     {
-        "name": "设置",
+        "name": "\u8bbe\u7f6e",
         "icon": "glyphicon glyphicon-wrench",
         "items": [
             {
-                "name": "参数设置",
+                "name": "\u53c2\u6570\u8bbe\u7f6e",
                 "link": "console\/setting\/"
             },
             {
-                "name": "类加载设置",
+                "name": "\u7c7b\u52a0\u8f7d\u8bbe\u7f6e",
                 "link": "console\/setting\/class"
             },
             {
-                "name": "域名绑定",
+                "name": "\u57df\u540d\u7ed1\u5b9a",
                 "link": "console\/setting\/domain"
             },
             {
-                "name": "代码测试",
+                "name": "\u4ee3\u7801\u6d4b\u8bd5",
                 "link": "console\/setting\/execute"
             }
         ]
     },
     {
-        "name": "功能",
+        "name": "\u529f\u80fd",
         "icon": "glyphicon glyphicon-cog",
         "items": [
             {
-                "name": "应用管理",
+                "name": "\u5e94\u7528\u7ba1\u7406",
                 "link": "console\/function\/app"
             },
             {
-                "name": "缓存管理",
+                "name": "\u7f13\u5b58\u7ba1\u7406",
                 "link": "console\/function\/cache"
             },
             {
-                "name": "插件管理",
+                "name": "\u63d2\u4ef6\u7ba1\u7406",
                 "link": "console\/function\/plugin"
             },
             {
-                "name": "附件管理",
+                "name": "\u9644\u4ef6\u7ba1\u7406",
                 "link": "console\/function\/attachment"
             }
         ]
     },
     {
-        "name": "文档",
+        "name": "\u6587\u6863",
         "icon": "glyphicon glyphicon-book",
         "items": [
             {
-                "name": "框架指南",
+                "name": "\u6846\u67b6\u6307\u5357",
                 "link": "console\/guide"
             },
             {
-                "name": "功能示例",
+                "name": "\u529f\u80fd\u793a\u4f8b",
                 "link": "console\/samples"
             },
             {
-                "name": "应用示例",
+                "name": "\u5e94\u7528\u793a\u4f8b",
                 "link": "Sample\/",
                 "addon": {
                     "target": "_blank"
                 }
             },
             {
-                "name": "功能类说明",
+                "name": "\u529f\u80fd\u7c7b\u8bf4\u660e",
                 "link": "Document\/",
                 "addon": {
                     "target": "_blank"
@@ -98,12 +98,12 @@
         ]
     },
     {
-        "name": "插件",
+        "name": "\u63d2\u4ef6",
         "icon": "fa fa-plug",
         "link": "#",
         "items": [
             {
-                "name": "更新维护",
+                "name": "\u66f4\u65b0\u7ef4\u62a4",
                 "link": "manager"
             }
         ]

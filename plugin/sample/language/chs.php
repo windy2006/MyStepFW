@@ -1,5 +1,6 @@
 <?PHP
 return array (
+    'plugin_sample_name_link' => '插件菜单',
     'plugin_sample_info_name' => '测试插件',
     'plugin_sample_info_intro' => '插件应用示例',
     'plugin_sample_info_copyright' => '版权所有 2019-2021 <a href="mailto:windy2006@gmail.com">Windy2000</a>',

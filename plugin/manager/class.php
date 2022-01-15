@@ -22,14 +22,13 @@ class plugin_manager implements interface_plugin {
         return $flag;
     }
     public static function install() {
-        global $router, $mystep;
+        global $mystep;
         regPluginRoute('manager');
         myFile::mkdir(__DIR__.'/update');
         myFile::mkdir(__DIR__.'/pack');
         addPluginLink($mystep->getLanguage('plugin_manager_title'), 'manager');
     }
     public static function uninstall() {
-        global $router;
         removePluginRoute('manager');
         myFile::del(__DIR__.'/update');
         myFile::del(__DIR__.'/pack');
@@ -258,15 +257,7 @@ class plugin_manager implements interface_plugin {
                 echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             default:
-                list($tpl, $tpl_sub) = setPluginTemplate('manager');
-                include(APP.'myStep/global.php');
-                $paras = [
-                    'version' => include(CONFIG.'version.php'),
-                    'link'=> $mystep->setting->web->update
-                ];
-                $tpl_sub->assign($paras);
-                $tpl->assign('main', $mystep->render($tpl_sub));
-                $mystep->show($tpl);
+                showPluginPage('manager');
         }
         $mystep->end();
     }

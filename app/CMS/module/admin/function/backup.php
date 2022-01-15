@@ -1,7 +1,6 @@
 <?PHP
 set_time_limit(0);
 ignore_user_abort("on");
-ini_set('memory_limit', '128M');
 $the_tbl = r::r('table');
 $web_idx = r::r('web_idx');
 $op_info = '';

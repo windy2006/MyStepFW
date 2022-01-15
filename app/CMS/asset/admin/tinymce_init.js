@@ -115,7 +115,7 @@ function uploadInit() {
                             editor.setContent(content);
                         } else {
                             let file = setting.url_prefix+'api/CMS/attachment/'+result.new_name;
-                            if(result.type.match(/^image/) || result.name.match(/\.png$/)) {
+                            if(result.type.match(/^image/) || result.name.match(/\.png$/i) || result.name.match(/\.gif$/i)) {
                                 insertContent('<br /><img src="' + file + '" title="' + result.name + '" style="max-width:90%;" /><br />');
                             } else if(result.type.match(/^video/)) {
                                 insertContent('<br />' +

@@ -327,8 +327,12 @@
             });
         }
     });
-    jQuery.vendor('jquery.date_input', {add_css:true});
-    jQuery.vendor('jquery.jmpopups', {add_css:true});
+    jQuery.vendor('jquery.date_input', {
+        add_css:true
+    });
+    jQuery.vendor('jquery.jmpopups', {
+        add_css:true
+    });
     jQuery.vendor('jquery.autocomplete', {
         add_css:true,
         callback:function(){

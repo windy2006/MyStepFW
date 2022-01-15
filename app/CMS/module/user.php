@@ -5,7 +5,7 @@ if($tpl_setting['name']=='logout') {
     myReq::removeCookie('ms_cms_op');
     myReq::removeCookie('ms_cms_user');
     myReq::sessionEnd();
-    myStep::info('login_logout', ROOT_WEB.$info_app['app']);
+    myStep::info('login_logout', ROOT_APP);
 }
 if($tpl_setting['name']=='profile' && is_null(r::s('ms_cms_user'))) {
     $tpl_setting['name']='login';
@@ -16,7 +16,7 @@ if(!in_array($tpl_setting['name'],['login','register','profile'])
     ||
     ($tpl_setting['name']!=='profile' && (!is_null(r::s('ms_cms_user_group'))))
 ) {
-    myStep::redirect(ROOT_WEB.$info_app['app']);
+    myStep::redirect(ROOT_APP);
 }
 if(myReq::check('post')) {
     $data = r::p('[ALL]');
@@ -27,16 +27,16 @@ if(myReq::check('post')) {
                 $pwd = r::p('password');
                 if(($result = $mystep->login($usr, $pwd))!==0) {
                     r::setCookie('ms_cms_user', $usr.chr(9).md5($pwd), $data['expire']);
-                    myStep::info('login_ok', ROOT_WEB.$info_app['app']);
+                    myStep::info('login_ok', ROOT_APP);
                 }
             } else {
                 myStep::info($mystep->getLanguage('login_error_captcha'));
             }
-            myStep::info($mystep->getLanguage('login_error'), ROOT_WEB.$info_app['app'].'/user/login');
+            myStep::info($mystep->getLanguage('login_error'), ROOT_APP.'/user/login');
             break;
         case 'register':
             if(strtolower($data['captcha']) != strtolower(r::s('captcha'))) {
-                myStep::info('login_error_captcha', ROOT_WEB.$info_app['app']);
+                myStep::info('login_error_captcha', ROOT_APP);
             }
             unset($data['captcha']);
             $db->build($S->db->pre.'users')->field('user_id')->where('username','=',$data['username']);
@@ -53,7 +53,7 @@ if(myReq::check('post')) {
             r::s('ms_cms_user', $data['username']);
             r::s('ms_cms_user_group', 1);
             r::setCookie('ms_cms_user', $data['username'].chr(9).$data['password'], 60*60*24);
-            $url = (isHttps()?'https':'http').'://'.r::svr('HTTP_HOST').ROOT_WEB.$info_app['app'].'/user/login/'.$data['hash'];
+            $url = (isHttps()?'https':'http').'://'.r::svr('HTTP_HOST').ROOT_APP.'/user/login/'.$data['hash'];
             $mail = new myEmail();
             $mail->init($S->email->user, $S->gen->charset);
             $mail->from($S->email->user, $S->web->title);
@@ -85,7 +85,7 @@ if($tpl_setting['name']=='login' && isset($info_app['path'][2])) {
         \r::s('ms_cms_user_group', $record['group_id']);
         $db->build($S->db->pre.'users')->field(['hash'=>''])->where('hash','=', $info_app['path'][2]);
         $db->update();
-        myStep::info('page_user_activate', ROOT_WEB.$info_app['app']);
+        myStep::info('page_user_activate', ROOT_APP);
     }
 }
 if($tpl_setting['name']=='profile') {

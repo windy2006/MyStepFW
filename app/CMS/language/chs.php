@@ -4,7 +4,7 @@ return array(
     'module_missing' => '模块请求错误',
     'unknown_method' => '未知请求',
     'page_catalog' => '相关栏目',
-    'page_article_missing' => '指定文章不存在',
+    'page_article_missing' => '指定内容不存在',
     'page_article_expired' => '指定文章已过期',
     'page_nopower' => '无权浏览此文章！',
     'page_original' => '网络',

@@ -2,8 +2,8 @@
 BODY {
     font-size: 12px;
     font-family: Tahoma, Verdana, Arial, Sans-Serif;
-    color: <!--pre_color-->;
-    background-color: <!--pre_backgroundColor-->;
+    color: <!--pre_main_color-->;
+    background-color: <!--pre_main_backgroundColor-->;
     padding: 0px;
     margin: auto;
     overflow: auto;

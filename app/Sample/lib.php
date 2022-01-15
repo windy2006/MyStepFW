@@ -35,7 +35,6 @@ function route($para) {
     $tpl_sub->assign('code2', htmlentities(\myFile::getLocal(PATH.'route.php')));
     $tpl_sub->assign('root', ROOT_WEB);
     $tpl->assign('main', $tpl_sub->render('', false));
-    $mystep->setting->show = true;
     $mystep->show($tpl);
     $mystep->end();
 }
@@ -66,5 +65,5 @@ function routeTest() {
         echo '请尝试连续刷新，超过3次后将会报错<br /><br />';
     }
     echo '当前URL路径 ： '.$first.'<br /><br />';
-    echo '上一个函数的返回值 ： '.$last.'<br />';
+    echo '上一个函数的返回值 ： '.end($last).'<br />';
 }
