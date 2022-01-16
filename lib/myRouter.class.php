@@ -50,7 +50,7 @@ class myRouter extends myBase {
         $this->setting = $setting;
         $this->route = $this->parseQuery();
         $this->query = $this->route['qstr'];
-        if(strpos($this->route['qstr'], $setting['url_fix'])===0) $this->setting['url_fix'] = '';
+        if(!empty($setting['url_fix']) && strpos($this->route['qstr'], $setting['url_fix'])===0) $this->setting['url_fix'] = '';
         if(preg_match('#^/\w+$#', $this->query)) $this->query .= '/';
         $this->parse();
     }
