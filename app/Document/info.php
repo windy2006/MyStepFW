@@ -1,6 +1,6 @@
 <?PHP
 return array(
-    'name' => '框架类说明及示例',
+    'name' => '功能类说明',
     'app' => 'Document',
     'ver' => '1.0',
     'intro' => '框架相关功能类文档及使用实例',

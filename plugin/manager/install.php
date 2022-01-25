@@ -58,7 +58,6 @@ class unpacker {
     public function __construct($pack_dir = "./", $pack_file = "pack.pkg") {
         $this->pack_dir = str_replace("//", "/", $pack_dir);
         $this->pack_file = $pack_file;
-        return;
     }
 
     protected function log($log) {
@@ -94,7 +93,6 @@ class unpacker {
                 $this->log("<b>".$lng[4]."</b> $outdir/$data[1] ".($flag?"<span style='color:green'>".$lng[2]."</span>(".GetFileSize($this->pack_dir."/".$data[1]).")":"<span style='color:red'>".$lng[3]."</span>"));
             }
         }
-        return;
     }
 
     public function DoIt($separator="|") {

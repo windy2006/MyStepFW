@@ -10,4 +10,6 @@ return array (
     'plugin_manager_upload_fail'=>'更新文件上传失败',
     'plugin_manager_done'=>'更新完成！',
     'plugin_manager_update_data_empty'=>'升级信息为空！',
+    'plugin_manager_update_succeed'=>'更新成功！',
+    'plugin_manager_update_fail'=>'更新失败或无需更新！',
 );

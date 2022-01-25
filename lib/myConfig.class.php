@@ -418,6 +418,7 @@ return '.var_export($setting, true).';';
                 $the_value = $the_value->$key ?? '';
             }
             $the_value = is_null($the_value) ? '' : myString::fromAny($the_value);
+            $the_value = stripslashes($the_value);
             $k = str_replace('.', "][", $cur_idx);
             $k = str_replace('single_setting][', '', $k);
             switch($v['type'][0]) {

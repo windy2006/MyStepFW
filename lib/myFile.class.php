@@ -64,7 +64,7 @@ class myFile {
             'm' => 'rename',
             's' => 'saveFile',
             'g' => 'getLocal',
-            'url' => 'getRemote_curl',
+            'url' => 'getRemote',
             'grab' => 'getRemoteFile',
         );
     public
@@ -150,10 +150,16 @@ class myFile {
         $info = parse_url($url);
         switch($info['scheme']) {
             case 'https':
-            $mode = 'ssl';
-            break;
+                $mode = 'ssl';
+                stream_context_set_default( [
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                ]);
+                break;
             default:
-            $mode = $info['scheme'];
+                $mode = $info['scheme'];
         }
         $opts = array(
             $mode => array(
@@ -678,101 +684,113 @@ class myFile {
      * 获取远程文件
      * @param $url
      * @param array $header
+     * @param string $data
      * @param string $method
-     * @param array $data
      * @param int $timeout
-     * @return bool|string
+     * @return false|string
      */
-    public static function getRemote($url, $header=array(), $method='GET', $data=array(), $timeout=10) {
+    public static function getRemote($url, $header=array(), $data='', $method='GET', $timeout=10) {
+        if(function_exists('curl_init')) return self::getRemote_curl($url, $header, $data);
+        $separator = "\r\n";
         $errno = '';
         $errmsg = '';
         $scheme = '';
         $host = '';
         $path = '';
+        $query = '';
         extract(parse_url($url), EXTR_OVERWRITE);
         if($scheme=='https') {
-            $scheme = 'ssl://';
+            $transports = 'ssl://';
             if(!isset($port)) $port = '443';
         } else {
-            $scheme = '';
+            $transports = 'tcp://';
+            if(!isset($port)) $port = '80';
         }
-        if(isset($query)) $path .= '?'.$query;
-        if(!isset($port)) $port = 80;
-        if(false === ($fp = @fsockopen($scheme.$host, $port, $errno, $errmsg, $timeout))) {
+        if(isset($user)) $header['Authorization'] = 'Basic ' . base64_encode($user . (isset($pass)?':'.$pass:''));
+        if(!empty($data) && is_array($data)) $data = http_build_query($data);
+        if($method!='POST') {
+            $method='GET';
+            if(strlen($data)>0 && !empty($query)) $query .= '&';
+            $query .= $data;
+        } else {
+            $header['Content-Type'] = 'application/x-www-form-urlencoded';
+            if(strlen($data)>0) $header['Content-Length'] = strlen($data);
+        }
+        if(empty($path)) $path = '/';
+        if(!empty($query)) $path .= '?'.$query;
+
+        if(!isset($header['Referer'])) $header['Referer'] = $scheme.'://'.$host;
+        if(!isset($header['User-Agent'])) $header['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16';
+        if(isset($header['fakeIP'])) {
+            $header['HTTP_X_FORWARDED_FOR'] = $header['fakeIP'];
+            $header['HTTP_CLIENT_IP'] = $header['fakeIP'];
+            unset($header['fakeIP']);
+        }
+
+        $output = sprintf('%s %s HTTP/1.1'.$separator, $method, $path);
+        $output .= sprintf('Host: %s'.$separator, $host);
+        $output .= 'Accept: */*'.$separator;
+        //$output .= 'Accept-Encoding: gzip,deflate'.$separator;
+        foreach($header as $key => $value) {
+            $output .= $key.':'.$value.$separator;
+        }
+        $output .= 'Cache-Control:no-cache'.$separator;
+        $output .= 'Connection: Close'.$separator;
+        $output .= $separator;
+        if(!empty($data)) $output .= $data.$separator;
+
+        stream_context_set_default( [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ]);
+        if(false === ($fp = @fsockopen($transports.$host, $port, $errno, $errmsg, $timeout))) {
             if($errno==0 && empty($errmsg)) $errmsg = 'Socket initialize failed!';
             trigger_error('Error occurs when remote file getting: '.$errno.' - '.$errmsg.'('.$url.')');
             return false;
         }
         stream_set_blocking($fp, true);
         stream_set_timeout($fp, $timeout);
-        if($method!='POST') $method='GET';
-        if(!isset($header['Referer'])) $header['Referer'] = 'http://'.$host;
-        if(!isset($header['User-Agent'])) $header['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16';
-        if(isset($header['fakeIP'])) {
-            $header['HTTP_X_FORWARDED_FOR'] = $header['fakeIP'];
-            $header['HTTP_CLIENT_IP'] = $header['fakeIP'];
-        }
-        if($method=='POST') $header['Content-Type'] = 'application/x-www-form-urlencoded';
 
-        $output = sprintf("%s %s HTTP/1.1\r\n", $method, $path);
-        $output .= sprintf("Host:%s\r\n", $host);
-        $output .= "Accept: */*\r\n";
-        $output .= "Accept-Encoding: gzip, deflate\r\n";
-        foreach($header as $key => $value) {
-            $output .= $key.':'.$value."\r\n";
-        }
-
-        $post_data = '';
-        if(is_string($data) && strlen($data)>0) {
-            $post_data .= $data."\r\n";
-            $output .= 'Content-length:'.strlen($post_data)."\r\n";
-        } elseif(is_array($data) && count($data)>0) {
-            foreach($data as $key => $value) {
-                $post_data .= $key.'='.$value.'&';
-            }
-            $post_data = substr($post_data, 0, -1);
-            $output .= 'Content-length:'.strlen($post_data)."\r\n";
-        }
-        $output .= "Cache-Control:no-cache\r\n";
-        $output .= "Connection:Close\r\n";
-        $output .= "\r\n";
-
-        if(!empty($post_data)) $output .= $post_data."\r\n";
-        $output .= "\r\n";
         fputs($fp, $output);
         $status = stream_get_meta_data($fp);
         if(isset($status['timeout'])) return false;
 
-        $header = self::getHeader($url);
-        $content = stream_get_contents($fp);
-        $content = preg_replace('/^[\w\W]+?\r\n\r\n/', '', $content);
-        $content = preg_replace('#^\d+\r\n#', '', $content);
-        $content = preg_replace('#[\r\n]+0[\r\n]+$#', '', $content);
-        $content = preg_replace('#\r\n\d+\r\n#', '', $content);
-        fclose($fp);
-        if(isset($header['Content-Encoding']) && $header['Content-Encoding']=='gzip') {
-            //$content = preg_replace("/(^|[\r\n]+)(\w{3})([\r\n]+|$)/", "", $content);
-            $content = self::gzdecode($content);
+        $response = '';
+        while(!feof($fp)) {
+            $response .= stream_get_contents($fp, 1024);
         }
+        $response = preg_split('#\r\n\r\n|\n\n|\r\r#', $response, 2);
+        //$response = preg_split('#\r\n\r\n|\n\n|\r\r#', stream_get_contents($fp), 2);
+        $content = $response[1];
+        $content = preg_replace('#^[\da-f]{1,4}[\r\n]+#', '', $content);
+        $content = preg_replace('#[\r\n]+0[\r\n]+$#', '', $content);
+        $content = preg_replace('#[\r\n]+[\da-f]{1,3}[\r\n]+#', '', $content);
+        fclose($fp);
         return self::removeBom($content);
     }
 
     /**
      * 通过curl类获取远程文件
      * @param $url
-     * @param string $data
      * @param array $header
+     * @param string $data
      * @param array $return_header
-     * @return string
+     * @return bool|string
      */
-    public static function getRemote_curl($url, $data='', $header=array(), &$return_header=array()) {
-        if(!function_exists('curl_init')) return self::getRemote($url);
+    public static function getRemote_curl($url, $header=array(), $data='', &$return_header=array()) {
+        if(!function_exists('curl_init')) return self::getRemote($url, $header, $data, (empty($data)?'POST':'GET'));
         $info = parse_url($url);
         $curl = curl_init();
+        if(!is_object($curl) && !is_resource($curl)) return self::getRemote($url);
+
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+        curl_setopt($curl, CURLOPT_HEADER, FALSE);
+        curl_setopt($curl, CURLOPT_NOBODY, FALSE);
         if($info['scheme']=='https') {
-            curl_setopt($curl, CURLOPT_SSLVERSION, 3);
+            curl_setopt($curl, CURLOPT_SSLVERSION, 4);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         }
@@ -797,11 +815,14 @@ class myFile {
         }
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($curl);
-        $return_header = curl_getinfo($curl, CURLINFO_HEADER_OUT);
-        if(curl_errno($curl)) {
-            trigger_error('Error occurs when remote file getting'.curl_error($curl), E_USER_ERROR);
+        if(curl_getinfo($curl, CURLINFO_HTTP_CODE) != '200' || curl_errno($curl)) {
+            //trigger_error('Error occurs when remote file getting'.curl_error($curl), E_USER_ERROR);
+            $result = '';
+        } else {
+            $return_header = curl_getinfo($curl, CURLINFO_HEADER_OUT);
         }
         curl_close($curl);
+        unset($curl);
         return self::removeBom($result);
     }
 

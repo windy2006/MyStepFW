@@ -1,5 +1,7 @@
 pack
 rollback
 update
-checkfile.php
+check_app.php
+check_file.php
+check_plugin.php
 update.db

@@ -19,7 +19,7 @@
                         <input type="hidden" name="idx[]" value="<!--list_1_idx-->" />
                         <input class="py-0 px-2" type="text" name="order[]" value="<!--list_1_order-->" size="1" need="number" />
                     </td>
-                    <td><!--list_1_name--></td>
+                    <td><!--list_1_name--><!--list_1_update--></td>
                     <td><!--list_1_ver--></td>
                     <td><!--list_1_intro--></td>
                     <td class="btn-group">
@@ -54,7 +54,7 @@
             </tr>
 <!--loop:start key="list_2"-->
             <tr align="center">
-                <td><!--list_2_name--></td>
+                <td><!--list_2_name--><!--list_2_update--></td>
                 <td><!--list_2_ver--></td>
                 <td><!--list_2_intro--></td>
                 <td class="btn-group">
@@ -74,7 +74,6 @@
                 <td colspan="4" class="p-3 font-md text-center">
                     <button id="upload" class="btn btn-primary btn-sm mr-3" type="button"> 上传插件 </button>
                 </td>
-            </tr>
             </tr>
         </table>
     </div>

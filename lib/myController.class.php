@@ -509,14 +509,14 @@ class myController extends myBase {
      */
     public static function etag($etag = '', $expires = 604800) {
         if (empty($etag)) return;
-        header("Pragma: public");
-        header("Cache-Control: private, max-age=" . $expires);
+        header('Pragma: public');
+        header('Cache-Control: private, max-age=' . $expires);
         if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) == $etag) {
             header('Etag:' . $etag, true, 304);
             exit;
         } else {
             header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-            header("Expires: " . gmdate('D, d M Y H:i:s', time() + $expires) . " GMT");
+            header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
             header('Etag:' . $etag);
         }
     }
@@ -532,11 +532,11 @@ class myController extends myBase {
             self::etag(md5(filemtime($file)));
             $size = filesize($file);
             $type = myFile::getMime($file);
-            header("Date: " . date("D, j M Y H:i:s", strtotime("now")) . " GMT");
-            header("Expires: " . date("D, j M Y H:i:s", strtotime("now + 10 years")) . " GMT");
+            header('Content-Description: File Transfer');
+            header('Date: ' . date('D, j M Y H:i:s', strtotime('now')) . ' GMT');
+            header('Expires: ' . date('D, j M Y H:i:s', strtotime('now + 10 years')) . ' GMT');
             header('Content-Type: ' . $type);
             if ($type !== 'text/html') {
-                header('Pragma: public');
                 header('Accept-Ranges: bytes');
                 header('Accept-Length: ' . $size);
                 header('Content-Disposition: attachment; filename=' . $name);
@@ -544,7 +544,7 @@ class myController extends myBase {
             }
             if($size*2 >= myFile::getByte(ini_get('memory_limit'))) {
                 ob_clean();
-                if($fp = @fopen($file,"r")) {
+                if($fp = @fopen($file,'r')) {
                     while(($buffer = fgets($fp, 4096)) !== false) {
                         echo $buffer;
                     }

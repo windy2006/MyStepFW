@@ -11,7 +11,7 @@ f::regAlias(array(
             'm' => 'rename',
             's' => 'saveFile',
             'g' => 'getLocal',
-            'url' => 'getRemote_curl',
+            'url' => 'getRemote',
             'grab' => 'getRemoteFile',
 ));
 

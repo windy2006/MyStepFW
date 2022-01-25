@@ -10,4 +10,6 @@ return array (
     'plugin_manager_upload_fail'=>'The update file upload failed!',
     'plugin_manager_done'=>'Framework has been updated!',
     'plugin_manager_update_data_empty'=>'Nothing to update...',
+    'plugin_manager_update_succeed'=>'Update successfully!',
+    'plugin_manager_update_fail'=>'Update failed or don\'t need to update!',
 );

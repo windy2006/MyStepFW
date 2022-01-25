@@ -160,6 +160,8 @@ $api_list = array (
     'check' => 'plugin_manager::remote',
     'update' => 'plugin_manager::remote',
     'download' => 'plugin_manager::remote',
+    'plugin' => 'plugin_manager::remote',
+    'app' => 'plugin_manager::remote',
   ),
 );
 

@@ -25,6 +25,10 @@ if(myReq::check('post')) {
     }
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }
+
+$check_app = [];
+if(is_file(PLUGIN.'manager/check_app.php')) $check_app = include(PLUGIN.'manager/check_app.php');
+
 $dirs = myFile::find('', APP, false, myFile::DIR);
 $dirs = array_map(function ($v) {return basename($v);} , $dirs);
 foreach($dirs as $k) {
@@ -47,6 +51,7 @@ foreach($dirs as $k) {
     if(is_file(APP.$k.'/plugin.php')) {
         $info['plugin'] = implode(',', include(APP.$k.'/plugin.php'));
     }
+    $info['update'] = (version_compare($info['ver'], $check_app[$info['app']]??'')<0) ? '<a href="'.ROOT_WEB.'manager/app/'.$info['app'].'" title="v'.$check_app[$info['app']].'">【Update】</a>': '';
     $t->setLoop('app', $info);
 }
 $route_plugin = '';

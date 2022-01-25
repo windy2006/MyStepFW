@@ -90,7 +90,7 @@ $.get('app/myStep/menu.json?'+(new Date()).getTime(), function(data) {
     $('body').click(function(e){
         if(!$(e.target).hasClass('dropdown-toggle')) $('#nav').collapse('hide');
     });
-    $("a[href$='<!--path-->']").addClass('active');
+    $("#list a[href$='<!--path-->'],header a[href$='<!--path-->']").addClass('active');
     if('<!--db-->'=='n') {
         $('a[href$="/db"]').hide();
     }

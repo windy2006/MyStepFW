@@ -47,6 +47,71 @@
     </div>
 </div>
 
+<div class="card mb-5 mb-sm-2">
+    <div class="card-header bg-info text-white">
+        <b><span class="glyphicon glyphicon-info-sign"></span> 应用更新</b>
+    </div>
+    <div class="card-body p-0 table-responsive" style="overflow-y:hidden;">
+        <table class="table table-striped table-hover m-0">
+            <thead class="thead-light">
+                <tr align="center">
+                    <th>应用名称</th>
+                    <th width="100">本地版本</th>
+                    <th width="100">服务器版本</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            <!--loop:start key='app'-->
+                <tr title="<!--app_intro-->" align="center">
+                    <td align="left"><!--app_name--></td>
+                    <td><!--app_ver--></td>
+                    <td><!--app_remote--></td>
+                    <td class="btn-group">
+                        <a class="btn btn-sm btn-info" href="/<!--path_admin-->/setting/<!--app_app-->">设置</a>
+                        <a class="btn btn-sm btn-info" href="<!--app_link-->" target="">更新</a>
+                        <a class="btn btn-sm btn-info" href="manager/pack/app/<!--app_app-->" target="">打包</a>
+                    </td>
+                </tr>
+            <!--loop:end-->
+            <tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mb-5 mb-sm-2">
+    <div class="card-header bg-info text-white">
+        <b><span class="glyphicon glyphicon-info-sign"></span> 插件更新</b>
+    </div>
+    <div class="card-body p-0 table-responsive" style="overflow-y:hidden;">
+        <table class="table table-striped table-hover m-0">
+            <thead class="thead-light">
+                <tr align="center">
+                    <th>插件名称</th>
+                    <th width="100">本地版本</th>
+                    <th width="100">服务器版本</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            <!--loop:start key='plugin'-->
+                <tr title="<!--plugin_intro-->" align="center">
+                    <td align="left"><!--plugin_name--></td>
+                    <td><!--plugin_ver--></td>
+                    <td><!--plugin_remote--></td>
+                    <td class="btn-group">
+                        <a class="btn btn-sm btn-info" href="/<!--path_admin-->/function/plugin/setting/?idx=<!--plugin_idx-->">设置</a>
+                        <a class="btn btn-sm btn-info" href="<!--plugin_link-->" target="">更新</a>
+                        <a class="btn btn-sm btn-info" href="manager/pack/plugin/<!--plugin_idx-->" target="">打包</a>
+                    </td>
+                </tr>
+            <!--loop:end-->
+            <tbody>
+        </table>
+    </div>
+</div>
+
+
 <script type="text/javascript">
 jQuery.vendor('jquery.jmpopups', {add_css:true});
 jQuery.vendor('jquery.powerUpload', {

@@ -8,6 +8,6 @@ return array (
   'r' => 'rename',
   's' => 'saveFile',
   'g' => 'getLocal',
-  'url' => 'getRemote_curl',
+  'url' => 'getRemote',
   'dl' => 'getRemoteFile',
 );

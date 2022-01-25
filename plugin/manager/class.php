@@ -4,7 +4,9 @@ class plugin_manager implements interface_plugin {
         $result = '';
         $theList = array(
             'version.php',
-            'checkfile.php',
+            'check_app.php',
+            'check_file.php',
+            'check_plugin.php',
             'update.db',
             'pack/',
             'update/',
@@ -50,12 +52,26 @@ class plugin_manager implements interface_plugin {
                 break;
             case 'check':
                 $ver = require(CONFIG.'version.php');
-                $ver_remote = myString::fromJson(myFile::getRemote_curl($url.'check/version?v='.$ver, $header));
-                if(isset($ver_remote['version']) && !empty($ver_remote['version'])) {
-                    foreach($ver_remote['info'] as $k => $v) {
-                        $ver_remote['info'][$k] = preg_replace('#\r\n\s+#', chr(10), trim($v));
+                $ver_remote = myString::fromJson(myFile::getRemote($url.'check/version?v='.$ver, $header));
+                if(is_array($ver_remote)) {
+                    if(!empty($ver_remote['app'])) {
+                        myFile::saveFile(__DIR__.'/check_app.php', '<?php
+return '.var_export($ver_remote['app'], true).';
+');
                     }
-                    echo '{"version":"'.$ver_remote['version'].'", "detail":'.myString::toJson($ver_remote['info'], $ms_setting->gen->charset).'}';
+                    if(!empty($ver_remote['plugin'])) {
+                        myFile::saveFile(__DIR__.'/check_plugin.php', '<?php
+return '.var_export($ver_remote['plugin'], true).';
+');
+                    }
+                    if(isset($ver_remote['version']) && !empty($ver_remote['version'])) {
+                        foreach($ver_remote['info'] as $k => $v) {
+                            $ver_remote['info'][$k] = preg_replace('#\r\n\s+#', chr(10), trim($v));
+                        }
+                        echo '{"version":"'.$ver_remote['version'].'", "detail":'.myString::toJson($ver_remote['info'], $ms_setting->gen->charset).'}';
+                    } else {
+                        echo '{"version":""}';
+                    }
                 } else {
                     echo '{"version":""}';
                 }
@@ -65,13 +81,13 @@ class plugin_manager implements interface_plugin {
                 echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             case 'check_server':
-                $check_info = myFile::getRemote_curl($url.'check', $header);
+                $check_info = myFile::getRemote($url.'check', $header);
                 if(!empty($check_info)) {
                     $check_info = json_decode($check_info);
                     if(empty($check_info) || isset($check_info->error)) {
                         echo '{"code":1, "error":"Cannot parse the message from the update server!"}';
                     } else {
-                        $the_file = $dir.'/checkfile.php';
+                        $the_file = $dir.'/check_file.php';
                         if(file_exists($the_file)) rename($the_file, $the_file.'.bak');
                         $list_file = $check_info->list_file;
                         $list_file_md5 = $check_info->list_file_md5;
@@ -166,7 +182,7 @@ class plugin_manager implements interface_plugin {
             case 'download':
                 $ver = require(CONFIG.'version.php');
                 $mode = $info_app['para']['m'];
-                $detail = myFile::getRemote_curl($url.'download?v='.$ver, $header);
+                $detail = myFile::getRemote($url.'download?v='.$ver, $header);
                 $detail = unserialize(gzinflate($detail));
                 $path_rollback = $dir.'/rollback/'.$ver.'/';
                 if(isset($detail['setting']) && count($detail['setting'])>0) {
@@ -256,6 +272,59 @@ class plugin_manager implements interface_plugin {
                 ob_clean();
                 echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
+            case 'plugin':
+                $idx = end($info_app['path']);
+                $file = PLUGIN.$idx.'/info.php';
+                if(is_file($file)) {
+                    $info = include($file);
+                    $url .= 'plugin?p='.$idx.'&v='.$info['ver'];
+                }
+                $file = CACHE.'tmp/plugin.pack';
+                myFile::getRemoteFile($url, $file);
+                if(is_file($file) && filesize($file) > 1024) {
+                    $mypack = $mystep->getInstance('myPacker', PLUGIN.$idx.'/' , $file);
+                    $mypack->unpack();
+                    unset($mypack);
+                    myFile::del($file);
+                    myStep::info('plugin_manager_update_succeed');
+                } else {
+                    myStep::info('plugin_manager_update_fail');
+                }
+                break;
+            case 'app':
+                $idx = end($info_app['path']);
+                $file = APP.$idx.'/info.php';
+                if(is_file($file)) {
+                    $info = include($file);
+                    $url .= 'app?a='.$idx.'&v='.$info['ver'];
+                }
+                $file = CACHE.'tmp/app.pack';
+                myFile::getRemoteFile($url, $file);
+                if(is_file($file) && filesize($file) > 1024) {
+                    $mypack = $mystep->getInstance('myPacker', APP.$idx.'/' , $file);
+                    $mypack->unpack();
+                    unset($mypack);
+                    myFile::del($file);
+                    myStep::info('plugin_manager_update_succeed');
+                } else {
+                    myStep::info('plugin_manager_update_fail');
+                }
+                break;
+            case 'pack':
+                $type = $info_app['path'][2];
+                $idx = $info_app['path'][3];
+                if($type=='app') {
+                    $dir = APP.$idx;
+                } else {
+                    $dir = PLUGIN.$idx;
+                }
+                $file = CACHE.'tmp/'.$type.'_'.$idx.'.pack';
+                myFile::del($file);
+                $mypacker = $mystep->getInstance('myPacker', $dir, $file);
+                $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', 'config.php');
+                $mypacker->pack();
+                myStep::file($file);
+                break;
             default:
                 showPluginPage('manager');
         }
@@ -277,6 +346,26 @@ class plugin_manager implements interface_plugin {
                         $result['version'] = $k;
                     }
                 }
+                $apps = [];
+                $dirs = myFile::find('*', APP, false, myFile::DIR);
+                foreach($dirs as $k) {
+                    $k .= 'info.php';
+                    if(!is_file($k)) continue;
+                    $info = include($k);
+                    $apps[$info['app']] = $info['ver'];
+                }
+                $result['app'] = $apps;
+
+                $plugins = [];
+                $files = myFile::find('*', PLUGIN, false, myFile::DIR);
+                foreach($files as $k) {
+                    $k .= 'info.php';
+                    if(!is_file($k)) continue;
+                    $info = include($k);
+                    $plugins[$info['idx']] = $info['ver'];
+                }
+                $result['plugin'] = $plugins;
+
                 echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             case 'download':
@@ -337,8 +426,50 @@ class plugin_manager implements interface_plugin {
                 $mydb->close();
                 echo $result;
                 break;
+            case 'plugin':
+                $idx = myReq::get('p');
+                $ver = myReq::get('v');
+                $file = PLUGIN.$idx.'/info.php';
+                if(is_file($file)) {
+                    $info = include($file);
+                    if(version_compare($ver, $info['ver'])===-1) {
+                        $file = __DIR__.'/pack/plugin_'.$idx.'_'.$info['ver'].'.pack';
+                        if(!file_exists($file)) {
+                            $mypacker = $mystep->getInstance('myPacker', PLUGIN.$idx, $file);
+                            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', 'config.php');
+                            $mypacker->pack();
+                        }
+                        myController::file($file);
+                    } else {
+                        myController::header('404');
+                    }
+                } else {
+                    myController::header('404');
+                }
+                break;
+            case 'app':
+                $idx = myReq::get('a');
+                $ver = myReq::get('v');
+                $file = APP.$idx.'/info.php';
+                if(is_file($file)) {
+                    $info = include($file);
+                    if(version_compare($ver, $info['ver'])==-1) {
+                        $file = __DIR__.'/pack/app_'.$idx.'_'.$info['ver'].'.pack';
+                        if(!file_exists($file)) {
+                            $mypacker = new myPacker(APP.$idx, $file);
+                            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', 'config.php');
+                            $mypacker->pack();
+                        }
+                        myController::file($file);
+                    } else {
+                        myController::header('404');
+                    }
+                } else {
+                    myController::header('404');
+                }
+                break;
             default:
-                $the_file = __DIR__.'/checkfile.php';
+                $the_file = __DIR__.'/check_file.php';
                 $check_info = ['list_file'=>[], 'list_file_md5'=>[]];
                 if(file_exists($the_file)) {
                     include($the_file);
@@ -398,7 +529,7 @@ class plugin_manager implements interface_plugin {
             $list_file_md5 = array();
         }
         $the_dir = __DIR__.'/';
-        $the_file = $the_dir.'checkfile.php';
+        $the_file = $the_dir.'check_file.php';
         if(empty($dir)) $dir = ROOT;
         $dir = myFile::realPath($dir);
         if(($handle = opendir($dir))===false) return false;

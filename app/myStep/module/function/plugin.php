@@ -30,7 +30,12 @@ if(!empty($idx)) {
     }
     if($flag) myStep::info('page_error_plugin');
 }
-
+$installed = ($mydb->result('idx='.$idx, 'idx')!=='');
+if($installed && $method=='view') {
+    myStep::redirect(str_replace('view', 'setting', myReq::server('REQUEST_URI')));
+} elseif (!$installed && $method=='setting') {
+    myStep::redirect(str_replace('setting', 'view', myReq::server('REQUEST_URI')));
+}
 switch($method) {
     case 'view':
         if(myReq::check('post')) {
@@ -163,10 +168,14 @@ switch($method) {
         $dirs = myFile::find('', PLUGIN, false, myFile::DIR);
         $dirs = array_map(function ($v) {return basename($v);} , $dirs);
 
+        $check_plugin = [];
+        if(is_file(PLUGIN.'manager/check_plugin.php')) $check_plugin = include(PLUGIN.'manager/check_plugin.php');
+
         $data = $mydb->records();
         $t->setIf('empty_1', empty($data));
         foreach($data as $v) {
             $v['active'] = $mystep->getLanguage('plugin_'.($v['active']==1 ? 'deactive' : 'active'));
+            $v['update'] = (version_compare($v['ver'], $check_plugin[$v['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.'manager/plugin/'.$v['idx'].'">Update to v'.$check_plugin[$v['idx']].'</a>]': '';
             $t->setLoop('list_1', $v);
             if(($k = array_search($v['idx'], $dirs))!==false) unset($dirs[$k]);
         }
@@ -178,6 +187,7 @@ switch($method) {
             } else {
                 $info = array('name'=>$mystep->getLanguage('unknown'), 'ver'=>$mystep->getLanguage('unknown'), 'intro'=>$mystep->getLanguage('plugin_no_info'), 'idx'=>$v);
             }
+            $info['update'] = (version_compare($info['ver'], $check_plugin[$info['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.'manager/plugin/'.$info['idx'].'">Update to v'.$check_plugin[$info['idx']].'</a>]': '';
             $t->setLoop('list_2', $info);
         }
         $t->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));
