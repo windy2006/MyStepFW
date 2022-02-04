@@ -132,12 +132,20 @@ class myStep extends myController {
         $this->setLanguagePack(APP.'myStep/language/', $this->setting->gen->language);
         if(PATH != APP.'myStep/') $this->setLanguagePack(PATH.'language', $this->setting->gen->language);
 
+        if(count(ob_list_handlers())>0) {
+            $content = ob_get_contents();
+            ob_clean();
+        }
         myReq::init((array)$this->setting->cookie, (array)$this->setting->session);
         if($this->setting->session->mode=='sess_mysql') {
             sess_mysql::set((array)$this->setting->db);
         }
         myReq::sessionStart($this->setting->session->mode);
         $this->login();
+        if(isset($content)) {
+            echo $content;
+            unset($content);
+        }
 
         global $plugin_ignore;
         if(is_string($plugin_ignore)) $plugin_ignore = explode(',', str_replace(' ', '', $plugin_ignore));
@@ -180,9 +188,9 @@ class myStep extends myController {
     /**
      * 通过模板类显示页面
      * @param myTemplate $tpl
-     * @param string $append_pare
+     * @param array $append_pare
      */
-    public function show(myTemplate $tpl, $append_pare = '') {
+    public function show(myTemplate $tpl, $append_pare = []) {
         global $info_app;
         $paras = [
             'web_title' => $this->setting->web->title,
@@ -191,17 +199,18 @@ class myStep extends myController {
             'page_description' => $this->setting->web->description,
             'charset' => $this->setting->gen->charset,
             'app' => $info_app['app'],
-            'path_root' => ROOT_WEB,
+            'path_root' => ROOT_WEB.WEB_APP,
             'path_app' => str_replace(myFile::rootPath(), '/', PATH),
             'url_prefix' => self::$url_prefix,
             'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':($info_app['app'].'/')),
         ];
-        if(is_array($append_pare)) {
+        if(!empty($append_pare)) {
             $paras = array_merge($paras, $append_pare);
         }
         foreach($paras as $k => $v) {
             $tpl->assign($k, $v);
         }
+        $this->setAddedContent('start', '<script type="application/javascript">const root_web="'.ROOT_WEB.'";</script>');
         if(gettype($this->setting->css)=='string') {
             $this->CSS($this->setting->css);
             $this->setAddedContent('start', '<link rel="stylesheet" media="screen" type="text/css" href="'.ROOT_WEB.'cache/script/'.basename($this->setting->css).'" />');
@@ -224,20 +233,19 @@ class myStep extends myController {
     /**
      * 通过模板类输出页面内容
      * @param myTemplate $tpl
-     * @return mixed|string
+     * @param array $append_pare
+     * @return false|mixed
      */
-    public function render(myTemplate $tpl) {
+    public function render(myTemplate $tpl, $append_pare = []) {
         global $info_app;
-        $args = func_get_args();
-        array_shift($args);
         $paras = [
-            'path_root' => ROOT_WEB,
+            'path_root' => ROOT_WEB.WEB_APP,
             'path_app' => str_replace(myFile::rootPath(), '/', PATH),
             'url_prefix' => self::$url_prefix,
             'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':($info_app['app'].'/')),
         ];
-        if(isset($args[0]) && is_array($args[0])) {
-            $paras = array_merge($paras, array_shift($args));
+        if(!empty($append_pare)) {
+            $paras = array_merge($paras, $append_pare);
         }
         foreach($paras as $k => $v) {
             $tpl->assign($k, $v);
@@ -576,7 +584,6 @@ code;
     /**
      * JS设置信息接口
      * @param $app_name
-     * @param string $type
      */
     public static function setting($app_name) {
         $app_name = preg_replace('#&.+$#', '', $app_name);
@@ -594,7 +601,7 @@ code;
             'language' => $setting['setting']['gen']['language'],
             'debug' => $setting['setting']['gen']['debug'],
             'app' => trim($app_name, '/'),
-            'path_root' => ROOT_WEB,
+            'path_root' => ROOT_WEB.WEB_APP,
             'path_app' => str_replace(myFile::rootPath(), '/', APP.$app_name),
             'max_size' => min($m1, $m2),
             'url_fix' => defined('URL_FIX')?URL_FIX:'',
@@ -853,7 +860,7 @@ code;
      * 框架变量初始化
      */
     public static function init() {
-        if(count(ob_list_handlers())) ob_end_clean();
+        if(count(ob_list_handlers())==0) ob_start();
         $class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
         if(empty($class) || !is_dir($class[0]['path'])) {
             $old_root = empty($class) ? '' : preg_replace('#lib/$#', '', $class[0]['path']);
@@ -878,6 +885,7 @@ code;
             self::regClass($setting_class);
         }
         define('ROOT_WEB', str_replace(myFile::rootPath(), '/', ROOT));
+
         myException::init(array(
             'log_mode' => 0,
             'log_type' => E_ALL ^ E_NOTICE,
@@ -908,7 +916,6 @@ code;
         $host = myReq::server('HTTP_HOST');
         $domain = [];
         $ms_setting->router->url_fix = '';
-        $rule = preg_replace('@^/(\w+)/.*$@', '\1', '/[int]/[str]');
 
         if(is_file(CONFIG.'domain.php')) {
             $domain = include(CONFIG.'domain.php');
@@ -922,7 +929,6 @@ code;
                     define('URL_FIX', $rule);
                     $ms_setting->router->url_fix = '/'.$rule;
                 }
-                $ms_setting->router->url_fix = '/'.$rule;
             }
         }
         $router = new myRouter((array)$ms_setting->router);
@@ -972,10 +978,14 @@ code;
                     exit;
                 }
             }
+            $m = $info_app['path'][0] ?? '';
             if(is_file(PATH.'route.php')) $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
             if(is_file(PATH.'global.php')) require_once(PATH.'global.php');
             require(PATH.'index.php');
-            if(isset($tpl)) $mystep->show($tpl);
+            if(isset($tpl)) {
+                if(isset($content)) $tpl->assign('main', $content);
+                $mystep->show($tpl);
+            }
         }
         $mystep->end();
     }
@@ -988,6 +998,7 @@ code;
         self::checkClose();
         if(!empty($mystep)) return;
         define('PATH', APP.$info_app['app'].'/');
+        define('WEB_APP', defined('URL_FIX')?'':preg_replace('#^/(\w*).*$#', '\1', myReq::server('request_uri')).'/');
         if(is_file(PATH.$info_app['app'].'.class.php')) {
             require_once(PATH.$info_app['app'].'.class.php');
             $class = $info_app['app'];
@@ -1068,16 +1079,6 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
             } elseif(is_file(ROOT.$ms_setting->gen->close)) {
                 myStep::file($ms_setting->gen->close);
             } else {
-                global $mystep;
-                $mystep->setLanguagePack(APP.'myStep/language/', $ms_setting->gen->language);
-                $paras = [
-                    'web_title' => $ms_setting->web->title,
-                    'web_url' => $ms_setting->web->url,
-                    'charset' => $ms_setting->gen->charset,
-                    'path_root' => str_replace(myFile::rootPath(), '/', ROOT),
-                    'lng_page_info' => $mystep->getLanguage('page_info'),
-                    'lng_page_info_refresh' => $mystep->getLanguage('page_info_refresh'),
-                ];
                 myStep::info($ms_setting->gen->close, '###');
             }
         }

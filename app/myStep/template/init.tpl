@@ -10,8 +10,8 @@
     <base href="<!--path_root-->" />
     <link rel="Shortcut Icon" href="favicon.ico" />
     <!--page_start-->
-    <link rel="stylesheet" media="screen" type="text/css" href="static/css/bootstrap.css" />
-    <link rel="stylesheet" media="screen" type="text/css" href="static/css/glyphicons.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/bootstrap.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/glyphicons.css" />
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -20,7 +20,7 @@
 <body>
 
 <div class="p-5 text-center">
-    <img src="static/images/logo.png" />
+    <img src="/static/images/logo.png" />
 </div>
 
 <div id="main" class="container">
@@ -58,9 +58,9 @@
 <footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
     <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
-<script type="application/javascript" src="static/js/jquery.js"></script>
-<script type="application/javascript" src="static/js/bootstrap.bundle.js"></script>
-<script type="application/javascript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="/static/js/jquery.js"></script>
+<script type="application/javascript" src="/static/js/bootstrap.bundle.js"></script>
+<script type="application/javascript" src="/static/js/checkForm.js"></script>
 <!--page_end-->
 </body>
 <script type="application/javascript">

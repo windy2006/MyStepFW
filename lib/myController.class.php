@@ -633,7 +633,10 @@ class myController extends myBase {
      * @param bool $set_plugin
      */
     public function start($charset = 'UTF-8', $set_plugin = true) {
-        ob_start();
+        if(count(ob_list_handlers())) {
+            $content = ob_get_contents();
+            ob_end_clean();
+        }
         ob_implicit_flush(false);
         header('Powered-by: MyStep Framework');
         header_remove('x-powered-by');
@@ -652,9 +655,14 @@ class myController extends myBase {
             'revalidate_freq' => 120,
             'huge_code_pages' => 1
         ));
+        if(!headers_sent()) ob_start();
 
         if ($set_plugin) $this->plugin();
         $this->run('start');
+        if(isset($content)) {
+            echo $content;
+            unset($content);
+        }
     }
 
     /**

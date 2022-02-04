@@ -219,7 +219,7 @@ function getKeyword() {
     if($("#keyword").val().length>2) return;
     let str = $("#subject").val();
     if(str.length>2) {
-        $.get("/api/myStep/segment/"+str, function(data){
+        $.get("<!--url_prefix-->api/myStep/segment/"+str, function(data){
             $("#keyword").val(data);
         }, "text");
     }
@@ -398,5 +398,5 @@ let setting_tinymce_ext = {
 };
 let setting_tinymce_btn = 'pagebreak subtitle highlight';
 </script>
-<script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
-<script type="application/javascript" src="app/CMS/asset/admin/tinymce_init.js"></script>
+<script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
+<script type="application/javascript" src="/app/CMS/asset/admin/tinymce_init.js"></script>

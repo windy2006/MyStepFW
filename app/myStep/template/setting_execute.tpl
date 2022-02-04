@@ -24,27 +24,27 @@
 <script type="application/javascript">
     $(function() {
         $.setCSS([
-            'vendor/codemirror/lib/codemirror.css',
-            'vendor/codemirror/addon/fold/foldgutter.css',
-            'vendor/codemirror/addon/display/fullscreen.css'
+            '/vendor/codemirror/lib/codemirror.css',
+            '/vendor/codemirror/addon/fold/foldgutter.css',
+            '/vendor/codemirror/addon/display/fullscreen.css'
         ]);
         $.setJS([
-            "vendor/codemirror/lib/codemirror.js",
-            "vendor/codemirror/mode/php/php.js",
-            "vendor/codemirror/addon/edit/matchbrackets.js",
-            "vendor/codemirror/addon/selection/active-line.js",
-            "vendor/codemirror/mode/clike/clike.js",
-            "vendor/codemirror/addon/fold/foldcode.js",
-            "vendor/codemirror/addon/fold/foldgutter.js",
-            "vendor/codemirror/addon/fold/brace-fold.js",
-            "vendor/codemirror/addon/fold/xml-fold.js",
-            "vendor/codemirror/addon/fold/indent-fold.js",
-            "vendor/codemirror/addon/fold/comment-fold.js",
-            "vendor/codemirror/addon/display/fullscreen.js",
-            "vendor/codemirror/mode/javascript/javascript.js",
-            "vendor/codemirror/mode/xml/xml.js",
-            "vendor/codemirror/mode/css/css.js",
-            "vendor/codemirror/mode/htmlmixed/htmlmixed.js",
+            "/vendor/codemirror/lib/codemirror.js",
+            "/vendor/codemirror/mode/php/php.js",
+            "/vendor/codemirror/addon/edit/matchbrackets.js",
+            "/vendor/codemirror/addon/selection/active-line.js",
+            "/vendor/codemirror/mode/clike/clike.js",
+            "/vendor/codemirror/addon/fold/foldcode.js",
+            "/vendor/codemirror/addon/fold/foldgutter.js",
+            "/vendor/codemirror/addon/fold/brace-fold.js",
+            "/vendor/codemirror/addon/fold/xml-fold.js",
+            "/vendor/codemirror/addon/fold/indent-fold.js",
+            "/vendor/codemirror/addon/fold/comment-fold.js",
+            "/vendor/codemirror/addon/display/fullscreen.js",
+            "/vendor/codemirror/mode/javascript/javascript.js",
+            "/vendor/codemirror/mode/xml/xml.js",
+            "/vendor/codemirror/mode/css/css.js",
+            "/vendor/codemirror/mode/htmlmixed/htmlmixed.js",
         ], true, function() {
             let editor = CodeMirror.fromTextArea($id("code"), {
                 mode: "application/x-httpd-php",

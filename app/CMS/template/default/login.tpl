@@ -50,4 +50,4 @@
         </div>
     </div>
 </div>
-<script type="application/javascript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="/static/js/checkForm.js"></script>

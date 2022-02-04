@@ -35,8 +35,8 @@
         </form>
     </div>
 </div>
-<script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
-<script type="application/javascript" src="app/CMS/asset/admin/tinymce_init.js"></script>
+<script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
+<script type="application/javascript" src="/app/CMS/asset/admin/tinymce_init.js"></script>
 <script type="text/javascript">
 let setting_tinymce_css = '/asset/<!--tpl_style-->/style.css';
 $(function(){

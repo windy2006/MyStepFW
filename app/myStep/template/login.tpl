@@ -20,7 +20,7 @@
 </head>
 <body>
 <div class="p-5 text-center">
-    <img src="static/images/logo.png" keep-url />
+    <img src="/static/images/logo.png" keep-url />
 </div>
 <div class="container">
     <div class="row">&nbsp;</div>
@@ -50,7 +50,7 @@
                             </div>
                             <input name="captcha" type="text" class="form-control" placeholder="<!--lng_login_captcha_msg-->" need="" />
                             <div class="input-group-append">
-                                <img id="captcha" src="captcha/" height="33" />
+                                <img id="captcha" src="/captcha/" height="33" />
                             </div>
                             <div class="input-group-append">
                                 <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src+=(new Date().getTime());return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>
@@ -70,6 +70,6 @@
     <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
 <!--page_end-->
-<script type="application/javascript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="/static/js/checkForm.js"></script>
 </body>
 </html>

@@ -294,7 +294,7 @@
         add_css:true,
         name_fix:true,
         callback:function(){
-            $.getScript('vendor/select2/i18n/zh-CN.js', function(){
+            $.getScript('/vendor/select2/i18n/zh-CN.js', function(){
                 $("select[adv]").each(function(){
                     let opt = {
                         language: "zh-CN",
@@ -337,7 +337,7 @@
         add_css:true,
         callback:function(){
             ac_options = {
-                serviceUrl:'api/myStep/autoComplete/json',
+                serviceUrl:'<!--url_prefix-->api/myStep/autoComplete/json',
                 minChars:1,
                 delimiter: /(,|;)\s*/,
                 maxHeight:400,
@@ -361,7 +361,7 @@
         add_css:'.min',
         name_fix:'.min',
         callback:function(){
-            $.getScript('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js', function(){
+            $.getScript('/vendor/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js', function(){
                 $('.form-control.date').prop("readonly", true).datepicker({
                     language: "zh-CN",
                     orientation: "bottom left",

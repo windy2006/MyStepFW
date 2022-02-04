@@ -44,7 +44,7 @@ jQuery.vendor('Chart', {
     add_css:true,
     name_fix:'.min',
     callback:function(){
-        jQuery.getScript('vendor/Chart/utils.js', function(){
+        jQuery.getScript('/vendor/Chart/utils.js', function(){
             let getData = function(m=2, pie=false) {
                 let chartColors = window.chartColors;
                 let color = Chart.helpers.color;

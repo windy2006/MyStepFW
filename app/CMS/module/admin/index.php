@@ -76,7 +76,7 @@ if(!empty($info_app['path'][1]) && is_dir(PATH.'module/admin/'.$info_app['path']
     if(!checkPower('func', implode('/', array_slice($info_app['path'],1,2)))) {
         myStep::info('admin_nopower', $path_admin);
     }
-    $mystep->setAddedContent('end', '<script type="application/javascript" src="static/js/checkForm.js"></script>');
+    $mystep->setAddedContent('end', '<script type="application/javascript" src="/static/js/checkForm.js"></script>');
     include($file);
 } else {
     $tpl_setting['name'] = 'frame';

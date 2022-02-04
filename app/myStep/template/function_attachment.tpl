@@ -35,7 +35,7 @@
             <tbody>
             <!--loop:start key="files"-->
             <tr>
-                <td><a href="api/myStep/download/<!--files_idx-->"><!--files_name--></a></td>
+                <td><a href="<!--url_prefix-->api/myStep/download/<!--files_idx-->"><!--files_name--></a></td>
                 <td><!--files_size--></td>
                 <td><!--files_date--></td>
                 <td>

@@ -2,7 +2,7 @@
 body {background-image: url('/static/images/background.jpg');}
 </style>
 <div class="p-5 text-center">
-    <img src="static/images/logo.png" keep-url />
+    <img src="/static/images/logo.png" keep-url />
 </div>
 <div class="container">
     <div class="row">&nbsp;</div>
@@ -48,7 +48,7 @@ body {background-image: url('/static/images/background.jpg');}
         </div>
     </div>
 </div>
-<script type="application/javascript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="/static/js/checkForm.js"></script>
 <script type="application/javascript">
 if(self!=top) top.location.href = location.href;
 </script>

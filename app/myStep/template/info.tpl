@@ -6,9 +6,9 @@
     <meta http-equiv="windows-Target" content="_top" />
     <base href="<!--path_root-->" />
     <link rel="Shortcut Icon" href="favicon.ico" />
-    <link rel="stylesheet" media="screen" type="text/css" href="static/css/bootstrap.css" />
-    <link rel="stylesheet" media="screen" type="text/css" href="static/css/glyphicons.css" />
-    <script type="application/javascript" src="static/js/jquery.js"></script>
+    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/bootstrap.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/glyphicons.css" />
+    <script type="application/javascript" src="/static/js/jquery.js"></script>
 </head>
 <body>
 <div class="container">

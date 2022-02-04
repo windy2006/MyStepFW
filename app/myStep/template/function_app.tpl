@@ -95,15 +95,15 @@ $('#plugin').on('show.bs.modal', function (event) {
     });
 })
 $(function() {
-    $.setCSS('vendor/codemirror/lib/codemirror.css');
+    $.setCSS('/vendor/codemirror/lib/codemirror.css');
     $.setJS([
-        "vendor/codemirror/lib/codemirror.js",
-        "vendor/codemirror/mode/php/php.js",
-        "vendor/codemirror/addon/edit/matchbrackets.js",
-        "vendor/codemirror/addon/selection/active-line.js",
-        "vendor/codemirror/mode/xml/xml.js",
-        "vendor/codemirror/mode/htmlmixed/htmlmixed.js",
-        "vendor/codemirror/mode/clike/clike.js"
+        "/vendor/codemirror/lib/codemirror.js",
+        "/vendor/codemirror/mode/php/php.js",
+        "/vendor/codemirror/addon/edit/matchbrackets.js",
+        "/vendor/codemirror/addon/selection/active-line.js",
+        "/vendor/codemirror/mode/xml/xml.js",
+        "/vendor/codemirror/mode/htmlmixed/htmlmixed.js",
+        "/vendor/codemirror/mode/clike/clike.js"
     ], true, function(){
         $('textarea').each(function() {
             let editor = CodeMirror.fromTextArea(this, {

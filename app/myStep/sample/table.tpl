@@ -93,33 +93,33 @@
             name_fix:true,
             callback:function(){
                 $.setJS([
-                    'vendor/bootstrap-table/locale/bootstrap-table-zh-CN.min.js',
+                    '/vendor/bootstrap-table/locale/bootstrap-table-zh-CN.min.js',
 
-                    'vendor/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
-                    'vendor/bootstrap-table/extensions/export/tableExport.js',
+                    '/vendor/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
+                    '/vendor/bootstrap-table/extensions/export/tableExport.js',
 
-                    'vendor/bootstrap-table/extensions/mobile/bootstrap-table-mobile.min.js',
+                    '/vendor/bootstrap-table/extensions/mobile/bootstrap-table-mobile.min.js',
 
-                    'vendor/bootstrap-table/extensions/reorder-rows/jquery.tablednd.js',
-                    'vendor/bootstrap-table/extensions/reorder-rows/bootstrap-table-reorder-rows.min.js',
+                    '/vendor/bootstrap-table/extensions/reorder-rows/jquery.tablednd.js',
+                    '/vendor/bootstrap-table/extensions/reorder-rows/bootstrap-table-reorder-rows.min.js',
 
-                    //'vendor/bootstrap-table/extensions/reorder-columns/jquery.dragtable.js',
-                    //'vendor/bootstrap-table/extensions/reorder-columns/bootstrap-table-reorder-columns.min.js',
+                    //'/vendor/bootstrap-table/extensions/reorder-columns/jquery.dragtable.js',
+                    //'/vendor/bootstrap-table/extensions/reorder-columns/bootstrap-table-reorder-columns.min.js',
 
-                    'vendor/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
+                    '/vendor/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
 
-                    'vendor/bootstrap-table/extensions/resizable/jquery.resizableColumns.js',
-                    'vendor/bootstrap-table/extensions/resizable/bootstrap-table-resizable.min.js',
+                    '/vendor/bootstrap-table/extensions/resizable/jquery.resizableColumns.js',
+                    '/vendor/bootstrap-table/extensions/resizable/bootstrap-table-resizable.min.js',
 
-                    'vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.min.js',
+                    '/vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.min.js',
 
-                    'vendor/bootstrap-table/extensions/toolbar/bootstrap-table-toolbar.min.js',
+                    '/vendor/bootstrap-table/extensions/toolbar/bootstrap-table-toolbar.min.js',
                 ], true, function(){
                     $.setCSS([
-                        "vendor/bootstrap-table/extensions/reorder-rows/bootstrap-table-reorder-rows.min.css",
-                        //"vendor/bootstrap-table/extensions/reorder-columns/dragtable.css",
-                        "vendor/bootstrap-table/extensions/resizable/jquery.resizableColumns.css",
-                        "vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.css"
+                        "/vendor/bootstrap-table/extensions/reorder-rows/bootstrap-table-reorder-rows.min.css",
+                        //"/vendor/bootstrap-table/extensions/reorder-columns/dragtable.css",
+                        "/vendor/bootstrap-table/extensions/resizable/jquery.resizableColumns.css",
+                        "/vendor/bootstrap-table/extensions/sticky-header/bootstrap-table-sticky-header.css"
                     ]);
                     setTbl('#tb_list');
                 }, function(num_done, num_total, script) {

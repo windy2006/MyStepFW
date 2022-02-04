@@ -5,7 +5,7 @@
 jQuery.fn.powerImage = function(options) {
     let defaults = {
         selector: 'data-src',
-        image: "static/images/loading_img.gif",
+        image: "/static/images/loading_img.gif",
         width: 600,
         zoom: true
     };

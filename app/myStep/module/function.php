@@ -15,5 +15,5 @@ include($script);
 $t->assign('path_admin', $app_root);
 $content = $mystep->render($t);
 $mystep->setAddedContent('end', '
-<script type="application/javascript" src="static/js/checkForm.js"></script>
+<script type="application/javascript" src="/static/js/checkForm.js"></script>
 ');

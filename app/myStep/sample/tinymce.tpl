@@ -26,7 +26,7 @@
         </textarea>
     </div>
 </div>
-<script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
+<script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
 <script type="text/javascript">
 function tinymceInit(obj){
     if(!checkSetting()) return;

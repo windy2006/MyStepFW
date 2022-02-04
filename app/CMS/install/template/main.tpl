@@ -10,9 +10,9 @@
     <base href="<!--path_root-->" />
     <link rel="Shortcut Icon" href="favicon.ico" />
     <!--page_start-->
-    <link rel="stylesheet" media="screen" type="text/css" href="cache/script/myStep_.css" />
-    <script type="application/javascript" src="cache/script/myStep_.js"></script>
-    <script type="application/javascript" src="static/js/checkForm.js"></script>
+    <link rel="stylesheet" media="screen" type="text/css" href="/cache/script/myStep_.css" />
+    <script type="application/javascript" src="/cache/script/myStep_.js"></script>
+    <script type="application/javascript" src="/static/js/checkForm.js"></script>
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -20,7 +20,7 @@
 </head>
 <body style="overflow-y:auto;">
 <div class="p-3 text-center">
-    <img src="static/images/logo.png" />
+    <img src="/static/images/logo.png" />
 </div>
 <div class="container-fluid px-4 py-2">
     <div class="row">

@@ -66,7 +66,7 @@
         </table>
     </div>
 </div>
-<script type="application/javascript" src="vendor/tinymce/tinymce.min.js"></script>
+<script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
 <script type="text/javascript">
 let setting_tinymce = {
     language:'zh_CN',

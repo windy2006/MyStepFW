@@ -10,8 +10,8 @@
  *                                                *
  **************************************************/
 
-let global = {};
-global.root = $('base').attr('href');
+const global = {};
+global.root = root_web;
 if(global.root==null) global.root = '/';
 global.root_fix = location.pathname.replace(/&.+$/,'')+'/';
 global.root_fix = global.root_fix.replace(/\/+/g, '/');

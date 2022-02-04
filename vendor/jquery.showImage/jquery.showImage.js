@@ -18,7 +18,7 @@ jQuery.fn.showImage = function(options) {
     };
     let params = $.extend({}, defaults, options || {});
     params.obj = this;
-    params.thumb_width_offset = params.thumb_width + params.thumb_margin
+    params.thumb_width_offset = params.thumb_width + params.thumb_margin;
     let container = $("#"+params.container_id);
     let container_show = null;
     let container_list = null;
@@ -29,6 +29,7 @@ jQuery.fn.showImage = function(options) {
     let repeat_times = 4;
     let act_img = null;
     let marquee_interval = 0;
+    let running = false;
     let rate = container.width()/params.thumb_width_offset;
 
     if(img_list.length<2) return;
@@ -85,12 +86,22 @@ jQuery.fn.showImage = function(options) {
         }
     ).click(function(){
         if($(this).attr("active")==="y") return;
-        clearInterval(marquee_interval);
+        doIt(false);
         let the_step = Math.ceil(($(act_img).position().left-$(this).position().left)/params.thumb_width_offset);
         if(the_step<=0) the_step -= 1;
         switch_img(the_step);
-        marquee_interval = setInterval(switch_img, params.interval*1000);
+        doIt(true);
     });
+
+    let doIt = function(mode=true) {
+        if(mode) {
+            if(running) return;
+            marquee_interval = setInterval(switch_img, params.interval*1000);
+        } else {
+            if(running) clearInterval(marquee_interval);
+        }
+        running = !running;
+    }
 
     let switch_img = function(step) {
         if(step==null) step = -1;
@@ -105,7 +116,7 @@ jQuery.fn.showImage = function(options) {
             container_wrapper.css("left", the_width+the_step+params.thumb_width_offset);
             the_step += the_width;
         }
-        container_show.find("img").animate({"opacity": 0}, 1000);
+        container_show.find("img").animate({"opacity": 0.1}, 800);
         container_wrapper.animate({"left":the_step},1000,function(){
             let the_idx = Math.ceil(-the_step/params.thumb_width_offset);
             act_img = container_wrapper.find("img").get(the_idx+params.adjust_pos);
@@ -118,14 +129,20 @@ jQuery.fn.showImage = function(options) {
     }
 
     let reset = function() {
-        clearInterval(marquee_interval);
+        doIt(false);
         container.find('div,span,a,img').unbind();
         container.empty();
         $(params.obj).showImage(params);
     };
 
     switch_img(1 - img_cnt + params.adjust_pos);
-    marquee_interval = setInterval(switch_img, params.interval*1000);
+    doIt(true);
+
+    container.hover(function(){
+        doIt(false);
+    }, function(){
+        doIt(true);
+    });
 
     $(window).resize(function(){
         if(!isNaN(params.container_width)) return;
