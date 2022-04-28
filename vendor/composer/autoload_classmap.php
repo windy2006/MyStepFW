@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'CssAtCharsetParserPlugin' => $vendorDir . '/phrozenbyte/cssmin/src/parser/plugins/CssAtCharsetParserPlugin.php',
     'CssAtCharsetToken' => $vendorDir . '/phrozenbyte/cssmin/src/tokens/CssAtCharsetToken.php',
     'CssAtFontFaceDeclarationToken' => $vendorDir . '/phrozenbyte/cssmin/src/tokens/CssAtFontFaceDeclarationToken.php',
@@ -64,7 +65,6 @@ return array(
     'CssVariablesMinifierFilter' => $vendorDir . '/phrozenbyte/cssmin/src/minifier/filter/CssVariablesMinifierFilter.php',
     'CssVariablesMinifierPlugin' => $vendorDir . '/phrozenbyte/cssmin/src/minifier/plugins/CssVariablesMinifierPlugin.php',
     'CssWhitesmithsFormatter' => $vendorDir . '/phrozenbyte/cssmin/src/formatter/CssWhitesmithsFormatter.php',
-    'PclZip' => $vendorDir . '/pclzip/pclzip/pclzip.lib.php',
     'aCssAtBlockEndToken' => $vendorDir . '/phrozenbyte/cssmin/src/tokens/aCssAtBlockEndToken.php',
     'aCssAtBlockStartToken' => $vendorDir . '/phrozenbyte/cssmin/src/tokens/aCssAtBlockStartToken.php',
     'aCssDeclarationToken' => $vendorDir . '/phrozenbyte/cssmin/src/tokens/aCssDeclarationToken.php',

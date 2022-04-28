@@ -3,7 +3,6 @@
 namespace Erusev\Parsedown\Components\Blocks;
 
 use Erusev\Parsedown\AST\Handler;
-use Erusev\Parsedown\AST\StateRenderable;
 use Erusev\Parsedown\Components\AcquisitioningBlock;
 use Erusev\Parsedown\Components\Block;
 use Erusev\Parsedown\Components\ContinuableBlock;
@@ -112,15 +111,14 @@ final class Table implements AcquisitioningBlock, ContinuableBlock
         if (
             ! \preg_match_all('/(?:(\\\\[|])|[^|`]|`[^`]++`|`)++/', $row, $matches)
             || ! isset($matches[0])
-            || ! \is_array($matches[0])
         ) {
             return null;
         }
 
-        $cells = \array_values(\array_map(
+        $cells = \array_map(
             'trim',
             \array_slice($matches[0], 0, \count($this->alignments))
-        ));
+        );
 
         return new self(
             $this->alignments,

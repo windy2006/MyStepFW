@@ -32,11 +32,23 @@ final class StateTest extends TestCase
 
     /**
      * @return void
-     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws \PHPUnit\Framework\Exception
      * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
      */
     public function testStateCloneVisibility()
     {
         $this->assertInstanceOf(State::class, clone(new State));
+    }
+
+    /**
+     * @return void
+     * @throws \PHPUnit\Framework\Exception
+     * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     */
+    public function testStateFromStateIdentical()
+    {
+        $State = new State;
+
+        $this->assertSame($State, State::from($State));
     }
 }

@@ -3,7 +3,6 @@
 namespace Erusev\Parsedown\Components\Blocks;
 
 use Erusev\Parsedown\AST\Handler;
-use Erusev\Parsedown\AST\StateRenderable;
 use Erusev\Parsedown\Components\Block;
 use Erusev\Parsedown\Components\ContinuableBlock;
 use Erusev\Parsedown\Html\Renderables\Element;
@@ -82,7 +81,7 @@ final class BlockQuote implements ContinuableBlock
             return new self($Lines);
         }
 
-        if (! $Context->precedingEmptyLines() > 0) {
+        if (!($Context->precedingEmptyLines() > 0)) {
             $indentOffset = $Context->line()->indentOffset() + $Context->line()->indent();
             $Lines = $this->Lines->appendingTextLines($Context->line()->text(), $indentOffset);
 

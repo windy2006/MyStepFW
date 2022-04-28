@@ -2,7 +2,6 @@
 
 namespace Erusev\Parsedown\Components\Blocks;
 
-use Erusev\Parsedown\AST\StateRenderable;
 use Erusev\Parsedown\Components\Block;
 use Erusev\Parsedown\Components\ContinuableBlock;
 use Erusev\Parsedown\Html\Renderables\Element;
@@ -35,7 +34,7 @@ final class IndentedCode implements ContinuableBlock
         State $State,
         Block $Block = null
     ) {
-        if (isset($Block) && $Block instanceof Paragraph && ! $Context->precedingEmptyLines() > 0) {
+        if (isset($Block) && $Block instanceof Paragraph && ! ($Context->precedingEmptyLines() > 0)) {
             return null;
         }
 

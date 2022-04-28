@@ -102,12 +102,15 @@ final class State implements StateBearer
         );
     }
 
-    /**
-     * @return State
-     */
-    public function state()
+    public function state(): State
     {
         return $this;
+    }
+
+    /** @return self */
+    public static function from(StateBearer $StateBearer)
+    {
+        return $StateBearer->state();
     }
 
     public function isolatedCopy(): self

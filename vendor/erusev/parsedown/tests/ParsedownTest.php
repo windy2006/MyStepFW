@@ -12,6 +12,7 @@ use Erusev\Parsedown\Configurables\SafeMode;
 use Erusev\Parsedown\Configurables\StrictMode;
 use Erusev\Parsedown\Parsedown;
 use Erusev\Parsedown\State;
+use Erusev\Parsedown\StateBearer;
 use PHPUnit\Framework\TestCase;
 
 class ParsedownTest extends TestCase
@@ -39,6 +40,16 @@ class ParsedownTest extends TestCase
         return [\dirname(__FILE__).'/data/'];
     }
 
+    protected function initState(string $testName): StateBearer
+    {
+        return new State([
+            new SafeMode(\substr($testName, 0, 3) === 'xss'),
+            new StrictMode(\substr($testName, 0, 6) === 'strict'),
+            new Breaks(\substr($testName, 0, 14) === 'breaks_enabled'),
+            new HeaderSlug(\substr($testName, 0, 4) === 'slug'),
+        ]);
+    }
+
     /**
      * @dataProvider data
      * @param string $test
@@ -56,12 +67,7 @@ class ParsedownTest extends TestCase
         $expectedMarkup = \str_replace("\r\n", "\n", $expectedMarkup);
         $expectedMarkup = \str_replace("\r", "\n", $expectedMarkup);
 
-        $Parsedown = new Parsedown(new State([
-            new SafeMode(\substr($test, 0, 3) === 'xss'),
-            new StrictMode(\substr($test, 0, 6) === 'strict'),
-            new Breaks(\substr($test, 0, 14) === 'breaks_enabled'),
-            new HeaderSlug(\substr($test, 0, 4) === 'slug'),
-        ]));
+        $Parsedown = new Parsedown($this->initState($test));
 
         $actualMarkup = $Parsedown->toHtml($markdown);
 
@@ -75,10 +81,7 @@ class ParsedownTest extends TestCase
 
         foreach ($this->dirs as $dir) {
             $Folder = new \DirectoryIterator($dir);
-
             foreach ($Folder as $File) {
-                /** @var $File DirectoryIterator */
-
                 if (! $File->isFile()) {
                     continue;
                 }

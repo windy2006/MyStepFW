@@ -2,6 +2,7 @@
 
 namespace Erusev\Parsedown\Tests\Configurables;
 
+use Erusev\Parsedown\Components\Blocks\FencedCode;
 use Erusev\Parsedown\Components\Blocks\IndentedCode;
 use Erusev\Parsedown\Components\Blocks\Markup;
 use Erusev\Parsedown\Components\Blocks\Rule;
@@ -14,6 +15,7 @@ final class BlockTypesTest extends TestCase
      * @return void
      * @throws \PHPUnit\Framework\ExpectationFailedException
      * @throws \SebastianBergmann\RecursionContext\InvalidArgumentException
+     * @psalm-suppress InvalidDocblock
      */
     public function testAddingTypes()
     {
@@ -41,5 +43,9 @@ final class BlockTypesTest extends TestCase
         $BlockTypes = $BlockTypes->addingUnmarkedLowPrecedence([IndentedCode::class]);
         $this->assertSame([Markup::class, IndentedCode::class, Rule::class], $BlockTypes->markedBy('@'));
         $this->assertSame([Rule::class, Markup::class, IndentedCode::class], $BlockTypes->unmarked());
+
+        $BlockTypes = $BlockTypes->replacing(IndentedCode::class, FencedCode::class);
+        $this->assertSame([Markup::class, FencedCode::class, Rule::class], $BlockTypes->markedBy('@'));
+        $this->assertSame([Rule::class, Markup::class, FencedCode::class], $BlockTypes->unmarked());
     }
 }

@@ -14,8 +14,8 @@ use Erusev\Parsedown\Components\StateUpdatingBlock;
 use Erusev\Parsedown\Configurables\BlockTypes;
 use Erusev\Parsedown\Configurables\InlineTypes;
 use Erusev\Parsedown\Configurables\RecursionLimiter;
+use Erusev\Parsedown\Configurables\RenderStack;
 use Erusev\Parsedown\Html\Renderable;
-use Erusev\Parsedown\Html\Renderables\Text;
 use Erusev\Parsedown\Parsing\Excerpt;
 use Erusev\Parsedown\Parsing\Line;
 use Erusev\Parsedown\Parsing\Lines;
@@ -29,9 +29,9 @@ final class Parsedown
 
     public function __construct(StateBearer $StateBearer = null)
     {
-        $StateBearer = $StateBearer ?: new State;
+        $State = ($StateBearer ?? new State)->state();
 
-        $this->State = $StateBearer->state()->isolatedCopy();
+        $this->State = $State->isolatedCopy();
     }
 
     /**
@@ -45,7 +45,18 @@ final class Parsedown
             $this->State->isolatedCopy()
         );
 
-        $Renderables = $State->applyTo($StateRenderables);
+        $Renderables = \array_reduce(
+            \array_reverse($State->get(RenderStack::class)->getStack()),
+            /**
+             * @param Renderable[] $Renderables
+             * @param \Closure(Renderable[],State):Renderable[] $RenderMap
+             * @return Renderable[]
+             */
+            function (array $Renderables, \Closure $RenderMap) use ($State): array {
+                return $RenderMap($Renderables, $State);
+            },
+            $State->applyTo($StateRenderables)
+        );
 
         $html = self::render($Renderables);
 
