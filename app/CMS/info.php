@@ -4,5 +4,5 @@ return array(
     'app' => 'CMS',
     'ver' => '1.0',
     'intro' => '内容管理系统',
-    'copyright' => '版权所有 2021 <a href="mailto:windy2006@gmail.com">Windy2000</a>'
+    'copyright' => '版权所有 2022 <a href="mailto:windy2006@gmail.com">Windy2000</a>'
 );

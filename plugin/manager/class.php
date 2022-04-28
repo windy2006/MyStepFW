@@ -134,7 +134,7 @@ return '.var_export($ver_remote['plugin'], true).';
                     $path_upload = CACHE.'tmp/';
                     $upload = new myUploader($path_upload, true);
                     $upload->do(false);
-                    $result = $upload->getResult(0);
+                    $result = $upload->result();
                     if($result[0]['error'] == 0) {
                         $theFile = $path_upload.'/'.$result[0]['new_name'];
                         $dir = $path_upload.'update/';

@@ -155,7 +155,7 @@ CREATE TABLE `{pre}info` (
     INDEX (`web_id`),
     PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='内容展示';
-INSERT INTO `{pre}info` VALUES (0, 1, 'copyright', '<p style="text-align: center;">&copy;2010-2021&nbsp;www.mysteps.cn</p>');
+INSERT INTO `{pre}info` VALUES (0, 1, 'copyright', '<p style="text-align: center;">&copy;2010-2022&nbsp;www.mysteps.cn</p>');
 INSERT INTO `{pre}info` VALUES (0, 1, 'contact', '<p>QQ：18509608</p><p>Email：windy_sk@126.com</p>');
 
 # ---------------------------------------------------------------------------------------------------------------

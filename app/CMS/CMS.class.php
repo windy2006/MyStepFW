@@ -8,11 +8,13 @@ class CMS extends myStep {
      * @param string $pwd
      * @return int
      */
-    public function login(&$usr='', $pwd='') {
-        if(parent::login($usr, $pwd)) {
+    public function login($usr='', $pwd='') {
+        $result = 0;
+        if(parent::ms_login($usr, $pwd)) {
+            $result = 1;
+            if(empty($usr)) $usr = $this->setting->gen->s_usr;
             r::s('ms_cms_op', $usr);
             r::s('ms_cms_group', 1);
-            $result = 1;
         } else {
             if(!empty($usr) && !empty($pwd)) {
                 $pwd = md5($pwd);
@@ -20,33 +22,26 @@ class CMS extends myStep {
             } else {
                 $ms_user = myReq::cookie('ms_cms_op');
             }
-            $result = 0;
             if(!empty($ms_user)) {
                 list($usr, $pwd) = explode(chr(9), $ms_user);
-                if($usr == $this->setting->gen->s_usr && $pwd == $this->setting->gen->s_pwd) {
+                global $db, $S;
+                $db->build($S->db->pre.'sys_op')
+                    ->field('group_id')
+                    ->where('username','=',$usr)
+                    ->where('password','=',$pwd);
+                if($group_id=$db->result()) {
                     r::s('ms_cms_op', $usr);
-                    r::s('ms_cms_group', 1);
+                    r::s('ms_cms_group', $group_id);
                     $result = 1;
                 } else {
-                    global $db, $S;
-                    $db->build($S->db->pre.'sys_op')
+                    $db->build($S->db->pre.'users')
                         ->field('group_id')
                         ->where('username','=',$usr)
                         ->where('password','=',$pwd);
                     if($group_id=$db->result()) {
-                        r::s('ms_cms_op', $usr);
-                        r::s('ms_cms_group', $group_id);
-                        $result = 1;
-                    } else {
-                        $db->build($S->db->pre.'users')
-                            ->field('group_id')
-                            ->where('username','=',$usr)
-                            ->where('password','=',$pwd);
-                        if($group_id=$db->result()) {
-                            r::s('ms_cms_user', $usr);
-                            r::s('ms_cms_user_group', $group_id);
-                            $result = 2;
-                        }
+                        r::s('ms_cms_user', $usr);
+                        r::s('ms_cms_user_group', $group_id);
+                        $result = 2;
                     }
                 }
             }
@@ -134,13 +129,13 @@ class CMS extends myStep {
      */
     public function shutdown() {
         global $info_app, $db, $S;
-        if(!is_file(PATH.'config.php') || is_null($db)) return;
+        if(!is_file(PATH.'config.php') || is_null($db)) return false;
         $agent = strtolower(myReq::svr('HTTP_USER_AGENT'));
         if(
             strpos($agent, 'spider')!==false ||
             strpos($agent, 'bot')!==false ||
             (!empty($info_app['path']) && in_array($info_app['path'][0],['api','module','ms_language','ms_setting','captcha','pack']))
-        ) return;
+        ) return false;
         $ip = myReq::ip();
         $new_ip = 0;
         $cnt_visitor = myReq::c('cms_cnt_visitor');

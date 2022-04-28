@@ -24,15 +24,15 @@ class myUploader extends myBase {
         $path = '',
         $counter = 0,
         $rename = false,
-        $banlst = '';
+        $banlst = ['php','exe','com','bat','pif'];
 
     /**
      * 初始化类变量
      * @param string $path
-     * @param bool $rename
-     * @param string $banlst
+     * @param false $rename
+     * @param array $banlst
      */
-    public function init($path = '', $rename = false, $banlst='php,exe,com,bat,pif') {
+    public function init($path = '', $rename = false, $banlst=[]) {
         if(empty($_FILES)) return;
         if(!empty($path)) {
             $path = myFile::realPath($path);
@@ -44,8 +44,16 @@ class myUploader extends myBase {
         }
         $this->path = $path;
         $this->rename = $rename;
-        $this->banlst = $banlst;
-        return;
+        $this->setBan($banlst);
+    }
+
+    public function setBan($list) {
+        if(is_string($list)) {
+            $list = str_replace(' ', '', $list);
+            $list = explode(',', $list);
+        }
+        $this->banlst = array_merge($this->banlst, $list);
+        $this->banlst = array_unique($this->banlst);
     }
 
     public function do($getsize = true) {
@@ -82,14 +90,13 @@ class myUploader extends myBase {
                 $this->uploadFile();
             }
         }
-        return;
     }
 
     private function uploadFile() {
         switch($this->result[$this->counter]['error']) {
             case 0:
                 $file_ext = strtolower(pathinfo($this->result[$this->counter]['name'], PATHINFO_EXTENSION));
-                if(empty($file_ext) || strpos($this->banlst, $file_ext)!==false) $file_ext = 'upload';
+                if(empty($file_ext) || in_array($file_ext, $this->banlst)) $file_ext = 'upload';
                 $this->result[$this->counter]['new_name'] = $this->rename?(getMicrotime().substr(md5($this->result[$this->counter]['size']), 0, 5).'.'.$file_ext):$this->result[$this->counter]['name'];
                 if(file_exists($this->path.$this->result[$this->counter]['new_name'])) {
                     $this->result[$this->counter]['message'] = 'The Same-name-file Has Existed In The Upload Path !';
@@ -134,12 +141,12 @@ class myUploader extends myBase {
                 $this->result[$this->counter]['message'] = 'Unknown error !';
         }
         $this->counter++;
-        return;
     }
 
-    public function getResult($mode = 1) {
-        if($mode == 1) {
-            $result = '<table width="700" border="0" align="center" cellpadding="0" cellspacing="1" style="font-size:12px;border:1px black solid;">
+    public function result($html = false) {
+        if($html) {
+            $result = '<h4 style="text-align: center">Total '.$this->counter.' File(s) Uploaded!</h4>';
+            $result .= '<table width="700" border="0" align="center" cellpadding="0" cellspacing="1" style="font-size:12px;border:1px black solid;">
                 <tr align="center" bgcolor="#999999">
                   <td><b>File Name (Rename)</b></td>
                   <td width="70"><b>File Size</b></td>
@@ -147,19 +154,34 @@ class myUploader extends myBase {
                   <td><b>Result</b></td>
                 </tr>
                 ';
-            $max_count = count($this->result);
-            for($i=0; $i<$max_count; $i++) {
+            for($i=0; $i<$this->counter; $i++) {
                 $result .= '<tr bgcolor="#eeeeee">
-                  <td style="padding: 4px"><a href="'.$this->result[$i]['path'].$this->result[$i]['new_name'].'" target="_blank">'.$this->result[$i]['name'].($this->rename?' ('.$this->result[$i]['new_name'].')':'').'</a></td>
-                  <td style="padding: 4px">'.$this->result[$i]['size'].'</td>
-                  <td style="padding: 4px">'.$this->result[$i]['type'].'</td>
-                  <td style="padding: 4px">'.$this->result[$i]['message'].'</td>
+                  <td style="padding: 4px"><a href="'.$this->result[$i]['path'].$this->result[$i]['new_name'].'" target="_blank" title="'.($this->rename?$this->result[$i]['new_name']:'').'">'.$this->result[$i]['name'].'</a></td>
+                  <td style="padding: 4px;text-align: right;">'.$this->result[$i]['size'].'</td>
+                  <td style="padding: 4px;text-align: center;">'.$this->result[$i]['type'].'</td>
+                  <td style="padding: 4px;text-align: center;">'.$this->result[$i]['message'].'</td>
                 </tr>
                 ';
             }
             $result .= '</table>';
+            $result .= '<div>&nbsp;</div>';
         } else {
             $result = $this->result;
+            /*
+            $done = [];
+            $fail = [];
+            for($i=0;$i<$this->counter;$i++) {
+                if($this->result[$i]['error']===0) {
+                    $done[] = $this->result[$i];
+                } else {
+                    $fail[] = $this->result[$i];;
+                }
+            }
+            $result = [
+                'done' => $done,
+                'fail' => $fail
+            ];
+            */
         }
         return $result;
     }

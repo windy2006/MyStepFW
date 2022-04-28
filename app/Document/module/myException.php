@@ -8,10 +8,6 @@ myException::init(array(
     'exit_on_error' => false
 ));
 
-//Division by zero
-$num = 0;
-echo 1/$num;
-
 //Undefined variable
 echo $noset_para;
 
@@ -25,3 +21,7 @@ try {
 
 //undefined function
 NoSet();
+
+//Division by zero, because of the previous shutdown error, the codes below will not be run
+$num = 0;
+echo 1/$num;

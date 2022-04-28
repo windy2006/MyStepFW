@@ -51,6 +51,7 @@ if($module=='phpinfo') {
                         $line = $match[1];
                         $err_lst[$i] = str_replace($code, '!!code!!', $err_lst[$i]);
                         $err_lst[$i] = preg_replace('#[\r\n\s]+!!code!!#', '!!code!!', $err_lst[$i]);
+                        $code = preg_replace('#(\t?\d+\.)([\r\n]+)#', '\1/* ----------- */\2', $code);
                         $code = preg_replace('#\t?\d+\.#', '', $code);
                         $code = htmlspecialchars($code);
                         $code = '<pre class="brush:php;first-line:'.$start.';highlight:'.$line.'">'.$code.'</pre>';

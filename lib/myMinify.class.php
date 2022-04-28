@@ -70,15 +70,11 @@ class myMinify extends myBase {
         if($this->check()) {
             $this->result = file_get_contents($this->cache);
         } else {
-            if($this->mode == 'js') {
-                if($pack) {
-                    $packer = new JavaScriptPacker($this->content, 62, false, false);
-                    $this->result = $packer->pack();
-                }else {
-                    $this->result = \JSMin\JSMin::minify($this->content);
-                }
+            if($this->mode == 'js' && $pack) {
+                $packer = new JavaScriptPacker($this->content, 62, false, false);
+                $this->result = $packer->pack();
             } else {
-                $this->result = CssMin::minify($this->content);
+                $this->result = self::minify($this->content, $this->mode);
             }
             if(!empty($this->cache)) file_put_contents($this->cache, $this->result);
         }
@@ -86,7 +82,7 @@ class myMinify extends myBase {
     }
 
     /**
-     * 显示压缩代码
+     * 显示代码
      * @param bool $pack
      */
     public function show($pack = false) {
@@ -98,9 +94,24 @@ class myMinify extends myBase {
             header('Content-Type:text/css');
         }
         header("Accept-Ranges: bytes");
-        header("Accept-Length: ".strlen($this->content));
-        echo $this->content;
+        header("Accept-Length: ".strlen($this->result));
+        echo $this->result;
         exit;
+    }
+
+    /**
+     * 压缩代码
+     * @param $code
+     * @param string $mode
+     * @return string
+     */
+    public static function minify($code, $mode = 'js') {
+        if($mode == 'js') {
+            $code = \JSMin\JSMin::minify($code);
+        } else {
+            $code = CssMin::minify($code);
+        }
+        return $code;
     }
 
     public function __toString() {

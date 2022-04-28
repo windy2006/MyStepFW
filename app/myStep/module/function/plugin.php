@@ -124,7 +124,7 @@ switch($method) {
             $path_upload = CACHE.'tmp';
             $upload = new myUploader($path_upload, true);
             $upload->do(false);
-            $result = $upload->getResult(0);
+            $result = $upload->result();
             if($result[0]['error'] == 0) {
                 $file = $path_upload.'/'.$result[0]['new_name'];
                 $mypack = $mystep->getInstance('myPacker', PLUGIN.strstr($result[0]['name'], '.', true).'/', $file);

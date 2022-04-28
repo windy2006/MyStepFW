@@ -260,7 +260,7 @@ switch($step) {
     </div>
 </div>
 <footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
-    <p>Powered by  MyStep Framework &nbsp;Copyright&copy; 2010-2021 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
+    <p>Powered by  MyStep Framework &nbsp;Copyright&copy; 2010-2022 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
 <script type="application/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </body>

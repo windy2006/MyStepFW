@@ -233,7 +233,7 @@ class myPacker extends myBase {
      * @param int $mode
      * @return array|string
      */
-    public function getResult($mode = 0) {
+    public function result($mode = 0) {
         if($mode) return $this->pack_result;
         $result = '';
         for($i=0,$m=count($this->pack_result)-1;$i<$m;$i++) {

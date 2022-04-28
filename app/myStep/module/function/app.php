@@ -40,7 +40,7 @@ foreach($dirs as $k) {
             'app' => $k,
             'ver' => '',
             'intro' => '信息文件缺失，应用有可能无法正常执行',
-            'copyright' => '版权所有 2021 <a href="mailto:windy2006@gmail.com">Windy2000</a>'
+            'copyright' => '版权所有 2022 <a href="mailto:windy2006@gmail.com">Windy2000</a>'
         );
     }
     $info['route'] = '';

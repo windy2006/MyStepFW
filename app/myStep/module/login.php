@@ -1,6 +1,6 @@
 <?PHP
 if(myReq::server('QUERY_STRING')=='out') {
-    myReq::removeCookie('ms_user');
+    myReq::removeCookie('ms_auth');
     myReq::sessionEnd();
     myStep::info('login_logout', $app_root);
 } elseif(myReq::session('ms_user')!='') {
@@ -9,8 +9,8 @@ if(myReq::server('QUERY_STRING')=='out') {
     if(strtolower($captcha) == strtolower(myReq::session('captcha'))) {
         $usr = myReq::post('username');
         $pwd = myReq::post('password');
-        if(($result = $mystep->login($usr, $pwd))===true) {
-            myReq::setCookie('ms_user', $usr.chr(9).md5($pwd), 60*60*24);
+        if(($result = $mystep->ms_login($usr, $pwd))===true) {
+            myReq::setCookie('ms_auth', myStep::auth_code($usr, md5($pwd)), 60*60*24);
             $url = myReq::session('url');
             if(empty($url)) {
                 $url = $app_root;

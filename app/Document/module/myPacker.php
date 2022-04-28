@@ -8,7 +8,7 @@ $mypacker = new myPacker('./', PATH.'data/unpack/test.pkg');
 $mypacker->addIgnore(basename(__DIR__).'/', '.svn/', '.log/', '.idea/', 'cache/', 'web.config', 'aspnet_client/', 'Thumbs.db', '_bak/');
 $mypacker->pack();
 echo '<b>Pack Files:</b><br />'.chr(10);
-echo $mypacker->getResult();
+echo $mypacker->result();
 
 echo chr(10).chr(10).'<br />--------------------------------<br />'.chr(10).chr(10);
 
@@ -16,4 +16,4 @@ echo chr(10).chr(10).'<br />--------------------------------<br />'.chr(10).chr(
 $mypacker = new myPacker(PATH.'data/unpack/'.time().'/', PATH.'data/unpack/test.pkg');
 $mypacker->unpack();
 echo '<b>Unpack Files:</b><br />'.chr(10);
-echo $mypacker->getResult();
+echo $mypacker->result();

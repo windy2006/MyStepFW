@@ -13,16 +13,13 @@
 
 /**
 核心框架类，扩展于myController
-    $this->getInstance($calledClass)                 // 取得类实例
+    self::getInstance($calledClass)                  // 取得类实例
     $this->start()                                   // 框架执行入口，初始化所有变量
     $this->setInstance()                             // 声明重要实例
     $this->show(myTemplate $tpl)                     // 通过模板类显示页面
     $this->render(myTemplate $tpl)                   // 通过模板类输出页面内容
     $this->checkCache(myTemplate $tpl)               // 检查是否存在缓存并输出
     $this->end()                                     // 框架终止，销毁相关变量
-    $this->login($user_id, $user_pwd)                // 登录接口
-    $this->logout()                                  // 退出登录接口
-    $this->chg_psw($id, $psw_org, $psw_new)          // 变更密码接口
     $this->gzOut($level, $query, $time)              // 压缩输出页面内容
     $this->addCSS($file)                             // 添加页面CSS文件
     $this->CSS($cache)                               // 生成整合CSS文件
@@ -58,6 +55,8 @@ class myStep extends myController {
         $variant_alias = [],
         $url_prefix = '',
         $shown = false,
+        $cache_js = '',
+        $cache_css = '',
         $plugin_ignore = ['ms_language', 'ms_setting', 'captcha'];
     public $setting;
     protected
@@ -83,7 +82,7 @@ class myStep extends myController {
      * @param string $calledClass
      * @return mixed
      */
-    public function getInstance($calledClass = '') {
+    public static function getInstance($calledClass = '') {
         $instance = call_user_func_array('parent::getInstance', func_get_args());
         if(is_callable($instance, 'regAlias') && is_file(CONFIG.'method_alias/'.$calledClass.'.php')) {
             $alias = include(CONFIG.'method_alias/'.$calledClass.'.php');
@@ -121,6 +120,31 @@ class myStep extends myController {
                 }
             }
         }
+
+        if(empty($this->func_log)) {
+            $this->func_log = [
+                'login' => [$this, 'ms_login'],
+                'logout' => function() {
+                    myReq::removeCookie('ms_auth');
+                    myReq::sessionEnd();
+                    return true;
+                },
+                'chg_psw' => function($id, $psw_org, $psw_new) {
+                    $result = false;
+                    $username = myReq::session('username');
+                    if(!empty($username) && $psw_org!=$psw_new) {
+                        if($psw_org==$this->setting->gen->s_pwd) {
+                            $config = new myConfig(CONFIG.'config.php');
+                            $config->gen->s_pwd = $psw_new;
+                            $config->save('php');
+                            $result = true;
+                        }
+                    }
+                    return $result;
+                }
+            ];
+        }
+
         $this->setInstance();
         $this->setting->cookie->prefix .= substr(md5(myReq::server('USERNAME').myReq::server('COMPUTERNAME').myReq::server('OS')), 0, 4).'_';
         if($this->setting->session->mode=='sess_file') $this->setting->session->path = CACHE.'session/'.date('Ymd').'/';
@@ -160,6 +184,34 @@ class myStep extends myController {
     }
 
     /**
+     * 框架登录验证
+     * @param string $usr
+     * @param string $pwd
+     * @return bool
+     */
+    public function ms_login($usr='', $pwd='') {
+        if(!empty($usr) && !empty($pwd)) {
+            $auth = $this->auth_code($usr, md5($pwd));
+        } else {
+            $auth = myReq::cookie('ms_auth');
+        }
+        $result = false;
+        if(!empty($auth)) {
+            $token = $this->auth_code($this->setting->gen->s_usr, $this->setting->gen->s_pwd);
+            if($auth == $token) {
+                myReq::session('ms_user', $this->setting->gen->s_usr);
+                myReq::session('sysop', 'y');
+                $result = true;
+            }
+        }
+        return $result;
+    }
+    public static function auth_code() {
+        $args = func_get_args();
+        return md5(implode('|', $args));
+    }
+
+    /**
      * 声明重要实例
      */
     public function setInstance() {
@@ -172,10 +224,10 @@ class myStep extends myController {
                 default:
                     $cache_setting = CACHE.'data';
             }
-            $cache = $this->getInstance('myCache', 'myCache_'.$this->setting->gen->cache_mode, $cache_setting);
+            $cache = self::getInstance('myCache', 'myCache_'.$this->setting->gen->cache_mode, $cache_setting);
         }
         if(empty($db)) {
-            $db = $this->getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
+            $db = self::getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
             if($this->setting->db->auto) {
                 $db->connect($this->setting->db->pconnect, $this->setting->db->name);
                 $db->setCache($cache, 600);
@@ -211,13 +263,13 @@ class myStep extends myController {
             $tpl->assign($k, $v);
         }
         $this->setAddedContent('start', '<script type="application/javascript">const root_web="'.ROOT_WEB.'";</script>');
-        if(gettype($this->setting->css)=='string') {
-            $this->CSS($this->setting->css);
-            $this->setAddedContent('start', '<link rel="stylesheet" media="screen" type="text/css" href="'.ROOT_WEB.'cache/script/'.basename($this->setting->css).'" />');
+        if(gettype(self::$cache_css)=='string') {
+            $this->CSS(self::$cache_css);
+            $this->setAddedContent('start', '<link rel="stylesheet" media="screen" type="text/css" href="'.ROOT_WEB.'cache/script/'.basename(self::$cache_css).'" />');
         }
-        if(gettype($this->setting->js)=='string') {
-            $this->JS($this->setting->js);
-            $this->setAddedContent('start', '<script type="application/javascript" src="'.ROOT_WEB.'cache/script/'.basename($this->setting->js).'"></script>');
+        if(gettype(self::$cache_js)=='string') {
+            $this->JS(self::$cache_js);
+            $this->setAddedContent('start', '<script type="application/javascript" src="'.ROOT_WEB.'cache/script/'.basename(self::$cache_js).'"></script>');
         }
         $this->setAddedContent('end', '<script type="application/javascript">$(ms_func_run);</script>');
 
@@ -287,62 +339,6 @@ class myStep extends myController {
     }
 
     /**
-     * 登录接口
-     * @param string $usr
-     * @param string $pwd
-     * @return bool
-     */
-    public function login(&$usr='', $pwd='') {
-        if(!empty($usr) && !empty($pwd)) {
-            $pwd = md5($pwd);
-            $ms_user = $usr.chr(9).$pwd;
-        } else {
-            $ms_user = myReq::cookie('ms_user');
-        }
-        $result = false;
-        if(!empty($ms_user)) {
-            list($usr, $pwd) = explode(chr(9), $ms_user);
-            if($usr == $this->setting->gen->s_usr && $pwd == $this->setting->gen->s_pwd) {
-                myReq::session('ms_user', $usr);
-                myReq::session('sysop', 'y');
-                $result = true;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * 退出登录接口
-     * @return bool
-     */
-    public function logout() {
-        myReq::removeCookie('ms_user');
-        myReq::sessionEnd();
-        return true;
-    }
-
-    /**
-     * 变更密码接口
-     * @param $id
-     * @param $psw_org
-     * @param $psw_new
-     * @return bool
-     */
-    public function chg_psw($id, $psw_org, $psw_new) {
-        $result = false;
-        $username = myReq::session('username');
-        if(!empty($username) && $psw_org!=$psw_new) {
-            if($psw_org==$this->setting->gen->s_pwd) {
-                $config = new myConfig(CONFIG.'config.php');
-                $config->gen->s_pwd = $psw_new;
-                $config->save('php');
-                $result = true;
-            }
-        }
-        return $result;
-    }
-
-    /**
      * 页面压缩
      * @param int $level
      * @param int $query
@@ -402,10 +398,11 @@ class myStep extends myController {
     /**
      * 生成整合CSS文件
      * @param string $cache
-     * @param string $dummy
+     * @param string $dummy_1
+     * @param string $dummy_2
      * @return $this
      */
-    public function CSS($cache='', $dummy='') {
+    public function CSS($cache='', $dummy_1='', $dummy_2='') {
         if(!is_file($cache) || filemtime($cache)<$this->time_css) {
             foreach($this->css as $k => $v) {
                 $this->css[$k] = myFile::getLocal($v);
@@ -438,10 +435,11 @@ class myStep extends myController {
     /**
      * 整合页面脚本文件
      * @param string $cache
-     * @param string $dummy
+     * @param string $dummy_1
+     * @param string $dummy_2
      * @return myStep
      */
-    public function JS($cache='', $dummy='') {
+    public function JS($cache='', $dummy_1='', $dummy_2='') {
         if(!is_file($cache) || filemtime($cache)<$this->time_js) {
             foreach($this->js as $k => $v) {
                 $this->js[$k] = is_file($v)?myFile::getLocal($v):$v;
@@ -1017,7 +1015,7 @@ code;
         $mystep->addCSS(STATICS.'css/global.css');
         $mystep->addCSS(PATH.'asset/style.css');
         $mystep->addCSS(PATH.'asset/'.$ms_setting->template->style.'/style.css');
-        $ms_setting->css = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.css';
+        self::$cache_css = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.css';
 
         $ms_setting->web->js = explode(',', $ms_setting->web->js);
         foreach($ms_setting->web->js as $k) {
@@ -1034,7 +1032,7 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
     }
 });
         ', true);
-        $ms_setting->js = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.js';
+        self::$cache_js = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.js';
 
         $tpl_setting = array(
             'name' => $ms_setting->template->name,

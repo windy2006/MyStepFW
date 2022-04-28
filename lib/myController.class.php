@@ -13,8 +13,8 @@
 
 /**
 控制器基础类，含单实例控制
+    self::getInstance($calledClass)                     // 取得类实例
     $this->setSingleton($singleton)                     // 设置单实例模式
-    $this->getInstance($calledClass)                    // 取得类实例
     $this->setAddedContent($position, $content)         // 设置页面附加内容
     $this->pushAddedContent(myTemplate $tpl)            // 插入页面附加内容
     $this->setLanguage($language)                       // 设置语言
@@ -36,11 +36,11 @@
     $this->addCSS($code)                                // 添加样式表（代码或文件）
     $this->removeCSS($idx)                              // 去除样式表
     $this->clearCSS()                                   // 清空现有样式表
-    $this->CSS($show, $expires)                         // 获取样式表
+    $this->CSS($show, $cache_path, $expires)            // 获取样式表
     $this->addJS($code)                                 // 添加JS脚本（代码或文件）
     $this->removeJS($idx)                               // 去除JS脚本
     $this->clearJS()                                    // 清空现有JS脚本
-    $this->JS($show, $expires)                          // 获取JS脚本
+    $this->JS($show, $cache_path, $expires)             // 获取JS脚本
     self::etag($etag)                                   // 通过过期标签显示内容
     self::file($file)                                   // 显示文件
     self::guid($para)                                   // 生成唯一ID
@@ -59,10 +59,10 @@ require_once('myBase.class.php');
 class myController extends myBase {
     public static
         $modules = array(),
+        $singleton = false,
         $goto_url = '';
 
     protected
-        $singleton = false,
         $functions = array(),
         $func_tag = array(),
         $func_api = array(),
@@ -79,7 +79,7 @@ class myController extends myBase {
      * @return bool
      */
     public function __clone() {
-        if ($this->singleton) {
+        if (self::$singleton) {
             $this->error('Clone is not allowed.', E_USER_ERROR);
             return false;
         } else {
@@ -99,7 +99,7 @@ class myController extends myBase {
      * @param bool $singleton
      */
     public function setSingleton($singleton = false) {
-        $this->singleton = $singleton;
+        self::$singleton = $singleton;
     }
 
     /**
@@ -108,12 +108,11 @@ class myController extends myBase {
      * @return mixed|object
      * @throws ReflectionException
      */
-    public function getInstance($calledClass = '') {
-        if (empty($calledClass)) $calledClass = get_class($this);
+    public static function getInstance($calledClass) {
         $argList = func_get_args();
         array_shift($argList);
         $r = new ReflectionClass($calledClass);
-        if ($this->singleton) {
+        if (self::$singleton) {
             static $instanceList = array();
             if (!isset($instanceList[$calledClass])) $instanceList[$calledClass] = $r->newInstanceWithoutConstructor();
             $instance = &$instanceList[$calledClass];
@@ -345,11 +344,11 @@ class myController extends myBase {
 
     /**
      * 用户登录
-     * @param $usr
-     * @param $pwd
-     * @return bool
+     * @param string $usr
+     * @param string $pwd
+     * @return false|mixed
      */
-    public function login(&$usr, $pwd) {
+    public function login($usr='', $pwd='') {
         $result = false;
         if (isset($this->func_log['login'])) {
             $result = call_user_func($this->func_log['login'], $usr, $pwd);
@@ -427,15 +426,17 @@ class myController extends myBase {
     /**
      * 获取合成样式表
      * @param bool $show
+     * @param string $cache_path
      * @param int $expires
      * @return string
      */
-    public function CSS($show = true, $expires = 604800) {
+    public function CSS($show = true, $cache_path = '', $expires = 604800) {
         $css = implode(chr(10), $this->css);
-        if (!$show) return CssMin::minify($css);
+        if (!$show) return myMinify::minify($css, 'css');
         $md5 = md5($css);
         $this->etag($md5 . '.css', $expires);
-        $minify = new myMinify('css', dirname(__DIR__) . '/cache/' . $md5 . '.css');
+        if(empty($cache_path)) $cache_path = dirname(__DIR__) . '/cache';
+        $minify = new myMinify('css', $cache_path. '/' . $md5 . '.css');
         if (!$minify->check($expires)) {
             $minify->add($css);
         }
@@ -486,15 +487,17 @@ class myController extends myBase {
     /**
      * 获取合成脚本
      * @param bool $show
+     * @param string $cache_path
      * @param int $expires
      * @return string
      */
-    public function JS($show = true, $expires = 604800) {
+    public function JS($show = true, $cache_path = '', $expires = 604800) {
         $js = implode(chr(10), $this->js);
-        if (!$show) return \JSMin\JSMin::minify($js);
+        if (!$show) return myMinify::minify($js, 'js');
         $md5 = md5($js);
         $this->etag($md5 . '.js', $expires);
-        $minify = new myMinify('js', dirname(__DIR__) . '/cache/' . $md5 . '.js');
+        if(empty($cache_path)) $cache_path = dirname(__DIR__) . '/cache';
+        $minify = new myMinify('js', $cache_path . '/' . $md5 . '.js');
         if (!$minify->check($expires)) {
             $minify->add($js);
         }
