@@ -636,6 +636,7 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     public function close(&$err_info = array()) {
         if($this->check('result')) $this->free();
         if($this->check()) mysqli_close($this->connect);
+        $err_info = $this->err_info;
         return $this->count;
     }
 

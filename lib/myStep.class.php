@@ -931,6 +931,8 @@ code;
         }
         $router = new myRouter((array)$ms_setting->router);
         $the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);
+        //if(strpos(strpos($router->route['p'], 'static/')>2)) substr($router->route['p'],strpos($router->route['p'], 'static/'));
+        if(isset($router->info['path'][1]) && $router->info['path'][1]=='static') $the_file = str_replace('/'.$router->info['path'][0], '', $the_file);
         $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
         $ext_list = explode(',', $ms_setting->gen->static);
         if(strpos(trim($router->route['p'], '/'), 'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);

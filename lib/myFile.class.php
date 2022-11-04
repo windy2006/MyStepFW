@@ -49,8 +49,8 @@ class myFile {
         BOTH = 3;
 
     use myTrait {
-        __get as public __get_base;
-        __toString as public __toString_base;
+        myTrait::__get as public __get_base;
+        myTrait::__toString as public __toString_base;
     }
 
     public static
@@ -246,16 +246,17 @@ class myFile {
             $realpath = preg_replace('/\/+/', '/', $realpath);
             $realpath = str_replace('/./', '/', $realpath);
             $realpath = preg_replace('/[\.]{2,}/', '..', $realpath);
-            $realpath = '/'.str_replace($root, '', $realpath);
+            if(!preg_match('/^'.preg_quote($root, '/').'/', $realpath)) $realpath = $root.$realpath;
             while(preg_match('/\/[^\/]+\/\.\.\//', $realpath)) {
                 $realpath = preg_replace('/\/[^\/]+\/\.\.\//', '/', $realpath);
             }
-            $realpath = $root.preg_replace('/\/\.\.\//', '', $realpath);
+            $realpath = preg_replace('/\/\.\.\//', '', $realpath);
             $realpath = str_replace('//', '/', $realpath);
         }
         if($is_dir && substr($realpath, -1)!='/') $realpath .= '/';
         if($relative) $realpath = str_replace($root, '/', $realpath);
         if($mode) $realpath = str_replace('/', DIRECTORY_SEPARATOR, $realpath);
+        $realpath = preg_replace('#^/(\w\:)#', '\1', $realpath);
         return $realpath;
     }
 
@@ -504,6 +505,10 @@ class myFile {
      */
     public static function copy($source, $dest, $overwrite = false) {
         $source = self::realPath($source);
+        if(!file_exists($source)) {
+            trigger_error('Copy source is missing ! ('.$source.')');
+            return false;
+        }
         $dest = self::realPath($dest);
         $source_info = pathinfo($source);
         $dest_info = pathinfo($dest);
@@ -859,7 +864,7 @@ class myFile {
             } elseif(preg_match('/^\w+$/', $filter)) {
                 $filter = '*'.$filter.'*';
             }
-            foreach (glob($dir.$filter) as $name) {
+            foreach (glob(preg_replace('/(\*|\?|\[)/', '[$1]', $dir).$filter) as $name) {
                 if(is_dir($name) && $mode&1) {
                     array_push($result, $name.'/');
                 } elseif(is_file($name) && $mode&2) {

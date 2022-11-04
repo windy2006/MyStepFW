@@ -109,7 +109,25 @@ class myMinify extends myBase {
         if($mode == 'js') {
             $code = \JSMin\JSMin::minify($code);
         } else {
-            $code = CssMin::minify($code);
+            $code = CssMin::minify($code,[
+                "ImportImports"					=> false,
+                "RemoveComments"				=> true,
+                "RemoveEmptyRulesets"			=> true,
+                "RemoveEmptyAtBlocks"			=> true,
+                "ConvertLevel3Properties"		=> false,
+                "ConvertLevel3AtKeyframes"		=> false,
+                "Variables"						=> true,
+                "RemoveLastDelarationSemiColon"	=> true
+            ], [
+                "Variables"						=> false,
+                "ConvertFontWeight"				=> false,
+                "ConvertHslColors"				=> false,
+                "ConvertRgbColors"				=> false,
+                "ConvertNamedColors"			=> false,
+                "CompressColorValues"			=> false,
+                "CompressUnitValues"			=> false,
+                "CompressExpressionValues"		=> false
+            ]);
         }
         return $code;
     }

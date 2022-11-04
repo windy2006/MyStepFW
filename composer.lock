@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/erusev/parsedown.git",
-                "reference": "79effc4ae2a7d0d999b3b18c7b14ad1d1333427a"
+                "reference": "32278afaf36c758de026b66661d3afd6dfbea743"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/erusev/parsedown/zipball/79effc4ae2a7d0d999b3b18c7b14ad1d1333427a",
-                "reference": "79effc4ae2a7d0d999b3b18c7b14ad1d1333427a",
+                "url": "https://api.github.com/repos/erusev/parsedown/zipball/32278afaf36c758de026b66661d3afd6dfbea743",
+                "reference": "32278afaf36c758de026b66661d3afd6dfbea743",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -64,7 +64,7 @@
                 "issues": "https://github.com/erusev/parsedown/issues",
                 "source": "https://github.com/erusev/parsedown/tree/2.0.x"
             },
-            "time": "2021-12-08T20:35:46+00:00"
+            "time": "2022-05-21T21:40:24+00:00"
         },
         {
             "name": "meenie/javascript-packer",
@@ -115,16 +115,16 @@
         },
         {
             "name": "mrclay/jsmin-php",
-            "version": "2.4.0",
+            "version": "2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mrclay/jsmin-php.git",
-                "reference": "bb05febc9440852d39899255afd5569b7f21a72c"
+                "reference": "208e4122f8a273314e81c6b3bee897b5f3c1dc70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mrclay/jsmin-php/zipball/bb05febc9440852d39899255afd5569b7f21a72c",
-                "reference": "bb05febc9440852d39899255afd5569b7f21a72c",
+                "url": "https://api.github.com/repos/mrclay/jsmin-php/zipball/208e4122f8a273314e81c6b3bee897b5f3c1dc70",
+                "reference": "208e4122f8a273314e81c6b3bee897b5f3c1dc70",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -172,9 +172,9 @@
             "support": {
                 "email": "minify@googlegroups.com",
                 "issues": "https://github.com/mrclay/jsmin-php/issues",
-                "source": "https://github.com/mrclay/jsmin-php/tree/master"
+                "source": "https://github.com/mrclay/jsmin-php/tree/2.4.1"
             },
-            "time": "2018-12-06T15:03:38+00:00"
+            "time": "2022-03-26T14:41:59+00:00"
         },
         {
             "name": "phrozenbyte/cssmin",
@@ -241,5 +241,5 @@
         "php": "^7.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }

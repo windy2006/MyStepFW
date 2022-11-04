@@ -149,7 +149,7 @@ function loadingShow(info) {
             .attr("id", "bar_loading")
             .addClass("position-absolute font-weight-bold border p-5 text-center bg-light")
             .cssText("top:0;left:0;z-index:9999;color:#333333;opacity:0.9")
-            .append($('<img src="static/images/loading.gif" style="width:90%;min-width:300px;height:10px">'))
+            .append($('<img src="'+global.root+'static/images/loading.gif" style="width:90%;min-width:300px;height:10px">'))
             .append("<br />").append($("<span style='font-size:24px;line-height:48px;'>"));
         obj_loading.appendTo("body").hide();
     }

@@ -62,22 +62,22 @@
     <hr>
     <div class="row placeholders mb-3">
         <div class="col-6 col-sm-3 placeholder text-center">
-            <img src="//placehold.it/200/dddddd/fff?text=1" class="mx-auto img-fluid rounded-circle" alt="Generic placeholder thumbnail">
+            <img src="//via.placeholder.com/200/dddddd/fff?text=1" class="mx-auto img-fluid rounded-circle" alt="Generic placeholder thumbnail">
             <h4>Responsive</h4>
             <span class="text-muted">Device agnostic</span>
         </div>
         <div class="col-6 col-sm-3 placeholder text-center">
-            <img src="//placehold.it/200/e4e4e4/fff?text=2" class="mx-auto img-fluid rounded-circle" alt="Generic placeholder thumbnail">
+            <img src="//via.placeholder.com/200/e4e4e4/fff?text=2" class="mx-auto img-fluid rounded-circle" alt="Generic placeholder thumbnail">
             <h4>Frontend</h4>
             <span class="text-muted">UI / UX oriented</span>
         </div>
         <div class="col-6 col-sm-3 placeholder text-center">
-            <img src="//placehold.it/200/d6d6d6/fff?text=3" class="mx-auto img-fluid rounded-circle" alt="Generic placeholder thumbnail">
+            <img src="//via.placeholder.com/200/d6d6d6/fff?text=3" class="mx-auto img-fluid rounded-circle" alt="Generic placeholder thumbnail">
             <h4>HTML5</h4>
             <span class="text-muted">Standards-based</span>
         </div>
         <div class="col-6 col-sm-3 placeholder text-center">
-            <img src="//placehold.it/200/e0e0e0/fff?text=4" class="center-block img-fluid rounded-circle" alt="Generic placeholder thumbnail">
+            <img src="//via.placeholder.com/200/e0e0e0/fff?text=4" class="center-block img-fluid rounded-circle" alt="Generic placeholder thumbnail">
             <h4>Framework</h4>
             <span class="text-muted">CSS and JavaScript</span>
         </div>
@@ -93,7 +93,7 @@
     <div class="row my-4">
         <div class="col-lg-3 col-md-4">
             <div class="card">
-                <img class="card-img-top img-fluid" src="//placehold.it/740x180/bbb/fff?text=..." alt="Card image cap">
+                <img class="card-img-top img-fluid" src="//via.placeholder.com/740x180/bbb/fff?text=..." alt="Card image cap">
                 <div class="card-body">
                     <h4 class="card-title">Layouts</h4>
                     <p class="card-text">Flexbox provides simpler, more flexible layout options like vertical centering.</p>
@@ -239,7 +239,7 @@
 
     <div class="card-columns mb-3">
         <div class="card">
-            <img class="card-img-top img-fluid" src="//placehold.it/600x200/444/fff?text=..." alt="Card image cap">
+            <img class="card-img-top img-fluid" src="//via.placeholder.com/600x200/444/fff?text=..." alt="Card image cap">
             <div class="card-body">
                 <h4 class="card-title">New XL Grid Tier</h4>
                 <p class="card-text">With screens getting smaller, Bootstrap 4 introduces a new grid breakpoint with the col-xl-* classes. This extra tier extends the media query range all the way down to 576 px. Eventhough the new XL tier would make one think it’s been added to support extra large screens, it’s actually the opposite.</p>
@@ -256,7 +256,7 @@
             </blockquote>
         </div>
         <div class="card">
-            <img class="card-img-top img-fluid" src="//placehold.it/600x200/bbb/fff?text=..." alt="Card image cap">
+            <img class="card-img-top img-fluid" src="//via.placeholder.com/600x200/bbb/fff?text=..." alt="Card image cap">
             <div class="card-body">
                 <h4 class="card-title">Card title</h4>
                 <p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
@@ -279,7 +279,7 @@
             <p class="card-text"><small class="text-muted">Last updated 5 mins ago</small></p>
         </div>
         <div class="card">
-            <img class="card-img img-fluid" src="//placehold.it/600x200/777/fff?text=..." alt="Card image">
+            <img class="card-img img-fluid" src="//via.placeholder.com/600x200/777/fff?text=..." alt="Card image">
         </div>
         <div class="card card-body text-right">
             <blockquote class="card-blockquote">
@@ -416,7 +416,7 @@
                                 <h4>Profile Section</h4>
                                 <p>Imagine creating this simple user profile inside a tab card.</p>
                             </div>
-                            <div class="col-sm-5"><img src="//placehold.it/170" class="float-right img-responsive img-rounded"></div>
+                            <div class="col-sm-5"><img src="//via.placeholder.com/170" class="float-right img-responsive img-rounded"></div>
                         </div>
                         <hr>
                         <a href="javascript:;" class="btn btn-info btn-block">Read More Profiles</a>

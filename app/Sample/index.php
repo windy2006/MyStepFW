@@ -22,7 +22,7 @@ foreach ([
     'db' => '数据库对象，参见MySQL【<a href="/Document/mysql" target="_blank">使用样例</a>】 【<a href="/Document/mysql/detail" target="_blank">方法说明</a>】',
     'cache' => '缓存对象，参见【<a href="/Document/myCache" target="_blank">使用样例</a>】 【<a href="/Document/myCache/detail" target="_blank">方法说明</a>】',
 ] as $k => $v) {
-    $tpl_sub->setLoop('para', ['name'=>'$'.$k, 'comment'=>$v, 'detail'=>var_export($$k, true)]);
+    $tpl_sub->setLoop('para', ['name'=>'$'.$k, 'comment'=>$v, 'detail'=>print_r($$k, true)]);
 }
 //编译子模版页面并赋值到主模版对应变量中
 $tpl->assign('main', $tpl_sub->render('', false));

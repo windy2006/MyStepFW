@@ -44,7 +44,6 @@ class simpleDB implements interface_db {
         $file    = '',
         $tlen    = 500,
         $fp    = null,
-        $err    = '',
         $maxlen    = 10,
         $separator    = "\0";
     public
@@ -69,7 +68,6 @@ class simpleDB implements interface_db {
         $this->path = $path;
         $this->tlen = $tlen;
         $this->file = $path.$name.'.db';
-        return;
     }
 
     /**
@@ -109,7 +107,6 @@ class simpleDB implements interface_db {
         $this->err    = '';
         if(!empty($tlen)) $this->tlen = $tlen;
         $this->connect();
-        return;
     }
 
     /**
@@ -463,7 +460,7 @@ class simpleDB implements interface_db {
     /**
      * 返回某行数据
      * @param int $row
-     * @return bool
+     * @return array|false
      */
     public function record($row=0) {
         if(!$this->check()) return false;
@@ -634,4 +631,3 @@ class simpleDB implements interface_db {
         return $result;
     }
 }
-?>

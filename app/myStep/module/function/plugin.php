@@ -36,6 +36,26 @@ if($installed && $method=='view') {
 } elseif (!$installed && $method=='setting') {
     myStep::redirect(str_replace('setting', 'view', myReq::server('REQUEST_URI')));
 }
+function checkApp($apps, $idx) {
+    $dirs = myFile::find('', APP, false, myFile::DIR);
+    $dirs = array_map(function ($v) {return basename($v);} , $dirs);
+    foreach($dirs as $k) {
+        $plugin = [];
+        if(is_file(APP.$k.'/plugin.php')) $plugin = include(APP.$k.'/plugin.php');
+        if(in_array($k, $apps)) {
+            if(!in_array($idx, $plugin)) {
+                $plugin[] = $idx;
+            }
+        } else {
+            if(($n = array_search($idx, $plugin))!==false) {
+                unset($plugin[$n]);
+                $plunin = array_values($plugin);
+            }
+        }
+        myFile::saveFile(APP.$k.'/plugin.php', '<?PHP'.chr(10).'return '.var_export($plugin, true).';');
+    }
+}
+
 switch($method) {
     case 'view':
         if(myReq::check('post')) {
@@ -44,6 +64,8 @@ switch($method) {
                 $config->set($_POST['setting']);
                 $config->save('php');
             }
+            if(isset($_POST['apps'])) checkApp($_POST['apps'], $idx);
+
             call_user_func(array($class, 'install'));
             $mydb->insert(array(
                 'order' => 1,
@@ -64,6 +86,7 @@ switch($method) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
+            if(isset($_POST['apps'])) checkApp($_POST['apps'], $idx);
             myStep::redirect($app_root.'/function/plugin/');
         }
         $t->assign($info);
@@ -95,6 +118,22 @@ switch($method) {
             }
         }
         $t->assign('setting', $result);
+
+        $dirs = myFile::find('', APP, false, myFile::DIR);
+        $dirs = array_map(function ($v) {return basename($v);} , $dirs);
+        if(!isset($info['app'])) $info['app'] = [];
+        foreach($dirs as $k) {
+            if(!is_file(APP.$k.'/info.php')) continue;
+            $i = include(APP.$k.'/info.php');
+            $i['plugin'] = '';
+            $i['checked'] = '';
+            if(in_array($i['app'], $info['app'])) {
+                $i['checked'] = 'checked onclick="return false"';
+            } elseif(is_file(APP.$k.'/plugin.php') && in_array($idx, include(APP.$k.'/plugin.php'))) {
+                $i['checked'] = 'checked';
+            }
+            $t->setLoop('app', $i);
+        }
         break;
     case 'active':
         $active = $mydb->result('idx='.$idx, 'active');
@@ -108,6 +147,7 @@ switch($method) {
     case 'uninstall':
         $mydb->delete('idx='.$idx);
         call_user_func(array($class, 'uninstall'));
+        checkApp([], $idx);
         myStep::info('plugin_uninstalled', $app_root.'/function/plugin/');
         break;
     case 'pack':

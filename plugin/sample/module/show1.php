@@ -14,7 +14,7 @@ foreach ([
          'db' => '数据库对象，参见MySQL【<a href="/Document/mysql" target="_blank">使用样例</a>】 【<a href="/Document/mysql/detail" target="_blank">方法说明</a>】',
          'cache' => '缓存对象，参见【<a href="/Document/myCache" target="_blank">使用样例</a>】 【<a href="/Document/myCache/detail" target="_blank">方法说明</a>】',
          ] as $k => $v) {
-    $detail = var_export($$k, true);
+    $detail = print_r($$k, true);
     echo <<<mystep
 <h6 class="ml-4">{$k} : {$v}</h6>
 <div style="width:96%;max-height:200px;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">

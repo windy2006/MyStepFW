@@ -24,7 +24,7 @@
         self::toJson($var, $charset='UTF-8')                // get json string from any array
         self::fromJson($json, $assoc = false)               // get array from string
         self::fromAny($var)                                 // transfer any variant to string
-        self::toXML($var)                                   // get xml string from any array
+        self::toXML($var, $item_tag, $main_tag)             // get xml string from any array
         self::toScript($var, $name)                         // get php code from any variant
         self::htmlTrans($str)                               // transfer the html code to show
         self::txt2html($content)                            // transfer the text code to html
@@ -226,9 +226,9 @@ class myString {
      * @param bool $assoc
      * @return mixed
      */
-    public static function fromJson($json, $assoc = true) {
+    public static function fromJson($json, $assoc=true) {
         $json = str_replace([chr(10), chr(13)], '', $json);
-        $json = preg_replace('/([ {, ])(\s*)([^"]+?)\s*:/', '$1"$3":', $json);
+        //$json = preg_replace('/([{,])(\s*)([^"]+?)\s*:/', '$1"$3":', $json);
         $json = str_replace('\\"', "&#34;", $json);
         return json_decode($json, $assoc);
     }
@@ -243,20 +243,16 @@ class myString {
             case is_string($var):
                 $result = $var;
                 break;
+            case is_object($var):
             case is_numeric($var):
                 $result = (STRING)$var;
                 break;
             case is_bool($var):
                 $result = $var?'true':'false';
                 break;
-            /*
             case is_array($var):
                 $result = join(',', $var);
                 break;
-            case is_object($var):
-                $result = (STRING)$var;
-                break;
-            */
             default:
                 $result = serialize($var);
                 break;
@@ -267,14 +263,16 @@ class myString {
     /**
      * 将数组转换为XML
      * @param $var
-     * @return string
+     * @param string $item_tag
+     * @param string $main_tag
+     * @return mixed|string
      */
-    public static function toXML($var) {
+    public static function toXML($var, $item_tag='item', $main_tag='') {
         $result = '';
         if(is_array($var)) {
             $result .= chr(10);
             foreach($var as $key => $value) {
-                if(is_numeric($key)) $key = 'item';
+                if(is_numeric($key)) $key = $item_tag;
                 $result .= "<{$key}>";
                 $result .= self::toXML($value);
                 $result .= "</{$key}>";
@@ -287,6 +285,7 @@ class myString {
                 $result = $var;
             }
         }
+        if(!empty($main_tag)) $result = '<'.$main_tag.'>'.$result.'</'.$main_tag.'>';
         return $result;
     }
 

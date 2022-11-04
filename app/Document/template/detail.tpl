@@ -1,5 +1,5 @@
 <div class="row mb-4">
-    <div class="card w-100">
+    <div class="card p-0 w-100">
         <div class="card-header">
             <h2>Class: <!--name--></h2>
         </div>

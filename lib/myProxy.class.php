@@ -16,9 +16,9 @@
  */
 abstract class myProxy extends myBase {
     use myTrait {
-        __get as public __get_base;
-        __set as public __set_base;
-        __call as public __call_base;
+        myTrait::__get as public __get_base;
+        myTrait::__set as public __set_base;
+        myTrait::__call as public __call_base;
     }
 
     /**
