@@ -100,16 +100,7 @@
     {
         "name": "\u63d2\u4ef6",
         "icon": "fa fa-plug",
-        "link": "#",
-        "items": [
-            {
-                "name": "\u66f4\u65b0\u7ef4\u62a4",
-                "link": "manager"
-            },
-            {
-                "name": "\u524d\u7aef\u6846\u67b6",
-                "link": "frontend"
-            }
-        ]
+        "link": "manager\/function\/plugin",
+        "items": []
     }
 ]

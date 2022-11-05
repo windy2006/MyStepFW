@@ -70,7 +70,7 @@
                     <td class="btn-group">
                         <a class="btn btn-sm btn-info" href="/<!--path_admin-->/setting/<!--app_app-->">设置</a>
                         <a class="btn btn-sm btn-info" href="<!--app_link-->" target="">更新</a>
-                        <a class="btn btn-sm btn-info" href="manager/pack/app/<!--app_app-->" target="">打包</a>
+                        <a class="btn btn-sm btn-info" href="<!--url_prefix-->manager/pack/app/<!--app_app-->" target="">打包</a>
                     </td>
                 </tr>
             <!--loop:end-->
@@ -102,7 +102,7 @@
                     <td class="btn-group">
                         <a class="btn btn-sm btn-info" href="/<!--path_admin-->/function/plugin/setting/?idx=<!--plugin_idx-->">设置</a>
                         <a class="btn btn-sm btn-info" href="<!--plugin_link-->" target="">更新</a>
-                        <a class="btn btn-sm btn-info" href="manager/pack/plugin/<!--plugin_idx-->" target="">打包</a>
+                        <a class="btn btn-sm btn-info" href="<!--url_prefix-->manager/pack/plugin/<!--plugin_idx-->" target="">打包</a>
                     </td>
                 </tr>
             <!--loop:end-->
@@ -214,12 +214,12 @@ $('#link_3').click(function(){
     });
 });
 $('#link_4').click(function(){
-    window.open("manager/export");
+    window.open("<!--url_prefix-->manager/export");
 });
 $('#link_5').click(function(){
     loadingShow("正在打包框架系统，完成后将自动开始下载！");
-    $.get("pack/", function(url) {
-        console.log(url);
+    $.get("<!--url_prefix-->pack/", function(url) {
+        //console.log(url);
         loadingShow();
         location.replace(url);
     }, 'text').fail(function (e) {

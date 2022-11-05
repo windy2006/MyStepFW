@@ -8,4 +8,5 @@ return array(
     'intro' => $mystep->getLanguage('plugin_manager_info_intro'),
     'copyright' => $mystep->getLanguage('plugin_manager_info_copyright'),
     'description' => $mystep->getLanguage('plugin_manager_info_description'),
+    'app' => ['myStep']
 );
