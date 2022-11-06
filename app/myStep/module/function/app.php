@@ -51,7 +51,7 @@ foreach($dirs as $k) {
     if(is_file(APP.$k.'/plugin.php')) {
         $info['plugin'] = implode(',', include(APP.$k.'/plugin.php'));
     }
-    $info['update'] = (version_compare($info['ver'], $check_app[$info['app']]??'')<0) ? '<a href="'.ROOT_WEB.'console/app/'.$info['app'].'" title="v'.$check_app[$info['app']].'">【Update】</a>': '';
+    $info['update'] = (version_compare($info['ver'], $check_app[$info['app']]??'')<0) ? '<a href="'.ROOT_WEB.$ms_setting->gen->path_admin.'/app/'.$info['app'].'" title="v'.$check_app[$info['app']].'">【Update】</a>': '';
     $t->setLoop('app', $info);
 }
 $route_plugin = '';

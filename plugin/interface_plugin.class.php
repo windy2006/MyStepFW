@@ -28,7 +28,8 @@ function removePluginLink($path) {
             break;
         }
     }
-    if(count($menu[$len]['items'])==0) $menu[$len]['link'] = 'manager/function/plugin';
+    $setting = new myConfig(APP.'myStep/config.php');
+    if(count($menu[$len]['items'])==0) $menu[$len]['link'] = $setting->gen->path_admin.'/function/plugin';
     myFile::saveFile(APP.'myStep/menu.json', myString::toJson($menu));
 }
 

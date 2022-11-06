@@ -215,7 +215,7 @@ switch($method) {
         $t->setIf('empty_1', empty($data));
         foreach($data as $v) {
             $v['active'] = $mystep->getLanguage('plugin_'.($v['active']==1 ? 'deactive' : 'active'));
-            $v['update'] = (version_compare($v['ver'], $check_plugin[$v['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.'console/plugin/'.$v['idx'].'">Update to v'.$check_plugin[$v['idx']].'</a>]': '';
+            $v['update'] = (version_compare($v['ver'], $check_plugin[$v['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.$ms_setting->gen->path_admin.'/plugin/'.$v['idx'].'">Update to v'.$check_plugin[$v['idx']].'</a>]': '';
             $t->setLoop('list_1', $v);
             if(($k = array_search($v['idx'], $dirs))!==false) unset($dirs[$k]);
         }
@@ -227,7 +227,7 @@ switch($method) {
             } else {
                 $info = array('name'=>$mystep->getLanguage('unknown'), 'ver'=>$mystep->getLanguage('unknown'), 'intro'=>$mystep->getLanguage('plugin_no_info'), 'idx'=>$v);
             }
-            $info['update'] = (version_compare($info['ver'], $check_plugin[$info['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.'console/plugin/'.$info['idx'].'">Update to v'.$check_plugin[$info['idx']].'</a>]': '';
+            $info['update'] = (version_compare($info['ver'], $check_plugin[$info['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.$ms_setting->gen->path_admin.'/plugin/'.$info['idx'].'">Update to v'.$check_plugin[$info['idx']].'</a>]': '';
             $t->setLoop('list_2', $info);
         }
         $t->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));

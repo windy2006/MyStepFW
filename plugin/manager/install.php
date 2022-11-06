@@ -1,4 +1,6 @@
 <?PHP
+if(version_compare(PHP_VERSION, '7.0.0', '<'))
+    die('MyStep Framework can only run under PHP 7.0 or upper version!');
 $lng = array();
 if (preg_match("/zh/i", $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
     $lng[0] = ' 扩展未启用！';
@@ -39,7 +41,7 @@ if (preg_match("/zh/i", $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
     $lng[16] = 'All files are unpacked and will jump to the setting page.';
     $lng[17] = 'Framework is under Nginx system, please check the Nginx file under the framework directory for the setting!';
 }
-$ext_list = ['zlib', 'zip', 'sockets', 'curl', 'gd', 'curl', 'iconv', 'mysqli','openssl'];
+$ext_list = array('zlib', 'zip', 'sockets', 'curl', 'gd', 'curl', 'iconv', 'mysqli', 'openssl');
 foreach ($ext_list as $v) {
     if (!extension_loaded($v)) {
         die($v.$lng[0]);
