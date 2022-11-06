@@ -22,10 +22,10 @@ $setting['web']['keyword'] = 'mystep,framework,free';
 $setting['web']['description'] = '开源PHP框架系统';
 $setting['web']['gzip_level'] = 0;
 $setting['web']['minify'] = false;
-$setting['web']['etag'] = 'etag_20190109';
+$setting['web']['etag'] = 'etag_20220101';
 $setting['web']['css'] = 'bootstrap,font-awesome,glyphicons';
 $setting['web']['js'] = 'jquery,jquery.addon,bootstrap.bundle';
-$setting['web']['update'] = 'www.mysteps.cn';
+$setting['web']['update'] = 'mysteps.com.cn';
 
 $setting['upload'] = array();
 $setting['upload']['path_mode'] = 'Y/m/';

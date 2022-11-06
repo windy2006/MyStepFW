@@ -54,7 +54,7 @@ $.get('<!--url_prefix-->app/myStep/menu.json?'+(new Date()).getTime(), function(
         if(typeof data[i].link == 'undefined') data[i].link = "#";
         if(typeof data[i].icon == 'undefined') data[i].icon = "glyphicon glyphicon-asterisk";
         obj = $('<li class="nav-item dropdown"></li>');
-        obj.append($('<a class="nav-link" href="'+data[i].link+'"><span class="'+data[i].icon+'"></span> '+data[i].name+'</a>'));
+        obj.append($('<a class="nav-link" href="<!--url_prefix-->'+data[i].link+'"><span class="'+data[i].icon+'"></span> '+data[i].name+'</a>'));
         if(data[i].items.length===0) {
             obj_top.append(obj);
             continue;

@@ -10,8 +10,8 @@
     <base href="<!--path_root-->" />
     <link rel="Shortcut Icon" href="favicon.ico" />
     <!--page_start-->
-    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/bootstrap.css" />
-    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/glyphicons.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="static/css/bootstrap.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="static/css/glyphicons.css" />
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>

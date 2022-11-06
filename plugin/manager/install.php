@@ -225,6 +225,8 @@ $step = isset($_GET['step']) ? $_GET['step'] : 1;
 $svr = strtolower($_SERVER['SERVER_SOFTWARE']);
 switch($step) {
     case 1:
+        @unlink('.htaccess');
+        @unlink('web.config');
         @unlink('install.php');
         copy('index.php', 'install.php');
         echo <<<myStep
