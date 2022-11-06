@@ -2,7 +2,7 @@
 if(version_compare(PHP_VERSION, '7.0.0', '<'))
     die('MyStep Framework can only run under PHP 7.0 or upper version!');
 $lng = array();
-if (preg_match("/zh/i", $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+if (preg_match("/zh/i", $_SERVER['HTTP_ACCEPT_LANGUAGE'])??'zh-cn') {
     $lng[0] = ' 扩展未启用！';
     $lng[1] = '当前目录不可写！';
     $lng[2] = '完成！';
@@ -98,6 +98,7 @@ class unpacker {
     }
 
     public function DoIt($separator="|") {
+    	global $lng;
         WriteFile($this->pack_file, gzuncompress(GetFile($this->pack_file)));
         $this->pack_fp = fopen($this->pack_file, "rb");
         if(!$this->pack_fp) die($lng[6]);
@@ -228,7 +229,6 @@ $svr = strtolower($_SERVER['SERVER_SOFTWARE']);
 switch($step) {
     case 1:
         @unlink('.htaccess');
-        @unlink('web.config');
         @unlink('install.php');
         copy('index.php', 'install.php');
         echo <<<myStep
@@ -313,8 +313,10 @@ myStep;
     case 3:
         @unlink('install.php');
         @unlink('install.log');
+        @unlink('.htaccess');
         rename('.htaccess.bak', '.htaccess');
-        rename('web.config.bak', 'web.config');
+        @rename('web.config.bak', 'web.config');
+        @unlink('web.config.bak');
         header('location: ./');
         break;
     default:
