@@ -5,6 +5,12 @@ namespace app\sample;
 //设置无需尝试数据库连接
 $ms_setting->db->auto = false;
 
+//设置模块
+$mystep->regModule("Sample_test1", "app\sample\module");
+function module() {
+    echo "This is just a module sample page!";
+}
+
 //以下为各类接口的执行函数
 
 //应用api对应的函数，直接返回数据，框架会自动根据参数调整为所需格式

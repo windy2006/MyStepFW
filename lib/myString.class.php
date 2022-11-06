@@ -251,8 +251,6 @@ class myString {
                 $result = $var?'true':'false';
                 break;
             case is_array($var):
-                $result = join(',', $var);
-                break;
             default:
                 $result = serialize($var);
                 break;

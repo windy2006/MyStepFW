@@ -676,17 +676,27 @@ code;
      * @param string $dummy
      */
     public static function module($path, $dummy = '') {
+        global $mystep, $ms_setting;
         $path = explode('/', trim($path, '/'));
-        $name = $path[0];
+        if(isset($path[1]) && is_file(APP.$path[0].'/lib.php')) {
+            $name = $path[0].'_'.$path[1];
+            require_once(APP.$path[0].'/lib.php');
+        } else {
+            $name = $path[0];
+        }
         if(isset(self::$modules[$name])) {
-            global $mystep, $db, $cache, $router, $info_app, $ms_setting, $tpl_setting, $tpl_cache;
-            require(self::$modules[$name]);
-            if(isset($tpl) && ($tpl instanceof myTemplate)) {
-                $path_app = APP.$info_app['app'].'/';
-                if(is_file($path_app.'global.php')) include_once($path_app.'global.php');
-                if(is_file($path_app.'plugin_addon.php')) include_once($path_app.'plugin_addon.php');
-                $tpl->assign('main', $content??'');
-                $mystep->show($tpl);
+            global $db, $cache, $router, $info_app, $tpl_setting, $tpl_cache;
+            if(is_file(self::$modules[$name])) {
+                require(self::$modules[$name]);
+                if(isset($tpl) && ($tpl instanceof myTemplate)) {
+                    $path_app = APP.$info_app['app'].'/';
+                    if(is_file($path_app.'global.php')) include_once($path_app.'global.php');
+                    if(is_file($path_app.'plugin_addon.php')) include_once($path_app.'plugin_addon.php');
+                    $tpl->assign('main', $content??'');
+                    $mystep->show($tpl);
+                }
+            } else {
+                call_user_func(self::$modules[$name]);
             }
             exit();
         } else {

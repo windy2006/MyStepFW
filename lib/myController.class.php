@@ -24,7 +24,7 @@
     $this->runApi($name)                                // 调用应用接口
     $this->regPlugin($plugin)                           // 注册插件
     $this->plugin()                                     // 执行现有插件
-    $this->regModule($module, $page)                    // 设置模块脚本（用于功能页面）
+    $this->regModule($module, $func)                    // 设置模块脚本（用于功能页面）
     $this->module($module, $global_vars)                // 调用模块
     $this->regTag($tag_name, $tag_func)                 // 添加模版标签解析方法
     $this->regUrl($mode, $func)                         // 添加URL生成规则
@@ -258,13 +258,17 @@ class myController extends myBase {
     /**
      * 注册功能模块
      * @param $module
-     * @param $page
+     * @param $func
      * @return $this
      */
-    public static function regModule($module, $page) {
-        $page = myFile::realPath($page);
-        if (is_file($page)) {
-            self::$modules[$module] = $page;
+    public static function regModule($module, $func) {
+        if(is_callable($func)) {
+            self::$modules[$module] = $func;
+        } else {
+            $func = myFile::realPath($func);
+            if (is_file($func)) {
+                self::$modules[$module] = $func;
+            }
         }
     }
 
