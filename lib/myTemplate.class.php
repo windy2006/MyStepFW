@@ -266,8 +266,7 @@ class myTemplate extends myBase {
         $cache_file = $this->setting['path_compile'].str_replace('../', '', $this->setting['style']).'/'.$this->setting['name'].'.php';
         $cache_file = myFile::realPath($cache_file);
         if(is_file($cache_file)) {
-            $tpl_time = preg_replace('/^.+?(\d+).+$/', '\1', myFile::getLocal($cache_file, 18));
-            if($tpl_time==filemtime($this->setting['file'])) {
+            if(filemtime($cache_file)>filemtime($this->setting['file'])) {
                 return $cache_file;
             } else {
                 myFile::del($cache_file);

@@ -263,11 +263,11 @@ class myStep extends myController {
             $tpl->assign($k, $v);
         }
         $this->setAddedContent('start', '<script type="application/javascript">const root_web="'.ROOT_WEB.'";</script>');
-        if(gettype(self::$cache_css)=='string') {
+        if(gettype(self::$cache_css)=='string' && self::$cache_css!=='') {
             $this->CSS(self::$cache_css);
             $this->setAddedContent('start', '<link rel="stylesheet" media="screen" type="text/css" href="'.ROOT_WEB.'cache/script/'.basename(self::$cache_css).'" />');
         }
-        if(gettype(self::$cache_js)=='string') {
+        if(gettype(self::$cache_js)=='string' && self::$cache_js!=='') {
             $this->JS(self::$cache_js);
             $this->setAddedContent('start', '<script type="application/javascript" src="'.ROOT_WEB.'cache/script/'.basename(self::$cache_js).'"></script>');
         }
@@ -330,7 +330,7 @@ class myStep extends myController {
     public function end() {
         parent::end();
         $this->editorGetPlugin();
-        $query_count = is_null($GLOBALS['db']) ? 0 : $GLOBALS['db']->close();
+        $query_count = is_object($GLOBALS['db']) ? $GLOBALS['db']->close() : 0;
         $time_exec = getTimeDiff($this->time_start);
         $mem_peak = memory_get_peak_usage();
         unset($GLOBALS['db'], $GLOBALS['cache']);
@@ -868,7 +868,8 @@ code;
      * 框架变量初始化
      */
     public static function init() {
-        if(count(ob_list_handlers())==0) ob_start();
+        if(count(ob_list_handlers())>0) ob_end_clean();
+        ob_start();
         $class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
         if(empty($class) || !is_dir($class[0]['path'])) {
             $old_root = empty($class) ? '' : preg_replace('#lib/$#', '', $class[0]['path']);
@@ -941,6 +942,7 @@ code;
         }
         $router = new myRouter((array)$ms_setting->router);
         $the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);
+        if(basename($the_file)=='favicon.ico') myController::file(ROOT.'favicon.ico');
         //if(strpos(strpos($router->route['p'], 'static/')>2)) substr($router->route['p'],strpos($router->route['p'], 'static/'));
         if(isset($router->info['path'][1]) && $router->info['path'][1]=='static') $the_file = str_replace('/'.$router->info['path'][0], '', $the_file);
         $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));

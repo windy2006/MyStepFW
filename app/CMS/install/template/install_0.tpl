@@ -28,9 +28,9 @@
     <P>电子文本形式的授权协议如同双方书面签署的协议一样，具有完全的和等同的法律效力。您一旦开始安装 MyStepCMS，即被视为完全理解并接受本协议的各项条款，在享有上述条款授予的权力的同时，受到相关的约束和限制。协议许可范围以外的行为，将直接违反本授权协议并构成侵权，我们有权随时终止授权，责令停止损害，并保留追究相关责任的权力。</P>
 </DIV>
 <DIV class="text-right mt-3 mb-5">
-    <FORM method="post" action="CMS/install/1">
+    <FORM method="post" action="install/1">
         <input type="hidden" name="step" value="1" />
         <button class="btn btn-info" type="submit">我同意</button>&emsp;
-        <button class="btn btn-info" type="button" onclick="location.href='about:blank'">我不同意</button>
+        <button class="btn btn-info" type="button" onclick="location.href='/'">我不同意</button>
     </FORM>
 </DIV>

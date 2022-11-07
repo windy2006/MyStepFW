@@ -39,6 +39,8 @@ return array (
 
     'login_username' => '用户名',
     'login_password' => '密&emsp;码',
+    'login_expire' => '时&emsp;限',
+    'login_expire_unit' => '天',
     'login_captcha' => '验证码',
     'login_captcha_msg' => '请输入右边字符',
     'login_refresh' => '刷新',

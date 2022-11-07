@@ -1,6 +1,9 @@
 <?PHP
 $setting = array();
 
+$setting['gen'] = array();
+$setting['gen']['force_domain'] = true;
+
 $setting['web'] = array();
 $setting['web']['title'] = '迈思内容管理系统 MyStep CMS';
 $setting['web']['path_admin'] = 'admin_cms';
@@ -28,6 +31,9 @@ $setting['template']['name'] = 'main';
 $setting['template']['path'] = 'template';
 $setting['template']['style'] = 'default';
 
+$setting['session'] = array();
+$setting['session']['mode'] = 'sess_mystep';
+
 $setting['list'] = array();
 $setting['list']['txt'] = 20;
 $setting['list']['img'] = 24;
@@ -41,6 +47,7 @@ $setting['expire']['tag'] = 86400;
 $setting['expire']['article'] = 604800;
 
 $setting['watermark'] = array();
+$setting['watermark']['thumb'] = 1024;
 $setting['watermark']['mode'] = 2;
 $setting['watermark']['txt'] = 'MyStep CMS';
 $setting['watermark']['img'] = 'static/images/logo.png';

@@ -4,7 +4,7 @@
         <div class="input-group-prepend">
             <div class="input-group-text">模块：</div>
         </div>
-        <select class="form-select" onchange="location.href=location.href.replace(/#.+$/,'')+'#'+this.value;">
+        <select class="custom-select" onchange="location.href=location.href.replace(/#.+$/,'')+'#'+this.value;">
             <!--loop:start key="item"-->
             <option><!--item_name--></option>
             <!--loop:end-->

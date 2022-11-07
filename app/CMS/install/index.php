@@ -4,7 +4,8 @@ if(is_file(PATH.'config.php')) {
 }
 global $mystep, $S, $info_app;
 $tpl = new myTemplate($tpl_setting, $tpl_cache);
-if($info_app['path'][0]!='install') {
+
+if(!isset($info_app['path'][0]) || $info_app['path'][0]!='install') {
     $info_app['path'][0] = 'install';
     $info_app['path'][1] = 0;
 }
@@ -53,6 +54,7 @@ switch ($info_app['path'][1]) {
                 'callback_type' => E_ALL ^ E_NOTICE,
                 'exit_on_error' => true
             ));
+            global $db;
             $db = new myDb($config->db->type, $config->db->host, $config->db->user, $config->db->password, $config->db->charset);
             if($db->connect($config->db->pconnect)===false) {
                 myStep::info('db_connect_error');
@@ -100,6 +102,7 @@ switch ($info_app['path'][1]) {
                 $t->setLoop('result', ['content'=> $detail]);
             }
             $config->save('php', PATH.'/config.php');
+            $S->merge(PATH.'/config.php');
         } else {
             $info_app['path'][1] = 2;
             unset($t);

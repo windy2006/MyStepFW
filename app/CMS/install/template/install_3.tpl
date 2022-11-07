@@ -7,7 +7,7 @@
         <!--loop:end-->
     </DIV>
     <DIV class="text-right mt-3">
-        <FORM method="post" action="CMS/install/4">
+        <FORM method="post" action="install/4">
             <input type="hidden" name="step" value="4" />
             <button class="btn btn-info" type="submit">下一步</button>
         </FORM>

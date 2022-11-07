@@ -7,6 +7,6 @@
         <p>您也可以通过官方网站，随时反馈您的信息，期待您的参与！</p>
     </DIV>
     <DIV class="text-right mt-3">
-        <button class="btn btn-info" type="button" onclick="location.href='CMS/'">完 成</button>
+        <button class="btn btn-info" type="button" onclick="location.href='./'">完 成</button>
     </DIV>
 </DIV>

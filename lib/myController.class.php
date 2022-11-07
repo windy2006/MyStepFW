@@ -662,7 +662,7 @@ class myController extends myBase {
             'revalidate_freq' => 120,
             'huge_code_pages' => 1
         ));
-        if(!headers_sent()) ob_start();
+        if(count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
 
         if ($set_plugin) $this->plugin();
         $this->run('start');

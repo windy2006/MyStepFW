@@ -46,6 +46,17 @@
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-prepend">
+                                <div class="input-group-text"><span class="glyphicon glyphicon-time"></span> &nbsp; <!--lng_login_expire--></div>
+                            </div>
+                            <select class="custom-select" name="expire">
+                                <option value="1">1 <!--lng_login_expire_unit--></option>
+                                <option value="7">7 <!--lng_login_expire_unit--></option>
+                                <option value="30">30 <!--lng_login_expire_unit--></option>
+                                <option value="365">365 <!--lng_login_expire_unit--></option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
                                 <div class="input-group-text"><span class="glyphicon glyphicon-edit"></span> &nbsp; <!--lng_login_captcha--></div>
                             </div>
                             <input name="captcha" type="text" class="form-control" placeholder="<!--lng_login_captcha_msg-->" need="" />

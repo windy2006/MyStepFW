@@ -39,6 +39,8 @@ return array (
 
     'login_username' => 'Username',
     'login_password' => 'Password',
+    'login_expire' => 'Expire',
+    'login_expire_unit' => 'Day(s)',
     'login_captcha' => 'Captcha',
     'login_captcha_msg' => 'Please input the string on the right image',
     'login_refresh' => 'Reflesh',

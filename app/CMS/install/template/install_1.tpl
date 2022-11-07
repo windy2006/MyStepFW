@@ -107,9 +107,9 @@ foreach($theList as $cur) {
     </table>
 </DIV>
 <DIV class="text-right mt-3 mb-5">
-    <FORM method="post" action="CMS/install/2">
+    <FORM method="post" action="install/2">
         <input type="hidden" name="step" value="2" />
-        <button class="btn btn-info" type="button" onclick="location.href='CMS/install/0'"">上一步</button>&emsp;
+        <button class="btn btn-info" type="button" onclick="location.href='install/0'"">上一步</button>&emsp;
         <button class="btn btn-info" id="install" type="submit">下一步</button>
         <button class="btn btn-info" id="refresh" type="button" onclick="location.reload()">复 查</button>
     </FORM>
