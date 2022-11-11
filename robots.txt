@@ -1,0 +1,6 @@
+#
+# robots.txt
+# MyStep Framework
+#
+
+User-agent: *

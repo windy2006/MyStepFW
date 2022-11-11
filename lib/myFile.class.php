@@ -672,7 +672,7 @@ class myFile {
         $file = self::realPath($file);
         if(!is_file($file)) return '';
         if($length==0 && $offset==0) {
-            $data = file_get_contents($file);
+            $data = @file_get_contents($file) or '';
         } else {
             if($length==0) $length = 8192;
             $data = '';

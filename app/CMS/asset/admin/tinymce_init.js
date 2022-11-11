@@ -96,7 +96,7 @@ function uploadInit() {
                         alert("上传失败！\n原因：" + result.message);
                     } else {
                         $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
-                        $("input[name=image]").val(setting.url_prefix+'api/myStep/download/'+result.new_name.split('.').slice(0,2).join('.'));
+                        $("input[name=image]").val(setting.url_prefix+'api/CMS/attachment/'+result.new_name);
                         $('#uploader').unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
                             $("input[name=image]").select();
                         });

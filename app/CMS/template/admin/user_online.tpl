@@ -25,7 +25,7 @@
             <tbody>
             <!--loop:start key="record" time="20"-->
             <tr class="text-center no-wrap" title="<!--record_sid-->">
-                <td><!--record_ip--></td>
+                <td><a type="ip" href="http://ip-api.com/json/<!--record_ip-->?lang=zh-CN" target="_blank"><!--record_ip--></a></td>
                 <td><!--record_username--></td>
                 <td><!--record_group--></a></td>
                 <td><!--record_refresh--></td>
@@ -41,6 +41,12 @@
 </div>
 <script type="application/javascript">
 $(function(){
+    $.ajaxSetup({
+        crossDomain: false,
+        xhrFields: {
+            withCredentials: false
+        }
+    });
     $('input[name=keyword]').keypress(function(e){
         if(e.keyCode==13) {
             location.href=global.root_fix+'?keyword='+this.value;
@@ -50,5 +56,23 @@ $(function(){
         location.href=global.root_fix+'?keyword='+$('input[name=keyword]').val();
     });
     global.root_fix += 'user/online/';
+    $("a[type]").click(function() {
+        let obj = $(this);
+        let result = obj.attr('info');
+        if(result==undefined) {
+            $.get(this.href, function(data){
+                let result = "";
+                for(let x in data) {
+                    if(data[x]=='') continue;
+                    result += x + " : " + data[x] + "\n";
+                }
+                obj.attr('info', result);
+                alert(result);
+            }, 'json');
+        } else {
+            alert(result);
+        }
+        return false;
+    });
 });
 </script>

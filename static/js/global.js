@@ -636,6 +636,13 @@ function ms_func_run(){
     }
 }
 
+$.ajaxSetup({
+    crossDomain: true,
+    xhrFields: {
+        withCredentials: true
+    }
+});
+
 $(window).bind('beforeunload',function(e){
     if(global.alert_leave!==false) {
         let msg = 'Some changes have not been submit, are you sure to leave?';

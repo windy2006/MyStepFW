@@ -191,7 +191,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
         $this->sql = $sql;
         $retry = 0;
         run:
-        if($this->result = mysqli_query($this->connect, $sql)) {
+        if($this->result = @mysqli_query($this->connect, $sql)) {
             if(strpos('selec|show |descr|expla|repai|check|optim', strtolower(substr(trim($sql), 0, 5)))!==false && $this->check('result')) {
                 $num_rows = mysqli_num_rows($this->result);
             } elseif($this->check()) {

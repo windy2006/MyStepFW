@@ -34,8 +34,7 @@ class myCache_File implements interface_cache {
         $new_key = substr(md5($key), 0, 8);
         $the_path = $this->path.substr($new_key, 0, 2).'/';
         if(is_file($the_path.$new_key)) {
-            $result = unserialize(myFile::getLocal($the_path.$new_key));
-            if($result['expire']>$_SERVER['REQUEST_TIME']) {
+            if(($result = unserialize(myFile::getLocal($the_path.$new_key))) && $result['expire']>$_SERVER['REQUEST_TIME']) {
                 return $result['value'];
             } else {
                 myFile::del($the_path.$new_key);

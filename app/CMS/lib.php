@@ -110,12 +110,13 @@ function logCheck($show = true) {
     return true;
 }
 
-function checkVal($para, $key, $val) {
+function checkVal($para, $key, $val, $fuzz = false) {
     if(!is_array($para)) return false;
     for($i=0,$m=count($para); $i<$m; $i++) {
         foreach($para[$i] as $k => $v) {
             if($key != $k) continue;
             if($v == $val) return $para[$i];
+            if($fuzz && strpos($v, $val)!==false) return $para[$i];
         }
     }
     return false;
@@ -383,9 +384,12 @@ function getLink($data, $mode='news') {
             break;
     }
     $link = \myStep::setURL($link);
-    if(isset($data['web_id'])) $web = checkVal($website, 'web_id', $data['web_id']);
-    if(isset($web) && is_array($web) && $web['web_id']!=$web_info['web_id']) {
-        $link = '//'.$web['domain'].$link;
+    if(isset($data['web_id'])) {
+        $web = checkVal($website, 'web_id', $data['web_id']);
+        if(is_array($web) && $web['web_id']!=$web_info['web_id']) {
+            if(strpos($web['domain'],',')) $web['domain'] = substr($web['domain'],0,strpos($web['domain'],','));
+            $link = '//'.$web['domain'].$link;
+        }
     }
     return $link;
 }
@@ -429,7 +433,7 @@ if(empty($sql)) {
 $result = $cache->getData($sql, 'all', $S->expire->catalog);
 $n = 0;
 foreach($result as $news) {
-    if(!isset($tag_attrs['show_cat'])) $news['catalog'] = '';
+    if(!isset($tag_attrs['show_cat']) || $tag_attrs['show_cat']=='n') $news['catalog'] = '';
     if(isset($tag_attrs['date'])) {
         $news['add_date'] = formatDate($news['add_date'], $tag_attrs['date']);
     } else {

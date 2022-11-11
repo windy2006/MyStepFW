@@ -12,7 +12,7 @@
                 <img class="img-fluid img-thumbnail ad" src="http://placehold.jp/630x80.png" alt="" />
             </div>
             <div class="news_list mb-3 border">
-                <!--news keyword="$k" limit="$limit" class="item" template="simple"-->
+                <!--news keyword="$k" show_cat="y" limit="$limit" class="item" template="simple"-->
             </div>
             <nav>
                 <!--pages query='$query' count='$count' page='$page' size='$page_size'-->

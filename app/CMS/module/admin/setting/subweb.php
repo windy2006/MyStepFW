@@ -15,8 +15,14 @@ if(!empty($id)) {
         myStep::info('admin_web_subweb_error');
     }
     $web_cur = \app\CMS\checkVal($website, 'web_id', $id);
+} else {
+    $id = 1;
+    $web_cur = \app\CMS\checkVal($website, 'web_id', 1);
 }
 global $domain;
+if(strpos($web_cur['domain'],',')) {
+    $web_cur['domain'] = explode(',', $web_cur['domain']);
+}
 switch($method) {
     case 'add':
     case 'edit':
@@ -49,7 +55,13 @@ switch($method) {
             $db->build($S->db->pre.'website')
                 ->where('web_id','n=',$id);
             $db->delete();
-            unset($domain[$web_cur['domain']]);
+            if(is_array($web_cur['domain'])) {
+                foreach($web_cur['domain'] as $k) {
+                    if(!empty($k)) unset($domain[$k]);
+                }
+            } else {
+                if(!empty($web_cur['domain'])) unset($domain[$web_cur['domain']]);
+            }
             myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
             \app\CMS\deleteCache('website');
         }
@@ -75,12 +87,28 @@ switch($method) {
                 $info = $db->file(PATH.'module/admin/subweb.sql', $strFind, $strReplace);
             }
         } else {
-            unset($domain[$web_cur['domain']]);
+            if(is_array($web_cur['domain'])) {
+                foreach($web_cur['domain'] as $k) {
+                    if(!empty($k)) unset($domain[$k]);
+                }
+            } else {
+                if(!empty($web_cur['domain'])) unset($domain[$web_cur['domain']]);
+            }
         }
         if(isset($domain[$data['domain']]) && $domain[$data['domain']]!=$info_app['app']) {
             mystep::info('admin_web_subweb_domain');
         }
-        if(strlen($data['domain'])>2) $domain[$data['domain']] = 'CMS';
+        if(strlen($data['domain'])>2) {
+            if(strpos($data['domain'],',')) {
+                $data['domain'] = explode(',', $data['domain']);
+            } else {
+                $data['domain'] = [$data['domain']];
+            }
+            foreach($data['domain'] as $k) {
+               if(!empty($k)) $domain[$k] = 'CMS';
+            }
+        }
+        $data['domain'] = implode(',', $data['domain']);
         myFile::saveFile(CONFIG.'domain.php', '<?PHP'.chr(10).'return '.var_export($domain, 1).';');
         $config = new myConfig(PATH.'website/config_'.$data['idx'].'.php');
         $config->set($setting);

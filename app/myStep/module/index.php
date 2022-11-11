@@ -59,7 +59,7 @@ if($module=='phpinfo') {
                         unset($code);
                     }
                 }
-                $err_lst[$i] = htmlspecialchars($err_lst[$i]);
+                $err_lst[$i] = htmlspecialchars(myString::setCharset($err_lst[$i],$ms_setting->gen->charset));
                 $err_lst[$i] = preg_replace("/\n+/", "\n", $err_lst[$i]);
                 $err_lst[$i] = str_replace("\n", "\n<br />\n", $err_lst[$i]);
                 $err_lst[$i] = str_replace("\t", " &nbsp; &nbsp;", $err_lst[$i]);

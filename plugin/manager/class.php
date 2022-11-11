@@ -46,6 +46,7 @@ class plugin_manager implements interface_plugin {
         $dir = __DIR__;
         switch($info_app['path'][1]) {
             case 'build':
+                set_time_limit(600);
                 if(!self::checkFile(ROOT, true)) {
                     echo 'error';
                 }

@@ -8,7 +8,7 @@
 <base href="<!--path_root-->" />
 <link rel="Shortcut Icon" href="favicon.ico" />
 <!--page_start-->
-<link rel="stylesheet" media="screen" type="text/css" href="<!--path_root-->app/CMS/asset/theme/default.css" id="theme_css" />
+<link rel="stylesheet" media="screen" type="text/css" href="<!--path_root-->asset/theme/default.css" id="theme_css" />
 </head>
 <body class="bg-transparent">
 <!--main-->

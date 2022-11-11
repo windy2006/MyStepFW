@@ -160,6 +160,7 @@ class myStep extends myController {
             $content = ob_get_contents();
             ob_clean();
         }
+        $_SERVER['REQUEST_URI'] = myString::setCharset($_SERVER['REQUEST_URI']);
         myReq::init((array)$this->setting->cookie, (array)$this->setting->session);
         if($this->setting->session->mode=='sess_mysql') {
             sess_mysql::set((array)$this->setting->db);
@@ -251,7 +252,7 @@ class myStep extends myController {
             'page_description' => $this->setting->web->description,
             'charset' => $this->setting->gen->charset,
             'app' => $info_app['app'],
-            'path_root' => ROOT_WEB.WEB_APP,
+            'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', PATH),
             'url_prefix' => self::$url_prefix,
             'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':($info_app['app'].'/')),
@@ -291,7 +292,7 @@ class myStep extends myController {
     public function render(myTemplate $tpl, $append_pare = []) {
         global $info_app;
         $paras = [
-            'path_root' => ROOT_WEB.WEB_APP,
+            'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', PATH),
             'url_prefix' => self::$url_prefix,
             'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':($info_app['app'].'/')),
@@ -358,6 +359,7 @@ class myStep extends myController {
             $rate = ceil(strlen(gzcompress($content, $level)) * 100 / (strlen($content)==0?1:strlen($content))). '%';
             $content .= '
 <!--
+Powered By MyStep Framework
 '.$this->getLanguage('info_memory').myFile::formatSize($mem).'
 '.$this->getLanguage('info_compressmode').$rate.'
 '.$this->getLanguage('info_querycount').(empty($query)?0:$query).'
@@ -552,7 +554,7 @@ code;
     public static function language($app_name, $type='default') {
         header('Content-Type: application/x-javascript');
         $type = preg_replace('#&.+$#', '', $type);
-        $cache = ROOT.'cache/language/'.$app_name.'_'.$type.'.js';
+        $cache = CACHE.'language/'.$app_name.'_'.trim($type, '/').'.js';
         if(is_file($cache)) {
             $result = myFile::getLocal($cache);
         } else {
@@ -599,7 +601,7 @@ code;
             'language' => $setting['setting']['gen']['language'],
             'debug' => $setting['setting']['gen']['debug'],
             'app' => trim($app_name, '/'),
-            'path_root' => ROOT_WEB.WEB_APP,
+            'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', APP.$app_name),
             'max_size' => min($m1, $m2),
             'url_fix' => defined('URL_FIX')?URL_FIX:'',
@@ -621,6 +623,17 @@ code;
      * @param $path
      */
     public static function api($path) {
+        $url = r::svr('HTTP_REFERER');
+        if(empty($url)) {
+            $url = '*';
+        } else {
+            $parts = parse_url($url);
+            $url = $parts['scheme'].'://'.$parts['host'];
+        }
+        header('Access-Control-Allow-Origin:'.$url);
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Methods:POST,GET,OPTIONS');
+        header('Access-Control-Allow-Headers:Content-MD5,X-Alt-Referer,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,X-CSRF-Token');
         global $ms_setting;
         if(strpos($path, 'myStep/plugin_')===0) $path = substr($path, 7);
         $path = preg_replace('#&.+$#', '', $path);
@@ -920,6 +933,9 @@ code;
     public static function go() {
         global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache, $host, $domain;
         $ms_setting = new myConfig(CONFIG.'config.php');
+        if(strpos(myReq::svr('REQUEST_URI'),'index.php')!==false && strpos(myReq::svr('REQUEST_URI'),'ms_')===false && $ms_setting->router->mode=='rewrite') {
+            myStep::info('app_missing');
+        }
         ini_set('memory_limit', $ms_setting->gen->memory);
         if($ms_setting->gen->debug) self::setOp('reset');
         $host = myReq::server('HTTP_HOST');
@@ -942,18 +958,43 @@ code;
         }
         $router = new myRouter((array)$ms_setting->router);
         $the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);
-        if(basename($the_file)=='favicon.ico') myController::file(ROOT.'favicon.ico');
-        //if(strpos(strpos($router->route['p'], 'static/')>2)) substr($router->route['p'],strpos($router->route['p'], 'static/'));
+        
         if(isset($router->info['path'][1]) && $router->info['path'][1]=='static') $the_file = str_replace('/'.$router->info['path'][0], '', $the_file);
         $ext = strtolower(pathinfo($the_file, PATHINFO_EXTENSION));
         $ext_list = explode(',', $ms_setting->gen->static);
         if(strpos(trim($router->route['p'], '/'), 'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
+        if(!is_file($the_file) && strpos($the_file, '/api/')===false && strpos($the_file, '/asset/')===false && in_array($ext, $ext_list)) {
+            no_file:
+            switch($ext) {
+                case 'jpg':
+                case 'png':
+                case 'gif':
+                    myController::file(ROOT.'static/images/noimage.gif');
+                    break;
+                case 'ico':
+                    myController::file(ROOT.'favicon.ico');
+                    break;
+                case 'css':
+                    echo '.none {display:none}';
+                    break;
+                case 'js':
+                    echo 'console.log("JS file('.$the_file.') is missing!");';
+                    break;
+                case 'json':
+                    echo '{};';
+                    break;
+                default:
+                    echo '';
+            }
+            exit;
+        }
+
         if(empty($ms_setting->cookie->domain) && ($ms_setting->cookie->domain = strstr($host, ':', true))===false) {
             $ms_setting->cookie->domain = $host;
         }
         $ms_setting->cookie->path = str_replace('\\', '/', dirname(myReq::server('SCRIPT_NAME')));
-        $ms_setting->web->url = 'http://'.$host;
+        $ms_setting->web->url = (isHttps()?'https://':'http://').$host;
         if(is_file(CONFIG.'variant_alias.php')) {
             $variant_alias = require CONFIG.'variant_alias.php';
             self::$variant_alias = array_keys($variant_alias);
@@ -984,11 +1025,18 @@ code;
             myStep::setPara();
             myStep::checkBind($info_app['app']);
             if(isset($info_app['path'][1]) && $info_app['path'][0]=='asset') {
-                $file = APP.$info_app['app'].'/asset/'. $ms_setting->template->style.'/'.$info_app['path'][1];
-                if(is_file($file)) {
-                    myController::file($file);
-                    exit;
+                $files = [
+                    APP.$info_app['app'].'/asset/'. $ms_setting->template->style.'/'.$info_app['path'][1],
+                    APP.$info_app['app'].'/asset/'.$info_app['path'][1],
+                    APP.$info_app['app'].'/asset/default/'.$info_app['path'][1]
+                ];
+                foreach($files as $f) {
+                    if(is_file($f)) {
+                        myController::file($f);
+                        exit;
+                    }
                 }
+                goto no_file;
             }
             $m = $info_app['path'][0] ?? '';
             if(is_file(PATH.'route.php')) $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
@@ -1010,7 +1058,7 @@ code;
         self::checkClose();
         if(!empty($mystep)) return;
         define('PATH', APP.$info_app['app'].'/');
-        define('WEB_APP', defined('URL_FIX')?'':preg_replace('#^/(\w*).*$#', '\1', myReq::server('request_uri')).'/');
+        //define('WEB_APP', defined('URL_FIX')?'':preg_replace('#^/(\w*).*$#', '\1', myReq::server('request_uri')).'/');
         if(is_file(PATH.$info_app['app'].'.class.php')) {
             require_once(PATH.$info_app['app'].'.class.php');
             $class = $info_app['app'];

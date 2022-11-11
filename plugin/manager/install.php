@@ -1,6 +1,8 @@
 <?PHP
 if(version_compare(PHP_VERSION, '7.0.0', '<'))
     die('MyStep Framework can only run under PHP 7.0 or upper version!');
+
+set_time_limit(60*10);
 $lng = array();
 if (preg_match("/zh/i", $_SERVER['HTTP_ACCEPT_LANGUAGE'])??'zh-cn') {
     $lng[0] = ' 扩展未启用！';
@@ -98,7 +100,7 @@ class unpacker {
     }
 
     public function DoIt($separator="|") {
-    	global $lng;
+        global $lng;
         WriteFile($this->pack_file, gzuncompress(GetFile($this->pack_file)));
         $this->pack_fp = fopen($this->pack_file, "rb");
         if(!$this->pack_fp) die($lng[6]);
@@ -284,23 +286,24 @@ $('#install').click(function(){
         $.get('install.php?step=2', function(detail){
             $('#detail').html(detail);
             $('#detail').scrollTop($('#detail').prop("scrollHeight"));
+            let check = ('{$lng[7]}').replace(/: .+$/, ':');
+            if(detail.indexOf(check)>0) {
+                $('#jump').removeClass('d-none').click(function(){
+                    location.href="install.php?step=3";
+                });
+                alert(txt_done);
+                clearInterval(timer);
+                if(('{$svr}').indexOf('nginx')!==-1) {
+                    alert('{$lng[17]}');
+                } else {
+                    setTimeout(function(){location.href="install.php?step=3";}, 5000);
+                }
+            }
+            len = detail.length;
         })
-    }, 50);
+    }, 100);
     $.get('install.php?step=999', function(result){
-        alert(txt_done);
-        clearInterval(timer);
-        $.get('install.php?step=2', function(detail){
-            $('#detail').html(detail);
-            $('#detail').scrollTop($('#detail').prop("scrollHeight"));
-        })
-        $('#jump').removeClass('d-none').click(function(){
-            location.href="install.php?step=3";
-        });
-        if(('{$svr}').indexOf('nginx')!==-1) {
-            alert('{$lng[17]}');
-        } else {
-            setTimeout(function(){location.href="install.php?step=3";}, 5000);
-        }
+        //alert(result);
     })
 });
 </script>

@@ -104,7 +104,7 @@ class CMS extends myStep {
         if(($website = \app\CMS\getCache('website'))===false) {
             myStep::info('error_para');
         }
-        if(($web_info = \app\CMS\checkVal($website, 'domain', myReq::server('HTTP_HOST')))===false) {
+        if(($web_info = \app\CMS\checkVal($website, 'domain', myReq::server('HTTP_HOST'), true))===false) {
             $web_info = \app\CMS\checkVal($website, 'web_id', 1);
         }
         if(($info_app['path'][0]??'')!==$S->web->path_admin) {

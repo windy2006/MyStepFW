@@ -132,7 +132,7 @@ function setPosition() {
     }
 }
 $(window).resize(setPosition);
-$(setPosition);
+setTimeout(setPosition, 500);
 </script>
 <!--page_end-->
 </body>

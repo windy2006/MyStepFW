@@ -486,11 +486,11 @@ class myReq extends myBase {
         if($flag) {
             //ini_set('session.save_handler', 'user');
             //session_module_name('user');
-            self::$session_opt['mode']=='user';
+            self::$session_opt['mode']='user';
         } else {
             //ini_set('session.save_handler', 'files');
             session_module_name('files');
-            self::$session_opt['mode']=='files';
+            self::$session_opt['mode']='files';
         }
         if(!empty(self::$session_opt['id'])) {
             session_id(self::$session_opt['id']);
