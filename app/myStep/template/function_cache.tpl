@@ -42,7 +42,9 @@
                 </tr>
             </table>
             <div class="pb-3 border-0 text-right">
-                <button class="btn btn-primary btn-sm mr-3" type="button" value="65535"> 清除所有 </button>
+                <button class="btn btn-primary btn-sm mr-3" type="button" value="72"> 基础清除 </button>
+                <button class="btn btn-primary btn-sm mr-3" type="button" value="79"> 进阶清除 </button>
+                <button class="btn btn-primary btn-sm mr-3" type="button" value="65535"> 全部清除 </button>
             </div>
         </form>
     </div>

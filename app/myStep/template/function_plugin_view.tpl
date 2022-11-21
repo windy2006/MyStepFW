@@ -78,7 +78,7 @@ $(function(){
         $(this).width(this.scrollWidth);
         $(this).height(this.scrollHeight);
     });
-    setSize();
     $(window).resize(setSize);
+    setTimeout(setSize, 500);
 });
 </script>

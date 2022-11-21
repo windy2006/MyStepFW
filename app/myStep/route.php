@@ -2,6 +2,7 @@
 $rule = array(
     array('/api/[str]/[any]', 'myStep::api'),
     array('/module/[str]/[any]', 'myStep::module'),
+    array('/sitemap', 'myStep::sitemap'),
     array('/ms_language/[str]/[any]', 'myStep::language'),
     array('/ms_setting/[any]', 'myStep::setting'),
     array('/captcha/[any]', 'myStep::captcha,4,3'),

@@ -48,7 +48,7 @@ switch($method) {
         multiDelData($id);
         \app\CMS\deleteCache('news_cat');
         $cache->func('\app\CMS\setCatList', [$news_cat], null);
-        CMS::redirect();
+        CMS::redirect(myReq::svr('referer').'?Refresh');
         break;
     case 'order':
         CMS::$log = $mystep->getLanguage('admin_art_catalog_change');
@@ -81,7 +81,7 @@ switch($method) {
                    ->field('layer');
                 $data['layer'] = 1 + $db->result();
             }
-            $data['idx'] = preg_replace('/[\s`~!@#$%^&*()_\-+=<>?:"{}|,.\/;\'\\[\]]/', '', $data['idx']);
+            $data['idx'] = preg_replace('/[\s`~!@#$%^&*()\-+=<>?:"{}|,.\/;\'\\[\]]/', '', $data['idx']);
             $db->build($S->db->pre.'news_cat')->field('idx')->where('idx', '=', $data['idx'])->where('web_id', 'n=', $data['web_id']);
             if($method=='edit_ok') {
                 $db->build($S->db->pre.'news_cat')->where('cat_id', 'n!=', $data['cat_id'], 'and');
@@ -269,5 +269,6 @@ function build_page($method) {
     }
     $tpl->assign('back_url', r::svr('HTTP_REFERER'));
     $tpl->assign('web_id', $web_info['web_id']);
+    setWeb($tpl);
     return $mystep->render($tpl);
 }

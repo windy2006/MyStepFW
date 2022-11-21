@@ -50,9 +50,9 @@
                 <td class="d-none d-md-table-cell"><!--record_add_date--></td>
                 <td>
                     <div class="btn-group">
-                        <a class="btn btn-sm btn-info" href="?method=unlock&web_id=<!--record_web_id-->&id=<!--record_news_id-->">解锁</a>
-                        <a class="btn btn-sm btn-info" href="?method=edit&web_id=<!--record_web_id-->&id=<!--record_news_id-->">修改</a>
-                        <a class="btn btn-sm btn-info" href="?method=delete&web_id=<!--record_web_id-->&id=<!--record_news_id-->" onclick="return confirm('是否确定要删除该文章？')">删除</a>
+                        <a class="btn btn-sm btn-info" href="unlock&web_id=<!--record_web_id-->&id=<!--record_news_id-->">解锁</a>
+                        <a class="btn btn-sm btn-info" href="edit&web_id=<!--record_web_id-->&id=<!--record_news_id-->">修改</a>
+                        <a class="btn btn-sm btn-info" href="delete&web_id=<!--record_web_id-->&id=<!--record_news_id-->" onclick="return confirm('是否确定要删除该文章？')">删除</a>
                     </div>
                 </td>
             </tr>
@@ -88,7 +88,7 @@ $(function(){
         location.href = global.root_fix;
     });
     let refer = '<!--back_url-->';
-    if(refer.match(/method=(\w+)/)) {
+    if(refer.match(/content\/(\w+)/)) {
         if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
             $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
                 let obj = $(window.parent.document.getElementById('sidebar'));
@@ -99,7 +99,7 @@ $(function(){
                     window.parent.setLink();
                     obj.find('.collapse').addClass('show');
                     obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-                    if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
+                    window.parent.$('#web_id').val(web_id).trigger('change');
                 } else {
                     alert(data.err);
                 }

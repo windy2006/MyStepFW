@@ -99,10 +99,13 @@ header .navbar-nav .dropdown-menu {
     padding:5px 20px;
     border:1px #bbbbbb solid;
     border-radius:20px;
-    background-color:rgba(220, 220, 220, 0.8);
+    color:rgba(255, 255, 255, 0.8);
+    background-color:rgba(220, 220, 220, 0.2);
+    text-shadow:1px 0 0 #000, 0 1px 0 #000, -1px 0 0 #000, 0 -1px 0 #000;
 }
 .carousel h5:hover{
-    background-color:#fff;
+    color:rgba(255, 255, 255, 1);
+    background-color:rgba(220, 220, 220, 0.5);
 }
 .carousel a{
     text-decoration:none;

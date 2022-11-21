@@ -20,7 +20,7 @@ function api() {
     //需要注意 $para 中的最后一个参数可能是格式变量（如json或xml）
     $result = \myConfig::o2a($S);
     $result = $result['setting'];
-    unset($result['db'], $result['gen']['s_usr'], $result['gen']['s_pwd']);
+    unset($result['db'], $result['gen']['s_usr'], $result['gen']['s_pwd'], $result['email']['password']);
     foreach($para as $v) {
         if(isset($result[$v])) {
             $result = $result[$v];

@@ -11,6 +11,11 @@ if(!defined('URL_FIX')) $root = $root.$info_app['app'].'/';
 $tpl_sub->assign('root', $root);
 $tpl_sub->assign('root2', ROOT_WEB);
 $tpl_sub->assign('code', htmlentities(myFile::getLocal(__FILE__)));
+//重制敏感信息
+$ms_setting->gen->s_usr = '******';
+$ms_setting->gen->s_pwd = '******';
+$ms_setting->email->password = '******';
+$ms_setting->db->password = '******';
 //参数列表及模版循环赋值
 foreach ([
     'info_app' => '当前app基本信息',

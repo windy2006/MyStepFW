@@ -44,6 +44,7 @@
             <div id="tfoot">
                 <button class="btn btn-primary btn-sm mr-3" type="submit"> 重新应用所有路由信息 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
+                <button class="btn btn-primary btn-sm mr-3" type="button" id="upload"> 上传新应用 </button>
             </div>
         </form>
     </div>
@@ -123,5 +124,27 @@ $(function() {
     $('form').on('reset', function(){
        location.reload();
     });
+});
+jQuery.vendor('jquery.powerUpload', {
+    callback:function(){
+        $('#upload').powerUpload({
+            url: '<!--path_admin-->/function/app',
+            title: '请选择需要上传的应用包',
+            mode: 'browse',
+            maxfiles: 1,
+            maxfilesize: 8,
+            errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
+            uploadFinished:function(i,file,result,timeDiff){
+                if(result.error!=0) {
+                    alert("上传失败！\n原因：" + result.message);
+                } else {
+                    $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
+                    $('#uploader').on('hidden.bs.modal', function (e) {
+                        window.location.reload();
+                    });
+                }
+            }
+        });
+    }
 });
 </script>

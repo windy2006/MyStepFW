@@ -12,9 +12,13 @@ class CMS extends myStep {
         $result = 0;
         if(parent::ms_login($usr, $pwd)) {
             $result = 1;
-            if(empty($usr)) $usr = $this->setting->gen->s_usr;
+            if(empty($usr)) {
+                $usr = $this->setting->gen->s_usr;
+                $pwd = $this->setting->gen->s_pwd;
+            }
             r::s('ms_cms_op', $usr);
             r::s('ms_cms_group', 1);
+            r::setCookie('ms_cms_op', $usr.chr(9).$pwd, 60*60*24);
         } else {
             if(!empty($usr) && !empty($pwd)) {
                 $pwd = md5($pwd);
@@ -32,6 +36,7 @@ class CMS extends myStep {
                 if($group_id=$db->result()) {
                     r::s('ms_cms_op', $usr);
                     r::s('ms_cms_group', $group_id);
+                    r::setCookie('ms_cms_op', $usr.chr(9).$pwd, 60*60*24);
                     $result = 1;
                 } else {
                     $db->build($S->db->pre.'users')
@@ -65,7 +70,7 @@ class CMS extends myStep {
      */
     public static function log() {
         global $db, $S, $group_info, $id;
-        $link = 'http://'.r::svr('HTTP_HOST').r::svr('REQUEST_URI');
+        $link = (isHttps()?'https':'http').'://'.r::svr('HTTP_HOST').r::svr('REQUEST_URI');
         if(strpos($link, '_ok')) $link = r::svr('REFERER');
         if(!empty($id)) {
             $link = str_replace('&id=' . $id, '', $link);
@@ -140,7 +145,7 @@ class CMS extends myStep {
         $new_ip = 0;
         $cnt_visitor = myReq::c('cms_cnt_visitor');
         if(empty($cnt_visitor) || $cnt_visitor!=$ip) {
-            myReq::setCookie('cms_cnt_visitor', $ip,60*60*24);
+            myReq::setCookie('cms_cnt_visitor', $ip, 60*60*24);
             $new_ip = 1;
         }
         $db->build($S->db->pre.'user_online')->field('ip')->where('ip','=',$ip);
@@ -177,7 +182,7 @@ class CMS extends myStep {
      */
     public static function checkPower($idx) {
         global $ms_setting;
-        $op = myReq::cookie('ms_cms_op');
+        $op = myReq::cookie('ms_cms_op') ?? myReq::session('sysop');
         switch($idx) {
             case 'upload':
             case 'remove_ul':

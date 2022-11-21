@@ -5,7 +5,6 @@ if(preg_match('#(%[A-E0-9])#', $catalog)) $catalog = urldecode($catalog);
 $cat_info = false;
 $prefix = r::g('pre')??'';
 $tpl_setting['name'] = 'catalog';
-$t = new myTemplate($tpl_setting);
 
 if(!empty($catalog)) {
     if(is_numeric($catalog)) {
@@ -23,13 +22,14 @@ if(!empty($catalog)) {
         $catalog = '';
     }
 }
+if(is_file(PATH.'template/custom/cat_'.$cat_info['cat_id'].'.tpl')) {
+    $tpl_setting['style'] = 'custom';
+    $tpl_setting['name'] = 'cat_'.$cat_info['cat_id'];
+} elseif(!empty($cat_info['type'])) {
+    $tpl_setting['name'] .= '_'.$cat_info['type'];
+}
+$t = new myTemplate($tpl_setting);
 if(!empty($catalog)) {
-    if(is_file(PATH.'template/custom/cat_'.$cat_info['cat_id'].'.tpl')) {
-        $tpl_setting['style'] = 'custom';
-        $tpl_setting['name'] = 'cat_'.$cat_info['cat_id'];
-    } elseif(!empty($cat_info['type'])) {
-        $tpl_setting['name'] .= '_'.$cat_info['type'];
-    }
     $S->web->title = $cat_info['name'].'_'.$S->web->title;
     $S->web->keyword = $cat_info['keyword'];
     $S->web->description = $cat_info['comment'];

@@ -83,7 +83,7 @@ switch($method) {
             $cat['view_lvl'] = 0;
             $cat['type'] = 0;
             $cat['show'] = 7;
-            $cat['link'] = '';
+            $cat['link'] = $data['link'];
             $db->build($S->db->pre.'news_cat')->field('max(`order`)');
             $cat['order'] = 1 + $db->result();
             $db->build($S->db->pre.'news_cat')
@@ -162,10 +162,10 @@ switch($method) {
         if(!isset($data['setop_mode']) || $data['setop_mode']==0) {
             $data['setop'] = 0;
         } else {
-            $data['setop'] = array_sum($data['setop']);
             if(is_null($data['setop'])) {
                 $data['setop'] = 0;
             } else {
+                $data['setop'] = array_sum($data['setop']);
                 $data['setop'] += ($data['setop_mode'] * 32);
             }
         }

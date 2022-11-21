@@ -3,7 +3,17 @@
         <i class="glyphicon glyphicon-circle-arrow-right"></i> <b><!--title--></b>
         <a class="btn btn-primary btn-sm float-right py-0 border" href="add">添加分类</a>
     </div>
-    <div class="card-body p-0 table-responsive mt-5">
+    <div class="form-inline mt-5 mx-auto">
+        <div class="input-group my-3 mx-auto px-2">
+            <select class="custom-select" id="web_id">
+                <option value="">显示所有</option>
+                <!--loop:start key="website"-->
+                <option value="<!--website_web_id-->" <!--website_selected-->><!--website_name--></option>
+                <!--loop:end-->
+            </select>
+        </div>
+    </div>
+    <div class="card-body p-0 table-responsive">
         <form class="col-xs-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 p-0" method="post" action="order" onsubmit="return checkForm(this)">
         <table class="table table-sm table-striped table-bordered table-hover my-md-3 bg-white">
             <thead class="thead-light">
@@ -14,9 +24,9 @@
                     <th width="92">操作</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="cat_list">
 <!--loop:start key="record" time="10"-->
-                <tr title="<!--record_comment-->" data-layer="<!--record_layer-->" data-expand="true">
+                <tr title="<!--record_comment-->" data-layer="<!--record_layer-->" data-expand="true" web_id="<!--record_web_id-->">
                     <td>
                         <input name="cat_id[]" type="hidden" value="<!--record_cat_id-->" />
                         <input name="cat_layer[]" type="hidden" value="<!--record_layer-->" />
@@ -48,7 +58,7 @@
 <script type="application/javascript">
 $(function(){
     let refer = '<!--back_url-->';
-    if(refer.match(/method=(\w+)/)) {
+    if(refer.match(/catalog\/(\w+)/) || location.search.indexOf('Refresh')) {
         if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
             $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
                 let web_id = '<!--web_id-->';
@@ -60,7 +70,7 @@ $(function(){
                     window.parent.setLink();
                     obj.find('.collapse').addClass('show');
                     obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-                    if(web_id!=='1') window.parent.$('#web_id').val(web_id).trigger('change');
+                    window.parent.$('#web_id').val(web_id).trigger('change');
                 } else {
                     alert(data.err);
                 }
@@ -97,6 +107,15 @@ $(function(){
         }
 
         obj.attr('data-expand', (expand?'false':'true'));
+    });
+    $('#web_id').change(function(){
+        let val = this.value;
+        if(val==='') {
+            $('#cat_list > tr').show();
+        } else {
+            $('#cat_list > tr').hide();
+            $('#cat_list > tr[web_id='+val+']').show();
+        }
     });
 });
 </script>

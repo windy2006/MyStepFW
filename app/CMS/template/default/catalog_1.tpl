@@ -7,7 +7,7 @@
                     <!--loop:start key="cat_list"-->
                     <li class="breadcrumb-item p-2"><a href="<!--cat_list_link-->"><!--cat_list_name--></a></li>
                     <!--loop:end-->
-                    <li class="breadcrumb-item p-2 flex-grow-1"><!--cat_name--></li>
+                    <li class="breadcrumb-item p-2 flex-grow-1">文章目录</li>
                 </ol>
             </nav>
             <div class="mb-3">

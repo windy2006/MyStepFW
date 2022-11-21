@@ -9,12 +9,12 @@
         </div>
 <!--loop:end-->
     </div>
-    <a class="carousel-control-prev" href="#carousel" data-slide="prev">
+    <button class="carousel-control-prev" type="button" data-target="#carousel" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carousel" data-slide="next">
+    </button>
+    <button class="carousel-control-next" type="button" data-target="#carousel" data-slide="next">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="sr-only">Next</span>
-    </a>
+    </button>
 </div>

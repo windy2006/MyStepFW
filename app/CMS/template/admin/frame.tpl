@@ -357,6 +357,9 @@ $(function(){
                     if(websites[i].domain.length < 5) {
                         websites[i].domain = '/';
                     } else {
+                        if(websites[i].domain.indexOf(',')) {
+                            websites[i].domain = websites[i].domain.replace(/,.+$/, '');
+                        }
                         websites[i].domain = 'http://'+websites[i].domain;
                     }
                     obj_sub.prepend('<a class="dropdown-item" href="'+websites[i].domain+'" target="_blank">'+websites[i].name+'</a>');
@@ -397,7 +400,7 @@ $(function(){
                 $('.sidebar-go-down').css('top', 22);
                 sidebar_top -= 28;
             }
-            if($("#sidebar").height() > $("#sidebar > .nav").height()) {
+            if($('#sidebar').height() > $("#sidebar > .nav").height()) {
                 $("#list > div").hide();
                 sidebar_top = 0;
             } else {

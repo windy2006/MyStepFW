@@ -40,7 +40,7 @@
                     <select id="prefix" class="custom-select rounded-0 border-right-0">
                         <option>无前缀</option>
                     </select>
-                    <div class="input-group-text bg-white py-0 pt-1">
+                    <div class="input-group-text bg-white py-0">
                         <label><input type="checkbox" name="style[]" value="b" /> 粗体</label> &nbsp; &nbsp;
                         <label><input type="checkbox" name="style[]" value="i" /> 斜体</label> &nbsp; &nbsp;
                         <label class="mb-1"><input type="color" name="style[]" value="#ff0000" /></label>
@@ -59,12 +59,6 @@
                 </div>
                 <input name="original" type="text" class="form-control" maxlength="80" value="<!--record_original-->" />
             </div>
-            <div class="input-group mb-2 cat_ext" title="点击文章标题所链接到的网址">
-                <div class="input-group-prepend">
-                    <span class="input-group-text item-name">跳转网址</span>
-                </div>
-                <input id="link" name="link" type="text" class="form-control" maxlength="150" value="<!--record_link-->" />
-            </div>
             <div class="input-group mb-2" title="文章标题图形显示">
                 <div class="input-group-prepend">
                     <span class="input-group-text item-name">文章图示</span>
@@ -74,6 +68,12 @@
                     <button id="upload" class="btn btn-light btn-outline-secondary" type="button" data-title="请选择需要上传的图示文件">上传</button>
                     <button class="btn btn-light btn-outline-secondary" type="button" name="image">插入</button>
                 </div>
+            </div>
+            <div class="input-group mb-2" title="点击文章标题所链接到的网址">
+                <div class="input-group-prepend">
+                    <span class="input-group-text item-name">跳转网址</span>
+                </div>
+                <input id="link" name="link" type="text" class="form-control" maxlength="150" value="<!--record_link-->" />
             </div>
             <div class="input-group mb-2 cat_ext" title="浏览当前文章需要达到的级别，0为不限制">
                 <div class="input-group-prepend">
@@ -212,7 +212,16 @@ function myChecker(theForm) {
     if(theLen>50 || theLen===0) {
         $("#keyword").val($('#subject').val());
     }
-    tinyMCE.editors[0].execCommand('ms_format');
+    let content = tinyMCE.get("content").getBody().innerText;
+    if(content.length<10) {
+        if($('#link').val()==='') {
+            alert("文章内容不能为空！");
+            tinyMCE.editors[0].focus();
+            flag = false;
+        }
+    } else {
+        tinyMCE.editors[0].execCommand('ms_format');
+    }
     return flag;
 }
 function getKeyword() {

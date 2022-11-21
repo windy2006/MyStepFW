@@ -1,8 +1,7 @@
 <?PHP
 global $db;
 $db->connect(0, 'mystep');
-$db->reconnect(1, 'mystep');
-$db->changUser('root', 'cfnadb!@#$%', 'mystep');
+$db->reconnect(1, 'mystep_cms');
 
 //select
 $db->build('cms_news_cat')
@@ -12,7 +11,8 @@ $db->build('cms_news_cat')
 echo $db->select(1).';<br /><br />';
 
 $db->build('[reset]');
-$db->build('cms_admin_cat')->field($db->getFields('cms_admin_cat'))->where('id', 'n>', '10')->order('id', 1)->limit(5, 6);
+$field = $db->getFields('cms_admin_cat');
+$db->build('cms_admin_cat')->field($field)->where('id', 'n>', '10')->order('id', 1)->limit(5, 6);
 echo $db->select(1).';<br /><br />';
 
 $db->build('[reset]');

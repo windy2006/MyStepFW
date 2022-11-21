@@ -1,4 +1,39 @@
 <?PHP
+if(myReq::check('files')) {
+    $path_upload = CACHE.'tmp';
+    $upload = new myUploader($path_upload, true);
+    $upload->do(false);
+    $result = $upload->result();
+    if($result[0]['error'] == 0) {
+        $file = $path_upload.'/'.$result[0]['new_name'];
+        $name = strstr($result[0]['name'], '.', true);
+        $name = str_replace('app_', '', $name);
+        if(!file_exists(APP.$name)) {
+            $mypack = $mystep->getInstance('myPacker', APP.$name.'/', $file);
+            $mypack->unpack();
+            unset($mypack);
+            myFile::del($file);
+            if(is_file(APP.$name.'/config_new.php')) myFile::move(APP.$name.'/config_new.php', APP.$name.'/config.php');
+            $result = [
+                'error' => 0,
+                'message' => $mystep->getLanguage('plugin_upload_done')
+            ];
+        } else {
+            $result = [
+                'error' => 99,
+                'message' => $mystep->getLanguage('plugin_upload_exists')
+            ];
+        }
+    } else {
+        $result = [
+            'error' => $result[0]['error'],
+            'message' => $result[0]['message']
+        ];
+    }
+    unset($upload);
+    echo myString::toJson($result, $ms_setting->gen->charset);
+    $mystep->end();
+}
 if(myReq::check('post')) {
     global $router;
     $name = myReq::post('name');

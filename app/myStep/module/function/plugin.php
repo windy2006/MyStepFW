@@ -153,9 +153,15 @@ switch($method) {
     case 'pack':
         if(!empty($idx) || is_dir(PLUGIN.$idx)) {
             $pack_file = ROOT.'cache/tmp/pack/'.$idx.'.plugin';
-            $mypack = $mystep->getInstance('myPacker', PLUGIN.$idx, $pack_file);
-            $mypack->pack();
-            unset($mypack);
+            $dir = PLUGIN.$idx;
+            $mypacker = $mystep->getInstance('myPacker', PLUGIN.$idx, $pack_file);
+            if(class_exists('plugin_manager')) {
+                plugin_manager::checkConfig($dir);
+                $mypacker->addIgnore(plugin_manager::IGNORE);
+            }
+            $mypacker->pack();
+            myFile::del($dir.'/config_new.php');
+            unset($mypacker);
             myStep::file($pack_file);
         }
         break;
@@ -167,14 +173,24 @@ switch($method) {
             $result = $upload->result();
             if($result[0]['error'] == 0) {
                 $file = $path_upload.'/'.$result[0]['new_name'];
-                $mypack = $mystep->getInstance('myPacker', PLUGIN.strstr($result[0]['name'], '.', true).'/', $file);
-                $mypack->unpack();
-                unset($mypack);
-                myFile::del($file);
-                $result = [
-                    'error' => 0,
-                    'message' => $mystep->getLanguage('plugin_upload_done')
-                ];
+                $name = strstr($result[0]['name'], '.', true);
+                $name = str_replace('plugin_', '', $name);
+                if(!file_exists(PLUGIN.$name)) {
+                    $mypack = $mystep->getInstance('myPacker', PLUGIN.$name.'/', $file);
+                    $mypack->unpack();
+                    unset($mypack);
+                    myFile::del($file);
+                    if(is_file(PLUGIN.$name.'/config_new.php')) myFile::move(PLUGIN.$name.'/config_new.php', PLUGIN.$name.'/config.php');
+                    $result = [
+                        'error' => 0,
+                        'message' => $mystep->getLanguage('plugin_upload_done')
+                    ];
+                } else {
+                    $result = [
+                        'error' => 99,
+                        'message' => $mystep->getLanguage('plugin_upload_exists')
+                    ];
+                }
             } else {
                 $result = [
                     'error' => $result[0]['error'],
@@ -185,7 +201,7 @@ switch($method) {
         } else {
             $result = [
                 'error' => '-1',
-                'message' => 'No file uploaded!'
+                'message' => $mystep->getLanguage('plugin_upload_fail')
             ];
         }
         echo myString::toJson($result, $ms_setting->gen->charset);

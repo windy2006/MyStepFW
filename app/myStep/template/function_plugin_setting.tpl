@@ -35,33 +35,33 @@
     </div>
 </div>
 <script type="text/javascript">
-    $('form').submit(function() {
-        let theObjs = $(this).find("input:password[id$=_r]");
-        for(let i=0; i<theObjs.length; i++) {
-            if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!=theObjs[i].value) {
-                alert("两次输入密码请保持一致！");
-                document.getElementById(theObjs[i].id.replace(/_r$/, "")).focus();
-                return false;
-            }
-        }
-        theObjs.remove();
-        return true;
-    });
-    function setSize() {
-        if($(window).width()>576) {
-            $('textarea,select,input[type=text],input[type=password]').each(function(){
-                $(this).width($(this).parent().width()-140);
-            });
-        } else {
-            $('textarea,select,input[type=text],input[type=password]').css('width','100%');
+$('form').submit(function() {
+    let theObjs = $(this).find("input:password[id$=_r]");
+    for(let i=0; i<theObjs.length; i++) {
+        if(document.getElementById(theObjs[i].id.replace(/_r$/, "")).value!=theObjs[i].value) {
+            alert("两次输入密码请保持一致！");
+            document.getElementById(theObjs[i].id.replace(/_r$/, "")).focus();
+            return false;
         }
     }
-    $(function(){
-        $('textarea').each(function(){
-            $(this).width(this.scrollWidth);
-            $(this).height(this.scrollHeight);
+    theObjs.remove();
+    return true;
+});
+function setSize() {
+    if($(window).width()>576) {
+        $('textarea,select,input[type=text],input[type=password]').each(function(){
+            $(this).width($(this).parent().width()-140);
         });
-        setSize();
-        $(window).resize(setSize);
+    } else {
+        $('textarea,select,input[type=text],input[type=password]').css('width','100%');
+    }
+}
+$(function(){
+    $('textarea').each(function(){
+        $(this).width(this.scrollWidth);
+        $(this).height(this.scrollHeight);
     });
+    $(window).resize(setSize);
+    setTimeout(setSize, 500);
+});
 </script>
