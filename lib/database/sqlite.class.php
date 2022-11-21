@@ -55,32 +55,21 @@ class SQLite extends myBase implements interface_db {
     }
 
     /**
-     * 方法调用
-     * @param $func
-     * @param array $args
-     * @return mixed|null
-     */
-    public function __call($func, array $args) {
-        if(is_callable(array($this->obj, $func))) {
-            return call_user_func_array(array($this->obj, $func), $args);
-        } else {
-            return $this->__call_base($func, $args);
-        }
-    }
-
-    /**
      * 初始化实例
-     * @param string $file
-     * @param int $flag
-     * @param null $key
+     * @param $file
+     * @param $flag
+     * @param $key
+     * @param $exception
+     * @param $timeout
+     * @return void
      */
-    public function init($file=':memory:', $flag=-1, $key=null) {
+    public function init($file=':memory:', $flag=-1, $key=null, $exception=false, $timeout=5000) {
         $this->delimiter = ['[',']'];
-        if($flag==-1) $flag = (is_file($file) || $file==':memory:') ? SQLITE3_OPEN_READWRITE : SQLITE3_OPEN_CREATE;
+        if($flag==-1) $flag = (is_file($file) || $file==':memory:') ? SQLITE3_OPEN_READWRITE : (SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
         $this->file_db = $file;
         $this->obj = new SQLite3($file, $flag, $key);
-        $this->obj->busyTimeout(5000);
-        $this->obj->enableExceptions(true);
+        $this->obj->busyTimeout($timeout);
+        $this->obj->enableExceptions($exception);
     }
 
     /**
@@ -130,7 +119,8 @@ class SQLite extends myBase implements interface_db {
             if(is_object($this->result)) $this->result->finalize();
             $this->result = $this->obj->query($sql);
         } else {
-            $this->obj->exec('BEGIN');
+            $sql = str_replace('LOW_PRIORITY', '', $sql);
+            $this->obj->exec('BEGIN IMMEDIATE');
             $this->result = $this->obj->exec($sql);
             $this->obj->exec('COMMIT');
         }

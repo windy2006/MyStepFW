@@ -44,15 +44,18 @@ class sess_mystep implements interface_session {
     }
 
     public static function write($sid, $sess_data) {
+        if($GLOBALS['no_log']) return true;
         if((self::$run & 2) == 2) {
             global $ms_setting;
+            $url = mysqli_real_escape_string(self::$cnt, 'http://'.r::svr('SERVER_NAME').r::svr('REQUEST_URI'));
+            if(strpos($url, 'api')!==false || strpos($url, 'ms_')!==false) return true;
             //$sess_data = gzdeflate($sess_data, 9);
             $sess_data = mysqli_real_escape_string(self::$cnt, $sess_data);
             $ip = mysqli_real_escape_string(self::$cnt, r::ip());
             $refresh = $ms_setting->info->time;
-            $url = mysqli_real_escape_string(self::$cnt, 'http://'.r::svr('SERVER_NAME').r::svr('REQUEST_URI'));
-            if(strpos($url, 'api')!==false) return true;
-            return @mysqli_query(self::$cnt, 'REPLACE INTO '.$ms_setting->db->pre.'user_online (sid, ip, refresh, url, data) VALUES ("'.$sid.'", "'.$ip.'", "'.$refresh.'", "'.$url.'", "'.$sess_data.'")');
+            $url = substr($url, 0, 198).' ';
+            mysqli_query(self::$cnt, 'REPLACE INTO '.$ms_setting->db->pre.'user_online (sid, ip, refresh, url, data) VALUES ("'.$sid.'", "'.$ip.'", "'.$refresh.'", "'.$url.'", "'.$sess_data.'")');
+            return true;
         }
         return true;
     }

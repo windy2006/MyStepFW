@@ -47,6 +47,7 @@ class myPacker extends myBase {
      */
     public function addIgnore() {
         $args_list = func_get_args();
+        if(is_array($args_list[0])) $args_list = $args_list[0];
         $this->file_ignore = array_merge($this->file_ignore, $args_list);
     }
 

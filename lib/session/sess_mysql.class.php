@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `my_session` (
     }
 
     public static function write($sid, $sess_data) {
+        if($GLOBALS['no_log']) return true;
         $expiration = $_SERVER['REQUEST_TIME'] + ini_get('session.gc_maxlifetime');
         $sess_data = mysqli_real_escape_string(self::$cnt, $sess_data);
         $result = false;

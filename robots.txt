@@ -2,5 +2,7 @@
 # robots.txt
 # MyStep Framework
 #
-
 User-agent: *
+Disallow: /cache
+Allow: 
+Sitemap: /sitemap

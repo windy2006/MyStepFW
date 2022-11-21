@@ -22,6 +22,7 @@ class sess_file implements interface_session {
     }
 
     public static function write($sid, $sess_data) {
+        if($GLOBALS['no_log']) return true;
         if(!file_exists(self::$path)) mkdir(self::$path, 0777, true);
         $result = file_put_contents(self::$path.'/sess_'.$sid, $sess_data, LOCK_EX);
         return is_int($result);
@@ -36,13 +37,13 @@ class sess_file implements interface_session {
         $dirname = basename(self::$path);
         if(preg_match('#^[\d\-]+$#', $dirname)) {
             $dir = dirname(self::$path);
-            $mydir = opendir($dir);
+            $mydir = @opendir($dir);
             while($file = readdir($mydir)) {
                 if($file=='.' || $file=='..' || $file==$dirname) continue;
                 myFile::del($dir.'/'.$file);
             }
         }
-        $mydir = opendir(self::$path);
+        $mydir = @opendir(self::$path);
         while($file = readdir($mydir)) {
             if($file=='.' || $file=='..') continue;
             $the_file = self::$path.'/'.$file;

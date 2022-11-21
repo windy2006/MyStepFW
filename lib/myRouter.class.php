@@ -204,6 +204,7 @@ class myRouter extends myBase {
         if(preg_match('@^/(\w+)@', $url_fix.$qstr, $m) && is_dir(APP.$m[1])) return false;
 
         if(!empty($rule)) {
+            $GLOBALS['no_log'] = ($rule['idx']=='myStep');
             if(empty($match)) {
                 preg_match('#^'.$rule['pattern'].'$#', $url_fix.$qstr, $match);
             }

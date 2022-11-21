@@ -303,7 +303,7 @@ class myReq extends myBase {
             $ip = self::server('HTTP_CLIENT_IP');
         }
         if(!empty($ip) && $ip!=$ip_org) {
-            $ip = $ip_org.', '.$ip;
+            $ip = $ip_org.','.$ip;
         } else {
             $ip = $ip_org;
         }

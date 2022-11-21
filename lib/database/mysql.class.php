@@ -176,12 +176,15 @@ class MySQL extends myBase implements interface_db, interface_sql {
     /**
      * 执行查询
      * @param $sql
+     * @param bool $reset
      * @return bool|int
      */
-    public function query($sql) {
+    public function query($sql, $reset = true) {
         if(!$this->check()) return false;
-        $this->build('[reset]');
-        $this->free();
+        if($reset) {
+            $this->build('[reset]');
+            $this->free();
+        }
         $this->count++;
         $sql = str_replace('    ', ' ', $sql);
         $sql = str_replace('(1=1)', '1=1', $sql);
@@ -265,7 +268,7 @@ class MySQL extends myBase implements interface_db, interface_sql {
      */
     public function getFields($the_tbl, $the_db='') {
         if(empty($the_db)) $the_db = $this->db;
-        $this->query('SHOW COLUMNS FROM `'.$this->safeName($the_db).'`.`'.$this->safeName($the_tbl).'`');
+        $this->query('SHOW COLUMNS FROM `'.$this->safeName($the_db).'`.`'.$this->safeName($the_tbl).'`', false);
         $fields = array();
         while($record = $this->getRS()) {
             $fields[] = $record['Field'];

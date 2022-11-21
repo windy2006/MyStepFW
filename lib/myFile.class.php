@@ -83,6 +83,7 @@ class myFile {
      * @param array $headers
      */
     public function __construct($file, $headers=array()) {
+        ini_set("auto_detect_line_endings", true);
         if(preg_match('/^[\w]{2,}:/', $file)) $this->remote = true;
         if($this->remote) {
             $this->file = $file;
@@ -590,15 +591,16 @@ class myFile {
         $newname = self::realPath($newname);
         if(file_exists($file)) {
             if(is_dir($newname)) {
-                rename($file, $newname.'/'.basename($file));
+                rename($file, $newname.'/'.basename($file)) or trigger_error('Operation Failed in Renaming '.$file.' !');
             } elseif(is_file($newname)) {
-                trigger_error("File{$newname} already exist !");
+                trigger_error('File '.$newname.' already exist !');
+                return false;
             } else {
                 self::mkdir(dirname($newname));
-                rename($file, $newname) or trigger_error("Operation Failed in Renaming {$file} !");
+                rename($file, $newname) or trigger_error('Operation Failed in Renaming '.$file.' !');
             }
         } else {
-            trigger_error("Cannot Find File{$file} !");
+            trigger_error('Cannot Find File '.$file.' !');
         }
     }
 

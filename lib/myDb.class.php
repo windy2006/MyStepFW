@@ -830,12 +830,22 @@ class SQLBuilder {
         if(is_string($condition)) {
             $result .= $condition;
         }elseif(is_string($condition[0])) {
-            $this->condition($condition[0], $condition[1], $condition[2]);
             $mode = isset($condition[3])?$condition[3]:'and';
-            if(!preg_match('/^\(.+\)$/', $condition[0])) {
-                $condition[0] = $this->dl.$condition[0].$this->dr;
+            if(is_array($condition[2]) && substr($condition[1], -2)!='in') {
+                $result = ' '. $mode . ' (1=1';
+                foreach($condition[2] as $k) {
+                    $this->condition($condition[0], $condition[1], $k);
+                    $result .= ' ' . $mode . ' ' . $condition[0] . ' ' . $condition[1] . ' ' . $k;
+                }
+                $result .= ')';
+                return $result;
+            } else {
+                $this->condition($condition[0], $condition[1], $condition[2]);
+                if(!preg_match('/^\(.+\)$/', $condition[0])) {
+                    $condition[0] = $this->dl.$condition[0].$this->dr;
+                }
+                return ' ' . $mode . ' ' . $condition[0] . ' ' . $condition[1] . ' ' . $condition[2];
             }
-            return ' ' . $mode . ' ' . $condition[0] . ' ' . $condition[1] . ' ' . $condition[2];
         } else {
             $cur_mode = '';
             if($layer>0) { 
@@ -911,10 +921,18 @@ class SQLBuilder {
                 $condition = 'f'.$match[2];
                 $value = $match[3];
             }
-            $this->condition($field, $condition, $value);
             $mode = strtolower($mode);
             if($mode!='or') $mode = 'and';
-            $this->condition[] = array($field, $condition, $value, $mode);
+            if(is_array($value) && substr($condition, -2)!='in') {
+                $temp = [];
+                foreach($value as $k) {
+                    $temp[] = array($field, $condition, $k, $mode);
+                }
+                $this->where($temp);
+            } else {
+                $this->condition($field, $condition, $value);
+                $this->condition[] = array($field, $condition, $value, $mode);
+            }
         }
         return $this;
     }
@@ -1119,7 +1137,11 @@ class SQLBuilder {
             $sql .= ' where '.$this->where();
         }
         if(!empty($this->group)) {
-            $sql .= ' group by '.$this->dl.$this->safeName($this->group['field']).$this->dr;
+            if(is_string($this->group['field'])) $this->group['field'] = explode(',', $this->group['field']);
+            $this->group['field'] = array_map(function($str) {
+                                                return $this->dl.$this->safeName($str).$this->dr;
+                                            }, $this->group['field']);
+            $sql .= ' group by '.implode(',', $this->group['field']);
             if(isset($this->group['having']) && !empty($this->group['having'])) {
                 $tmp = new self('tmp', [], '', [$this->dl,$this->dr]);
                 $tmp->where($this->group['having']);

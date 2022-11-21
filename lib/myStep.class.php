@@ -499,6 +499,7 @@ code;
      */
     public static function info($msg, $url = '') {
         global $mystep, $ms_setting;
+        $GLOBALS['no_log'] = true;
         ob_end_clean();
         if($mystep==null) {
             $mystep = new myController();
@@ -540,6 +541,8 @@ code;
      * @param int $scope
      */
     public static function captcha($len = 4, $scope = 3) {
+        if(is_null(r::svr('referer'))) return;
+        $GLOBALS['no_log'] = false;
         $str = myString::rndKey($len, $scope);
         myReq::session('captcha', $str);
         $img = new myImg();
@@ -690,6 +693,7 @@ code;
      */
     public static function module($path, $dummy = '') {
         global $mystep, $ms_setting;
+        $GLOBALS['no_log'] = false;
         $path = explode('/', trim($path, '/'));
         if(isset($path[1]) && is_file(APP.$path[0].'/lib.php')) {
             $name = $path[0].'_'.$path[1];
@@ -704,6 +708,7 @@ code;
                 if(isset($tpl) && ($tpl instanceof myTemplate)) {
                     $path_app = APP.$info_app['app'].'/';
                     if(is_file($path_app.'global.php')) include_once($path_app.'global.php');
+                    if(is_file($path_app.'lib.php')) include_once($path_app.'lib.php');
                     if(is_file($path_app.'plugin_addon.php')) include_once($path_app.'plugin_addon.php');
                     $tpl->assign('main', $content??'');
                     $mystep->show($tpl);
@@ -714,6 +719,23 @@ code;
             exit();
         } else {
             self::redirect('/');
+        }
+    }
+
+    /**
+     * SiteMap 显示
+     * @param $path
+     * @param string $dummy
+     */
+    public static function sitemap() {
+        $app = self::getCore();
+        $file = APP.$app.'/sitemap.php';
+        if(is_file($file)) {
+            global $info_app;
+            $mystep = new $app();
+            $info_app = include(APP.$app.'/info.php');
+            if(is_file(APP.$app.'/lib.php')) include(APP.$app.'/lib.php');
+            include($file);
         }
     }
 
@@ -864,6 +886,7 @@ code;
      * @param string $code
      */
     public static function redirect($url = '', $code = '302') {
+        $GLOBALS['no_log'] = true;
         if(empty($url)) {
             $url = myReq::server('HTTP_REFERER');
             if (is_null($url)) $url = '/';
@@ -886,15 +909,22 @@ code;
         $class = is_file(CONFIG.'class.php') ? include((CONFIG.'class.php')) : array();
         if(empty($class) || !is_dir($class[0]['path'])) {
             $old_root = empty($class) ? '' : preg_replace('#lib/$#', '', $class[0]['path']);
-            $class[0] = array(
-                'path' => ROOT . 'lib/',
-                'ext' => '.php,.class.php',
-                'idx' => array(
-                        'interface_plugin' => '../plugin/interface_plugin.class.php'
-                    ),
-            );
-            for($i=1,$m=count($class);$i<$m;$i++) {
-                $class[$i]['path'] = preg_replace('#^'.$old_root.'#', ROOT, $class[$i]['path']);
+            $class = [
+                array(
+                    'path' => ROOT . 'lib/',
+                    'ext' => '.php,.class.php',
+                    'idx' => array('interface_plugin' => '../plugin/interface_plugin.class.php'),
+                ),
+                array (
+                    'path' => ROOT . 'lib/database/',
+                    'ext' => '.php,.class.php',
+                    'idx' => array()
+                )
+            ];
+            if(!empty($old_root)) {
+                for($i=1,$m=count($class);$i<$m;$i++) {
+                    $class[$i]['path'] = preg_replace('#^'.$old_root.'#', ROOT, $class[$i]['path']);
+                }
             }
             @unlink(CONFIG.'class.php');
             file_put_contents(CONFIG.'class.php', '<?PHP'.chr(10).'return '.var_export($class, true).';');
@@ -916,6 +946,7 @@ code;
             'exit_on_error' =>  true
         ));
 
+        $GLOBALS['no_log'] = false;
         if(is_file(CONFIG.'config.php')) {
             self::go();
         } else {
@@ -933,6 +964,12 @@ code;
     public static function go() {
         global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache, $host, $domain;
         $ms_setting = new myConfig(CONFIG.'config.php');
+
+        $scripts = myFile::find('*.php', CONFIG.'priority/', false, myFile::FILE);
+        foreach($scripts as $k) {
+            if(is_file(ROOT.str_replace('_', '/', pathinfo($k, PATHINFO_FILENAME)).'/info.php')) include($k);
+        }
+
         if(strpos(myReq::svr('REQUEST_URI'),'index.php')!==false && strpos(myReq::svr('REQUEST_URI'),'ms_')===false && $ms_setting->router->mode=='rewrite') {
             myStep::info('app_missing');
         }
@@ -964,7 +1001,12 @@ code;
         $ext_list = explode(',', $ms_setting->gen->static);
         if(strpos(trim($router->route['p'], '/'), 'static')===0 || (is_file($the_file) && in_array($ext, $ext_list))) myController::file($the_file);
 
-        if(!is_file($the_file) && strpos($the_file, '/api/')===false && strpos($the_file, '/asset/')===false && in_array($ext, $ext_list)) {
+        if(!is_file($the_file) &&
+            in_array($ext, $ext_list) &&
+            $ms_setting->router->url_fix != '/api' &&
+            strpos($the_file, '/api/')===false &&
+            strpos($the_file, '/asset/')===false
+        ) {
             no_file:
             switch($ext) {
                 case 'jpg':
@@ -1017,12 +1059,6 @@ code;
             if(is_file(APP.$info_app['app'].'/config.php')) {
                 $ms_setting->merge(APP.$info_app['app'].'/config.php');
             }
-            if(defined('URL_FIX')) {
-                if(strpos($info_app["route"], '/'.URL_FIX)!==0) {
-                    $info_app['route'] = '/'.URL_FIX.$info_app['route'];
-                }
-            }
-            myStep::setPara();
             myStep::checkBind($info_app['app']);
             if(isset($info_app['path'][1]) && $info_app['path'][0]=='asset') {
                 $files = [
@@ -1038,6 +1074,12 @@ code;
                 }
                 goto no_file;
             }
+            if(defined('URL_FIX')) {
+                if(strpos($info_app["route"], '/'.URL_FIX)!==0) {
+                    $info_app['route'] = '/'.URL_FIX.$info_app['route'];
+                }
+            }
+            myStep::setPara();
             $m = $info_app['path'][0] ?? '';
             if(is_file(PATH.'route.php')) $router->checkRoute(CONFIG.'route.php', PATH.'route.php', $info_app['app']);
             if(is_file(PATH.'global.php')) require_once(PATH.'global.php');
@@ -1116,7 +1158,7 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      */
     public static function checkBind($pattern) {
         global $host, $domain, $router, $ms_setting;
-        if($ms_setting->gen->force_domain===false) return;
+        if($ms_setting->gen->force_domain===false || myReq::check('files')) return;
         if(($bind = array_search($pattern, $domain)) && !isset($domain[$host])) {
             if($host!=$bind) {
                 $path = $router->route['qstr'];
@@ -1239,7 +1281,7 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      */
     public static function checkPower($idx) {
         $core = self::getCore();
-        if($core == __CLASS__) {
+        if($core == __CLASS__ || !is_callable([$core, 'checkPower'])) {
             global $ms_setting;
             $op = myReq::session('sysop');
             switch($idx) {
@@ -1262,7 +1304,9 @@ $.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
      * @return string
      */
     public static function getCore() {
-        $core = myReq::get('core')??__CLASS__;
+        global $domain;
+        $core = myReq::get('core');
+        if(is_null($core)) $core = $domain[myReq::svr('HTTP_HOST')]??__CLASS__;
         if($core!=__CLASS__) {
             $file = APP.$core.'/'.$core.'.class.php';
             if(is_file($file)) {
