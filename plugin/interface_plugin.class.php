@@ -101,3 +101,14 @@ function showPluginPage($idx, $page='') {
     $tpl->assign('main', $mystep->render($tpl_sub));
     $mystep->show($tpl);
 }
+
+function setPriority($idx) {
+    $file = PLUGIN.$idx.'/priority.php';
+    if(is_file($file)) {
+        myFile::copy($file, CONFIG.'priority/plugin_'.$idx.'.php', true);
+    }
+}
+
+function removePriority($idx) {
+    myFile::del(CONFIG.'priority/plugin_'.$idx.'.php');
+}

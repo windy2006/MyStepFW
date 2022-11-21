@@ -1,4 +1,6 @@
 sample
 manager
 memcached
+frontend
+badurl
 interface_plugin.class.php

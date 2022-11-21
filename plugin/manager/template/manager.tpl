@@ -168,7 +168,7 @@ function checkModify(mode) {
     loadingShow("正在检测系统文件的变更情况，请等待！");
     let url = "<!--url_prefix-->manager/check_" + (mode==1?'server':'local');
     $.get(url, function(info){
-        console.log(info);
+        //console.log(info);
         if(info==false || typeof(info.error)!="undefined") {
             alert(mode==0?"校验失败，请确认校验信息是否已成功建立！":"服务器连接失败，或不存在本网站对应字符集的校验信息");
             loadingShow();

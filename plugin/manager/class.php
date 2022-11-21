@@ -1,5 +1,7 @@
 <?PHP
+set_time_limit(600);
 class plugin_manager implements interface_plugin {
+    const IGNORE = ['.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', 'ignore','allow', '_bak', '.bak', 'config.php', 'plugin.php', 'construction.php'];
     public static function check(&$result = '') {
         $result = '';
         $theList = array(
@@ -40,13 +42,12 @@ class plugin_manager implements interface_plugin {
         global $mystep, $info_app, $ms_setting;
         if(!isset($info_app['path'][1])) $info_app['path'][1] = '';
         $header = array();
-        $header['Referer'] = 'http://'.myReq::server('HTTP_HOST');
+        $header['Referer'] = (isHttps()?'https':'http').'://'.myReq::server('HTTP_HOST');
         $header['ms_sign'] = time();
         $url = 'http://'.$ms_setting->web->update.'/api/plugin_manager/';
         $dir = __DIR__;
         switch($info_app['path'][1]) {
             case 'build':
-                set_time_limit(600);
                 if(!self::checkFile(ROOT, true)) {
                     echo 'error';
                 }
@@ -205,8 +206,6 @@ return '.var_export($ver_remote['plugin'], true).';
                     myFile::saveFile($path_rollback.'_code.php', '<?PHP'.chr(10).implode("\n/*------------------------------*/\n", $detail['code']));
                 }
 
-                $check_list_file = self::checkFile();
-                if($check_list_file==false) $check_list_file = array();
                 $list = array();
                 for($i=0,$m=count($detail['file']); $i<$m; $i++) {
                     $file = myFile::realPath(ROOT.$detail['file'][$i]);
@@ -217,7 +216,7 @@ return '.var_export($ver_remote['plugin'], true).';
                         } elseif($detail['content'][$i]=='.') {
                             myFile::mkdir($file);
                         } else {
-                            myFile::copy($file, $path_rollback.$detail['file'][$i], true);
+                            myFile::copy($file, dirname($path_rollback.$detail['file'][$i]), true);
                             myFile::saveFile($file, $detail['content'][$i]);
                         }
                     } else {
@@ -225,7 +224,6 @@ return '.var_export($ver_remote['plugin'], true).';
                     }
                 }
                 $result = ['info'=>'', 'link'=>''];
-
                 $m = count($list);
                 if($m>0) {
                     $dir = CACHE.'tmp/';
@@ -237,10 +235,6 @@ return '.var_export($ver_remote['plugin'], true).';
                         if($detail['content'][$list[$i]]=='.') continue;
                         $files[$i] = $dir.$detail['file'][$list[$i]];
                         myFile::saveFile($files[$i], $detail['content'][$list[$i]]);
-                    }
-                    if(isset($content)) {
-                        $files[] = $dir.'include/config.php';
-                        myFile::saveFile($dir.'include/config.php', $content);
                     }
                     if(count($detail['code'])>0) {
                         $script_update = "<?PHP\n";
@@ -321,9 +315,11 @@ return '.var_export($ver_remote['plugin'], true).';
                 }
                 $file = CACHE.'tmp/'.$type.'_'.$idx.'.pack';
                 myFile::del($file);
+                self::checkConfig($dir);
                 $mypacker = $mystep->getInstance('myPacker', $dir, $file);
-                $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', 'config.php');
+                $mypacker->addIgnore(self::IGNORE);
                 $mypacker->pack();
+                myFile::del($dir.'/config_new.php');
                 myStep::file($file);
                 break;
             default:
@@ -436,9 +432,11 @@ return '.var_export($ver_remote['plugin'], true).';
                     if(version_compare($ver, $info['ver'])===-1) {
                         $file = __DIR__.'/pack/plugin_'.$idx.'_'.$info['ver'].'.pack';
                         if(!file_exists($file)) {
+                            self::checkConfig(PLUGIN.$idx);
                             $mypacker = $mystep->getInstance('myPacker', PLUGIN.$idx, $file);
-                            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', 'config.php');
+                            $mypacker->addIgnore(self::IGNORE);
                             $mypacker->pack();
+                            myFile::del(PLUGIN.$idx.'/config_new.php');
                         }
                         myController::file($file);
                     } else {
@@ -457,9 +455,11 @@ return '.var_export($ver_remote['plugin'], true).';
                     if(version_compare($ver, $info['ver'])==-1) {
                         $file = __DIR__.'/pack/app_'.$idx.'_'.$info['ver'].'.pack';
                         if(!file_exists($file)) {
-                            $mypacker = new myPacker(APP.$idx, $file);
-                            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak', 'config.php');
+                            self::checkConfig(APP.$idx);
+                            $mypacker = $mystep->getInstance('myPacker', APP.$idx, $file);
+                            $mypacker->addIgnore(self::IGNORE);
                             $mypacker->pack();
+                            myFile::del(APP.$idx.'/config_new.php');
                         }
                         myController::file($file);
                     } else {
@@ -490,6 +490,7 @@ return '.var_export($ver_remote['plugin'], true).';
         $ver = require(CONFIG.'version.php');
         $idx = 'mystep_v'.$ver;
         $dir = __DIR__.'/pack/';
+        $dir = str_replace(DIRECTORY_SEPARATOR, '/', $dir);
         $log_file = $dir.'log.txt';
         $log = array(
             'time' => date('Y-m-d H:i:s'),
@@ -509,7 +510,7 @@ return '.var_export($ver_remote['plugin'], true).';
             myFile::move(APP.'myStep/menu.json', $dir);
             myFile::copy($dir.'../menu.json', APP.'myStep/menu.json');
             $mypacker = new myPacker(ROOT, $dir.$idx.'/mystep.pack');
-            $mypacker->addIgnore('.svn/', '.log/', '.idea/', 'aspnet_client/', 'Thumbs.db', '.DS_Store', '_bak', '.bak');
+            $mypacker->addIgnore(self::IGNORE);
             $mypacker->pack();
             myFile::del(APP.'myStep/menu.json');
             myFile::move($dir.'menu.json', APP.'myStep/menu.json');
@@ -541,6 +542,7 @@ return '.var_export($ver_remote['plugin'], true).';
             $ignore = str_replace(chr(13), '', $ignore);
             $ignore = explode(chr(10), $ignore);
         }
+        $ignore = array_merge($ignore, self::IGNORE);
         $allow = array();
         if(is_file($dir.'/allow')) {
             $allow = file_get_contents($dir.'/allow');
@@ -550,7 +552,7 @@ return '.var_export($ver_remote['plugin'], true).';
         }
         if($build) {
             while (false !== ($file = readdir($handle))) {
-                if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow') continue;
+                if(trim($file, '.') == '') continue;
                 if(!empty($allow) && array_search($file, $allow)===false) continue;
                 if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
                 if(strpos($file, '.bak')!==false || strpos($file, '_bak')!==false) continue;
@@ -582,7 +584,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 'miss' => array()
             );
             while (false !== ($file = readdir($handle))) {
-                if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow') continue;
+                if(trim($file, '.') == '') continue;
                 if(!empty($allow) && array_search($file, $allow)===false) continue;
                 if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
                 if(strpos($file, '.bak')!==false || strpos($file, '_bak')!==false) continue;
@@ -597,13 +599,6 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 } else {
                     $the_name = str_replace(ROOT, '/', $the_name);
                     if(strpos($the_name, '/config.php')!==false) continue;
-                    if(strpos($the_name, '/plugin/')===0) {
-                        if(
-                            strpos(str_replace('/plugin/', '', $the_name), '/')!==false &&
-                            strpos($the_name, '/plugin/sample/')!==0 &&
-                            strpos($the_name, '/plugin/update/')!==0
-                        ) continue;
-                    }
                     if(false !== ($key = array_search($the_name, $list_file))) {
                         if(md5_file(ROOT.$the_name)!=$list_file_md5[$key]) {
                             $result['mod'][] = $the_name;
@@ -617,14 +612,35 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
             if($layer==0) {
                 foreach($list_file as $the_name) {
                     if(strpos($the_name, '/config.php')!==false) continue;
-                    if(strpos($the_name, '/plugin/')===0) {
-                        if(strpos(str_replace('/plugin/', '', $the_name), '/')!==false && strpos($the_name, '/plugin/sample/')!==0) continue;
-                    }
                     $result['miss'][] = $the_name;
                 }
             }
         }
         closedir($handle);
         return $result;
+    }
+
+    public static function checkConfig($path, $name_fix='_new') {
+        $path .= '/';
+        if(is_file($path.'config.php') && !is_file($path.'config_default.php')) {
+            if(is_file($path.'config/construction.php')) {
+                $construction = include($path.'config/construction.php');
+                if(isset($construction['password'])) {
+                    $tmp = new myConfig($path.'config.php');
+                    $tmp2 = &$tmp;
+                    foreach($construction['password'] as $v) {
+                        $v = explode('.', $v);
+                        for($i=0,$m=count($v);$i<$m;$i++) {
+                            $tmp2 = &$tmp2->{$v[$i]};
+                        }
+                        $tmp2 = md5('password');
+                    }
+                    $tmp->save('php', $path.'config'.$name_fix.'.php');
+                    unset($tmp, $tmp2);
+                } else {
+                    myFile::copy($path.'config.php', $path.'config'.$name_fix.'.php');
+                }
+            }
+        }
     }
 }
