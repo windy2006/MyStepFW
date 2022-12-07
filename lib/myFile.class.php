@@ -64,6 +64,7 @@ class myFile {
             'm' => 'rename',
             's' => 'saveFile',
             'g' => 'getLocal',
+            'get' => 'getLocal',
             'url' => 'getRemote',
             'grab' => 'getRemoteFile',
         );

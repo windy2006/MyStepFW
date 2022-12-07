@@ -29,9 +29,10 @@ $tpl->assign('charset_tag', $charset_tag);
 $tpl->assign('now', date("r"));
 $from = array("&", "'", '"', ">", "<");
 $to = array("&amp;", "&apos;", "&quot;", "&gt;", "&lt;");
+$url = (isHttps()?'https':'http').'://'.myReq::svr('HTTP_HOST');
 
 $record = array();
-$record['url'] = '//'.myReq::svr('HTTP_HOST');
+$record['url'] = $url;
 $record['date'] = date("Y-m-d");
 $record['priority'] = "1";
 $tpl->setLoop("record", $record);
@@ -46,7 +47,7 @@ $news_cat_plat = $cache->func('\app\CMS\setCatList', [$news_cat]);
 for($i=0, $m=count($news_cat_plat); $i<$m; $i++) {
     if($news_cat_plat[$i]['web_id']!=$web_info['web_id']) continue;
     $record = array();
-    $record['url'] = empty($news_cat_plat[$i]['link']) ? \app\CMS\getLink($news_cat_plat[$i], 'catalog') : $news_cat_plat[$i]['link'];
+    $record['url'] = empty($news_cat_plat[$i]['link']) ? ($url.\app\CMS\getLink($news_cat_plat[$i], 'catalog')) : $news_cat_plat[$i]['link'];
     $record['url'] = str_replace($from, $to, $record['url']);
     $record['date'] = substr($db->result('select max(add_date) from '.$S->db->pre_sub.'news_show where cat_id='.$news_cat_plat[$i]['cat_id']), 0, 10);
     if(empty($record['date'])) $record['date'] = date("Y-m-d");

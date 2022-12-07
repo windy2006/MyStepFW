@@ -6,6 +6,7 @@ class sess_mystep implements interface_session {
     public static $cnt, $run;
 
     public static function open($sess_path, $sess_name) {
+        if($GLOBALS['no_log']) return true;
         self::$run = 3; // 1 - read ; 2 - write
         $agent = strtolower($_SERVER['HTTP_USER_AGENT']??'null');
         if(strpos($agent, 'spider')!==false || strpos($agent, 'bot')!==false) self::$run = 0;
@@ -19,6 +20,7 @@ class sess_mystep implements interface_session {
         return true;
     }
     public static function close() {
+        if($GLOBALS['no_log']) return true;
         if(self::$run==0) return true;
         if(rand(1,100)>95) {
             self::gc(ini_get('session.gc_maxlifetime'));
@@ -30,6 +32,7 @@ class sess_mystep implements interface_session {
     }
 
     public static function read($sid) {
+        if($GLOBALS['no_log']) return '';
         if((self::$run & 1) == 1) {
             global $ms_setting;
             if($result = mysqli_query(self::$cnt, 'SELECT data FROM '.$ms_setting->db->pre.'user_online WHERE sid="'.$sid.'" AND refresh>'.($_SERVER['REQUEST_TIME']-($ms_setting->session->expire*60)))) {
@@ -61,6 +64,7 @@ class sess_mystep implements interface_session {
     }
 
     public static function destroy($sid) {
+        if($GLOBALS['no_log']) return true;
         if(self::$run==0) return true;
         global $ms_setting;
         return mysqli_query(self::$cnt, 'DELETE FROM '.$ms_setting->db->pre.'user_online WHERE sid="'.$sid.'"');

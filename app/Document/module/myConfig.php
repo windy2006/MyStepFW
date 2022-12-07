@@ -7,7 +7,7 @@ if(myReq::check('post')) {
     $config->text->para_1 = 'change';
     $config->choice->para_4 = !$config->choice->para_4;
 }
-$config->merge('./config/config.php');
+$config->merge(PATH.'data/config/config.php');
 $config->save('ini');
 
 $list = $config->build(PATH.'data/config/setting_multi.php');

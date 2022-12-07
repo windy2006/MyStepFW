@@ -469,6 +469,32 @@ return '.var_export($ver_remote['plugin'], true).';
                     myController::header('404');
                 }
                 break;
+            case 'difference':
+                $list_file = myReq::post();
+                $refer = myReq::svr('referer');
+                $list_file = json_decode(htmlspecialchars_decode($list_file['data']));
+                if($list_file===false || empty($refer)) {
+                    $check_info = ['error'=>'Bad Request!'];
+                } elseif(empty($list_file)) {
+                    $check_info = ['error'=>'All Files have been up to date!'];
+                } else {
+                    $dir = CACHE.'tmp/';
+                    $refer = parse_url($refer, PHP_URL_HOST);
+                    $zipfile = $dir.$refer.'_'.getMicrotime().'.zip';
+                    myFile::del($zipfile);
+                    $dir .= $refer.'_'.getMicrotime().'/';
+                    for($i=0,$m=count($list_file); $i<$m; $i++) {
+                        if(is_file(ROOT.$list_file[$i]) && !in_array(basename($list_file[$i]), self::IGNORE)) {
+                            myFile::copy(ROOT.$list_file[$i], $dir.$list_file[$i]);
+                        }
+                    }
+                    $zip = new myZip($zipfile, $dir);
+                    $zip->zip($dir);
+                    myFile::del($dir);
+                    $check_info = ['link'=>str_replace(ROOT, '/', $zipfile), 'info'=>'The file is downloading...'];
+                }
+                echo myString::toJson($check_info, $ms_setting->gen->charset);
+                break;
             default:
                 $the_file = __DIR__.'/check_file.php';
                 $check_info = ['list_file'=>[], 'list_file_md5'=>[]];
@@ -553,8 +579,9 @@ return '.var_export($ver_remote['plugin'], true).';
         if($build) {
             while (false !== ($file = readdir($handle))) {
                 if(trim($file, '.') == '') continue;
-                if(!empty($allow) && array_search($file, $allow)===false) continue;
-                if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
+                if(basename($file) == 'menu.json') continue;
+                if(!empty($allow) && !in_array($file, $allow)) continue;
+                if(!empty($ignore) && in_array($file, $ignore)) continue;
                 if(strpos($file, '.bak')!==false || strpos($file, '_bak')!==false) continue;
                 $the_name = $dir.$file;
                 if($the_name==$the_file) continue;
@@ -585,8 +612,9 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
             );
             while (false !== ($file = readdir($handle))) {
                 if(trim($file, '.') == '') continue;
-                if(!empty($allow) && array_search($file, $allow)===false) continue;
-                if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
+                if(basename($file) == 'menu.json') continue;
+                if(!empty($allow) && !in_array($file, $allow)) continue;
+                if(!empty($ignore) && in_array($file, $ignore)) continue;
                 if(strpos($file, '.bak')!==false || strpos($file, '_bak')!==false) continue;
                 $the_name = $dir.$file;
                 if($the_name==$the_file) continue;

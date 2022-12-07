@@ -28,7 +28,7 @@ while($record = $db->getRS()) {
     $record['sid'] = 'Session ID: '.$record['sid'];
     $record['refresh'] = date('Y-m-d H:i:s', $record['refresh']);
     $record['url_simple'] = preg_replace('#&.+$#', '', $record['url']);
-    if(strlen($record['url_simple'])>40) $record['url_simple'] = substr($record['url_simple'],0, 25).'...'.substr($record['url_simple'],-12);
+    $record['url_simple'] = shortUrl($record['url']);
     if(isset($user['ms_cms_op'])) {
         $record['username'] = $user['ms_cms_op'];
         $record['group'] = \app\CMS\checkVal($group, 'group_id', $user['ms_cms_group'])['name'];

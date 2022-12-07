@@ -34,6 +34,7 @@
     self::setting($app_name, $type)                  // JS设置信息接口
     self::api($para)                                 // 框架API执行接口
     self::module($m)                                 // 框架模块调用接口
+    self::appFunc($func)                             // 应用自定义功能接口（sitemap, atom, rss等）
     self::upload()                                   // 文件上传接口
     self::download($idx)                             // 文件下载接口
     self::remove_ul($idx)                            // 删除文件下载接口
@@ -57,7 +58,7 @@ class myStep extends myController {
         $shown = false,
         $cache_js = '',
         $cache_css = '',
-        $plugin_ignore = ['ms_language', 'ms_setting', 'captcha'];
+        $func_ignore = ['captcha', 'error', 'ms_language', 'ms_setting', 'sitemap', 'atom', 'rss'];
     public $setting;
     protected
         $editor_plugin = [],
@@ -172,11 +173,11 @@ class myStep extends myController {
             unset($content);
         }
 
-        global $plugin_ignore;
-        if(is_string($plugin_ignore)) $plugin_ignore = explode(',', str_replace(' ', '', $plugin_ignore));
-        if(is_array($plugin_ignore)) self::$plugin_ignore = array_merge(self::$plugin_ignore, $plugin_ignore);
+        global $func_ignore;
+        if(is_string($func_ignore)) $func_ignore = explode(',', str_replace(' ', '', $func_ignore));
+        if(is_array($func_ignore)) self::$func_ignore = array_merge(self::$func_ignore, $func_ignore);
         $path = explode('/', trim(myReq::globals('info_app')['route'], '/'));
-        $set_plugin = !in_array(array_shift($path), self::$plugin_ignore);
+        $set_plugin = !in_array(array_shift($path), self::$func_ignore);
 
         $this->page_content['start'] = array();
         $this->page_content['end'] = array();
@@ -499,14 +500,14 @@ code;
      */
     public static function info($msg, $url = '') {
         global $mystep, $ms_setting;
-        $GLOBALS['no_log'] = true;
         ob_end_clean();
         if($mystep==null) {
+            $GLOBALS['no_log'] = true;
             $mystep = new myController();
             $mystep->setLanguagePack(APP.'myStep/language/', $ms_setting->gen->language);
             $paras = [
                 'web_title' => $ms_setting->web->title,
-                'web_url' => $ms_setting->web->url,
+                'web_url' => (isHttps()?'https://':'http://').myReq::server('HTTP_HOST'),
                 'charset' => $ms_setting->gen->charset,
                 'path_root' => str_replace(myFile::rootPath(), '/', ROOT),
                 'lng_page_info' => $mystep->getLanguage('page_info'),
@@ -541,8 +542,7 @@ code;
      * @param int $scope
      */
     public static function captcha($len = 4, $scope = 3) {
-        if(is_null(r::svr('referer'))) return;
-        $GLOBALS['no_log'] = false;
+        if(is_null(r::svr('referer')) || count($_COOKIE)==0) return;
         $str = myString::rndKey($len, $scope);
         myReq::session('captcha', $str);
         $img = new myImg();
@@ -693,7 +693,6 @@ code;
      */
     public static function module($path, $dummy = '') {
         global $mystep, $ms_setting;
-        $GLOBALS['no_log'] = false;
         $path = explode('/', trim($path, '/'));
         if(isset($path[1]) && is_file(APP.$path[0].'/lib.php')) {
             $name = $path[0].'_'.$path[1];
@@ -723,19 +722,22 @@ code;
     }
 
     /**
-     * SiteMap 显示
-     * @param $path
-     * @param string $dummy
+     * 应用自定义功能接口（sitemap, atom, rss等）
+     * @param $func
+     * @return void
      */
-    public static function sitemap() {
+    public static function appFunc($func) {
         $app = self::getCore();
-        $file = APP.$app.'/sitemap.php';
+        $func = preg_replace('#\W#', '', $func);
+        $file = APP.$app.'/'.$func.'.php';
         if(is_file($file)) {
             global $info_app;
             $mystep = new $app();
             $info_app = include(APP.$app.'/info.php');
             if(is_file(APP.$app.'/lib.php')) include(APP.$app.'/lib.php');
             include($file);
+        } else {
+            self::redirect('/');
         }
     }
 
@@ -886,7 +888,6 @@ code;
      * @param string $code
      */
     public static function redirect($url = '', $code = '302') {
-        $GLOBALS['no_log'] = true;
         if(empty($url)) {
             $url = myReq::server('HTTP_REFERER');
             if (is_null($url)) $url = '/';
@@ -946,7 +947,6 @@ code;
             'exit_on_error' =>  true
         ));
 
-        $GLOBALS['no_log'] = false;
         if(is_file(CONFIG.'config.php')) {
             self::go();
         } else {
@@ -965,14 +965,17 @@ code;
         global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache, $host, $domain;
         $ms_setting = new myConfig(CONFIG.'config.php');
 
+        $uri = trim(strtolower(myReq::svr('REQUEST_URI')), '/');
+        if(preg_match('#^(sitemap|atom|rss|favicon.ico)#', $uri, $match) && $uri!=$match[0]) {
+            header('Location: /'.$match[0]);
+            exit;
+        }
+
         $scripts = myFile::find('*.php', CONFIG.'priority/', false, myFile::FILE);
         foreach($scripts as $k) {
             if(is_file(ROOT.str_replace('_', '/', pathinfo($k, PATHINFO_FILENAME)).'/info.php')) include($k);
         }
 
-        if(strpos(myReq::svr('REQUEST_URI'),'index.php')!==false && strpos(myReq::svr('REQUEST_URI'),'ms_')===false && $ms_setting->router->mode=='rewrite') {
-            myStep::info('app_missing');
-        }
         ini_set('memory_limit', $ms_setting->gen->memory);
         if($ms_setting->gen->debug) self::setOp('reset');
         $host = myReq::server('HTTP_HOST');
@@ -1048,9 +1051,10 @@ code;
         }
 
         $router->setRules(CONFIG.'route.php');
+        $info_app = $router->info;
+        $GLOBALS['no_log'] = isset($info_app['path'][0]) && $info_app['path'][0]!='captcha' && in_array($info_app['path'][0], self::$func_ignore);
 
         if(!$router->check()) {
-            $info_app = $router->info;
             $info_app['route'] = $router->route['p'];
             $info_app['app'] = trim($info_app['app'], '.');
             if(empty($info_app['app']) || !is_dir(APP.$info_app['app'])) {

@@ -9,4 +9,5 @@ $api = array(
     'download' => 'plugin_manager::remote',
     'plugin' => 'plugin_manager::remote',
     'app' => 'plugin_manager::remote',
+    'difference' => 'plugin_manager::remote',
 );

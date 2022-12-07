@@ -1,12 +1,13 @@
 <?php
 global $page, $query, $count, $page_size;
+$m = $info_app['path'][1] ?? r::g('m');
+$ip = r::g('ip');
+if($m=='reset') myFile::del(__DIR__.'/../data.db');
 $setting = new myConfig(__DIR__.'/../config.php');
 $db = new myDb('sqlite', __DIR__.'/../data.db');
 $list = include(__DIR__.'/../ban_ip.php');
 $flag = false;
 
-$m = r::g('m');
-$ip = r::g('ip');
 switch($m) {
     case 'ban':
         $ip = str_replace(' ', '', $ip);
@@ -30,16 +31,6 @@ switch($m) {
         myStep::redirect();
         break;
     case 'reset':
-        $db->close();
-        myFile::del(__DIR__.'/../data.db');
-        myFile::copy(__DIR__.'/../data - empty.db', __DIR__.'/../data.db');
-        /*
-        $db->query('DELETE FROM requests');
-        $db->execute('VACUUM');
-        */
-        /*
-        $db->query('DROP table requests');
-        $db->execute('VACUUM');
         $db->query("CREATE TABLE if not exists requests(
             id INTEGER PRIMARY KEY autoincrement, 
             ip varchar(40),
@@ -49,7 +40,6 @@ switch($m) {
             cnt integer,
             req DATETIME
         )");
-        */
         myStep::redirect();
         break;
 }
@@ -147,10 +137,11 @@ $db->build('requests')
     ->limit($record_start, $page_size);
 $db->select();
 while($record = $db->getRS()) {
-    if(strlen($record['url'])>40) {
-        $record['url2'] = substr($record['url'],0, 25).'...'.substr($record['url'],-12);
-    } else {
-        $record['url2'] = $record['url'];
+    $record['url2'] = shortUrl($record['url']);
+    $record['file'] = '';
+    if($file = myFile::find($record['req'].'.*', CACHE.'tmp/post/'.date('Ymd',$record['req']).'/')) {
+        $file = str_replace(ROOT, '/', $file[0]);
+        $record['file'] = $file;
     }
     $record['req'] = date('Y-m-d H:i:s', $record['req']);
     $record['mode'] = isset($list[$record['ip']]) ? 'unban' : 'ban';

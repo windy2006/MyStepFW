@@ -12,6 +12,7 @@ class sess_mysql implements interface_session {
     }
 
     public static function open($sess_path, $sess_name) {
+        if($GLOBALS['no_log']) return true;
         $result = false;
         if(!isset(self::$setting['charset'])) self::$setting['charset'] = 'utf8';
         if(self::$cnt = mysqli_connect(self::$setting['host'], self::$setting['user'], self::$setting['password'], self::$setting['name'])) {
@@ -29,11 +30,13 @@ CREATE TABLE IF NOT EXISTS `my_session` (
     }
 
     public static function close() {
+        if($GLOBALS['no_log']) return true;
         if(rand(1,100)>95) self::gc(ini_get('session.gc_maxlifetime'));
         return true;
     }
 
     public static function read($sid) {
+        if($GLOBALS['no_log']) return '';
         if($result = mysqli_query(self::$cnt, 'SELECT value FROM my_session WHERE SID = "'.$sid.'" AND expiration > '.$_SERVER['REQUEST_TIME'])) {
             if(mysqli_num_rows($result)) {
                 $record = mysqli_fetch_assoc($result);
@@ -57,10 +60,12 @@ CREATE TABLE IF NOT EXISTS `my_session` (
     }
 
     public static function destroy($sid) {
+        if($GLOBALS['no_log']) return true;
         return mysqli_query(self::$cnt, 'DELETE FROM my_session WHERE SID='.$sid);
     }
 
     public static function gc($maxlifetime) {
+        if($GLOBALS['no_log']) return true;
         return mysqli_query(self::$cnt, 'DELETE FROM my_session WHERE expiration < ' . ($_SERVER['REQUEST_TIME'] - $maxlifetime));
     }
 }

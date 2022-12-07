@@ -89,7 +89,7 @@ function setPluginTemplate($idx, $page='', $mode = true) {
 
 function showPluginPage($idx, $page='') {
     app\myStep\logCheck();
-    global $mystep;
+    global $mystep, $S;
     if(empty($page)) $page = $idx;
     $path_plugin = PLUGIN.$idx.'/';
     if(!is_file($path_plugin.'template/'.$page.'.tpl')) {
@@ -98,6 +98,8 @@ function showPluginPage($idx, $page='') {
     list($tpl, $tpl_sub) = setPluginTemplate($idx, $page, true);
     include(APP.'myStep/global.php');
     if(is_file($path_plugin.'module/'.$page.'.php')) include($path_plugin.'module/'.$page.'.php');
+    $tpl_sub->assign('root_web', ROOT_WEB);
+    $tpl_sub->assign('path_admin', $S->gen->path_admin);
     $tpl->assign('main', $mystep->render($tpl_sub));
     $mystep->show($tpl);
 }

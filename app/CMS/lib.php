@@ -332,6 +332,8 @@ function removeNewsCache($news_id, $web_id=0) {
 }
 
 function getPageList($total, $page=1, $page_size=20, $qstr='') {
+    if(is_null($total)) $total = 0;
+    if(is_null($page_size)) $page_size = 20;
     if(!is_numeric($page) || $page < 1) $page = 1;
     $page = (INT)$page;
     $page_count = ceil($total/$page_size);

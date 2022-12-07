@@ -79,6 +79,7 @@ class myRouter extends myBase {
         $qstr = trim(str_replace('?', '&', trim($qstr, '?')), '/');
         $qstr = preg_replace('#^([\w\/]+)(\?|&|$)#', '\1/\2', $qstr);
         $qstr = str_replace('//', '/', $qstr);
+        $qstr = str_replace(':/', '://', $qstr);
 
         $detail = explode('&', $qstr);
         if(count($detail)>1) {
@@ -204,7 +205,6 @@ class myRouter extends myBase {
         if(preg_match('@^/(\w+)@', $url_fix.$qstr, $m) && is_dir(APP.$m[1])) return false;
 
         if(!empty($rule)) {
-            $GLOBALS['no_log'] = ($rule['idx']=='myStep');
             if(empty($match)) {
                 preg_match('#^'.$rule['pattern'].'$#', $url_fix.$qstr, $match);
             }
@@ -242,8 +242,8 @@ class myRouter extends myBase {
             if(isset($info_app['para']['core']) && is_file(APP.$core.'/config.php')) {
                 $ms_setting->merge(APP.$core.'/config.php');
             }
-            myStep::setPara();
             myStep::checkBind($rule['pattern']);
+            myStep::setPara();
             $result = [];
             if(is_array($rule['method'])) {
                 $last = array_pop($rule['method']);

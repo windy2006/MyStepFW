@@ -57,11 +57,14 @@
 </div>
 <script type="application/javascript">
 $(function(){
+    let web_id = '<!--web_id-->';
+    if(web_id !== '1') {
+        $('#web_id').val(web_id).parent().hide();
+    }
     let refer = '<!--back_url-->';
     if(refer.match(/catalog\/(\w+)/) || location.search.indexOf('Refresh')) {
         if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
             $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
-                let web_id = '<!--web_id-->';
                 let obj = $(window.parent.document.getElementById('sidebar'));
                 if(typeof data.err==='undefined') {
                     obj.empty();

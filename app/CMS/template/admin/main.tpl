@@ -13,6 +13,7 @@
 <body class="bg-transparent">
 <!--main-->
 <script type="application/javascript">
+global.root_fix = '<!--path_admin-->';
 let p = window.parent;
 $('html').bind('keydown',function(e){
     if(e.altKey && e.keyCode===81) { // ALT + Q
@@ -70,7 +71,6 @@ if(p!==window) {
         return true;
     });
 }
-global.root_fix = '<!--path_admin-->';
 $(function(){
     $('[title]').not('[data-placement]').attr('data-placement', 'bottom');
     $('[title]').not('[notip]').attr('data-trigger', 'hover').tooltip().on('show.bs.tooltip', function(){

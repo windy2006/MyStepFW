@@ -322,6 +322,7 @@ function getList(data) {
     return obj;
 }
 $(function(){
+    global.root_fix = '<!--path_admin-->';
     let web_id = '<!--web_id-->';
     let websites = <!--websites-->;
     $.getJSON('<!--url_prefix-->api/CMS/get/admin_cat', function(data){
@@ -342,7 +343,7 @@ $(function(){
                         obj_sub = obj.find('div');
                         for(j=0,n=list[i].sub.length;j<n;j++) {
                             if(list_func!==',all,' && list_func.indexOf(','+list[i].sub[j].id+',')===-1) continue;
-                            obj_sub.append('<a class="dropdown-item" href="'+list[i].sub[j].path+'">'+list[i].sub[j].name+'</a>');
+                            obj_sub.append('<a class="dropdown-item" href="'+global.root_fix+list[i].sub[j].path+'">'+list[i].sub[j].name+'</a>');
                         }
                     }
                     obj.prependTo('#nav > ul');

@@ -102,6 +102,7 @@ class SQLite extends myBase implements interface_db {
         if(preg_match('/limit\s+(\d+)[\s,]+(\d+)$/i', $sql, $matches)) {
             $sql = str_replace($matches[0], 'limit '.$matches[2].' offset '.$matches[1], $sql);
         }
+        $sql = str_replace('LOW_PRIORITY', '', $sql);
         return $sql;
     }
 
@@ -119,10 +120,14 @@ class SQLite extends myBase implements interface_db {
             if(is_object($this->result)) $this->result->finalize();
             $this->result = $this->obj->query($sql);
         } else {
-            $sql = str_replace('LOW_PRIORITY', '', $sql);
-            $this->obj->exec('BEGIN IMMEDIATE');
-            $this->result = $this->obj->exec($sql);
-            $this->obj->exec('COMMIT');
+            //$this->obj->exec('BEGIN IMMEDIATE');
+            //$this->result = @$this->obj->exec($sql);
+            //$this->obj->exec('COMMIT');
+            $i = 1;
+            while(($this->result=@$this->obj->exec($sql))==false) {
+                if($i++>3) break;
+                sleep(1);
+            }
         }
         return $this->obj->changes();
     }

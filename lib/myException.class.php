@@ -63,7 +63,7 @@ class myException extends ErrorException {
      * callback_type = E_ERROR|E_CORE_ERROR|E_CORE_WARNING  需要捕获的错误类型
      * log_type = E_ALL ^ E_NOTICE                          需要记录日志的错误类型
      * log_file = 'error.log'                               日志文件位置
-     * log_mode = 0                                         日志记录模式，0-系统，1-用户
+     * log_mode = 0                                         日志记录模式，0-用户，1-系统
      * exit_on_error = true                                 出错时终止执行
      */
     public static function init($options=array()) {

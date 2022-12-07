@@ -1,6 +1,7 @@
 <div class="card mb-5 mb-sm-2">
     <div class="card-header bg-info text-white">
         <b><span class="glyphicon glyphicon-info-sign"></span> 框架更新</b>
+        <a class="btn btn-primary btn-sm float-right py-0 border" href="<!--root_web--><!--path_admin-->/function/plugin/setting/?idx=manager">设置</a>
     </div>
     <div class="card-body p-0 table-responsive">
         <table class="table table-striped table-hover m-0">
@@ -12,8 +13,14 @@
                 </td>
             </tr>
             <tr>
+                <td>上传更新</td>
+                <td>
+                    <a href="javascript:" id="upload"> 点击上传 </a><b>（请上传通过更新功能下载的压缩包）</b>
+                </td>
+            </tr>
+            <tr>
                 <td>更新地址</td>
-                <td><!--link--></td>
+                <td><!--link--><b>（如果更新来源不确定或者DNS被劫持，可能会造成不可预测的问题！）</b></td>
             </tr>
             <tr>
                 <td>文件校验</td>
@@ -21,12 +28,8 @@
                     <a href="javascript:" id="link_1">更新本地校验</a>
                     |
                     <a href="javascript:" id="link_2">检查文件改动</a>
-                </td>
-            </tr>
-            <tr>
-                <td>上传更新</td>
-                <td>
-                    <a href="javascript:" id="upload"> 点击上传 </a>
+                    |
+                    <a href="javascript:" id="link_6">服务器端差异文件下载</a>
                 </td>
             </tr>
             <tr>
@@ -170,7 +173,7 @@ function checkModify(mode) {
     $.get(url, function(info){
         //console.log(info);
         if(info==false || typeof(info.error)!="undefined") {
-            alert(mode==0?"校验失败，请确认校验信息是否已成功建立！":"服务器连接失败，或不存在本网站对应字符集的校验信息");
+            alert(mode==0?"校验失败，请确认校验信息是否已成功建立！":"服务器连接失败！");
             loadingShow();
             return;
         }
@@ -227,6 +230,50 @@ $('#link_5').click(function(){
         alert('文件打包失败！');
     });
 });
+$('#link_6').click(function(){
+    loadingShow("正在确认差异文件……");
+    $.get("<!--url_prefix-->manager/check_server", function(info){
+        if(info==false || typeof(info.error)!="undefined") {
+            alert("服务器校验失败！");
+            loadingShow();
+            return;
+        }
+        let list = [];
+        if(info['mod']!=null) {
+            list.push.apply(list,info['mod']);
+        }
+        if(info['miss']!=null) {
+            list.push.apply(list,info['miss']);
+        }
+        if(info.length==0) {
+            alert("未发现改变的文件！");
+        } else {
+            loadingShow('获取差异文件……');
+            $.post("http://<!--link-->/api/plugin_manager/difference", {'data':JSON.stringify(list)}, function(info){
+                if(info==false || typeof(info.error)!="undefined") {
+                    alert("服务器校验失败 或 文件无需更新！");
+                    loadingShow();
+                    return;
+                }
+                try {
+                    if(info.link.length>2) {
+                        alert("文件正在下载。。。");
+                        location.href = "http://<!--link-->"+info.link;
+                    }
+                } catch(e) {
+                    alert("文件获取失败，请检查相关设置！");
+                }
+            }, "json").fail(function (e) {
+                console.log(e);
+                alert('差异文件失败！');
+            });
+        }
+        
+    }, "json").fail(function (e) {
+        console.log(e);
+        alert('服务器校验失败！');
+    });
+});
 let update_info = null;
 function checkUpdate() {
     if(update_info==null) {
@@ -260,7 +307,7 @@ function applyUpdate(mode) {
         try {
             alert_org(info.info);
             if(info.link.length>2) {
-                window.open(info.link);
+                location.href = info.link;
             } else {
                 window.top.location.reload();
             }

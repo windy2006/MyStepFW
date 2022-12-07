@@ -197,7 +197,7 @@ function myEval($code, $return = false) {
     $file = @tempnam(sys_get_temp_dir(), 'ms_');
     if($file==false) {
         f::mkdir(CACHE.'tmp/');
-        $file = CACHE.'tmp/'.getMicrotime();
+        $file = CACHE.'tmp/'.getMicrotime().md5(rand());
     }
     $result = '';
     @unlink($file);

@@ -58,15 +58,16 @@ $db->build('cms_news_detail', array(
                             ))->field('sub_title,content')->where('page', 'n>=', '1')->order('page');
 echo $db->select(1).';<br /><br />';
 
-$db->build('tbl2', array(
-    'mode' => 'left',
-    'field' => 'news_id'
-))->field('col1, col2');
+$db->build('[reset]');
 $db->build('table_name')->field(['field_name', 'count(*) as cnt'])
     ->group('field_name')
     ->group(['field_name', 'cnt>3'])
     ->group('field_name', ['cnt','n>',3])
     ->group(['field'=>'field_name,field2_name', 'having'=>'cnt>3']);
+$db->build('tbl2', array(
+    'mode' => 'left',
+    'field' => 'news_id'
+))->field('col1, col2');
 echo $db->select(1).';<br /><br />';
 
 //insert

@@ -64,7 +64,7 @@
                                 <img id="captcha" src="/captcha/" height="33" />
                             </div>
                             <div class="input-group-append">
-                                <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src+=(new Date().getTime());return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>
+                                <span class="input-group-text"><a href="#" id="refresh" title="<!--lng_login_refresh-->"><span class="glyphicon glyphicon-refresh"></span></a></span>
                             </div>
                         </div>
                         <div class="text-right">
@@ -82,5 +82,14 @@
 </footer>
 <!--page_end-->
 <script type="application/javascript" src="/static/js/checkForm.js"></script>
+<script type="application/javascript">
+$('#refresh').click(function(){
+    document.getElementById('captcha').src+=(new Date().getTime());
+    return false;
+});
+$(function(){
+    $('#refresh').click();
+});
+</script>
 </body>
 </html>

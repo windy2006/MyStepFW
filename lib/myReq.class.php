@@ -136,12 +136,13 @@ class myReq extends myBase {
                 $var = &$GLOBALS;
                 break;
         }
-        if(is_null($para)) {
+        if(is_null($para)) $para = '[ALL]';
+        if($para=='[G]' || $para=='[GLOBAL]') {
             foreach ($var as $key => $value) {
                 if (!empty($format)) $value = htmlspecialchars($value);
                 self::globals($key, $value);
             }
-        }elseif($para=='[ALL]') {
+        }elseif($para=='[A]' || $para=='[ALL]') {
             return recursionFunction('htmlspecialchars', $var);
         } else {
             $result = null;
@@ -198,8 +199,7 @@ class myReq extends myBase {
      */
     public static function get($para = '', $format = 'str') {
         if(empty($para)) {
-            self::getValue('get');
-            return count($_GET);
+            return self::getValue('get', '[ALL]');
         } else {
             return self::getValue('get', $para, $format);
         }
@@ -213,8 +213,7 @@ class myReq extends myBase {
      */
     public static function post($para = '', $format = 'str') {
         if(empty($para)) {
-            self::getValue('post');
-            return count($_POST);
+            return self::getValue('post', '[ALL]');
         } else {
             return self::getValue('post', $para, $format);
         }
@@ -227,8 +226,7 @@ class myReq extends myBase {
      */
     public static function files($para = '') {
         if(empty($para)) {
-            self::getValue('files');
-            return count($_FILES);
+            return self::getValue('files', '[ALL]');
         } else {
             return self::getValue('files', $para, '!');
         }
@@ -242,8 +240,7 @@ class myReq extends myBase {
      */
     public static function request($para = '', $format = 'str') {
         if(empty($para)) {
-            self::getValue('request');
-            return count($_REQUEST);
+            return self::getValue('request', '[ALL]');
         } else {
             return self::getValue('request', $para, $format);
         }

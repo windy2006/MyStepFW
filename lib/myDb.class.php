@@ -949,7 +949,7 @@ class SQLBuilder {
                 if(substr(strtolower($this->fields[0]),0,6)=='count(') return $this->fields[0];
                 if(!empty($this->idx)) {
                     for($i=0,$m=count($this->fields);$i<$m;$i++) {
-                        if(!preg_match('/^([a-z]\w+)\((.+)\)/i', $this->fields[$i])) {
+                        if(!preg_match('/^([a-z]\w+)\((.+)\)/i', $this->fields[$i]) && strpos($this->fields[$i], $this->dl.$this->idx.$this->dr.'.')===false) {
                             $this->fields[$i] = $this->dl.$this->idx.$this->dr.'.'.$this->fields[$i];
                         }
                     }
