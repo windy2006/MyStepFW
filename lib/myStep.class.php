@@ -193,13 +193,13 @@ class myStep extends myController {
      */
     public function ms_login($usr='', $pwd='') {
         if(!empty($usr) && !empty($pwd)) {
-            $auth = $this->auth_code($usr, md5($pwd));
+            $auth = $this->auth_code($usr, md5($pwd), $this->setting->web->etag);
         } else {
             $auth = myReq::cookie('ms_auth');
         }
         $result = false;
         if(!empty($auth)) {
-            $token = $this->auth_code($this->setting->gen->s_usr, $this->setting->gen->s_pwd);
+            $token = $this->auth_code($this->setting->gen->s_usr, $this->setting->gen->s_pwd, $this->setting->web->etag);
             if($auth == $token) {
                 myReq::session('ms_user', $this->setting->gen->s_usr);
                 myReq::session('sysop', 'y');
@@ -208,6 +208,11 @@ class myStep extends myController {
         }
         return $result;
     }
+
+    /**
+     * 生成认证码，可扩展，可在添加任意个salt参数
+     * @return string
+     */
     public static function auth_code() {
         $args = func_get_args();
         return md5(implode('|', $args));

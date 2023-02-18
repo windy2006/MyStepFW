@@ -331,6 +331,16 @@ function isMobile() {
     return isMobile;
 }
 
+//Base64
+function base64(code, mode) {
+    if(mode===undefined) mode = /^[\da-zA-Z]+=*$/.test(code);
+    return mode
+        ?
+        decodeURIComponent(escape(window.atob(code))) // 解码
+        :
+        window.btoa(unescape(encodeURIComponent(code))); // 编码
+}
+
 //MD5编码
 function md5(str) {
     let rhex = function(num) {

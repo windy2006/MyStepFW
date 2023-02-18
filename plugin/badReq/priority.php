@@ -2,8 +2,6 @@
 global $ip, $ua, $list, $url, $info;
 $list = @include(PLUGIN.'badReq/ban_ip.php');
 $ip = myReq::ip();
-$ip = preg_replace('#,.+$#', '', $ip);
-$ip = urlencode($ip);
 
 if(is_array($list) && isset($list[$ip])) {
     if(strpos($list[$ip], 'http')===0) {
@@ -35,8 +33,9 @@ if(preg_match('#^\w+$#', $setting->cookie) &&
     stripos($ua, 'spider')===false &&
     stripos(implode('.', $info), 'api')===false
 ) {
-    $check = myReq::cookie('badReq_'.$setting->cookie) ?? 0;
-    myReq::setCookie('badReq_'.$setting->cookie, $check+1, 60*60);
+    $cookie_idx = 'BQ_'.$setting->cookie.'_'.md5(date('Hd'));
+    $check = myReq::cookie($cookie_idx) ?? 0;
+    myReq::setCookie($cookie_idx, $check+1, 60*60);
     if($check===0) {
         echo '<script>setTimeout(function(){location.reload();},1000);</script>';
         exit;

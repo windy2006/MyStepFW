@@ -73,12 +73,6 @@ $(function(){
             withCredentials: false
         }
     });
-    $("a[type=ip]").each(function(){
-        if(this.innerHTML.indexOf(',')>0) {
-            let ips = this.innerHTML.split(/[, ]+/);
-            this.outerHTML = '<a type="ip" href="http://ip-api.com/json/'+ips[0]+'?lang=zh-CN" target="_blank">'+ips[0]+'</a>, <a type="ip" href="http://ip-api.com/json/'+ips[1]+'?lang=zh-CN" target="_blank">'+ips[1]+'</a>';
-        }
-    });
     $("a[type=ip]").click(function() {
         let obj = $(this);
         let result = obj.attr('info');

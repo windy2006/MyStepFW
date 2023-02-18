@@ -288,21 +288,13 @@ class myReq extends myBase {
 
     /**
      * 返回客户端IP
-     * @return null|string|string[]
+     * @return string
      */
     public static function ip() {
-        $ip = $ip_org = self::server('REMOTE_ADDR');
+        $ip = self::server('HTTP_X_REAL_IP') ?? self::server('HTTP_CLIENT_IP') ?? self::server('REMOTE_ADDR');
         if(!is_null(self::server('HTTP_X_FORWARDED_FOR'))) {
-            $ip = self::server('HTTP_X_FORWARDED_FOR');
-            $ip_list = explode(',', $ip);
-            if(count($ip_list)>1) $ip = $ip_list[0];
-        } elseif(!is_null(self::server('HTTP_CLIENT_IP'))) {
-            $ip = self::server('HTTP_CLIENT_IP');
-        }
-        if(!empty($ip) && $ip!=$ip_org) {
-            $ip = $ip_org.','.$ip;
-        } else {
-            $ip = $ip_org;
+            $arr = explode(',', self::server('HTTP_X_FORWARDED_FOR'));
+            if(trim($arr[0])!='unknown') $ip = trim($arr[0]);
         }
         $ip = preg_replace('/[^\w\.\-, ]+/', '', $ip);
         if($ip=='1') $ip = '127.0.0.1';

@@ -11,7 +11,7 @@ if(myReq::server('QUERY_STRING')=='out') {
         $pwd = myReq::post('password');
         if(($result = $mystep->ms_login($usr, $pwd))===true) {
             $expire = myReq::post('expire', 'int');
-            myReq::setCookie('ms_auth', myStep::auth_code($usr, md5($pwd)), 60*60*24*$expire);
+            myReq::setCookie('ms_auth', myStep::auth_code($usr, md5($pwd), $ms_setting->web->etag), 60*60*24*$expire);
             $url = myReq::session('url');
             if(empty($url)) {
                 $url = $app_root;

@@ -100,7 +100,12 @@
     {
         "name": "\u63d2\u4ef6",
         "icon": "fa fa-plug",
-        "link": "console\/function\/plugin",
-        "items": []
+        "link": "#",
+        "items": [
+            {
+                "name": "\u66f4\u65b0\u7ef4\u62a4",
+                "link": "manager"
+            }
+        ]
     }
 ]
