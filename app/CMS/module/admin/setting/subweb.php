@@ -119,7 +119,7 @@ switch($method) {
         \app\CMS\deleteCache('website');
         f::del(CACHE.'app/'.$info_app['app']);
         f::del(CACHE.'template/'.$info_app['app']);
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/setting/subweb/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -194,7 +194,7 @@ function build_page($method) {
         }
         $tpl->assign($record);
         $tpl->assign('method', $method);
-        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+        $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/setting/subweb/'));
     }
     $db->free();
     return $mystep->render($tpl);

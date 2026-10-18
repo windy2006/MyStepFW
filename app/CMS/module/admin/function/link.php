@@ -38,7 +38,7 @@ switch($method) {
             }
             \app\CMS\deleteCache('link');
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/function/link/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -66,7 +66,7 @@ function build_page($method) {
         if(empty($order_type)) $order_type = 'desc';
 
         $page = r::g('page', 'int');
-        $query = 'web_id='.$web_info['web_id'].'&order='.$order.'&order_type='.$order_type;
+        $query = http_build_query(['web_id'=>$web_id, 'idx'=>$idx, 'order'=>$order, 'order_type'=>$order_type], '', '&', PHP_QUERY_RFC3986);
         list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
         $db->build($S->db->pre.'links')
@@ -115,7 +115,7 @@ function build_page($method) {
         $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_func_link_add':'admin_func_link_edit'));
         $tpl->assign('method', $method);
-        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+        $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/function/link/'));
         $idx = $record['idx'];
         $web_id = $record['web_id'];
     }

@@ -3,11 +3,10 @@
  * This {@link aCssMinifierFilter minifier filter} sorts the ruleset declarations of a ruleset by name.
  * 
  * @package		CssMin/Minifier/Filters
- * @link		http://code.google.com/p/cssmin/
+ * @link		https://github.com/PhrozenByte/cssmin
  * @author		Rowan Beentje <http://assanka.net>
  * @copyright	Rowan Beentje <http://assanka.net>
  * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		3.0.1
  */
 class CssSortRulesetPropertiesMinifierFilter extends aCssMinifierFilter
 	{

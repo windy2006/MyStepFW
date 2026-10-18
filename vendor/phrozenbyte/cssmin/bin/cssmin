@@ -1,0 +1,66 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Command line interface (CLI) for CssMin.
+ * 
+ * Use CssMin to minify CSS via the command line, supports both files and stdin as input.
+ * 
+ * @package		CssMin
+ * @link		https://github.com/PhrozenByte/cssmin
+ * @author		Daniel Rudolf <https://www.daniel-rudolf.de>
+ * @copyright	2025 Daniel Rudolf <https://www.daniel-rudolf.de>
+ * @license		http://opensource.org/licenses/mit-license.php MIT License
+ */
+
+if (!file_exists(__DIR__ . "/../vendor/autoload.php"))
+	{
+	fwrite(STDERR, "Missing required Composer autoloader (did you run \`composer install\`?) "
+		. "'" . __DIR__ . "/../vendor/autoload.php': No such file or directory\n");
+	exit(1);
+	}
+elseif (!is_file(__DIR__ . "/../vendor/autoload.php"))
+	{
+	fwrite(STDERR, "Missing required Composer autoloader "
+		. "'" . __DIR__ . "/../vendor/autoload.php': Not a file\n");
+	exit(1);
+	}
+elseif (!is_readable(__DIR__ . "/../vendor/autoload.php"))
+	{
+	fwrite(STDERR, "Missing required Composer autoloader "
+		. "'" . __DIR__ . "/../vendor/autoload.php': Permission denied\n");
+	exit(1);
+	}
+
+require(__DIR__ . "/../vendor/autoload.php");
+
+$css = null;
+if (($_SERVER["argc"] === 1) || ($_SERVER["argv"][1] === "--help"))
+	{
+	fwrite(STDERR, "Usage:\n");
+	fwrite(STDERR, "  " . $_SERVER["argv"][0] . " INPUT_FILE|-\n");
+	exit(1);
+	}
+elseif ($_SERVER["argv"][1] !== "-")
+	{
+	if (!file_exists($_SERVER["argv"][1]))
+		{
+		fwrite(STDERR, "Invalid CSS input file '" . $_SERVER["argv"][1] . "': No such file or directory\n");
+		}
+	elseif (!is_file($_SERVER["argv"][1]))
+		{
+		fwrite(STDERR, "Invalid CSS input file '" . $_SERVER["argv"][1] . "': Not a file\n");
+		}
+	elseif (!is_readable($_SERVER["argv"][1]))
+		{
+		fwrite(STDERR, "Invalid CSS input file '" . $_SERVER["argv"][1] . "': Permission denied\n");
+		}
+
+	$css = file_get_contents($_SERVER["argv"][1]);
+	}
+else
+	{
+	$css = stream_get_contents(STDIN);
+	}
+
+$minifier = new CssMinifier($css);
+echo $minifier->getMinified() . "\n";

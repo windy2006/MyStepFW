@@ -1,7 +1,7 @@
 <?PHP
 global $id, $cat_id;
 $id = end($info_app['path']);
-if(preg_match('#(%[A-E0-9])#', $id)) $id = urldecode($id);
+$id = urldecode($id);
 
 $page = r::g('page');
 if($page!='all') {
@@ -18,7 +18,7 @@ $db->build($S->db->pre_sub.'news_detail', array(
         'field' => 'news_id'
     ))->field('sub_title,content')->order('page');
 
-$records = $cache->getData($db->select(true),1);
+$records = $cache->getData($db->select(true), 'all', 1);
 
 if(empty($records)) {
     myStep::info('page_article_missing', ROOT_APP);
@@ -103,22 +103,14 @@ for($i=0,$m=count($tag); $i<$m; $i++) {
 }
 $tag = $record['tag'];
 
-$path_list = [];
-$pid = $cat_info['cat_id'];
-while($pid>0) {
-    $the_cat = \app\CMS\getPara($news_cat_plat, 'cat_id', $pid);
-    $path_list[] = [
-        'name' => $the_cat['name'],
-        'link' => \app\CMS\getLink($the_cat, 'catalog')
-    ];
-    $pid = $the_cat['pid'];
-}
-for($i=count($path_list)-1;$i>=0;$i--) {
-    $t->setLoop('cat_list', $path_list[$i]);
-}
+// 异常栏目关系不能阻塞前台请求。
+$path_list = \app\CMS\categoryPath($news_cat_plat,$cat_info['cat_id']);
+foreach($path_list as $the_cat) $t->setLoop('cat_list', [
+    'name'=>$the_cat['name'], 'link'=>\app\CMS\getLink($the_cat,'catalog')
+]);
 $t->assign('multi_page', ($page_count>1)?'':'d-none');
 for($i=0,$m=count($sub_title); $i<$m; $i++) {
-    $link = preg_replace('#[&?].*$#','', r::svr('REQUEST_URI')).'&page='.($i+1);
+    $link = \app\CMS\getURL(null, ['page'=>$i+1]);
     $t->setLoop('page', array('link'=>$link, 'no'=>($i+1), 'active'=>(($page==$i+1) ? 'active' : '')));
     if($page=='all') {
         $link = r::svr('REQUEST_URI').'#content_'.$i;
@@ -126,7 +118,7 @@ for($i=0,$m=count($sub_title); $i<$m; $i++) {
     $t->setLoop('sub_title', array('selected'=>($page==$i+1?'selected':''), 'link'=>$link, 'name'=>$sub_title[$i]));
 }
 $t->setLoop('page', array(
-    'link'=>preg_replace('#[&?].*$#','', r::svr('REQUEST_URI')).'&page=all',
+    'link'=>\app\CMS\getURL(null, ['page'=>'all']),
     'no'=>$mystep->getLanguage('page_show_all'),
     'active'=>(($page=='all') ? 'active' : '')
 ));

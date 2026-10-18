@@ -38,7 +38,7 @@ $setting_detail['gen'] = array(
             'name' => '管理密码',
             'name2' => '重复密码',
             'describe' => '请确认密码的安全可靠',
-            'type' => array('password', 'md5', '40')
+            'type' => array('password', 'myAuth::hashPassword', '40')
         ),
         'close' => array(
             'name' => '关闭页面',
@@ -150,7 +150,7 @@ $setting_detail['template'] = array(
         ),
         'path' => array(
             'name' => '模版路径',
-            'describe' => '模版的存放位置（相对于本应用的相对路径）',
+            'describe' => '模版的存放位置（相对于网站根，例如app/Admin/template）',
             'type' => array('text', '', '30')
         ),
         'style' => array(
@@ -181,7 +181,7 @@ $setting_detail['session'] = array(
         ),
         'path' => array(
             'name' => '存储路径',
-            'describe' => 'SESSION文件的存放位置',
+            'describe' => 'SESSION文件的存放位置（相对于网站根，例如cache/session/）',
             'type' => array('text', '', '30')
         ),
         'gc' => array(
@@ -301,12 +301,12 @@ $setting_detail['db'] = array(
         ),
         'pconnect' => array(
             'name' => '持久连接',
-            'describe' => '数据库存储数据的默认字符集',
+            'describe' => '开启数据库持久连接，减少反复连接数据库造成的资源消耗',
             'type' => array('radio', array('开启'=>'true', '关闭'=>'false'))
         ),
         'charset' => array(
             'name' => '数据库编码',
-            'describe' => '开启数据库持久连接，减少反复连接数据库造成的资源消耗',
+            'describe' => '数据库存储数据的默认字符集',
             'type' => array('select', array('GBK'=>'gbk', 'UTF-8'=>'utf-8', 'Latin1'=>'latin1'))
         ),
         'name' => array(

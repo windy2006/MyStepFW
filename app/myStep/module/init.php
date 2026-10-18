@@ -7,7 +7,9 @@ if(myReq::check('post')) {
         $db->create($setting['db']['name']);
     }
     $config = new myConfig(CONFIG.'config.php');
-    $config->set($setting);
+    // 先保留完整默认字段，避免首次保存时被跳过的空密码字段缺失。
+    if(!is_file(CONFIG.'config.php')) $config->merge(CONFIG.'config_default.php');
+    $config->set(myPath::settings($setting, 'myStep'));
     $config->save('php');
     myController::redirect();
 }

@@ -8,11 +8,17 @@ if(empty($web_idx)) {
     $web_idx = $website['0']['idx'];
 }
 $method = r::r('method');
+// SQL 标识符必须取自当前库的实际表列表；不接收表单拼接的 SQL/下载文件名。
+if(myReq::check('post') && in_array($method,['export','optimize','repair'],true)
+    && $the_tbl!=='all' && (!is_string($the_tbl) || !in_array($the_tbl,$db->getTbls(),true))) {
+    myStep::info('error_para');
+}
 
 if(myReq::check('post')) {
     $content = '';
     switch($method) {
         case 'import':
+            $result_exe = [];
             CMS::$log = $mystep->getLanguage('admin_func_backup_import');
             $path = CACHE.'tmp/';
             $upload = new myUploader($path, true, $S->upload->ban_ext);
@@ -88,7 +94,7 @@ if(myReq::check('post')) {
                 $tbl_list = $db->getTbls();
                 $files = array();
                 for($i=0,$m=count($tbl_list); $i<$m; $i++) {
-                    $content = 'DROP TABLE IF EXISTS `'.$tbl_list[$i].'`;'.chr(10);
+                    $content = 'DROP TABLE IF EXISTS '.$db->quoteIdentifier($tbl_list[$i]).';'.chr(10);
                     $content .= $db->getCreateScript($tbl_list[$i]).chr(10).$db->getDataScript($tbl_list[$i]);
                     $files[$i] = $dir.$tbl_list[$i].'.sql';
                     f::s($files[$i], $content);
@@ -100,7 +106,7 @@ if(myReq::check('post')) {
                 f::del($dir);
                 myStep::file($file);
             } else {
-                $content = 'DROP TABLE IF EXISTS `'.$the_tbl.'`;'.chr(10);
+                $content = 'DROP TABLE IF EXISTS '.$db->quoteIdentifier($the_tbl).';'.chr(10);
                 $content .= $db->getCreateScript($the_tbl).''.chr(10).$db->getDataScript($the_tbl);
                 header('Content-type: text/plain');
                 header('Accept-Ranges: bytes');
@@ -117,7 +123,7 @@ if(myReq::check('post')) {
                 $tbl_list = $db->getTbls();
                 $tables = '';
                 for($i=0,$m=count($tbl_list); $i<$m; $i++) {
-                    $tables .= $tbl_list[$i].',';
+                    $tables .= $db->quoteIdentifier($tbl_list[$i]).',';
                 }
                 if(!empty($tables)) {
                     $i = 1;
@@ -127,7 +133,7 @@ if(myReq::check('post')) {
                     }
                 }
             } else {
-                $db->query('optimize table '.$S->db->name.'.'.$the_tbl);
+                $db->query('optimize table '.$db->quoteIdentifier($S->db->name).'.'.$db->quoteIdentifier($the_tbl));
                 $record = $db->getRS();
                 $op_info .= '<h6>'.$record['Table'].' - <i>'.$record['Msg_text'].'</i></h6>';
             }
@@ -139,7 +145,7 @@ if(myReq::check('post')) {
                 $tbl_list = $db->getTbls();
                 $tables = '';
                 for($i=0,$m=count($tbl_list); $i<$m; $i++) {
-                    $tables .= $tbl_list[$i].',';
+                    $tables .= $db->quoteIdentifier($tbl_list[$i]).',';
                 }
                 if(!empty($tables)) {
                     $i = 1;
@@ -149,7 +155,7 @@ if(myReq::check('post')) {
                     }
                 }
             } else {
-                $record = $db->query('repair table '.$S->db->name.'.'.$the_tbl);
+                $db->query('repair table '.$db->quoteIdentifier($S->db->name).'.'.$db->quoteIdentifier($the_tbl));
                 $record = $db->getRS();
                 $op_info .= '<h6>'.$record['Table'].' - <i>'.$record['Msg_text'].'</i></h6>';
             }

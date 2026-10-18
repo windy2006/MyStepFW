@@ -1,5 +1,5 @@
 <?PHP
-$module = $info_app['path'][2];
+$module = $info_app['path'][2] ?? 'app';
 $script = __DIR__.'/function/'.$module.'.php';
 if(!is_file($script)) {
     $module = 'app';
@@ -15,5 +15,5 @@ include($script);
 $t->assign('path_admin', $app_root);
 $content = $mystep->render($t);
 $mystep->setAddedContent('end', '
-<script type="application/javascript" src="/static/js/checkForm.js"></script>
+<script type="application/javascript" src="'.ROOT_WEB.'static/js/checkForm.js"></script>
 ');

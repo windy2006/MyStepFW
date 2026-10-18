@@ -51,7 +51,7 @@
 <script type="application/javascript">
 let news_cat = <!--news_cat-->;
 $('img').on('error', function(){
-    this.src = '/static/images/noimage.gif';
+    this.src = '<!--path_root-->static/images/noimage.gif';
 });
 function showSearch() {
     let obj = $('#search');

@@ -2,14 +2,18 @@
 $module = $info_app['path'][0] ?? null;
 $mode = $info_app['path'][1] ?? null;
 if (is_null($mode)) $mode = 'show';
+// 样例文件名同时作为公开反射白名单，避免任意类名触发自动加载及路径拼接。
+$examples = glob(PATH.'module/*.php');
+$allowed = array_map(function($file) { return pathinfo($file,PATHINFO_FILENAME); },$examples);
+if(!is_null($module) && $module!=='' && (!is_string($module) || !in_array($module,$allowed,true))) myStep::header('404');
+set_include_path(get_include_path().PATH_SEPARATOR.LIB.'database/'.PATH_SEPARATOR.LIB.'cache/');
+spl_autoload_extensions('.class.php,.php');
+spl_autoload_register();
 $sp_module = ['myExcel', 'myImg'];
 $tpl_setting['name'] = 'main';
 $tpl = new myTemplate($tpl_setting, false);
 
 if(empty($module)) {
-    set_include_path(get_include_path() . PATH_SEPARATOR . './lib/database/' . PATH_SEPARATOR . './lib/cache/');
-    spl_autoload_extensions('.class.php,.php');
-    spl_autoload_register();
     $list = f::find('*.php', PATH . 'module');
     $tpl_setting['name'] = 'list';
     $tpl_sub = new myTemplate($tpl_setting, false);

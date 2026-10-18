@@ -22,7 +22,7 @@
             【<a href="<!--item_name-->/detail" target="_blank">方法说明</a>】
         </div>
         <div class="card-body">
-            <pre class="card-text"><!--item_doc--></pre>
+            <pre class="card-text"><!--item_doc|html--></pre>
         </div>
     </div>
 </div>

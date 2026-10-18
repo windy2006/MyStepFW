@@ -4,27 +4,16 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
+class ComposerStaticInitb8fd4a8bf717ff767980a4df4d00f548
 {
-    public static $files = array (
-        '52e181473ddd523a649d74860143e341' => __DIR__ . '/..' . '/meenie/javascript-packer/class.JavaScriptPacker.php',
-    );
-
-    public static $prefixLengthsPsr4 = array (
-        'E' => 
-        array (
-            'Erusev\\Parsedown\\' => 17,
-        ),
-    );
-
-    public static $prefixDirsPsr4 = array (
-        'Erusev\\Parsedown\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/erusev/parsedown/src',
-        ),
-    );
-
     public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'Parsedown' => 
+            array (
+                0 => __DIR__ . '/..' . '/erusev/parsedown',
+            ),
+        ),
         'J' => 
         array (
             'JSMin\\' => 
@@ -94,6 +83,11 @@ class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
         'CssVariablesMinifierFilter' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/minifier/filter/CssVariablesMinifierFilter.php',
         'CssVariablesMinifierPlugin' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/minifier/plugins/CssVariablesMinifierPlugin.php',
         'CssWhitesmithsFormatter' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/formatter/CssWhitesmithsFormatter.php',
+        'JSMin\\JSMin' => __DIR__ . '/..' . '/mrclay/jsmin-php/src/JSMin/JSMin.php',
+        'JSMin\\UnterminatedCommentException' => __DIR__ . '/..' . '/mrclay/jsmin-php/src/JSMin/UnterminatedCommentException.php',
+        'JSMin\\UnterminatedRegExpException' => __DIR__ . '/..' . '/mrclay/jsmin-php/src/JSMin/UnterminatedRegExpException.php',
+        'JSMin\\UnterminatedStringException' => __DIR__ . '/..' . '/mrclay/jsmin-php/src/JSMin/UnterminatedStringException.php',
+        'Parsedown' => __DIR__ . '/..' . '/erusev/parsedown/Parsedown.php',
         'aCssAtBlockEndToken' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/tokens/aCssAtBlockEndToken.php',
         'aCssAtBlockStartToken' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/tokens/aCssAtBlockStartToken.php',
         'aCssDeclarationToken' => __DIR__ . '/..' . '/phrozenbyte/cssmin/src/tokens/aCssDeclarationToken.php',
@@ -109,10 +103,8 @@ class ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit971d79fdbb4c10f3a321a4c40bb7be2e::$classMap;
+            $loader->prefixesPsr0 = ComposerStaticInitb8fd4a8bf717ff767980a4df4d00f548::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitb8fd4a8bf717ff767980a4df4d00f548::$classMap;
 
         }, null, ClassLoader::class);
     }

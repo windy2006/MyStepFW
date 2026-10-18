@@ -20,7 +20,7 @@
             </select>
         </div>
         <div class="input-group mb-2 mb-md-0 mx-auto px-2">
-            <input type="text" name="keyword" class="form-control" value="<!--keyword-->" placeholder="请输入查询关键字" />
+            <input type="text" name="keyword" class="form-control" value="<!--keyword|html-->" placeholder="请输入查询关键字" />
             <div class="input-group-append">
                 <button class="btn btn-light btn-outline-secondary" name="keyword" type="button">检索</button>
                 <button class="btn btn-light btn-outline-secondary" name="show_all" type="button">重置</button>
@@ -32,27 +32,27 @@
         <table class="table table-sm table-striped table-bordered table-hover my-md-3 bg-white">
             <thead class="thead-light">
             <tr class="text-center">
-                <th width="40"><a class="text-dark" href="?keyword=<!--keyword-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->&order_type=<!--order_type-->">编号</a></th>
-                <th class="d-none d-sm-table-cell" width="100"><a class="text-dark" href="?keyword=<!--keyword-->&order=cat_id&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">栏目</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&order=subject&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">文章标题</a></th>
-                <th class="d-none d-md-table-cell" width="80"><a class="text-dark" href="?keyword=<!--keyword-->&order=add_user&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">录入人</a></th>
-                <th class="d-none d-md-table-cell" width="160"><a class="text-dark" href="?keyword=<!--keyword-->&order=add_date&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">录入时间</a></th>
-                <th width="150"><a class="text-dark" href="?keyword=<!--keyword-->&order=setop&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">相关操作</a></th>
+                <th width="40"><a class="text-dark" href="?keyword=<!--keyword|url-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->&order_type=<!--order_type-->">编号</a></th>
+                <th class="d-none d-sm-table-cell" width="100"><a class="text-dark" href="?keyword=<!--keyword|url-->&order=cat_id&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">栏目</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&order=subject&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">文章标题</a></th>
+                <th class="d-none d-md-table-cell" width="80"><a class="text-dark" href="?keyword=<!--keyword|url-->&order=add_user&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">录入人</a></th>
+                <th class="d-none d-md-table-cell" width="160"><a class="text-dark" href="?keyword=<!--keyword|url-->&order=add_date&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">录入时间</a></th>
+                <th width="150"><a class="text-dark" href="?keyword=<!--keyword|url-->&order=setop&order_type=<!--order_type-->&cat_id=<!--cat_id-->&web_id=<!--web_id-->">相关操作</a></th>
             </tr>
             </thead>
             <tbody>
             <!--loop:start key="record" time="20"-->
             <tr align="center">
                 <td><!--record_news_id--></td>
-                <td class="d-none d-sm-table-cell"><a class="badge badge-warning" href="?cat_id=<!--record_cat_id-->&web_id=<!--record_web_id-->" /><!--record_cat_name--></a></td>
+                <td class="d-none d-sm-table-cell"><a class="badge badge-warning" href="?cat_id=<!--record_cat_id-->&web_id=<!--record_web_id-->"><!--record_cat_name--></a></td>
                 <td align="left"><a class="text-dark" href="<!--record_link-->" target="_blank"><!--record_subject--></a></td>
                 <td class="d-none d-md-table-cell"><!--record_add_user--></td>
                 <td class="d-none d-md-table-cell"><!--record_add_date--></td>
                 <td>
                     <div class="btn-group">
-                        <a class="btn btn-sm btn-info" href="unlock&web_id=<!--record_web_id-->&id=<!--record_news_id-->">解锁</a>
-                        <a class="btn btn-sm btn-info" href="edit&web_id=<!--record_web_id-->&id=<!--record_news_id-->">修改</a>
-                        <a class="btn btn-sm btn-info" href="delete&web_id=<!--record_web_id-->&id=<!--record_news_id-->" onclick="return confirm('是否确定要删除该文章？')">删除</a>
+                        <a class="btn btn-sm btn-info" href="unlock?web_id=<!--record_web_id-->&id=<!--record_news_id-->">解锁</a>
+                        <a class="btn btn-sm btn-info" href="edit?web_id=<!--record_web_id-->&id=<!--record_news_id-->">修改</a>
+                        <a class="btn btn-sm btn-info" href="delete?web_id=<!--record_web_id-->&id=<!--record_news_id-->" onclick="return confirm('是否确定要删除该文章？')">删除</a>
                     </div>
                 </td>
             </tr>
@@ -71,23 +71,23 @@ $(function(){
         $('#web_id').val(web_id).parent().hide();
     }
     $('#web_id').change(function(){
-        location.href=global.root_fix+'?web_id='+this.value;
+        location.href=queryURL(global.root_fix, {web_id:this.value});
     });
     $('#catalog').change(function(){
-        location.href=global.root_fix+'?cat_id='+this.value;
+        location.href=queryURL(global.root_fix, {web_id:'<!--web_id-->',cat_id:this.value});
     });
     $('input[name=keyword]').keypress(function(e){
         if(e.keyCode==13) {
-            location.href=global.root_fix+'?web_id=<!--web_id-->&keyword='+this.value;
+            location.href=queryURL(global.root_fix, {web_id:'<!--web_id-->',keyword:this.value});
         }
     });
     $('button[name=keyword]').click(function(e){
-        location.href=global.root_fix+'?web_id=<!--web_id-->&keyword='+$('input[name=keyword]').val();
+        location.href=queryURL(global.root_fix, {web_id:'<!--web_id-->',keyword:$('input[name=keyword]').val()});
     });
     $('button[name=show_all]').click(function(e){
         location.href = global.root_fix;
     });
-    let refer = '<!--back_url-->';
+    let refer = decodeURIComponent('<!--back_url|url-->');
     if(refer.match(/content\/(\w+)/)) {
         if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
             $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
@@ -95,7 +95,7 @@ $(function(){
                 if(typeof data.err==='undefined') {
                     obj.empty();
                     obj.append(window.parent.getList(data).removeClass('sub-menu'));
-                    setURL(global.root_fix.replace('article/catalog/', ''), obj);
+                    setURL(global.root_fix.replace('article/content/', ''), obj);
                     window.parent.setLink();
                     obj.find('.collapse').addClass('show');
                     obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);

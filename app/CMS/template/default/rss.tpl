@@ -8,7 +8,7 @@
 	<generator><![CDATA[Powered By MyStep CMS - windy2006@gmail.com]]></generator>
 	<lastBuildDate><![CDATA[<!--now-->]]></lastBuildDate>
 	<image>
-		<url><![CDATA[<!--web_url-->/static/images/rss.png]]></url>
+		<url><![CDATA[<!--feed_image-->]]></url>
 		<title><![CDATA[<!--web_title-->]]></title>
 		<link><![CDATA[<!--web_url-->]]></link>
 		<description><![CDATA[<!--page_description-->]]></description>

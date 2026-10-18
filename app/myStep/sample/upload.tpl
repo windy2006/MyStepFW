@@ -32,7 +32,7 @@
 </div>
 <script type="application/javascript">
 function init() {
-    if(!checkSetting()) return;
+    if(!checkSetting(100, init)) return;
     jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
@@ -56,7 +56,7 @@ function init() {
                         obj.find('span').click(function(e){
                             e.preventDefault();
                             if(confirm('是否确认删除 "'+$(this).parent().text().replace(/X$/, '')+'" ？')) {
-                                $.get('<!--url_prefix-->api/myStep/remove/'+result.new_name.split('.').slice(0,2).join('.'), function(data, status){
+                                $.post('<!--url_prefix-->api/myStep/remove/'+result.new_name.split('.').slice(0,2).join('.'), function(data, status){
                                     if(data.error==='0' && status==='success') {
                                         if(obj.parent().find('a').length==1) obj.parent().addClass('d-none');
                                         obj.remove();

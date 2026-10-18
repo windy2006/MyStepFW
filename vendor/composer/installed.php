@@ -1,59 +1,92 @@
 <?php return array(
     'root' => array(
         'name' => 'mystep/framework',
-        'pretty_version' => 'trunk',
-        'version' => 'dev-trunk',
-        'reference' => NULL,
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
+        'reference' => null,
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'erusev/parsedown' => array(
-            'pretty_version' => '2.0.x-dev',
-            'version' => '2.0.9999999.9999999-dev',
-            'reference' => '32278afaf36c758de026b66661d3afd6dfbea743',
+            'pretty_version' => '1.8.0',
+            'version' => '1.8.0.0',
+            'reference' => '96baaad00f71ba04d76e45b4620f54d3beabd6f7',
             'type' => 'library',
             'install_path' => __DIR__ . '/../erusev/parsedown',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'meenie/javascript-packer' => array(
-            'pretty_version' => '1.1',
-            'version' => '1.1.0.0',
-            'reference' => 'dcab0159ae1ed9d7535c034fb8afe1e4c3495d22',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../meenie/javascript-packer',
-            'aliases' => array(),
+        'innogames/cssmin' => array(
             'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
         ),
         'mrclay/jsmin-php' => array(
-            'pretty_version' => '2.4.1',
-            'version' => '2.4.1.0',
-            'reference' => '208e4122f8a273314e81c6b3bee897b5f3c1dc70',
+            'pretty_version' => '2.4.3',
+            'version' => '2.4.3.0',
+            'reference' => '49feaa85933458c15bb62ae65644bf22d60b7610',
             'type' => 'library',
             'install_path' => __DIR__ . '/../mrclay/jsmin-php',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
         'mystep/framework' => array(
-            'pretty_version' => 'trunk',
-            'version' => 'dev-trunk',
-            'reference' => NULL,
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
+            'reference' => null,
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'natxet/cssmin' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
         'phrozenbyte/cssmin' => array(
-            'pretty_version' => 'v3.0.2',
-            'version' => '3.0.2.0',
-            'reference' => 'cbf03632033927f2bccf19b424d61a14fc44e37a',
+            'pretty_version' => 'v3.0.4',
+            'version' => '3.0.4.0',
+            'reference' => '261bd26bf42f533ea419b009732f62c850d2b5c6',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phrozenbyte/cssmin',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'skavunga/cssmin' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'skeeks/cssmin' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'supa-creation/php-css-min' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'supa86000/zf2-css-min' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'surda/cssmin' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
         ),
     ),
 );

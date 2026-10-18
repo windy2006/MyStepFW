@@ -50,12 +50,16 @@ if(myReq::check('post')) {
     if(empty($route_plugin)) {
         myFile::del(CONFIG.'route_plugin.php');
     } else {
-        myFile::saveFile(CONFIG.'route_plugin.php', htmlspecialchars_decode($route_plugin));
+        if(!is_string($route_plugin) || !preg_match('/\A\s*<\?php\s+return\s+(.+?)\s*\z/is', htmlspecialchars_decode($route_plugin), $mapping)) throw new InvalidArgumentException('插件路由映射须为PHP数组配置。');
+        $list = myClassLoader::mapping($mapping[1]);
+        foreach($list as &$source) $source = myPath::relative($source);
+        unset($source);
+        myFile::saveFile(CONFIG.'route_plugin.php', '<?PHP'.chr(10).'return '.var_export($list, true).';');
     }
     if(is_file(CONFIG.'route_plugin.php')) {
         $list = include(CONFIG.'route_plugin.php');
         foreach($list as $k => $v) {
-            $router->checkRoute(CONFIG.'route.php', $v, 'plugin_'.$k);
+            $router->checkRoute(CONFIG.'route.php', myPath::absolute($v), 'plugin_'.$k);
         }
     }
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');

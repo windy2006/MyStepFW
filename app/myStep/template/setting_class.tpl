@@ -8,7 +8,7 @@
             <table class="table table-sm table-striped table-hover mb-2 border-bottom">
                 <tr>
                     <td width="80">所在目录</td>
-                    <td data-toggle="tooltip" data-placement="bottom" title="框架会自动读取此目录下面的类脚本"><input type="text" class="form-control" name="path[]" value="<!--class_path-->" need="" /></td>
+                    <td data-toggle="tooltip" data-placement="bottom" title="相对于网站根目录，如lib/；框架会自动读取此目录下面的类脚本"><input type="text" class="form-control" name="path[]" value="<!--class_path-->" need="" /></td>
                     <td rowspan="3" class="align-middle text-center" width="80">
                         <a class="btn btn-info" href="<!--path_admin-->/setting/alias/<!--class_id-->">查看</a><br /><br />
                         <a class="btn btn-info" name="btn_del" href="#">删除</a>
@@ -38,7 +38,7 @@
 <table name="tpl" class="table table-sm table-striped table-hover mb-2 border-bottom" style="display:none;">
     <tr>
         <td width="80">所在目录</td>
-        <td data-toggle="tooltip" data-placement="bottom" title="框架会自动加载此目录下面的类脚本"><input type="text" class="form-control" name="path[]" value="" need="" /></td>
+        <td data-toggle="tooltip" data-placement="bottom" title="相对于网站根目录，如lib/；框架会自动加载此目录下面的类脚本"><input type="text" class="form-control" name="path[]" value="" need="" /></td>
         <td rowspan="3" class="align-middle text-center" width="80">
             <a class="btn btn-info" name="btn_del" href="">删除</a>
         </td>

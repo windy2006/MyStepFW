@@ -3,23 +3,21 @@ if(myReq::check('post')) {
     $path = myReq::post('path');
     $ext = myReq::post('ext');
     $idx = myReq::post('idx');
-    $m = count($path);
-    $result = array();
-    for($i=0;$i<$m;$i++) {
-        $result[] = array(
-            'path' => myFile::realPath($path[$i]),
-            'ext' => $ext[$i],
-            'idx' => empty($idx[$i]) ? array() : myEval($idx[$i], true)
-        );
+    if(!is_array($path) || !is_array($ext) || !is_array($idx)) throw new InvalidArgumentException('类加载规则无效。');
+    $result = [];
+    foreach($path as $i => $directory) {
+        if($directory === '') continue;
+        $result[] = ['path'=>$directory, 'ext'=>$ext[$i]??'', 'idx'=>myClassLoader::mapping($idx[$i]??'')];
     }
-    myFile::saveFile(CONFIG.'class.php', '<?PHP'.chr(10).'return '.var_export($result, true).';');
+    $result = myClassLoader::normalize($result, true);
+    myClassLoader::save(CONFIG.'class.php', $result, is_file(CONFIG.'class.php')?hash_file('sha256', CONFIG.'class.php'):'missing');
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
 }
 $setting_class = include(CONFIG.'class.php');
 foreach($setting_class as $k => $v) {
-    $v['path'] = str_replace(ROOT, '', $v['path']);
-    if(!isset($v['idx'])) $v['idx'] = array();
-    $v['idx'] = empty($v['idx'])?'':var_export($v['idx'], true);
+    $v['path'] = htmlspecialchars(myPath::relative($v['path']), ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
+    $v['idx'] = htmlspecialchars(var_export($v['idx']??[], true), ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
+    $v['ext'] = htmlspecialchars($v['ext'], ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
     $v['id'] = $k;
     $t->setLoop('class', $v);
 }

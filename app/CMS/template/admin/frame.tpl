@@ -51,7 +51,7 @@
                 </ul>
                 <div id="list_frame" class="tab-content border-top">
                     <div class="tab-pane fade show active" id="tab_main">
-                        <iframe src="about:blank" class="frame" frameborder="0" allowtransparency="true"></iframe>
+                        <iframe src="<!--path_admin-->info/" title="后台首页" class="frame" frameborder="0" allowtransparency="true"></iframe>
                     </div>
                 </div>
             </div>
@@ -242,7 +242,7 @@ function setLink() {
                 flag = true;
                 break;
             case this.href.indexOf('#')!==-1:
-                location.href = location.pathname + this.href.replace(/^.+(#.*)$/g, '$1');
+                location.href = location.href.replace(/#.*$/, '') + this.href.replace(/^.+(#.*)$/g, '$1');
                 break;
             default:
                 e.preventDefault();
@@ -301,7 +301,7 @@ function getList(data) {
         if(typeof data[i].link ==='undefined' || data[i].link==='') {
             data[i].link = 'article/content/?cat_id='+data[i].cat_id;
         }
-        data[i].link = '<!--path_admin-->article/content/?cat_id='+data[i].cat_id;
+        data[i].link = queryURL('<!--path_admin-->article/content/', {cat_id:data[i].cat_id,web_id:data[i].web_id});
         if(list_web!==',all,' && list_web.indexOf(','+data[i].web_id+',')===-1) continue;
         data[i].icon = 'fa fa-caret-right';
         sub = $('\n' +
@@ -361,7 +361,7 @@ $(function(){
                         if(websites[i].domain.indexOf(',')) {
                             websites[i].domain = websites[i].domain.replace(/,.+$/, '');
                         }
-                        websites[i].domain = 'http://'+websites[i].domain;
+                        websites[i].domain = '//'+websites[i].domain;
                     }
                     obj_sub.prepend('<a class="dropdown-item" href="'+websites[i].domain+'" target="_blank">'+websites[i].name+'</a>');
                 }
@@ -378,7 +378,7 @@ $(function(){
                 }
                 $('' +
                     '<li class="nav-item">\n' +
-                    '    <a class="nav-link" href="/" title="<!--lng_admin_web-->" target="_blank"><!--lng_admin_web--></a>\n' +
+                    '    <a class="nav-link" href="<!--url_prefix_app-->" title="<!--lng_admin_web-->" target="_blank"><!--lng_admin_web--></a>\n' +
                     '</li>').appendTo('#nav > ul');
             }
             setLink();
@@ -412,7 +412,7 @@ $(function(){
             alert(data.error+' - '+data.message);
         }
     });
-    $('iframe').attr('src', location.href.replace(/#.+$/, '')+'/info');
+    // 首页地址由模板输出，避免异步 setting 尚未就绪时中断侧栏等事件的绑定。
     $('#list_tab .arrow').hover(function(e){
         global.timer = setInterval(function(){
             setPos(e.target);

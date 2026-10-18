@@ -1,8 +1,8 @@
 <style>
-body {background-image: url('/static/images/background.jpg');}
+body {background-image: url('<!--path_root-->static/images/background.jpg');}
 </style>
 <div class="p-5 text-center">
-    <img src="/static/images/logo.png" keep-url />
+    <img src="<!--path_root-->static/images/logo.png" keep-url />
 </div>
 <div class="container">
     <div class="row">&nbsp;</div>
@@ -32,7 +32,7 @@ body {background-image: url('/static/images/background.jpg');}
                             </div>
                             <input name="captcha" type="text" class="form-control" placeholder="<!--lng_login_captcha_msg-->" need="" />
                             <div class="input-group-append">
-                                <img id="captcha" src="captcha/&core=CMS&" height="33" keep-url />
+                                <img id="captcha" src="<!--captcha_url|html-->" height="33" keep-url />
                             </div>
                             <div class="input-group-append">
                                 <span class="input-group-text"><a href="#" id="refresh" title="<!--lng_login_refresh-->"><span class="glyphicon glyphicon-refresh"></span></a></span>
@@ -48,11 +48,11 @@ body {background-image: url('/static/images/background.jpg');}
         </div>
     </div>
 </div>
-<script type="application/javascript" src="/static/js/checkForm.js"></script>
+<script type="application/javascript" src="<!--path_root-->static/js/checkForm.js"></script>
 <script type="application/javascript">
 if(self!=top) top.location.href = location.href;
 $('#refresh').click(function(){
-    document.getElementById('captcha').src+=(new Date().getTime());
+    document.getElementById('captcha').src=queryURL(document.getElementById('captcha').src, {t:Date.now()});
     return false;
 });
 $(function(){

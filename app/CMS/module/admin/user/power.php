@@ -54,7 +54,7 @@ switch($method) {
         }
         \app\CMS\deleteCache('user_group');
         \app\CMS\deleteCache('user_power');
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/user/power/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -103,7 +103,7 @@ function build_page($method) {
             $tpl->setLoop('format', array('key'=>$key, 'value'=>$value, 'select'=>($record['format']==$key?'selected':'')));
         }
         $tpl->assign('method', $method);
-        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+        $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/user/power/'));
         $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_user_power_add':'admin_user_power_edit'));
     }
     $db->free();

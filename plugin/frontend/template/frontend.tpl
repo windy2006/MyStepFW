@@ -68,7 +68,7 @@ $("#btn_add").click(function (){
     toDetail();
 });
 function setNew(app, jq, bs) {
-    let obj = $("<tr>").append('<td>'+app+'</td>').append('<td>'+jq+'</td>').append('<td>'+bs+'</td>');
+    let obj = $('<tr>').append($('<td>').text(app)).append($('<td>').text(jq)).append($('<td>').text(bs));
     let btn = $("<button>").attr("type", "button").attr("idx", app).addClass("btn btn-primary").text("删除").click(function (){
         $("#app option[value="+this.getAttribute("idx")+"]").show();
         $(this).parentsUntil("tr").parent().remove();
@@ -79,7 +79,7 @@ function setNew(app, jq, bs) {
     obj.insertAfter("#selector");
 }
 function toDetail() {
-    let result = {};
+    let result = Object.create(null);
     $("input[name=rule]").each(function(){
         let list = this.value.split(":");
         result[list[0]] = {jq:list[1],bs:list[2]}
@@ -90,7 +90,7 @@ function toDetail() {
 $(function(){
     $("#jQuery option:last").prop("selected", true);
     $("#BootStrap option:last").prev().prop("selected", true);
-    let detail = JSON.parse('<!--detail-->');
+    let detail = JSON.parse(document.getElementById('detail').value || '{}');
     for(let x in detail) {
         $("#app option[value="+x+"]").hide();
         setNew(x, detail[x].jq, detail[x].bs);

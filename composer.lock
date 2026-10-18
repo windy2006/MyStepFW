@@ -4,43 +4,33 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5b312c5b4fbb9f9433e53e2b245693ca",
+    "content-hash": "b8fd4a8bf717ff767980a4df4d00f548",
     "packages": [
         {
             "name": "erusev/parsedown",
-            "version": "2.0.x-dev",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/erusev/parsedown.git",
-                "reference": "32278afaf36c758de026b66661d3afd6dfbea743"
+                "reference": "96baaad00f71ba04d76e45b4620f54d3beabd6f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/erusev/parsedown/zipball/32278afaf36c758de026b66661d3afd6dfbea743",
-                "reference": "32278afaf36c758de026b66661d3afd6dfbea743",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/erusev/parsedown/zipball/96baaad00f71ba04d76e45b4620f54d3beabd6f7",
+                "reference": "96baaad00f71ba04d76e45b4620f54d3beabd6f7",
+                "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": "^7.1||^8.0"
+                "php": ">=7.1"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.0.0",
-                "infection/infection": "^0.25.0",
-                "phpunit/phpunit": "^9.3.11||^8.5.21||^7.5.20",
-                "roave/infection-static-analysis-plugin": "^1.10.0",
-                "vimeo/psalm": "^4.10.0"
+                "phpunit/phpunit": "^7.5|^8.5|^9.6"
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Erusev\\Parsedown\\": "src/"
+                "psr-0": {
+                    "Parsedown": ""
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -62,83 +52,36 @@
             ],
             "support": {
                 "issues": "https://github.com/erusev/parsedown/issues",
-                "source": "https://github.com/erusev/parsedown/tree/2.0.x"
+                "source": "https://github.com/erusev/parsedown/tree/1.8.0"
             },
-            "time": "2022-05-21T21:40:24+00:00"
-        },
-        {
-            "name": "meenie/javascript-packer",
-            "version": "1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/meenie/javascript-packer.git",
-                "reference": "dcab0159ae1ed9d7535c034fb8afe1e4c3495d22"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/meenie/javascript-packer/zipball/dcab0159ae1ed9d7535c034fb8afe1e4c3495d22",
-                "reference": "dcab0159ae1ed9d7535c034fb8afe1e4c3495d22",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "class.JavaScriptPacker.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL 2.1"
-            ],
-            "authors": [
+            "funding": [
                 {
-                    "name": "Nicolas Martin",
-                    "role": "Developer"
+                    "url": "https://github.com/erusev",
+                    "type": "github"
                 }
             ],
-            "description": "Composer hosted mirror of the PHP Version of Dean Edwards' JavaScript Packer",
-            "homepage": "http://joliclic.free.fr/php/javascript-packer/en/",
-            "keywords": [
-                "javascript packer"
-            ],
-            "support": {
-                "issues": "https://github.com/meenie/javascript-packer/issues",
-                "source": "https://github.com/meenie/javascript-packer/tree/1.1"
-            },
-            "time": "2013-03-25T21:54:33+00:00"
+            "time": "2026-02-16T11:41:01+00:00"
         },
         {
             "name": "mrclay/jsmin-php",
-            "version": "2.4.1",
+            "version": "2.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mrclay/jsmin-php.git",
-                "reference": "208e4122f8a273314e81c6b3bee897b5f3c1dc70"
+                "reference": "49feaa85933458c15bb62ae65644bf22d60b7610"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mrclay/jsmin-php/zipball/208e4122f8a273314e81c6b3bee897b5f3c1dc70",
-                "reference": "208e4122f8a273314e81c6b3bee897b5f3c1dc70",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/mrclay/jsmin-php/zipball/49feaa85933458c15bb62ae65644bf22d60b7610",
+                "reference": "49feaa85933458c15bb62ae65644bf22d60b7610",
+                "shasum": ""
             },
             "require": {
                 "ext-pcre": "*",
                 "php": ">=5.3.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.2"
+                "phpunit/phpunit": "^4.8.36|^9.5.26"
             },
             "type": "library",
             "autoload": {
@@ -172,33 +115,39 @@
             "support": {
                 "email": "minify@googlegroups.com",
                 "issues": "https://github.com/mrclay/jsmin-php/issues",
-                "source": "https://github.com/mrclay/jsmin-php/tree/2.4.1"
+                "source": "https://github.com/mrclay/jsmin-php/tree/2.4.3"
             },
-            "time": "2022-03-26T14:41:59+00:00"
+            "time": "2022-12-13T20:15:15+00:00"
         },
         {
             "name": "phrozenbyte/cssmin",
-            "version": "v3.0.2",
+            "version": "v3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PhrozenByte/cssmin.git",
-                "reference": "cbf03632033927f2bccf19b424d61a14fc44e37a"
+                "reference": "261bd26bf42f533ea419b009732f62c850d2b5c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PhrozenByte/cssmin/zipball/cbf03632033927f2bccf19b424d61a14fc44e37a",
-                "reference": "cbf03632033927f2bccf19b424d61a14fc44e37a",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/PhrozenByte/cssmin/zipball/261bd26bf42f533ea419b009732f62c850d2b5c6",
+                "reference": "261bd26bf42f533ea419b009732f62c850d2b5c6",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.0"
             },
+            "replace": {
+                "innogames/cssmin": "*",
+                "natxet/cssmin": "*",
+                "skavunga/cssmin": "*",
+                "skeeks/cssmin": "*",
+                "supa-creation/php-css-min": "*",
+                "supa86000/zf2-css-min": "*",
+                "surda/cssmin": "*"
+            },
+            "bin": [
+                "bin/cssmin"
+            ],
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -213,7 +162,13 @@
                 {
                     "name": "Joe Scylla",
                     "email": "joe.scylla@gmail.com",
-                    "homepage": "https://profiles.google.com/joe.scylla"
+                    "homepage": "https://profiles.google.com/joe.scylla",
+                    "role": "Original Author"
+                },
+                {
+                    "name": "Daniel Rudolf",
+                    "homepage": "https://www.daniel-rudolf.de",
+                    "role": "Maintainer"
                 }
             ],
             "description": "CssMin is a css parser and minfier. It minifies css by removing unneeded whitespace character, comments, empty blocks and empty declarations. In addition declaration values can get rewritten to shorter notation if available. The minification if configurable.",
@@ -224,22 +179,23 @@
             ],
             "support": {
                 "issues": "https://github.com/PhrozenByte/cssmin/issues",
-                "source": "https://github.com/PhrozenByte/cssmin/tree/master"
+                "source": "https://github.com/PhrozenByte/cssmin"
             },
-            "time": "2017-05-26T17:05:01+00:00"
+            "time": "2025-08-08T15:34:05+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "erusev/parsedown": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.0"
+        "php": "^7.4"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-overrides": {
+        "php": "7.4.0"
+    },
+    "plugin-api-version": "2.6.0"
 }

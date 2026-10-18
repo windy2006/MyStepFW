@@ -47,8 +47,8 @@ switch($method) {
         }
         multiDelData($id);
         \app\CMS\deleteCache('news_cat');
-        $cache->func('\app\CMS\setCatList', [$news_cat], null);
-        CMS::redirect(myReq::svr('referer').'?Refresh');
+        $cache->func('\app\CMS\setCatList', [$news_cat], 0);
+        CMS::redirect(\app\CMS\queryURL(myReq::svr('referer'), ['Refresh'=>1]));
         break;
     case 'order':
         CMS::$log = $mystep->getLanguage('admin_art_catalog_change');
@@ -65,7 +65,7 @@ switch($method) {
             $db->update();
         }
         \app\CMS\deleteCache('news_cat');
-        $cache->func('\app\CMS\setCatList', [$news_cat], null);
+        $cache->func('\app\CMS\setCatList', [$news_cat], 0);
         $id = '';
         CMS::redirect();
         break;
@@ -73,6 +73,12 @@ switch($method) {
     case 'edit_ok':
         if(myReq::check('post')) {
             $data = r::p('[ALL]');
+            $parentPath = \app\CMS\categoryPath($news_cat_plat,$data['pid']);
+            if(!checkPower('web',$data['web_id']) || ($data['pid']!=0 && (!$parentPath
+                || end($parentPath)['web_id']!=$data['web_id']
+                || ($method==='edit_ok' && in_array((int)$data['cat_id'],array_map('intval',array_column($parentPath,'cat_id')),true))))) {
+                myStep::info('admin_art_catalog_error');
+            }
             if($data['pid']==0) {
                 $data['layer'] = 1;
             } else {
@@ -171,9 +177,9 @@ switch($method) {
                 f::del($the_file);
             }
             \app\CMS\deleteCache('news_cat');
-            $cache->func('\app\CMS\setCatList', [$news_cat], null);
+            $cache->func('\app\CMS\setCatList', [$news_cat], 0);
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/article/catalog/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -267,7 +273,7 @@ function build_page($method) {
         $tpl->assign('method', $method);
         $tpl->assign('show_merge', $show_merge);
     }
-    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/article/catalog/'));
     $tpl->assign('web_id', $web_info['web_id']);
     setWeb($tpl);
     return $mystep->render($tpl);

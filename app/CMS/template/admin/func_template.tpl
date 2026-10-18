@@ -41,9 +41,9 @@
                     <img src="<!--tpl_list_img-->" class="card-img-top mb-2" alt="<!--tpl_list_idx-->">
                     <div class="card-body p-0">
                         <div class="btn-group">
-                            <a class="btn btn-sm btn-info" href="list&idx=<!--tpl_list_idx-->">编辑</a>
-                            <a class="btn btn-sm btn-info" href="export&idx=<!--tpl_list_idx-->">导出</a>
-                            <a class="btn btn-sm btn-info" href="remove&idx=<!--tpl_list_idx-->" onclick="return confirm('是否确定删除当前模板？')">删除</a>
+                            <a class="btn btn-sm btn-info" href="list?idx=<!--tpl_list_idx|url-->">编辑</a>
+                            <a class="btn btn-sm btn-info" href="export?idx=<!--tpl_list_idx|url-->">导出</a>
+                            <a class="btn btn-sm btn-info" href="remove?idx=<!--tpl_list_idx|url-->" onclick="return confirm('是否确定删除当前模板？')">删除</a>
                         </div>
                     </div>
                 </div>

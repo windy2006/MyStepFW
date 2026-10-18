@@ -4,11 +4,10 @@
  * current stylesheet. 
  * 
  * @package		CssMin/Minifier/Filters
- * @link		http://code.google.com/p/cssmin/
+ * @link		https://github.com/PhrozenByte/cssmin
  * @author		Joe Scylla <joe.scylla@gmail.com>
  * @copyright	2008 - 2011 Joe Scylla <joe.scylla@gmail.com>
  * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		3.0.1
  */
 class CssImportImportsMinifierFilter extends aCssMinifierFilter
 	{
@@ -69,7 +68,7 @@ class CssImportImportsMinifierFilter extends aCssMinifierFilter
 									$import[$ii]->MediaTypes = $tokens[$i]->MediaTypes;
 									}
 								// @import at-rule defineds one or more media types; filter out media types not matching with the  parent @import at-rule
-								elseif (count($import[$ii]->MediaTypes > 0))
+								elseif (count($import[$ii]->MediaTypes) > 0)
 									{
 									foreach ($import[$ii]->MediaTypes as $index => $mediaType)
 										{

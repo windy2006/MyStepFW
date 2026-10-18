@@ -1,31 +1,28 @@
-<!-- ![Parsedown](https://i.imgur.com/yE8afYV.png) -->
+# Parsedown
 
-<p align="center"><img alt="Parsedown" src="https://i.imgur.com/fKVY6Kz.png" width="240" /></p>
-
-<h1>Parsedown</h1>
-
-[![Build Status](https://travis-ci.org/erusev/parsedown.svg)](https://travis-ci.org/erusev/parsedown)
 [![Total Downloads](https://poser.pugx.org/erusev/parsedown/d/total.svg)](https://packagist.org/packages/erusev/parsedown)
 [![Version](https://poser.pugx.org/erusev/parsedown/v/stable.svg)](https://packagist.org/packages/erusev/parsedown)
 [![License](https://poser.pugx.org/erusev/parsedown/license.svg)](https://packagist.org/packages/erusev/parsedown)
 
-Better Markdown Parser in PHP - <a href="http://parsedown.org/demo">Demo</a>.
+Better Markdown Parser in PHP — <a href="https://parsedown.org/demo">demo</a>
 
 ## Features
 
-* One File
-* No Dependencies
-* [Super Fast](http://parsedown.org/speed)
-* Extensible
-* [GitHub flavored](https://help.github.com/articles/github-flavored-markdown)
-* Tested in 5.5 to 7.3
-* [Markdown Extra extension](https://github.com/erusev/parsedown-extra)
+- One file
+- No dependencies
+- [Super fast](http://parsedown.org/speed)
+- Extensible
+- [GitHub flavored](https://github.github.com/gfm)
+- [Tested](http://parsedown.org/tests/) in PHP 7.1+
+- [Markdown Extra extension](https://github.com/erusev/parsedown-extra)
 
 ## Installation
 
 Install the [composer package]:
 
-    composer require erusev/parsedown
+```sh
+composer require erusev/parsedown
+```
 
 Or download the [latest release] and include `Parsedown.php`
 
@@ -62,21 +59,19 @@ If instead, you wish to allow HTML within untrusted user-input, but still want o
 
 In both cases you should strongly consider employing defence-in-depth measures, like [deploying a Content-Security-Policy](https://scotthelme.co.uk/content-security-policy-an-introduction/) (a browser security feature) so that your page is likely to be safe even if an attacker finds a vulnerability in one of the first lines of defence above.
 
-#### Security of Parsedown Extensions
-
 Safe mode does not necessarily yield safe results when using extensions to Parsedown. Extensions should be evaluated on their own to determine their specific safety against XSS.
 
 ## Escaping HTML
 
-> ⚠️  **WARNING:** This method isn't safe from XSS!
+> WARNING: This method is not safe from XSS!
 
-If you wish to escape HTML **in trusted input**, you can use the following:
+If you wish to escape HTML in trusted input, you can use the following:
 
 ```php
 $Parsedown->setMarkupEscaped(true);
 ```
 
-Beware that this still allows users to insert unsafe scripting vectors, such as links like `[xss](javascript:alert%281%29)`.
+Beware that this still allows users to insert unsafe scripting vectors, ex: `[xss](javascript:alert%281%29)`.
 
 ## Questions
 
@@ -97,3 +92,7 @@ It passes most of the CommonMark tests. Most of the tests that don't pass deal w
 **How can I help?**
 
 Use it, star it, share it and if you feel generous, [donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=528P3NZQMP8N2).
+
+**What else should I know?**
+
+I also make [Nota](https://nota.md/) — a notes app designed for local Markdown files.

@@ -61,7 +61,7 @@
                 <div class="float-right p-2 border-0">
                     <button class="btn btn-primary btn-sm mr-3" type="submit"> 确 认 </button>
                     <button class="btn btn-primary btn-sm mr-3" type="reset"> 重 置 </button>
-                    <button class="btn btn-primary btn-sm" type="button" onClick="location.href='<!--back_url-->'"> 返 回 </button>
+                    <button class="btn btn-primary btn-sm" type="button" onClick="location.href=this.getAttribute('data-back-url')" data-back-url="<!--back_url|html-->"> 返 回 </button>
                 </div>
             </div>
         </form>
@@ -72,7 +72,7 @@ $(function(){
     jQuery.vendor('jquery.powerUpload', {
         callback:function(){
             $('#upload').powerUpload({
-                url: '<!--url_prefix-->api/myStep/upload?core=CMS',
+                url: queryURL('<!--url_prefix-->api/myStep/upload', {core:'CMS'}),
                 title: '请选择需要上传的图示文件',
                 mode: 'browse',
                 max_files: 1,

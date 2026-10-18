@@ -48,7 +48,7 @@ $web_id = r::r('web_id');
 if(empty($web_id)) $web_id = 1;
 if(!checkPower('web', $web_id, $list)) {
     if(count($list)==0) {
-        CMS::redirect($path_admin.'log&out');
+        CMS::redirect(\app\CMS\getURL($S->web->path_admin.'/login', ['out'=>1]));
     } else {
         $web_id = $list[0];
     }
@@ -76,7 +76,7 @@ if(!empty($info_app['path'][1]) && is_dir(PATH.'module/admin/'.$info_app['path']
     if(!checkPower('func', implode('/', array_slice($info_app['path'],1,2)))) {
         myStep::info('admin_nopower', $path_admin);
     }
-    $mystep->setAddedContent('end', '<script type="application/javascript" src="/static/js/checkForm.js"></script>');
+    $mystep->setAddedContent('end', '<script type="application/javascript" src="'.ROOT_WEB.'static/js/checkForm.js"></script>');
     include($file);
 } else {
     $tpl_setting['name'] = 'frame';

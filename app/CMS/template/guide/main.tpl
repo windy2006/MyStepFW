@@ -37,7 +37,7 @@
             <div class="position-fixed" style="top:60px;width:200px;">
                 <ul id="side_nav" class="navbar-nav list-group">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
+                        <a class="nav-link" href="<!--url_prefix_app-->"><span class="glyphicon glyphicon-home"></span> 首页</a>
                     </li>
                     <!--loop:start key="news_cat"-->
                     <li class="nav-item" idx="<!--news_cat_idx-->" cat="<!--news_cat_cat_id-->">

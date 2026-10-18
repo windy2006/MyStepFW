@@ -1,158 +1,101 @@
 <?php
-global $page, $query, $count, $page_size;
-$m = $info_app['path'][1] ?? r::g('m');
-$ip = r::g('ip');
-if($m=='reset') myFile::del(__DIR__.'/../data.db');
-$setting = new myConfig(__DIR__.'/../config.php');
-$db = new myDb('sqlite', __DIR__.'/../data.db');
-$list = include(__DIR__.'/../ban_ip.php');
-$flag = false;
 
-switch($m) {
-    case 'ban':
-        $ip = str_replace(' ', '', $ip);
-        $ip = explode(',', $ip);
-        $ip = $ip[0];
-        if($ip==myReq::ip()) myStep::redirect();
-        $msg = r::g('msg');
-        $list[$ip] = empty($msg) ? $setting->forward : $msg;
-        $flag = true;
-        break;
-    case 'unban':
-        unset($list[$ip]);
-        $flag = true;
-    case 'del':
-        if(strpos($ip, ',')) {
-            $ip = str_replace(' ', '', $ip);
-            $ip = explode(',', $ip);
-        }
-        $db->build('requests')->where('ip','=',$ip,'or');
-        $db->delete();
-        myStep::redirect();
-        break;
-    case 'reset':
-        $db->query("CREATE TABLE if not exists requests(
-            id INTEGER PRIMARY KEY autoincrement, 
-            ip varchar(40),
-            url varchar(255), 
-            qry varchar(255), 
-            ua varchar(255), 
-            cnt integer,
-            req DATETIME
-        )");
-        myStep::redirect();
-        break;
-}
+/**
+ * 文件：plugin/badReq/module/badReq.php
+ * 功能说明：badReq 插件的 badReq 功能模块
+ *
+ * 方法目录：
+ *   本文件不直接声明具名方法或函数。
+ *
+ * 回调目录：
+ *   回调 1：在锁内登记单个 IP 的封禁信息。
+ *   回调 2：在锁内解除指定 IP 的封禁。
+ *
+ * 使用说明：
+ *   1. 处理日志筛选、分组、分页、诊断读取及封禁/解除/删除/重置。
+ *   2. 由受保护的 showPluginPage 装配，使用 $tpl_sub 及必要的全局上下文；写操作限制 POST。
+ *
+ * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码保持 PHP 7.4 兼容。
+ *       方法目录覆盖本文件直接声明；闭包参数及捕获变量说明见各回调旁 PHPDoc。
+ */
 
-if($flag) {
-    krsort($list, SORT_NUMERIC);
-    $result = '<?PHP
-return '.var_export($list, true).';';
-    myFile::saveFile(__DIR__.'/../ban_ip.php', $result);
-    $db->close();
-    myStep::redirect();
-}
-
-function getPageList($total, $page=1, $page_size=20, $qstr='') {
-    if(!is_numeric($page) || $page < 1) $page = 1;
-    $page = (INT)$page;
-    $page_count = ceil($total/$page_size);
-    if($page < 1) $page = 1;
-    if($page > $page_count) $page = $page_count;
-    if(!empty($qstr)) $qstr .= '&';
-    $keys = array_keys(\myReq::r('[ALL]'));
-    $qstr = reset($keys).'?'.$qstr.'page=';
-    $record_start = ($page-1) * $page_size;
-    if($record_start < 0) $record_start = 0;
-    $page_arr = array();
-    $page_arr['total'] = $total;
-    $page_arr['page_current'] = $page;
-    $page_arr['page_count'] = $page_count;
-    $page_arr['link_first'] = ($page<=1 ? 'javascript:' : $qstr.'1');
-    $page_arr['link_prev'] = ($page<=1 ? 'javascript:' : $qstr.($page-1));
-    $page_arr['link_next'] = ($page==$page_count ? 'javascript:' : $qstr.($page+1));
-    $page_arr['link_last'] = ($page==$page_count ? 'javascript:' : $qstr.$page_count);
-    return array($page_arr, $record_start, $page_size);
-}
-
-function parsePages(\myTemplate &$tpl, &$tag_attrs = array()){
-    global $tpl_setting;
-    $tpl_content = $tpl->getTemplate(__DIR__.'/../template/block_pages.tpl');
-    list($block, $tag_attrs['unit'], $tag_attrs['unit_blank']) = $tpl->getBlock($tpl_content, 'if');
-    $tag_attrs['unit'] = preg_replace('#<!--(link_\w+)-->#', '<?=$page_info[\'\1\']?>', $tag_attrs['unit']);
-    $tag_attrs['unit'] = str_replace('<!--page_count-->', '<?=$page_info[\'page_count\']?>', $tag_attrs['unit']);
-    $tag_attrs['unit'] = stripslashes($tag_attrs['unit']);
-    $tag_attrs['unit_blank'] = stripslashes($tag_attrs['unit_blank']);
-    $content = <<<'mytpl'
-<?PHP
-list($page_info) = getPageList({myTemplate::count}, {myTemplate::page}, {myTemplate::size}, {myTemplate::query});
-if($page_info['page_count']>1) {
-?>
-{myTemplate::unit}
-<?PHP
-} elseif({myTemplate::count}>0) {
-?>
-{myTemplate::unit_blank}
-<?PHP
-}
-?>
-mytpl;
-    return str_replace($block, $content, $tpl_content);
-}
-$mystep->regTag('pages', 'parsePages');
-
-$order = r::g('order');
-if(empty($order)) $order='req';
-$order_type = r::g('order_type');
-if(empty($order_type)) $order_type = 'desc';
-$keyword = r::g('keyword')??'';
-$mode = r::g('mode');
-if(empty($mode)) $mode='';
-
-$condition = array();
-if(!empty($keyword)) $condition = [
-    array('ip','like',$keyword, 'or'),
-    array('url','like',$keyword, 'or'),
-    array('qry','like',$keyword, 'or'),
-    array('ua','like',$keyword, 'or'),
-];
-
-$db->build('requests')->where($condition);
-if(!empty($mode)) {
-    $db->build('requests')
-       ->group($mode)
-       ->field('ip', 'url', 'qry', 'ua', 'req', 'count(*) as cnt');
-    $order='cnt';
-    $order_type = 'desc';
-}
-$sql = $db->select(1);
-
-$count = $db->result('select count(*) from ('.$sql.')');
-$page = r::g('page', 'int');
-$query = 'mode='.$mode.'&keyword='.$keyword.'&order='.$order.'&order_type='.$order_type;
-list($page_info, $record_start, $page_size) = getPageList($count, $page, 20, $query);
-
-$db->build('requests')
-    ->order($order, $order_type=='desc')
-    ->limit($record_start, $page_size);
-$db->select();
-while($record = $db->getRS()) {
-    $record['url2'] = shortUrl($record['url']);
-    $record['file'] = '';
-    if($file = myFile::find($record['req'].'.*', CACHE.'tmp/post/'.date('Ymd',$record['req']).'/')) {
-        $file = str_replace(ROOT, '/', $file[0]);
-        $record['file'] = $file;
+global $page,$query,$count,$page_size;
+$m=$info_app['path'][1] ?? r::r('m','!');$ip=r::r('ip','!');
+$setting=new myConfig(__DIR__.'/../config.php');
+$badDb=new myDb('SQLite',__DIR__.'/../data.db');plugin_badReq::schema($badDb);
+$list=is_file(__DIR__.'/../ban_ip.php') ? include __DIR__.'/../ban_ip.php' : [];if(!is_array($list))$list=[];
+if(in_array($m,['ban','unban','del','reset'],true)) {
+    if(($_SERVER['REQUEST_METHOD'] ?? 'GET')!=='POST') {http_response_code(405);header('Allow: POST');exit;}
+    $ips=is_string($ip)?array_values(array_filter(array_map('trim',explode(',',$ip)))):[];
+    foreach($ips as $address) if(!filter_var($address,FILTER_VALIDATE_IP)) myStep::info('error_para');
+    if($m==='ban') {
+        if(count($ips)!==1 || $ips[0]===myReq::ip()) myStep::info('error_para');
+        $message=r::r('msg','!');if(!is_string($message))$message=$setting->forward;
+        plugin_badReq::bans(
+        /**
+         * 功能说明：在锁内登记单个 IP 的封禁信息。
+         *
+         * 闭包依赖：通过 use 捕获 ips 和 message；调用前已完成 IP 与操作权限检查。
+         *
+         * @param array $list 当前封禁字典
+         * @return array 合并指定 IP 后的字典
+         */
+        function($list) use ($ips,$message) {$list[$ips[0]]=$message;return $list;});
+    } else {
+        if($m==='unban') plugin_badReq::bans(
+        /**
+         * 功能说明：在锁内解除指定 IP 的封禁。
+         *
+         * 闭包依赖：通过 use 捕获 ips；其他 IP 的记录保持不变。
+         *
+         * @param array $list 当前封禁字典
+         * @return array 移除指定 IP 后的字典
+         */
+        function($list) use ($ips) {foreach($ips as $address)unset($list[$address]);return $list;});
+        if($m==='reset') $badDb->query('DELETE FROM requests');
+        elseif($ips) {$badDb->build('requests')->where('ip','in',$ips);$badDb->delete();}
     }
-    $record['req'] = date('Y-m-d H:i:s', $record['req']);
-    $record['mode'] = isset($list[$record['ip']]) ? 'unban' : 'ban';
-    $tpl_sub->setLoop('record', $record);
+    $badDb->close();myStep::redirect(plugin_badReq::url());
 }
-$db->free();
+if($m==='detail') {
+    $file=myFile::resolveWithin(CACHE.'tmp/post',r::g('file','!'));
+    if(!$file || pathinfo($file,PATHINFO_EXTENSION)!=='txt') myStep::header('404');
+    header('Content-Type: text/plain; charset=utf-8');echo myFile::getLocal($file);$badDb->close();exit;
+}
+$mystep->regTag('pages','plugin_badReq::parsePages');
+$order=r::g('order');if(!in_array($order,['ip','url','req','cnt'],true))$order='req';
+$order_type=r::g('order_type')==='asc'?'asc':'desc';
+$keyword=r::g('keyword','!') ?? '';if(!is_string($keyword))$keyword='';
+$mode=r::g('mode');if(!in_array($mode,['ip','url'],true))$mode='';
+if($keyword!=='') $badDb->build('requests')->where([['ip','like',$keyword],['url','like',$keyword,'or'],['qry','like',$keyword,'or'],['ua','like',$keyword,'or']]);
+else $badDb->build('requests');
+if($mode!=='') {
+    $other=$mode==='ip'?'url':'ip';
+    $badDb->build('requests')->field($mode,'MAX('.$other.') AS '.$other,'MAX(qry) AS qry','MAX(ua) AS ua','MAX(req) AS req','SUM(cnt) AS cnt')->group($mode);
+    $order='cnt';$order_type='desc';
+}
+$sql=$badDb->select(true);$count=$badDb->count($sql);
+$page=r::g('page','int');$page_size=20;
+$query=http_build_query(['mode'=>$mode,'keyword'=>$keyword,'order'=>$order,'order_type'=>$order_type],'','&',PHP_QUERY_RFC3986);
+list($page_info,$record_start,$page_size)=plugin_badReq::pages($count,$page,$page_size,$query);$page=$page_info['page_current'];
+// count()释放构建状态；对已经生成的SQL追加已校验排序与整数分页，保留筛选/分组。
+$rows=$badDb->records($sql.' ORDER BY "'.$order.'" '.strtoupper($order_type).' LIMIT '.$page_size.' OFFSET '.$record_start);
+foreach($rows ?: [] as $record) {
+    $record['url2']=shortUrl($record['url']);$record['file']='';
+    $files=myFile::find($record['req'].'.*',CACHE.'tmp/post/'.date('Ymd',$record['req']).'/');
+    if($files) $record['file']=plugin_badReq::url(['m'=>'detail','file'=>date('Ymd',$record['req']).'/'.basename($files[0])]);
+    $record['mode']=isset($list[$record['ip']])?'unban':'ban';$record['req']=date('Y-m-d H:i:s',$record['req']);
+    foreach($record as &$value) $value=htmlspecialchars((string)$value,ENT_QUOTES,'UTF-8');unset($value);
+    $record['delete_url']=htmlspecialchars(plugin_badReq::url(['m'=>'del','ip'=>htmlspecialchars_decode($record['ip'],ENT_QUOTES)]),ENT_QUOTES,'UTF-8');
+    $tpl_sub->setLoop('record',$record);
+}
+$tpl_sub->assign('mode',$mode);$tpl_sub->assign('keyword',htmlspecialchars($keyword,ENT_QUOTES,'UTF-8'));
+$tpl_sub->assign('order',$order);$tpl_sub->assign('order_type_org',$order_type);$tpl_sub->assign('order_type',$order_type==='asc'?'desc':'asc');
+$tpl_sub->assign('msg',htmlspecialchars((string)$setting->forward,ENT_QUOTES,'UTF-8'));
+$badDb->close();
 
-$tpl_sub->assign('mode', $mode);
-$tpl_sub->assign('keyword', $keyword);
-$tpl_sub->assign('order', $order);
-$tpl_sub->assign('order_type_org', $order_type);
-$tpl_sub->assign('order_type', $order_type=='asc'?'desc':'asc');
-$tpl_sub->assign('msg', $setting->forward);
-$db->close();
+$tpl_sub->assign('reset_url',htmlspecialchars(plugin_badReq::url(['m'=>'reset']),ENT_QUOTES,'UTF-8'));
+$tpl_sub->assign('badreq_page_url_json',json_encode(plugin_badReq::url(),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT));
+foreach(['ip','url','cnt','req'] as $field) $tpl_sub->assign('order_'.$field.'_url',htmlspecialchars(plugin_badReq::url(['mode'=>$mode,'keyword'=>$keyword,'order'=>$field,'order_type'=>$order_type==='asc'?'desc':'asc']),ENT_QUOTES,'UTF-8'));
+
+$tpl_sub->assign('badreq_list_url_json',json_encode(plugin_badReq::url(['mode'=>$mode,'keyword'=>$keyword,'order'=>$order,'order_type'=>$order_type]),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT));

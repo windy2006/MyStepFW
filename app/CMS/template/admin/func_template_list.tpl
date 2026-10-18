@@ -1,11 +1,11 @@
 <div class="card border-bottom-0 bg-transparent pt-3 mb-5">
     <div class="card-header bg-info text-white position-fixed w-100 title">
         <i class="glyphicon glyphicon-circle-arrow-right"></i> <b><!--title--></b>
-        <a id="upload" class="btn btn-primary btn-sm float-right py-0 border" href="add&idx=<!--tpl_idx-->">添加模板</a>
+        <a id="upload" class="btn btn-primary btn-sm float-right py-0 border" href="add?idx=<!--tpl_idx|url-->">添加模板</a>
     </div>
     <div class="form-inline mt-5 mx-auto">
         <div class="input-group mb-2 mb-md-0 mx-auto px-2">
-            <select name="tpl" onchange="location.href=global.root_fix+'list&idx='+this.value">
+            <select name="tpl" onchange="location.href=queryURL(routeURL('list'), {idx:this.value})">
                 <!--loop:start key="tpl_list"-->
                 <option value="<!--tpl_list_idx-->" <!--tpl_list_selected-->><!--tpl_list_idx--></option>
                 <!--loop:end-->
@@ -33,8 +33,8 @@
                 <td><!--file_time--></td>
                 <td>
                     <div class="btn-group">
-                        <a class="btn btn-sm btn-info" href="edit&idx=<!--tpl_idx-->&file=<!--file_name-->">修改</a>
-                        <a class="btn btn-sm btn-info" href="delete&idx=<!--tpl_idx-->&file=<!--file_name-->" onclick="return confirm('是否确定删除当前模板文件？')">删除</a>
+                        <a class="btn btn-sm btn-info" href="edit?idx=<!--tpl_idx|url-->&file=<!--file_name|url-->">修改</a>
+                        <a class="btn btn-sm btn-info" href="delete?idx=<!--tpl_idx|url-->&file=<!--file_name|url-->" onclick="return confirm('是否确定删除当前模板文件？')">删除</a>
                     </div>
                 </td>
             </tr>

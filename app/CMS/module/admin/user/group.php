@@ -29,7 +29,7 @@ switch($method) {
         $db->build($S->db->pre.'user_group')->field($data);
         $db->replace();
         \app\CMS\deleteCache('user_group');
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/user/group/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -66,7 +66,7 @@ function build_page($method) {
         }
         $tpl->assign($record);
         $tpl->assign('method', $method);
-        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+        $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/user/group/'));
         $tpl->assign('title', $mystep->getLanguage($method == 'add'?'admin_user_group_add':'admin_user_group_edit'));
     }
     for($i=0,$m=count($power); $i<$m; $i++) {

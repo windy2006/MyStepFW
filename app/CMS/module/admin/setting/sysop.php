@@ -19,6 +19,10 @@ switch($method) {
     case 'edit_ok':
         if(myReq::check('post')) {
             $data = r::p('[ALL]');
+            $data['password'] = r::p('password', '!') ?? '';
+            // 确认字段保留在前端，服务端独立检查并在写入前剔除；兼容旧页面省略该字段。
+            $confirmation = r::p('password_r', '!') ?? r::p('password_c', '!');
+            if($confirmation !== null && $data['password'] !== $confirmation) myStep::info('checkform_err_password');
             $flag = false;
             if($data['username'] != $data['username_org']) {
                 $db->build($S->db->pre.'sys_op')
@@ -29,20 +33,21 @@ switch($method) {
                 myStep::info(sprintf($mystep->getLanguage('admin_sys_op_error2'), $data['username']));
             }
             CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_sys_op_add':'admin_sys_op_edit');
-            if(empty($data['password'])) {
+            if($data['password'] === '') {
                 unset($data['password']);
             } else {
-                $data['password'] = md5($data['password']);
+                $data['password'] = myAuth::hashPassword($data['password']);
             }
-            unset($data['username_org'], $data['password_c']);
+            unset($data['username_org'], $data['password_c'], $data['password_r']);
             $db->build($S->db->pre.'sys_op')->field($data);
             if($method=='add_ok') {
                 $db->insert();
             } else {
+                $db->build($S->db->pre.'sys_op')->where('id', 'n=', $id);
                 $db->update();
             }
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/setting/sysop/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -72,7 +77,7 @@ function build_page($method) {
         $order_type = r::g('order_type');
         if(empty($order_type)) $order_type = 'desc';
 
-        $query = 'keyword='.$keyword.'&web_id='.$web_info['web_id'].'&order='.$order.'&order_type='.$order_type;
+        $query = http_build_query(['keyword'=>$keyword, 'group_id'=>$group_id, 'order'=>$order, 'order_type'=>$order_type], '', '&', PHP_QUERY_RFC3986);
         list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
         $db->build($S->db->pre.'sys_op')
@@ -116,7 +121,7 @@ function build_page($method) {
         $sys_group[$i]['selected'] = ($sys_group[$i]['group_id']==$group_id?'selected':'');
         $tpl->setLoop('sys_group', $sys_group[$i]);
     }
-    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/setting/sysop/'));
     $tpl->assign('method', $method);
     $db->free();
     return $mystep->render($tpl);

@@ -28,7 +28,7 @@ if(!empty($id)) {
         if(!checkPower('web', $web_id)) {
             CMS::redirect();
         }
-        if(checkPower('func') && ($S->info->time/1000-strtotime($add_date))/(60*60*24)>60) {
+        if(checkPower('func') && ($S->info->time-strtotime($add_date))/(60*60*24)>60) {
             myStep::info('admin_art_content_locked');
         }
     }
@@ -91,7 +91,7 @@ switch($method) {
             $db->insert();
             $data['cat_id'] = $db->getInsertId();
             \app\CMS\deleteCache('news_cat');
-            $cache->func('\app\CMS\setCatList', [$news_cat], null);
+            $cache->func('\app\CMS\setCatList', [$news_cat], 0);
             unset($data['independent_article']);
         }
 
@@ -105,9 +105,9 @@ switch($method) {
         $content = preg_replace('/<(\w+)[^>]*><\!\-\- pagebreak \-\-\><\/\\1>[\r\n\s]*/m', '<!-- pagebreak -->', $content);
         unset($data['content']);
 
-        $back_url = htmlspecialchars_decode($data['back_url']);
-        $back_url = preg_replace('#web_id=\d+#', 'web_id='.$web_id, $back_url);
-        $back_url = preg_replace('#cat_id=\d+#', 'cat_id='.$cat_id, $back_url);
+        $back_url = htmlspecialchars_decode($data['back_url'] ?? '');
+        if($back_url === '') $back_url = \app\CMS\getURL($S->web->path_admin.'/article/content/');
+        $back_url = \app\CMS\queryURL($back_url, ['web_id'=>$web_id, 'cat_id'=>$cat_id]);
         unset($data['back_url']);
 
         $get_remote_file = $data['get_remote_file']??false;
@@ -121,17 +121,8 @@ switch($method) {
                 } else {
                     continue;
                 }
-                $file_info = pathinfo($matches[2][$i]);
-                if(empty($file_info['extension'])) $file_info['extension'] = 'jpg';
-                $file_info['basename'] = preg_replace('/\?.*$/', '', $file_info['basename']);
-                $file_info['basename'] = preg_replace('/[;,&=]/', '', $file_info['basename']);
-                $file_info['extension'] = preg_replace('/\?.*$/', '', $file_info['extension']);
-                if(strlen($file_info['basename'])>120) $old_name = substr($file_info['basename'], -120);
-                $the_name = getMicrotime().'.'.$file_info['extension'];
-                $the_path = FILE.date($S->upload->path_mode);
-                myFile::getRemoteFile($matches[2][$i], $the_path.'/'.$the_name);
-                myFile::saveFile(FILE.date($S->upload->path_mode).'/log.txt', $the_name.'::'.$file_info['basename'].'::'.chr(10), 'a');
-                $content = str_replace($matches[2][$i], '/api/CMS/attachment/'.$the_name, $content);
+                $the_name = myFile::importPublicImage($matches[2][$i], FILE.date($S->upload->path_mode));
+                if($the_name !== false) $content = str_replace($matches[2][$i], myStep::setURL('api/CMS/attachment/'.$the_name), $content);
             }
         }
         $content = preg_replace('#(<img.+?)height=.+?[\'|"|\s]+(.*?)>#i', '\1\2>', $content);
@@ -155,10 +146,7 @@ switch($method) {
                 $sub_title[$i] = $data['subject'].' - '.($i+1);
             }
         }
-        $data['tag'] = str_replace('，', ',', $data['tag']);
-        $data['tag'] = str_replace('；', ',', $data['tag']);
-        $data['tag'] = str_replace(';', ',', $data['tag']);
-        $data['tag'] = str_replace(' ', '_', $data['tag']);
+        $data['tag'] = implode(',',\app\CMS\normalizeTags($data['tag']));
         if(!isset($data['setop_mode']) || $data['setop_mode']==0) {
             $data['setop'] = 0;
         } else {
@@ -176,25 +164,12 @@ switch($method) {
             $data['add_user'] = r::s('ms_cms_op');
             $data['add_date'] = 'now()';
 
-            $tag = explode(',', $data['tag']);
-            for($i=0,$m = count($tag); $i<$m; $i++) {
-                $tag[$i] = trim($tag[$i], '_');
-                if(strlen(trim($tag[$i]))<2) continue;
-                $tag[$i] = s::substr($tag[$i], 0, 15);
-                $tag[$i] = $db->safeValue($tag[$i]);
-                $db->build($web_cur['setting']->db->pre.'news_tag')
-                    ->field('id')
-                    ->where('tag', '=', $tag[$i]);
-                if($db->result()) {
-                    $db->build($web_cur['setting']->db->pre.'news_tag')
-                        ->field(array('count'=>'+1', 'update_date'=>'(UNIX_TIMESTAMP())'))
-                        ->where('tag', '=', $tag[$i]);
-                    $db->update();
-                } else {
-                    $db->build($web_cur['setting']->db->pre.'news_tag')
-                        ->values(0, $tag[$i], 1, 0, 'UNIX_TIMESTAMP()', 'UNIX_TIMESTAMP()');
-                    $db->insert();
-                }
+            // 与标签重建使用相同规则；数据值只交给 execute 绑定，避免双重转义。
+            $tagTable=$db->quoteIdentifier($web_cur['setting']->db->pre.'news_tag');
+            foreach(\app\CMS\normalizeTags($data['tag']) as $tag) {
+                $tagId=$db->fetchValue('SELECT id FROM '.$tagTable.' WHERE tag=?',[$tag]);
+                if($tagId!==false) $db->execute('UPDATE '.$tagTable.' SET count=count+1,update_date=UNIX_TIMESTAMP() WHERE id=?',[$tagId]);
+                else $db->execute('INSERT INTO '.$tagTable.' (tag,count,click,add_date,update_date) VALUES (?,1,0,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())',[$tag]);
             }
             unset($data['attach_list']);
             $db->build($web_cur['setting']->db->pre.'news_show')->field($data);
@@ -257,7 +232,7 @@ switch($method) {
                 $db->insert();
             }
         }
-        myStep::$goto_url = !empty($back_url)?$back_url:preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = !empty($back_url)?$back_url:\app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/article/content/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -328,7 +303,7 @@ function build_page($method) {
                 goto edit;
             }
         }
-        $query = 'keyword='.$keyword.'&cat_id='.$id.'&web_id='.$web_cur['web_id'].'&order='.$order.'&order_type='.$order_type;
+        $query = http_build_query(['keyword'=>$keyword, 'cat_id'=>$cat_id, 'web_id'=>$web_cur['web_id'], 'order'=>$order, 'order_type'=>$order_type], '', '&', PHP_QUERY_RFC3986);
         list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
         //main list
@@ -438,9 +413,9 @@ function build_page($method) {
     $tpl->assign('news_id', $id);
     $url = r::svr('HTTP_REFERER');
     if(is_null($url) || trim(substr($url, -(strlen($S->web->path_admin)+1)),'/')==$S->web->path_admin) {
-        $url = preg_replace('#/'.$S->web->path_admin.'.*$#', '/'.$S->web->path_admin.'/article/content', r::svr('request_uri'));
+        $url = \app\CMS\getURL($S->web->path_admin.'/article/content/');
     }
-    $url .= '&web_id='.$web_id;
+    $url = \app\CMS\queryURL($url, ['web_id'=>$web_id]);
     $tpl->assign('back_url', $url);
     $tpl->assign('tpl_style', $web_info['setting']->template->style);
     setWeb($tpl, $web_id);

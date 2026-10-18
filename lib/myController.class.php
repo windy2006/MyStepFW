@@ -10,6 +10,65 @@
  *           BUT PLEASE HOLD THIS ITEM.      *
  *                                           *
  ********************************************/
+/**
+ * 文件：lib/myController.class.php
+ * 功能说明：控制器公共能力与输出生命周期
+ *   管理实例、语言、插件、模块、API、标签、钩子及CSS/JS合并输出。
+ *
+ * 方法目录：
+ *   public myController::__clone() — 单实例克隆控制
+ *   public myController::setSingleton($singleton = false) — 单实例模式设置
+ *   public static myController::getInstance($calledClass) — 依照单实例模式引用其他实例
+ *   public myController::setAddedContent($position, $content) — 设置指定页面内容
+ *   public myController::pushAddedContent(myTemplate $tpl) — 将内容添加到指定位置
+ *   public myController::setLanguage($language, $charset = 'utf-8') — 设置页面语言
+ *   public myController::setLanguagePack($dir, $lng = 'default', $charset = 'utf-8') — 获取语言包
+ *   public myController::getLanguage($idx) — 获取语言项目
+ *   public myController::regApi($name, $method = '') — 注册 API 处理函数
+ *   public myController::runApi($name, $para = array(), $return = 'json') — 获取 API 数据
+ *   public myController::regPlugin($plugin, &$info = array()) — 注册插件
+ *   public myController::plugin() — 设置插件
+ *   public static myController::regModule($module, $func) — 注册功能模块
+ *   public static myController::module($module, $global_vars = '') — 调用已注册模块
+ *   public myController::regTag($tag_name, $tag_func) — 注册模版标签处理函数
+ *   public myController::regUrl($mode, $func) — 注册 URL 生成函数
+ *   public myController::url($mode) — 获取 URL
+ *   public myController::regLog($login, $logout = '', $chg_psw = '') — 注册登录接口
+ *   public myController::login($usr='', $pwd='') — 用户登录
+ *   public myController::logout() — 用户退出
+ *   public myController::chg_psw($id, $psw_org, $psw_new) — 变更密码
+ *   public myController::addCSS($code) — 添加 CSS
+ *   public myController::removeCSS($idx) — 移除 CSS
+ *   public myController::clearCSS() — 清空已添加样式
+ *   public myController::CSS($show = true, $cache_path = '', $expires = 604800) — 获取合成样式表
+ *   public myController::addJS($code) — 添加 JS
+ *   public myController::removeJS($idx) — 移除 JS
+ *   public myController::clearJS() — 清空已添加 JS
+ *   public myController::JS($show = true, $cache_path = '', $expires = 604800) — 获取合成脚本
+ *   public static myController::etag($etag = '', $expires = 604800) — 检测过期标签
+ *   public static myController::file($file, $name = '') — 显示文件
+ *   public static myController::guid($para = '') — 生成GUID
+ *   public myController::setFunction($position, $func) — 添加钩子代码
+ *   public myController::run($position, $desc = false, $para = '') — 执行钩子代码
+ *   public myController::start($charset = 'UTF-8', $set_plugin = true) — 页面起始
+ *   public myController::show(myTemplate $tpl, $minify = false) — 显示页面
+ *   public myController::end() — 页面结束
+ *   public static myController::redirect($url = '', $code = '302') — 链接跳转
+ *   public static myController::setOp($setting='check') — opCache 设置
+ *   public static myController::regClass($setting) — 设置类载入规则
+ *   public static myController::setAlias($list) — 设置类别名
+ *   public static myController::header($idx, $para = '', $exit = true) — 发送信息头
+ *
+ * 使用说明：
+ *   1. 由myStep及应用控制器继承；先登记资源和回调，再执行生命周期。
+ *   2. show/end可能输出或结束请求；需要字符串时使用相应非输出入口。
+ *   3. 本文件包含可继承公共接口，注释描述实际兼容行为，不改变签名。
+ *
+ * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
+ *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
+ *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ */
+
 
 /**
 控制器基础类，含单实例控制
@@ -56,6 +115,20 @@
     self::header($idx, $para, $exit)                    // 发送信息头
 */
 require_once('myBase.class.php');
+require_once __DIR__.'/myPath.class.php';
+require_once __DIR__.'/myClassLoader.class.php';
+/**
+ * 功能说明：管理实例、语言、插件、模块、API、标签、钩子及CSS/JS合并输出。
+ *
+ * 使用说明：
+ *   1. 由myStep及应用控制器继承；先登记资源和回调，再执行生命周期。
+ *   2. show/end可能输出或结束请求；需要字符串时使用相应非输出入口。
+ *   3. 本文件包含可继承公共接口，注释描述实际兼容行为，不改变签名。
+ *
+ * 方法目录：参见本文件顶部；只列直接声明，继承和trait别名沿用原声明注释。
+ *
+ * @example ../app/Document/module/myController.php 框架现有演示，仅作为文档引用，不在检查时执行
+ */
 class myController extends myBase {
     public static
         $modules = array(),
@@ -75,8 +148,11 @@ class myController extends myBase {
         $js = array();
 
     /**
-     * 单实例克隆控制
-     * @return bool
+     * 功能说明：单实例克隆控制
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return bool 单例模式下触发错误并返回false，否则为true；PHP的clone表达式仍返回克隆对象
      */
     public function __clone() {
         if (self::$singleton) {
@@ -95,45 +171,61 @@ class myController extends myBase {
     }
 
     /**
-     * 单实例模式设置
-     * @param bool $singleton
+     * 功能说明：单实例模式设置
+     *
+     * @param bool $singleton 是否启用按类复用实例的单例模式（默认：false）
+     * @return void 无返回值。
      */
     public function setSingleton($singleton = false) {
         self::$singleton = $singleton;
     }
 
     /**
-     * 依照单实例模式引用其他实例
-     * @param string $calledClass
-     * @return mixed|object
-     * @throws ReflectionException
+     * 功能说明：按类名取得实例，新实例执行构造初始化，单例复用不隐式重新初始化
+     *
+     * @param string $calledClass 待创建或获取实例的类名
+     * @param mixed ...$args 传给目标类init或构造函数的位置参数（历史位置参数，由func_get_args读取）
+     * @return object 新实例优先执行真实构造，所需参数缺省时延迟初始化；已有单例无参复用，显式传参重新初始化
+     * @throws ReflectionException 目标反射或底层调用产生的异常继续传递
+     * @throws Throwable 自定义解析器、初始化/反射目标或受信执行文件产生的异常继续传递
      */
     public static function getInstance($calledClass) {
         $argList = func_get_args();
         array_shift($argList);
+        static $instanceList = [];
         $r = new ReflectionClass($calledClass);
-        if (self::$singleton) {
-            static $instanceList = array();
-            if (!isset($instanceList[$calledClass])) $instanceList[$calledClass] = $r->newInstanceWithoutConstructor();
-            $instance = &$instanceList[$calledClass];
-        } else {
-            $instance = $r->newInstanceWithoutConstructor();
-        }
-        if (count($argList) > 0) {
-            if (method_exists($calledClass, 'init')) {
-                call_user_func_array(array($instance, 'init'), $argList);
-            } elseif (method_exists($calledClass, '__construct'))  {
-                call_user_func_array(array($instance, '__construct'), $argList);
+        $key = strtolower($r->getName());
+        $created = !self::$singleton || !isset($instanceList[$key]);
+        $instance = $created ? $r->newInstanceWithoutConstructor() : $instanceList[$key];
+        if($argList) {
+            if($created && ($constructor = $r->getConstructor()) && $constructor->isPublic()) {
+                $constructor->invokeArgs($instance, $argList);
+            } elseif(method_exists($instance, 'init') && is_callable([$instance, 'init'])) {
+                $instance->init(...$argList);
+            } elseif(($constructor = $r->getConstructor()) && $constructor->isPublic()) {
+                $constructor->invokeArgs($instance, $argList);
+            }
+        } elseif($created) {
+            $constructor = $r->getConstructor();
+            // 同 new myBase()：无参且仍需要必需参数时允许延迟初始化。
+            if($constructor && $constructor->isPublic() && $constructor->getNumberOfRequiredParameters() === 0) {
+                $constructor->invoke($instance);
+            } elseif(!$constructor && method_exists($instance, 'init') && is_callable([$instance, 'init'])
+                && (new ReflectionMethod($instance, 'init'))->getNumberOfRequiredParameters() === 0) {
+                $instance->init();
             }
         }
+        // 初始化失败不把半成品放入单例表；已存在实例显式传参仍沿用重新初始化约定。
+        if(self::$singleton && $created) $instanceList[$key] = $instance;
         return $instance;
     }
 
     /**
-     * 设置指定页面内容
-     * @param $position
-     * @param $content
-     * @return $this
+     * 功能说明：设置指定页面内容
+     *
+     * @param string $position 页面插入位置，例如head/start/end等既有位置
+     * @param string $content 要追加到该位置的HTML/脚本内容
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setAddedContent($position, $content) {
         $this->page_content[$position][] = $content;
@@ -141,8 +233,11 @@ class myController extends myBase {
     }
 
     /**
-     * 将内容添加到指定位置
-     * @param myTemplate $tpl
+     * 功能说明：将内容添加到指定位置
+     *
+     * @param myTemplate $tpl 已经初始化的模板实例
+     * @param string ...$args 可选页面位置名称列表；省略时一次赋值全部位置（历史位置参数，由func_get_args读取）
+     * @return void 将内容写入模板变量，不返回拼接结果
      */
     public function pushAddedContent(myTemplate $tpl) {
         $argList = func_get_args();
@@ -162,10 +257,11 @@ class myController extends myBase {
     }
 
     /**
-     * 设置页面语言
-     * @param $language
-     * @param $charset
-     * @return $this
+     * 功能说明：设置页面语言
+     *
+     * @param array $language 语言键到文本的映射；非数组不会合并
+     * @param string $charset 语言文本需要转换到的目标编码（默认：'utf-8'）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setLanguage($language, $charset = 'utf-8') {
         if (is_array($language)) {
@@ -175,11 +271,12 @@ class myController extends myBase {
     }
 
     /**
-     * 获取语言包
-     * @param $dir
-     * @param string $lng
-     * @param string $charset
-     * @return $this
+     * 功能说明：获取语言包
+     *
+     * @param string $dir 目标目录
+     * @param string $lng 语言包名称，不含文件扩展名（默认：'default'）
+     * @param string $charset 语言包文本转换到的目标编码（默认：'utf-8'）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setLanguagePack($dir, $lng = 'default', $charset = 'utf-8') {
         $dir = myFile::realPath($dir);
@@ -192,19 +289,21 @@ class myController extends myBase {
     }
 
     /**
-     * 获取语言项目
-     * @param $idx
-     * @return mixed|string
+     * 功能说明：获取语言项目
+     *
+     * @param string $idx 语言键名；缺失时按当前语言策略返回原键或默认值
+     * @return mixed 已登记语言键的原值；键不存在时原样返回idx
      */
     public function getLanguage($idx) {
         return isset($this->language[$idx]) ? $this->language[$idx] : $idx;
     }
 
     /**
-     * 注册 API 处理函数
-     * @param $name
-     * @param string $method
-     * @return $this
+     * 功能说明：注册 API 处理函数
+     *
+     * @param string $name 对外登记的API名称
+     * @param callable|string $method 接口回调或方法名，空串使用名称约定（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function regApi($name, $method = '') {
         if (empty($method) && is_callable($name)) {
@@ -216,11 +315,12 @@ class myController extends myBase {
     }
 
     /**
-     * 获取 API 数据
-     * @param $name
-     * @param array $para
-     * @param string $return
-     * @return mixed|string
+     * 功能说明：获取 API 数据
+     *
+     * @param string $name 已登记的API名称
+     * @param array $para 依位置顺序传给接口的参数（默认：array()）
+     * @param string $return 结果输出格式，例如json/xml等已支持格式（默认：'json'）
+     * @return string 已登记接口的编码正文；名称未登记时返回空串，不调用接口
      */
     public function runApi($name, $para = array(), $return = 'json') {
         $result = '';
@@ -233,9 +333,11 @@ class myController extends myBase {
     }
 
     /**
-     * 注册插件
-     * @param $plugin
-     * @return $this
+     * 功能说明：注册插件
+     *
+     * @param string $plugin 插件目录名称或路径
+     * @param array &$info 引用输出的插件元信息（默认：array()）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function regPlugin($plugin, &$info = array()) {
         $plugin = myFile::realPath($plugin);
@@ -247,7 +349,11 @@ class myController extends myBase {
     }
 
     /**
-     * 设置插件
+     * 功能说明：设置插件
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return void 无返回值。
      */
     public function plugin() {
         for ($i = 0, $m = count($this->plugins); $i < $m; $i++) {
@@ -256,10 +362,11 @@ class myController extends myBase {
     }
 
     /**
-     * 注册功能模块
-     * @param $module
-     * @param $func
-     * @return $this
+     * 功能说明：注册功能模块
+     *
+     * @param string $module 登记的模块名称
+     * @param callable|string $func 处理该模块的回调或执行入口
+     * @return void 只登记模块，不立即执行
      */
     public static function regModule($module, $func) {
         if(is_callable($func)) {
@@ -273,9 +380,11 @@ class myController extends myBase {
     }
 
     /**
-     * 调用已注册模块
-     * @param $module
-     * @param string $global_vars
+     * 功能说明：调用已注册模块
+     *
+     * @param string $module 模块名称
+     * @param string|string[] $global_vars 模块执行前需要导入的全局变量名列表（默认：''）
+     * @return void 无返回值。
      */
     public static function module($module, $global_vars = '') {
         if (isset(self::$modules[$module])) {
@@ -286,17 +395,21 @@ class myController extends myBase {
                     global $$k;
                 }
             }
-            include(self::$modules[$module]);
+            $handler = self::$modules[$module];
+            if(is_string($handler) && is_file($handler)) include($handler);
+            elseif(is_callable($handler)) call_user_func($handler);
+            else self::$goto_url = '/';
         } else {
             self::$goto_url = '/';
         }
     }
 
     /**
-     * 注册模版标签处理函数
-     * @param $tag_name
-     * @param $tag_func
-     * @return $this
+     * 功能说明：注册模版标签处理函数
+     *
+     * @param string $tag_name 模板标签名称
+     * @param callable $tag_func 处理模板标签的回调
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function regTag($tag_name, $tag_func) {
         $this->func_tag[$tag_name] = $tag_func;
@@ -304,10 +417,11 @@ class myController extends myBase {
     }
 
     /**
-     * 注册 URL 生成函数
-     * @param $mode
-     * @param $func
-     * @return $this
+     * 功能说明：注册 URL 生成函数
+     *
+     * @param string $mode URL生成策略名称
+     * @param callable $func 执行该策略的URL构造回调
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function regUrl($mode, $func) {
         if (is_callable($func)) {
@@ -317,9 +431,12 @@ class myController extends myBase {
     }
 
     /**
-     * 获取 URL
-     * @param $mode
-     * @return mixed|string
+     * 功能说明：获取 URL
+     *
+     * @param string $mode 已登记的URL生成策略；附加参数传给该策略回调
+     * @param mixed ...$args 依顺序转交已登记URL回调的位置参数（历史位置参数，由func_get_args读取）
+     * @return mixed 已登记URL回调的原始返回值；未登记模式返回#
+     * @throws Throwable 被调用回调/后端的异常按当前入口继续传递，不包装为成功结果
      */
     public function url($mode) {
         $url = '#';
@@ -332,11 +449,15 @@ class myController extends myBase {
     }
 
     /**
-     * 注册登录接口
-     * @param $login
-     * @param string $logout
-     * @param string $chg_psw
-     * @return $this
+     * 功能说明：注册登录接口
+     *
+     *
+     * 回调签名：login($usr,$pwd)、logout()、chg_psw($id,$psw_org,$psw_new)；原始返回值由对应登录入口直接返回。
+     *
+     * @param callable $login 登录处理回调
+     * @param callable|string $logout 退出处理回调，空串不登记（默认：''）
+     * @param callable|string $chg_psw 密码修改回调，空串不登记（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function regLog($login, $logout = '', $chg_psw = '') {
         $this->func_log = array();
@@ -347,10 +468,12 @@ class myController extends myBase {
     }
 
     /**
-     * 用户登录
-     * @param string $usr
-     * @param string $pwd
-     * @return false|mixed
+     * 功能说明：用户登录
+     *
+     * @param string $usr 登录用户名（默认：''）
+     * @param string $pwd 账号密码，空串按调用入口的兼容约定处理（默认：''）
+     * @return mixed 登录回调的原始返回值；未登记回调时返回false
+     * @throws Throwable 被调用回调/后端的异常按当前入口继续传递，不包装为成功结果
      */
     public function login($usr='', $pwd='') {
         $result = false;
@@ -361,8 +484,12 @@ class myController extends myBase {
     }
 
     /**
-     * 用户退出
-     * @return bool
+     * 功能说明：用户退出
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return mixed 退出回调的原始结果；未登记回调时返回false
+     * @throws Throwable 被调用回调/后端的异常按当前入口继续传递，不包装为成功结果
      */
     public function logout() {
         $result = false;
@@ -373,11 +500,13 @@ class myController extends myBase {
     }
 
     /**
-     * 变更密码
-     * @param $id
-     * @param $psw_org
-     * @param $psw_new
-     * @return bool
+     * 功能说明：变更密码
+     *
+     * @param string $id 操作对象的标识
+     * @param string $psw_org 原密码
+     * @param string $psw_new 新密码
+     * @return mixed 密码修改回调的原始结果；未登记时返回false
+     * @throws Throwable 被调用回调/后端的异常按当前入口继续传递，不包装为成功结果
      */
     public function chg_psw($id, $psw_org, $psw_new) {
         $result = false;
@@ -388,9 +517,10 @@ class myController extends myBase {
     }
 
     /**
-     * 添加 CSS
-     * @param $code
-     * @return $this
+     * 功能说明：添加 CSS
+     *
+     * @param string $code CSS文件路径或CSS源码；文件路径会立即读取并按内容去重
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function addCSS($code) {
         if (is_file($code)) {
@@ -404,9 +534,10 @@ class myController extends myBase {
     }
 
     /**
-     * 移除 CSS
-     * @param $idx
-     * @return $this
+     * 功能说明：移除 CSS
+     *
+     * @param string $idx 项目、属性或资源的索引名称
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function removeCSS($idx) {
         if (is_file($idx)) {
@@ -419,8 +550,11 @@ class myController extends myBase {
     }
 
     /**
-     * 清空已添加样式
-     * @return $this
+     * 功能说明：清空已添加样式
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function clearCSS() {
         $this->css = array();
@@ -428,11 +562,12 @@ class myController extends myBase {
     }
 
     /**
-     * 获取合成样式表
-     * @param bool $show
-     * @param string $cache_path
-     * @param int $expires
-     * @return string
+     * 功能说明：获取合成样式表
+     *
+     * @param bool $show true输出CSS并结束请求，false返回压缩结果字符串（默认：true）
+     * @param string $cache_path 生成资源缓存文件的目录，空串采用默认位置（默认：''）
+     * @param int $expires 缓存有效秒数（默认：604800）
+     * @return string show为false返回压缩CSS文本；show为true发送响应并结束请求
      */
     public function CSS($show = true, $cache_path = '', $expires = 604800) {
         $css = implode(chr(10), $this->css);
@@ -449,9 +584,10 @@ class myController extends myBase {
     }
 
     /**
-     * 添加 JS
-     * @param $code
-     * @return $this
+     * 功能说明：添加 JS
+     *
+     * @param string $code JavaScript文件路径或源码；文件路径会立即读取并按内容去重
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function addJS($code) {
         if (is_file($code)) {
@@ -465,9 +601,10 @@ class myController extends myBase {
     }
 
     /**
-     * 移除 JS
-     * @param $idx
-     * @return $this
+     * 功能说明：移除 JS
+     *
+     * @param string $idx 项目、属性或资源的索引名称
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function removeJS($idx) {
         if (is_file($idx)) {
@@ -480,8 +617,11 @@ class myController extends myBase {
     }
 
     /**
-     * 清空已添加 JS
-     * @return $this
+     * 功能说明：清空已添加 JS
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function clearJS() {
         $this->js = array();
@@ -489,14 +629,15 @@ class myController extends myBase {
     }
 
     /**
-     * 获取合成脚本
-     * @param bool $show
-     * @param string $cache_path
-     * @param int $expires
-     * @return string
+     * 功能说明：获取合成脚本
+     *
+     * @param bool $show true输出JavaScript并结束请求，false返回压缩结果字符串（默认：true）
+     * @param string $cache_path 生成资源缓存文件的目录，空串采用默认位置（默认：''）
+     * @param int $expires 缓存有效秒数（默认：604800）
+     * @return string show为false返回压缩JavaScript文本；show为true发送响应并结束请求
      */
     public function JS($show = true, $cache_path = '', $expires = 604800) {
-        $js = implode(chr(10), $this->js);
+        $js = implode("\n;\n", $this->js);
         if (!$show) return myMinify::minify($js, 'js');
         $md5 = md5($js);
         $this->etag($md5 . '.js', $expires);
@@ -505,68 +646,111 @@ class myController extends myBase {
         if (!$minify->check($expires)) {
             $minify->add($js);
         }
-        $minify->show(true);
+        $minify->show();
         return '';
     }
 
     /**
-     * 检测过期标签
-     * @param string $etag
-     * @param int $expires
+     * 功能说明：检测过期标签
+     *
+     *
+     * 输出约定：写入缓存响应头；GET/HEAD的If-None-Match命中时发送304并exit，支持列表、弱标签及星号；其他方法不返回304。空etag直接返回。
+     *
+     * @param string $etag 用于条件请求比较的资源标识（默认：''）
+     * @param int $expires 缓存有效秒数，限制为非负数（默认：604800）
+     * @return void 未命中时返回，命中时终止请求
+     * @throws InvalidArgumentException 标签含控制字符
      */
     public static function etag($etag = '', $expires = 604800) {
-        if (empty($etag)) return;
+        if ($etag === '') return;
+        $etag = (string)$etag;
+        if(preg_match('/[\x00-\x1f\x7f]/', $etag)) throw new InvalidArgumentException('Invalid ETag');
+        if(!preg_match('/\A(?:W\/)?"[^"\r\n]*"\z/D', $etag)) $etag = '"'.str_replace('"', '', $etag).'"';
+        $expires = max(0, (int)$expires);
         header('Pragma: public');
         header('Cache-Control: private, max-age=' . $expires);
-        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) == $etag) {
-            header('Etag:' . $etag, true, 304);
-            exit;
-        } else {
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-            header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
-            header('Etag:' . $etag);
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
+        header('ETag: ' . $etag);
+        $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+        if(in_array($method, ['GET', 'HEAD'], true)) {
+            $current = preg_replace('/^W\//', '', $etag);
+            preg_match_all('/(?:\A|,)\s*((?:W\/)?"[^"\r\n]*"|\*)\s*(?=,|\z)/D', $_SERVER['HTTP_IF_NONE_MATCH'] ?? '', $matches);
+            foreach($matches[1] as $candidate) if($candidate === '*' || preg_replace('/^W\//', '', $candidate) === $current) {
+                http_response_code(304);
+                if(ob_get_level() > 0) ob_clean();
+                exit;
+            }
         }
     }
 
     /**
-     * 显示文件
-     * @param $file
-     * @param string $name
+     * 功能说明：在框架默认及内置gzip缓冲下分块输出文件，保留原始字节并终止请求
+     *
+     * @param string $file 要发送的本地文件路径
+     * @param string $name 下载文件名；空串使用文件名，响应头会过滤控制字符并编码非ASCII字符（默认：''）
+     * @return void 成功输出、HEAD或文件不存在（404）均终止请求；不执行页面end钩子
+     * @throws RuntimeException 无法移除框架默认响应缓冲或文件读取失败
      */
     public static function file($file, $name = '') {
-        if (is_file($file)) {
-            if(empty($name)) $name = basename($file);
-            self::etag(md5(filemtime($file)));
-            $size = filesize($file);
+        $handlers = ob_list_handlers();
+        if(!array_diff($handlers, ['default output handler', 'ob_gzhandler'])) {
+            $gzip = in_array('ob_gzhandler', $handlers, true);
+            while(ob_get_level() > 0) if(!@ob_end_clean()) throw new RuntimeException('Cannot reset response buffer');
+            if($gzip) ob_start('ob_gzhandler', 65536);
+        } elseif(ob_get_level() > 0) ob_clean();
+        if(!is_file($file) || !is_readable($file)) { http_response_code(404); exit; }
+        $stream = @fopen($file, 'rb');
+        if(!$stream) { http_response_code(404); exit; }
+        try {
+            $stat = fstat($stream);
+            // 内容指纹避免同秒、同长度替换仍误回304；流式哈希不把大文件读入内存。
+            $context = hash_init('sha256');
+            hash_update_stream($context, $stream);
+            $digest = hash_final($context);
+            rewind($stream);
+            self::etag($digest);
+            $name = $name === '' ? basename($file) : basename(str_replace('\\', '/', $name));
+            $name = preg_replace('/[\x00-\x1f\x7f]/', '', $name);
+            $fallback = preg_replace('/[^a-zA-Z0-9._-]/', '_', $name);
+            if($fallback === '') $fallback = 'download';
             $type = myFile::getMime($file);
             header('Content-Description: File Transfer');
-            header('Date: ' . date('D, j M Y H:i:s', strtotime('now')) . ' GMT');
-            header('Expires: ' . date('D, j M Y H:i:s', strtotime('now + 10 years')) . ' GMT');
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $stat['mtime']) . ' GMT');
             header('Content-Type: ' . $type);
-            if ($type !== 'text/html') {
-                header('Accept-Ranges: bytes');
-                header('Accept-Length: ' . $size);
-                header('Content-Disposition: attachment; filename=' . $name);
+            if($type !== 'text/html') {
+                header('Content-Disposition: attachment; filename="'.$fallback.'"; filename*=UTF-8'."''".rawurlencode($name));
                 header('Content-Transfer-Encoding: binary');
             }
-            if($size*2 >= myFile::getByte(ini_get('memory_limit'))) {
-                ob_clean();
-                if($fp = @fopen($file,'r')) {
-                    while(($buffer = fgets($fp, 4096)) !== false) {
-                        echo $buffer;
-                    }
-                    fclose($fp);
-                }
-            } else {
-                myFile::show(myFile::getLocal($file));
+            // 压缩处理器可能改变字节数，此时由处理器决定传输长度。
+            $compression = strtolower((string)ini_get('zlib.output_compression'));
+            $transformed = !in_array($compression, ['', '0', 'off'], true);
+            foreach(ob_list_handlers() as $handler) if($handler !== 'default output handler') $transformed = true;
+            if(!$transformed) header('Content-Length: ' . $stat['size']);
+            if(ob_get_level() > 0) ob_clean();
+            // 框架默认缓冲不能继续累积整个文件；已有压缩/自定义处理器保留。
+            while(ob_get_level() > 0) {
+                $handlers = ob_list_handlers();
+                if($handlers[count($handlers)-1] !== 'default output handler') break;
+                if(!@ob_end_clean()) throw new RuntimeException('Cannot reset response buffer');
             }
-        }
+            if(strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
+                // fpassthru可能把mmap文件作为单个大块交给压缩缓冲，显式分块限制峰值。
+                while(!feof($stream)) {
+                    $chunk = fread($stream, 65536);
+                    if($chunk === false) throw new RuntimeException('Cannot read response file');
+                    echo $chunk;
+                }
+            }
+        } finally { fclose($stream); }
+        // 小文件和大文件均在此结束，防止继续进入路由、模板或追加生命周期输出。
+        exit;
     }
 
     /**
-     * 生成GUID
-     * @param string $para
-     * @return string
+     * 功能说明：生成GUID
+     *
+     * @param string $para 参与GUID摘要生成的附加文本（默认：''）
+     * @return string 32位十六进制GUID摘要，供兼容标识使用，不作为认证令牌
      */
     public static function guid($para = '') {
         $guid = '';
@@ -594,38 +778,43 @@ class myController extends myBase {
     }
 
     /**
-     * 添加钩子代码
-     * @param string $position
-     * @param $func
-     * @return $this
+     * 功能说明：添加钩子代码
+     *
+     *
+     * 回调签名取决于run：显式传入第三参数时按管道传递，保留空串、0、false及null；省略第三参数时只传当前控制器。
+     *
+     * @param string $position 内容/钩子插入位置名称
+     * @param callable|callable[] $func 单个回调（包括可调用数组）或按登记顺序执行的回调列表
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setFunction($position, $func) {
         if (!isset($this->functions[$position])) $this->functions[$position] = array();
-        if (is_array($func)) {
-            for ($i = 0, $m = count($func); $i < $m; $i++) {
-                if (is_callable($func[$i])) $this->functions[$position][] = $func[$i];
-            }
-        } elseif (is_callable($func)) {
+        if(is_callable($func)) {
             $this->functions[$position][] = $func;
+        } elseif(is_array($func)) {
+            foreach($func as $callback) if(is_callable($callback)) $this->functions[$position][] = $callback;
         }
         return $this;
     }
 
     /**
-     * 执行钩子代码
-     * @param $position
-     * @param bool $desc
-     * @param array $para
-     * @return array|mixed
+     * 功能说明：执行钩子代码
+     *
+     * @param string $position 内容/钩子插入位置名称
+     * @param bool $desc true按登记顺序的逆序执行回调（默认：false）
+     * @param mixed $para 显式传入时启动管道；数组展开为位置参数，其他值作为单参数；省略时传当前控制器（默认：''）
+     * @return mixed 依次执行回调后的最终值；初始参数及回调返回值按已有管道规则传递
+     * @throws Throwable 被调用回调/后端的异常按当前入口继续传递，不包装为成功结果
      */
     public function run($position, $desc = false, $para = '') {
+        $pipeline = func_num_args() >= 3;
         if (isset($this->functions[$position])) {
             $m = count($this->functions[$position]);
             for ($i = 0; $i < $m; $i++) {
                 $n = $desc ? ($m - $i - 1) : $i;
-                if (!empty($para)) {
-                    if(!is_array($para)) $para = [$para];
-                    $para = call_user_func_array($this->functions[$position][$n], $para);
+                if ($pipeline) {
+                    $arguments = is_array($para) ? array_values($para) : [$para];
+                    $para = call_user_func_array($this->functions[$position][$n], $arguments);
                 } else {
                     call_user_func($this->functions[$position][$n], $this);
                 }
@@ -635,9 +824,11 @@ class myController extends myBase {
     }
 
     /**
-     * 页面起始
-     * @param string $charset
-     * @param bool $set_plugin
+     * 功能说明：页面起始
+     *
+     * @param string $charset 字符编码名称，例如UTF-8；是否自动检测由具体入口决定（默认：'UTF-8'）
+     * @param bool $set_plugin 是否加载当前配置中启用的插件（默认：true）
+     * @return void 无返回值。
      */
     public function start($charset = 'UTF-8', $set_plugin = true) {
         if(count(ob_list_handlers())) {
@@ -659,7 +850,7 @@ class myController extends myBase {
             'max_accelerated_files' => 4000,
             'fast_shutdown' => 1,
             'validate_timestamps' => 1,
-            'revalidate_freq' => 120,
+            'revalidate_freq' => !empty($this->setting->gen->debug) ? 0 : 120,
             'huge_code_pages' => 1
         ));
         if(count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
@@ -673,9 +864,15 @@ class myController extends myBase {
     }
 
     /**
-     * 显示页面
-     * @param myTemplate $tpl
-     * @param bool $minify
+     * 功能说明：显示页面
+     *
+     *
+     * 输出约定：渲染并echo页面，可能开启缓冲；本方法本身不结束请求，生命周期收尾由调用方负责。
+     *
+     * @param myTemplate $tpl 已经初始化的模板实例
+     * @param bool $minify 是否压缩最终HTML输出（默认：false）
+     * @param string ...$args 兼容第三位置参数：传给模板render的子模板名称（历史位置参数，由func_get_args读取）
+     * @return void 无返回值。
      */
     public function show(myTemplate $tpl, $minify = false) {
         $this->pushAddedContent($tpl);
@@ -683,12 +880,20 @@ class myController extends myBase {
         $tpl->regTag($this->func_tag);
         if(count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
         $page = $tpl->render((func_num_args()==3 ? func_get_arg(2) : ''), false, $minify);
-        echo $this->run('page', false, $page);
+        $page = $this->run('page', false, $page);
+        echo $this instanceof myStep ? mySecurity::decorate($page) : $page;
         unset($tpl);
     }
 
     /**
-     * 页面结束
+     * 功能说明：页面结束
+     *
+     * 参数说明：无显式参数。
+     *
+     *
+     * 生命周期：执行end钩子及可调用shutdown；通常返回调用方，只有满足预设goto跳转条件时才结束请求。
+     *
+     * @return void 无返回值。
      */
     public function end() {
         $this->run('end', true);
@@ -700,9 +905,11 @@ class myController extends myBase {
     }
 
     /**
-     * 链接跳转
-     * @param $url
-     * @param string $code
+     * 功能说明：链接跳转
+     *
+     * @param string $url 跳转目标；空串回到Referer或默认地址（默认：''）
+     * @param string|int $code 重定向HTTP状态码，默认302（默认：'302'）
+     * @return void 无返回值。
      */
     public static function redirect($url = '', $code = '302') {
         if (empty($url)) {
@@ -715,9 +922,10 @@ class myController extends myBase {
     }
 
     /**
-     * opCache 设置
-     * @param string $setting
-     * @return array|bool
+     * 功能说明：opCache 设置
+     *
+     * @param array|string $setting opcache配置数组，或check/config/debug/reset命令（默认：'check'）
+     * @return array|bool config返回OPcache配置，其他命令返回当前操作/状态结果；扩展不可用为false
      */
     public static function setOp($setting='check') {
         if($result = function_exists('opcache_compile_file')) {
@@ -735,6 +943,9 @@ class myController extends myBase {
                     case $setting=='config':
                         $result = opcache_get_configuration();
                         break;
+                    case $setting=='debug':
+                        @ini_set('opcache.revalidate_freq', '0');
+                        break;
                     case $setting=='reset':
                         opcache_reset();
                         break;
@@ -745,12 +956,15 @@ class myController extends myBase {
     }
 
     /**
-     * 设置类载入规则
-     * @param $setting
+     * 功能说明：设置类载入规则
+     *
+     * @param array $setting 加载规则列表；path相对于ROOT，运行时兼容历史绝对路径；ext逗号分隔，idx文件相对于该path
+     * @return void 登记自动加载回调，不立即创建实例
      */
     public static function regClass($setting) {
         $idx = array();
         foreach($setting as $current) {
+            $current['path'] = rtrim(myPath::absolute($current['path']), '/').'/';
             /*
             set_include_path(get_include_path().PATH_SEPARATOR.$current['path']);
             spl_autoload_extensions($current['ext']);
@@ -779,8 +993,10 @@ class myController extends myBase {
     }
 
     /**
-     * 设置类别名
-     * @param $list
+     * 功能说明：设置类别名
+     *
+     * @param array $list 原类名与别名的映射
+     * @return void 无返回值。
      */
     public static function setAlias($list) {
         foreach ($list as $k => $v) {
@@ -789,10 +1005,12 @@ class myController extends myBase {
     }
 
     /**
-     * 发送信息头
-     * @param $idx
-     * @param string $para
-     * @param bool $exit
+     * 功能说明：发送信息头
+     *
+     * @param string|int $idx 状态码或已支持的响应头类别
+     * @param string|array $para 响应头模板的替换值；数组用于refresh等多值模板（默认：''）
+     * @param bool $exit 是否在发出响应头后结束请求（默认：true）
+     * @return void 发送响应头；exit为true时结束请求
      */
     public static function header($idx, $para = '', $exit = true) {
         //http_response_code()

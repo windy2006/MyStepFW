@@ -40,8 +40,8 @@ $mail->bcc('flyhorses@sina.com', '孙凯');
 $mail->file(PATH.'data/file/utf8.txt', 'xxx.txt');
 $mail->file(PATH.'data/image/logo.png', null, true);
 $mail->header('Disposition-Notification-To', $email);
-$result = $mail->send($server_1, false, 1);
+$result = $mail->buildMail(); // 展示 MIME；实际发送用 send($server_1)，应由受保护的业务表单触发。
 
 echo '<pre>';
-var_dump($result);
+echo htmlspecialchars(print_r($result,true),ENT_QUOTES,'UTF-8');
 echo '</pre>';

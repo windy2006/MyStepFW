@@ -3,11 +3,10 @@
  * This {@link aCssMinifierFilter minifier filter} will remove any comments from the array of parsed tokens.
  * 
  * @package		CssMin/Minifier/Filters
- * @link		http://code.google.com/p/cssmin/
+ * @link		https://github.com/PhrozenByte/cssmin
  * @author		Joe Scylla <joe.scylla@gmail.com>
  * @copyright	2008 - 2011 Joe Scylla <joe.scylla@gmail.com>
  * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		3.0.1
  */
 class CssRemoveCommentsMinifierFilter extends aCssMinifierFilter
 	{

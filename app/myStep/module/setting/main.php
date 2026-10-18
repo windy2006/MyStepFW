@@ -10,10 +10,12 @@ if(!empty($app)) {
     $builder = CONFIG.'construction/'.$ms_setting->gen->language.'.php';
 }
 $config = new myConfig($file);
+$config->merge(myPath::settings($config->get(true), $app?:'myStep'));
 if(myReq::check('post')) {
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
     if(!empty($app) && file_exists(APP.$app.'/setting_expand.php')) include(APP.$app.'/setting_expand.php');
     $config->set($_POST['setting']);
+    $config->merge(myPath::settings($config->get(true), $app?:'myStep'));
     $config->save('php');
 }
 

@@ -20,7 +20,7 @@
                 </div>
                 <input type="hidden" name="news_id" value="<!--record_news_id-->" />
                 <input type="hidden" name="pages" value="<!--record_pages-->" />
-                <input type="hidden" name="back_url" value="<!--back_url-->" />
+                <input type="hidden" name="back_url" value="<!--back_url|html-->" />
                 <select name="cat_id" class="custom-select">
                     <option value="">请选择</option>
                     <!--loop:start key="catalog"-->
@@ -152,7 +152,7 @@
                     <input type="hidden" name="multi_cata" value="">
                     <button class="btn btn-primary btn-sm mr-3" type="submit"> 确 认 </button>
                     <button class="btn btn-primary btn-sm mr-3" type="reset"> 重 置 </button>
-                    <button class="btn btn-primary btn-sm" type="button" onClick="location.href='<!--back_url-->'"> 返 回 </button>
+                    <button class="btn btn-primary btn-sm" type="button" onClick="location.href=this.getAttribute('data-back-url')" data-back-url="<!--back_url|html-->"> 返 回 </button>
                 </div>
             </div>
         </form>
@@ -228,7 +228,7 @@ function getKeyword() {
     if($("#keyword").val().length>2) return;
     let str = $("#subject").val();
     if(str.length>2) {
-        $.get("<!--url_prefix-->api/myStep/segment/"+str, function(data){
+        $.get("<!--url_prefix-->api/myStep/segment/"+encodeURIComponent(str), function(data){
             $("#keyword").val(data);
         }, "text");
     }
@@ -407,5 +407,5 @@ let setting_tinymce_ext = {
 };
 let setting_tinymce_btn = 'pagebreak subtitle highlight';
 </script>
-<script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
-<script type="application/javascript" src="/app/CMS/asset/admin/tinymce_init.js"></script>
+<script type="application/javascript" src="<!--path_root-->vendor/tinymce/tinymce.min.js"></script>
+<script type="application/javascript" src="<!--path_app-->asset/admin/tinymce_init.js"></script>

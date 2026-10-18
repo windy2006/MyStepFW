@@ -1,6 +1,6 @@
 <?PHP
-
-$setting = array();
-$setting['pack'] = true;
-$setting['update'] = true;
+$setting = array (
+  'pack' => true,
+  'update' => true,
+);
 return $setting;

@@ -1,49 +1,30 @@
 <?PHP
-$cache = new myCache('myCache_File', PATH.'data/cache/');
-$cache->regAlias(array(
-            's' => 'set',
-            'g' => 'get',
-            'r' => 'remove',
-            'c' => 'clean',
-            'db' => 'getData',
-            'func' => 'getData_func',
-));
+// 独立示例对象：不替换框架全局$cache，不连接真实SQL缓存表，也不flush共享服务。
+$demoCache = new myCache('File', [
+    'path' => CACHE.'tmp/cache-demo',
+    'namespace' => 'document',
+    'allowed_classes' => false,
+], 0);
+$demoKey = 'sample:'.bin2hex(random_bytes(8));
+try {
+    $demoCache->set($demoKey, 'File_cache_test', 60);
+    echo $demoCache->get($demoKey).'<br />';
+    $demoCache->set($demoKey, false, 60);
+    $demoValue = $demoCache->fetch($demoKey, $demoHit);
+    echo 'false值命中：'.($demoHit && $demoValue === false ? 'yes' : 'no').'<br />';
 
-$key = 'cache_test';
-$cache->s($key, 'File_cache_test');
-echo $cache->g($key).'<br />';
-$cache->r($key);
-$cache->c();
+    echo $demoCache->getData_func('strtoupper', ['cache_demo'], 60).'<br />';
 
-if(class_exists('myCache_'.$mystep->setting->db->type)) {
-    $cache->change('myCache_'.$mystep->setting->db->type, array(
-        'host' => $mystep->setting->db->host,
-        'user' => $mystep->setting->db->user,
-        'password' => $mystep->setting->db->password,
-        'name' => $mystep->setting->db->name,
-        'charset' => $mystep->setting->db->charset
-    ));
-    $key = 'cache_test';
-    $cache->set($key, strtoupper($mystep->setting->db->type).'_cache_test');
-    echo $cache->get($key).'<br />';
-    $cache->remove($key);
-    $cache->clean();
+    // 内置File/MySQL支持计算锁；其他后端先检查能力。
+    if($demoCache->supports(interface_cache_lock::class)) {
+        $demoValue = $demoCache->rememberLocked($demoKey, function () {
+            return 'rememberLocked_cache_test';
+        }, 60, 5);
+        echo $demoValue.'<br />';
+    }
+} finally {
+    $demoCache->remove($demoKey);
+    $demoCache->getData_func('strtoupper', ['cache_demo'], 0); // 0表示删除函数缓存。
+    // remember内部使用独立键，TTL较短；不通过clear清空其他请求的示例数据。
 }
-
-if(class_exists('Memcached') && class_exists('memoryCache')) {
-    $cache->change('memoryCache', array(
-        'server' => '127.0.0.1:11211',
-        'expire' => 86400,
-        'persistant' => true,
-        'weight' => 5,
-        'timeout' => 1,
-        'retry_interval' => 10,
-    ));
-    $key = 'cache_test';
-    $cache->set($key, 'memCache_cache_test');
-    echo $cache->get($key).'<br />';
-    $cache->remove($key);
-    $cache->clean();
-}
-
-unset($cache);
+unset($demoCache, $demoKey, $demoValue, $demoHit);

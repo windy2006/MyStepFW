@@ -93,7 +93,7 @@ switch($method) {
             $data['file_content'] = str_replace('  ', chr(9), htmlspecialchars_decode($data['file_content']));
             f::s($file, $data['file_content']);
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', 'list&idx='.$idx, r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL($S->web->path_admin.'/function/template/list', ['idx'=>$idx]);
         break;
     default:
         $content = build_page('show');
@@ -194,7 +194,7 @@ function build_page($method) {
         $tpl->assign('file', $file);
     }
 
-    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/function/template/'));
     $tpl->assign('method', $method);
     return $mystep->render($tpl);
 }

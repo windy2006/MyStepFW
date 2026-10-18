@@ -181,7 +181,7 @@ CREATE TABLE `{pre}sys_op` (
     `id` mediumint(8) unsigned auto_increment,
     `group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '管理组索引',
     `username` varchar(15) UNIQUE COMMENT '用户名',
-    `password` varchar(40)  COMMENT '密码',
+    `password` varchar(255)  COMMENT '密码',
     `email` varchar(60)  COMMENT '电子邮件',
     INDEX (`username`),
     PRIMARY KEY (`id`)
@@ -252,7 +252,7 @@ CREATE TABLE `{pre}users` (
     `user_id` mediumint(8) unsigned auto_increment,
     `group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '用户组',
     `username` varchar(15) UNIQUE COMMENT '用户名',
-    `password` varchar(40)  COMMENT '密码',
+    `password` varchar(255)  COMMENT '密码',
     `email` varchar(60)  COMMENT '电子邮件',
     `reg_date` int(10) unsigned Default "0"  COMMENT '注册日期',
     `hash` varchar(32)  COMMENT '哈希码',

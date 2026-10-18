@@ -7,18 +7,18 @@
             <tr>
                 <td width="100">模块测试</td>
                 <td>
-                    <a href="/module/test1" target="_blank">独立页面</a> |
-                    <a href="/module/test2" target="_blank">模版融合</a>
+                    <a href="<!--url_prefix-->module/test1" target="_blank">独立页面</a> |
+                    <a href="<!--url_prefix-->module/test2" target="_blank">模版融合</a>
                 </td>
             </tr>
             <tr>
                 <td width="100">API测试</td>
                 <td>
-                    <a href="//api.mystep.com/plugin_sample/sample/json" target="_blank">JSON</a> |
-                    <a href="//api.mystep.com/plugin_sample/sample/xml" target="_blank">XML</a> |
-                    <a href="/api/plugin_sample/sample/script" target="_blank">SCRIPT</a> |
-                    <a href="/api/plugin_sample/sample/string" target="_blank">STRING</a> |
-                    <a href="/api/plugin_sample/sample/hex" target="_blank">HEX</a>
+                    <a href="<!--url_prefix-->api/plugin_sample/sample/json" target="_blank">JSON</a> |
+                    <a href="<!--url_prefix-->api/plugin_sample/sample/xml" target="_blank">XML</a> |
+                    <a href="<!--url_prefix-->api/plugin_sample/sample/script" target="_blank">SCRIPT</a> |
+                    <a href="<!--url_prefix-->api/plugin_sample/sample/string" target="_blank">STRING</a> |
+                    <a href="<!--url_prefix-->api/plugin_sample/sample/hex" target="_blank">HEX</a>
                 </td>
             </tr>
             <tr>
@@ -35,7 +35,7 @@
             </tr>
             <tr>
                 <td>编辑器测试<br />
-                    <a href="/console/function/cache/?id=1">(清除缓存)</a></td>
+                    <a href="<!--sample_cache_url|html-->">(如无法显示自定义功能请点击本链接清除缓存)</a></td>
                 <td>
                     <textarea id="content" name="content" style="width:100%; height:400px;">
 &lt;!DOCTYPE html&gt;
@@ -66,7 +66,7 @@
         </table>
     </div>
 </div>
-<script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
+<script type="application/javascript" src="<!--root_web-->vendor/tinymce/tinymce.min.js"></script>
 <script type="text/javascript">
 let setting_tinymce = {
     language:'zh_CN',

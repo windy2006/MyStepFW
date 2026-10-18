@@ -14,15 +14,18 @@ $tpl_cache = array(
     'path' => CACHE.'app/'.$app.'/html/'.$web_info['idx'].'/',
     'expire' => 60*60*24*7
 );
-$tpl = new myTemplate($tpl_setting, $tpl_cache);
-header('Content-Type: application/xml; charset='.$S->gen->charset);
-$mystep->checkCache($tpl);
-
+// 缓存命中也会执行 CMS shutdown 统计，须先完成应用/子站设置与数据库选择。
 $S->merge(APP.$app.'/config.php');
 $db_pre = $S->db->pre;
 $S->merge(APP.$app.'/website/config_'.$web_info['idx'].'.php');
 $S->db->pre_sub = $S->db->pre;
 $S->db->pre = $db_pre;
+$db->connect($S->db->pconnect, $S->db->name);
+
+$tpl = new myTemplate($tpl_setting, $tpl_cache);
+header('Content-Type: application/xml; charset='.$S->gen->charset);
+$mystep->checkCache($tpl);
+
 
 $url = (isHttps()?'https':'http').'://'.myReq::svr('HTTP_HOST');
 
@@ -30,11 +33,12 @@ $charset_tag = '<?xml version="1.0" encoding="'.$S->gen->charset.'"?>'."\n";
 $tpl->assign('charset_tag', $charset_tag);
 $tpl->assign('web_title', $S->web->title);
 $tpl->assign('web_description', $S->web->description);
-$tpl->assign('web_url', $url);
+$tpl->assign('feed_image', \app\CMS\absoluteURL(ROOT_WEB.'static/images/rss.png'));
+$tpl->assign('web_url', \app\CMS\absoluteURL(\app\CMS\getURL('')));
+$tpl->assign('feed_url', \app\CMS\absoluteURL(\app\CMS\getURL('rss')));
 $tpl->assign('now', date("r"));
 
 $record = array();
-$db->connect($S->db->pconnect, $S->db->name);
 $db->setCache($cache, 600);
 
 $db->build($S->db->pre_sub.'news_show')
@@ -47,7 +51,7 @@ $db->build($S->db->pre.'news_cat', array(
 
 $db->select();
 while($record=$db->getRS()) {
-    $record['link'] = $url.\app\CMS\getLink($record);
+    $record['link'] = \app\CMS\absoluteURL(\app\CMS\getLink($record));
 	$record['add_date'] = date("r", strtotime($record['add_date']));
     if(empty($record['original'])) $record['original'] = $S->web->title;
     $tpl->setLoop('record', $record);

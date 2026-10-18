@@ -1,100 +1,51 @@
-<?PHP
-$years = [];
+<?php
+// Listing attachments must never delete directories or rewrite upload logs.
 $the_year = myReq::request('y');
 $the_month = myReq::request('m');
-$list = myFile::find('*', FILE, false, 1);
-$m = myReq::get('m');
+$the_year = is_string($the_year) && preg_match('/\A\d{4}\z/D', $the_year) ? $the_year : '';
+$the_month = is_string($the_month) && preg_match('/\A(?:0[1-9]|1[0-2])\z/D', $the_month) ? $the_month : '';
+if(myReq::get('m') === 'del') {
+    if(($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') { http_response_code(405); header('Allow: POST'); exit; }
+    $relative = myReq::post('idx', '!');
+    $target = is_string($relative) ? myFile::extractionPath(FILE, $relative) : false;
+    if($target && is_file($target) && basename($target) !== 'log.txt') {
+        $logged = false; $log = dirname($target).'/log.txt';
+        if(is_file($log) && !is_link($log)) foreach(file($log) as $line) if(explode('::', $line)[0] === basename($target)) $logged = true;
+        if(!$logged) unlink($target);
+    }
+    myStep::redirect(myStep::setURL($ms_setting->gen->path_admin.'/function/attachment'));
+}
+$directories = function($directory, $pattern) {
+    if(!is_dir($directory) || is_link($directory)) return [];
+    $result = [];
+    foreach(new DirectoryIterator($directory) as $entry) if(!$entry->isDot() && !$entry->isLink() && $entry->isDir() && preg_match($pattern, $entry->getFilename())) $result[] = $entry->getFilename();
+    rsort($result); return $result;
+};
+$years = $directories(FILE, '/\A\d{4}\z/D');
+if(!in_array($the_year, $years, true)) $the_year = $years[0] ?? '';
+foreach($years as $year) $t->setLoop('years', ['year'=>$year, 'selected'=>$year === $the_year ? 'selected' : '']);
+$months = $the_year === '' ? [] : $directories(FILE.$the_year, '/\A(?:0[1-9]|1[0-2])\z/D');
+if(!in_array($the_month, $months, true)) $the_month = $months[0] ?? '';
+foreach($months as $month) $t->setLoop('months', ['month'=>$month, 'selected'=>$month === $the_month ? 'selected' : '']);
 $empty = true;
-if($m=='del') {
-    $idx = myReq::get('idx');
-    list($the_year, $the_month, $the_file) = explode('/', $idx);
-    if($the_file!='log.txt') myFile::del(FILE.$idx);
-}
-if($list===false) $list = [];
-for($i=0,$m=count($list);$i<$m;$i++) {
-    $tmp = myFile::find('log.txt', $list[$i], true, 2);
-    if(empty($tmp)) {
-        myFile::del($list[$i]);
-    } else {
-        if(empty($the_year) && empty($years)) $the_year = basename($list[$i]);
-        $years[] = basename($list[$i]);
-        $tmp = [
-            'year' => basename($list[$i]),
-            'selected' => $the_year == basename($list[$i]) ? 'selected' : ''
-        ];
-        $t->setLoop('years', $tmp);
-    }
-}
-if(!empty($years)) {
-    $months = [];
-    $logs = [];
-    if(!is_dir(FILE.$the_year)) {
-        $the_year = $years[0];
-    }
-    $list = myFile::find('*', FILE.$the_year, false, 1);
-    for($i=0,$m=count($list);$i<$m;$i++) {
-        $tmp = myFile::find('log.txt', $list[$i], true, 2);
-        if(empty($tmp)) {
-            myFile::del($list[$i]);
-        } else {
-            if(empty($the_month) && empty($months)) $the_month = basename($list[$i]);
-            $months[] = basename($list[$i]);
-            $logs[] = myFile::find('log.txt', $list[$i], true);
-            $tmp = [
-                'month' => basename($list[$i]),
-                'selected' => $the_month == basename($list[$i]) ? 'selected' : ''
-            ];
-            $t->setLoop('months', $tmp);
+if($the_year !== '' && $the_month !== '') {
+    $directory = FILE.$the_year.'/'.$the_month; $records = [];
+    if(is_file($directory.'/log.txt') && !is_link($directory.'/log.txt')) {
+        foreach(file($directory.'/log.txt') as $line) {
+            $parts = explode('::', rtrim($line, "\r\n"));
+            if(count($parts) >= 2) $records[$parts[0]] = $parts[1];
         }
     }
-    if(!is_dir(FILE.$the_year.'/'.$the_month)) {
-        $the_month = $months[0]??'';
-    }
-    $files = myFile::getTree(FILE.$the_year.'/'.$the_month);
-    usort($files, function($a, $b){
-        return (strtotime($a['time']) < strtotime($b['time'])) ? -1 : 1;
-    });
-    $the_log = myFile::getLocal(FILE.$the_year.'/'.$the_month.'/log.txt');
-    if(strlen($the_log)>10) {
-        foreach($files as $k => $v) {
-            if($v['name']=='log.txt') continue;
-            $tmp = [
-                'idx' => preg_replace('/\.[^.]+$/','', $v['name']),
-                'name' => $v['name'],
-                'size' => $v['size'],
-                'date' => $v['time'],
-            ];
-            if(preg_match('#'.preg_quote($v['name']).'::(.+?)::#', $the_log, $match)) {
-                $the_log = preg_replace('#'.preg_quote($v['name']).'\:\:.+?\n#ms', '', $the_log);
-                $tmp['name'] = $match[1];
-            } else {
-                $tmp['idx'] = $the_year.'/'.$the_month.'/'.$tmp['name'];
-                $tmp['name'] .= ' <span class="badge badge-danger">Not Logged!</span>';
-            }
-            $empty = false;
-            $t->setLoop('files', $tmp);
-        }
-        if(strlen($the_log)>0) {
-            $list = explode(chr(10), $the_log);
-            $the_log = myFile::getLocal(FILE.$the_year.'/'.$the_month.'/log.txt');
-            for($i=0,$m=count($list);$i<$m;$i++) {
-                if(strpos($list[$i], '::')===false) continue;
-                $tmp = [
-                    'idx' => '',
-                    'name' => '',
-                    'size' => '0',
-                    'date' => '----',
-                ];
-                list($tmp['idx'], $tmp['name']) = explode('::', $list[$i]);
-                $tmp['name'] .= ' <span class="badge badge-danger">File is Missing!</span>';
-                $empty = false;
-                $t->setLoop('files', $tmp);
-                $the_log = str_replace($list[$i].chr(10), '', $the_log);
-            }
-            myFile::saveFile(FILE.$the_year.'/'.$the_month.'/log.txt', $the_log);
-        }
-    } else {
-        myFile::del(FILE.$the_year.'/'.$the_month);
+    foreach(new DirectoryIterator($directory) as $entry) {
+        if($entry->isDot() || $entry->isLink() || !$entry->isFile() || $entry->getFilename() === 'log.txt' || $entry->getFilename()[0] === '.') continue;
+        $stored = $entry->getFilename(); $logged = array_key_exists($stored, $records);
+        $name = htmlspecialchars($logged ? $records[$stored] : $stored, ENT_QUOTES, 'UTF-8');
+        $t->setLoop('files', [
+            'idx'=>htmlspecialchars($logged ? pathinfo($stored, PATHINFO_FILENAME) : $the_year.'/'.$the_month.'/'.$stored, ENT_QUOTES, 'UTF-8'),
+            'name'=>$name.($logged ? '' : ' <span class="badge badge-danger">Not Logged!</span>'),
+            'size'=>myFile::formatSize($entry->getSize()), 'date'=>date('Y-m-d H:i:s', $entry->getMTime())
+        ]);
+        $empty = false;
     }
 }
-$t->setIf('empty',  $empty);
+$t->setIf('empty', $empty);

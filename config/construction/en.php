@@ -38,7 +38,7 @@ $setting_detail['gen'] = array(
             'name' => 'SA Password',
             'name2' => 'Repeat',
             'describe' => 'Password of the super user',
-            'type' => array('password', 'md5', '40')
+            'type' => array('password', 'myAuth::hashPassword', '40')
         ),
         'close' => array(
             'name' => 'Close Page',
@@ -150,7 +150,7 @@ $setting_detail['template'] = array(
         ),
         'path' => array(
             'name' => 'Path',
-            'describe' => 'The path which save the template files',
+            'describe' => 'Template path relative to the website root, e.g. app/myStep/template',
             'type' => array('text', '', '30')
         ),
         'style' => array(

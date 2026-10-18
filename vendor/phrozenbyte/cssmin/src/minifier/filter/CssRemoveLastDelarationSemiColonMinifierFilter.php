@@ -1,15 +1,14 @@
 <?php
 /**
- * This {@link aCssMinifierFilter minifier filter} sets the IsLast property of any last declaration in a ruleset,
+ * This {@link aCssMinifierFilter minifier filter} sets the IsLast property of any last declaration in a ruleset, 
  * @font-face at-rule or @page at-rule block. If the property IsLast is TRUE the decrations will get stringified 
  * without tailing semicolon.
  * 
  * @package		CssMin/Minifier/Filters
- * @link		http://code.google.com/p/cssmin/
+ * @link		https://github.com/PhrozenByte/cssmin
  * @author		Joe Scylla <joe.scylla@gmail.com>
  * @copyright	2008 - 2011 Joe Scylla <joe.scylla@gmail.com>
  * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		3.0.1
  */
 class CssRemoveLastDelarationSemiColonMinifierFilter extends aCssMinifierFilter
 	{

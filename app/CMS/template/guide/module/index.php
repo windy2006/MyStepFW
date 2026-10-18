@@ -1,8 +1,8 @@
 <?PHP
-$md = new Erusev\Parsedown\Parsedown();
+$md = new \Parsedown();
 $guide = myFile::getLocal(ROOT.'readme.md');
 $guide = str_replace(['<','>',chr(13)],['&lt;','&gt;',''], $guide);
-$guide = $md->toHtml($guide);
+$guide = $md->text($guide);
 
 preg_match_all('#<h(\d)>(.+?)</h\1>#', $guide, $matches);
 $m = count($matches[0]);

@@ -1,11 +1,11 @@
 <div class="card mb-5 mb-sm-2">
     <div class="card-header bg-info text-white">
         <b><span class="glyphicon glyphicon-list-alt"></span> 恶意请求查看</b>
-        <a class="btn btn-primary btn-sm float-right py-0 border" href="<!--root_web--><!--path_admin-->/function/plugin/setting/?idx=badReq">设置</a>
+        <a class="btn btn-primary btn-sm float-right py-0 border" href="<!--plugin_setting_url|html-->">设置</a>
     </div>
     <div class="form-inline pt-3 mx-auto">
         <div class="input-group mb-2 mb-md-0 mx-auto px-2">
-            【<a href="badReq?m=reset">重置数据</a>】
+            【<a href="<!--reset_url-->">重置数据</a>】
         </div>
         <div class="input-group mb-2 mb-md-0 mx-auto px-2">
             <select class="custom-select" id="mode">
@@ -26,10 +26,10 @@
                         col-xs-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
             <thead class="thead-light">
             <tr class="text-center no-wrap">
-                <th width="120"><a class="text-dark" href="badReq?mode=<!--mode-->&keyword=<!--keyword-->&order=ip&&order_type=<!--order_type-->">IP</a></th>
-                <th width="100"><a class="text-dark" href="badReq?mode=<!--mode-->&keyword=<!--keyword-->&order=url&&order_type=<!--order_type-->">调用脚本</a></th>
-                <th width="100"><a class="text-dark" href="badReq?mode=<!--mode-->&keyword=<!--keyword-->&order=cnt&&order_type=<!--order_type-->">出现次数</a></th>
-                <th width="160"><a class="text-dark" href="badReq?mode=<!--mode-->&keyword=<!--keyword-->&order=req&order_type=<!--order_type-->">调用时间</a></th>
+                <th width="120"><a class="text-dark" href="<!--order_ip_url-->">IP</a></th>
+                <th width="100"><a class="text-dark" href="<!--order_url_url-->">调用脚本</a></th>
+                <th width="100"><a class="text-dark" href="<!--order_cnt_url-->">出现次数</a></th>
+                <th width="160"><a class="text-dark" href="<!--order_req_url-->">调用时间</a></th>
                 <th width="80">操作</th>
             </tr>
             </thead>
@@ -42,7 +42,7 @@
                 <td><!--record_req--></td>
                 <td align="center">
                     <a href="###" type="<!--record_mode-->" data-ip="<!--record_ip-->">屏蔽</a>
-                    <a href="badReq?m=del&ip=<!--record_ip-->" onclick="return confirm('是否确认删除此 IP 所有记录？')">删除</a>
+                    <a href="<!--record_delete_url-->" onclick="return confirm('是否确认删除此 IP 所有记录？')">删除</a>
                     <a href="###" data-file="<!--record_file-->">详情</a>
                 </td>
             </tr>
@@ -54,24 +54,27 @@
         <!--pages query='$query' count='$count' page='$page' size='$page_size'-->
     </nav>
 </div>
+<input type="hidden" id="ban-default" value="<!--msg-->" />
 <script type="text/javascript">
+const badReqPageURL=<!--badreq_page_url_json-->;
+function submitBadReq(method,ip,msg) {
+    let form=document.createElement('form');form.method='POST';form.action=queryURL(badReqPageURL,{m:method});
+    for(let pair of [['ip',ip],['msg',msg || ''],['_ms_csrf',window.msSecurity.token]]) {
+        let input=document.createElement('input');input.type='hidden';input.name=pair[0];input.value=pair[1];form.appendChild(input);
+    }
+    document.body.appendChild(form);form.submit();
+}
 $(function(){
     $('#mode').val('<!--mode-->').change(function(){
-        location.href = "badReq?mode="+this.value+"&keyword=<!--keyword-->";
+        location.href=queryURL(badReqPageURL,{mode:this.value,keyword:$('input[name=keyword]').val()});
     });
     $('input[name=keyword]').keypress(function(e){
         if(e.keyCode===13) {
-            location.href=global.root_fix+'?mode=<!--mode-->&keyword='+this.value;
+            location.href=queryURL(badReqPageURL,{mode:$('#mode').val(),keyword:this.value});
         }
     });
     $('button[name=keyword]').click(function(e){
-        location.href=global.root_fix+'?keyword='+$('input[name=keyword]').val();
-    });
-    $.ajaxSetup({
-        crossDomain: false,
-        xhrFields: {
-            withCredentials: false
-        }
+        location.href=queryURL(badReqPageURL,{keyword:$('input[name=keyword]').val()});
     });
     $("a[type=ip]").click(function() {
         let obj = $(this);
@@ -93,15 +96,15 @@ $(function(){
     });
     $("a[type=ban]").click(function(){
         let ip = $(this).attr('data-ip');
-        let msg = prompt('请输入反馈给被屏蔽者的内容（网址或信息）：', '<!--msg-->');
+        let msg = prompt('请输入反馈给被屏蔽者的内容（网址或信息）：', document.getElementById('ban-default').value);
         if(msg!==null) {
-            location.href = 'badReq?m=ban&ip='+ip+'&msg='+msg;
+            submitBadReq('ban',ip,msg);
         }
         return false;
     });
     $("a[type=unban]").html('解除').click(function(){
         let ip = $(this).attr('data-ip');
-        location.href = 'badReq?m=unban&ip='+ip;
+        submitBadReq('unban',ip);
         return false;
     });
     $("a[data-file]").each(function (){

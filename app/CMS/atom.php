@@ -14,15 +14,18 @@ $tpl_cache = array(
     'path' => CACHE.'app/'.$app.'/html/'.$web_info['idx'].'/',
     'expire' => 60*60*24*7
 );
-$tpl = new myTemplate($tpl_setting, $tpl_cache);
-header('Content-Type: application/xml; charset='.$S->gen->charset);
-$mystep->checkCache($tpl);
-
+// 缓存命中也会执行 CMS shutdown 统计，须先完成应用/子站设置与数据库选择。
 $S->merge(APP.$app.'/config.php');
 $db_pre = $S->db->pre;
 $S->merge(APP.$app.'/website/config_'.$web_info['idx'].'.php');
 $S->db->pre_sub = $S->db->pre;
 $S->db->pre = $db_pre;
+$db->connect($S->db->pconnect, $S->db->name);
+
+$tpl = new myTemplate($tpl_setting, $tpl_cache);
+header('Content-Type: application/xml; charset='.$S->gen->charset);
+$mystep->checkCache($tpl);
+
 
 $url = (isHttps()?'https':'http').'://'.myReq::svr('HTTP_HOST');
 
@@ -30,11 +33,11 @@ $charset_tag = '<?xml version="1.0" encoding="'.$S->gen->charset.'"?>'."\n";
 $tpl->assign('charset_tag', $charset_tag);
 $tpl->assign('web_title', $S->web->title);
 $tpl->assign('web_description', $S->web->description);
-$tpl->assign('web_url', $url);
+$tpl->assign('web_url', \app\CMS\absoluteURL(\app\CMS\getURL('')));
+$tpl->assign('feed_url', \app\CMS\absoluteURL(\app\CMS\getURL('atom')));
 $tpl->assign('email', $S->email->user);
 
 $record = array();
-$db->connect($S->db->pconnect, $S->db->name);
 $db->setCache($cache, 600);
 
 $tpl->assign('update', $db->result('select add_date from '.$S->db->pre_sub.'news_show where web_id='.$web_info['web_id'].' order by news_id desc limit 1'));
@@ -45,7 +48,7 @@ while($record=$db->getRS()) {
     if(empty($record['original'])) $record['original'] = $S->web->title;
     if(empty($record['active'])) $record['active'] = $record['add_date'];
     $record['tag'] = explode(',', $record['tag']);
-    $record['link'] = $url.\app\CMS\getLink($record);
+    $record['link'] = \app\CMS\absoluteURL(\app\CMS\getLink($record));
     $record['keywords'] = '';
     foreach($record['tag'] as $k) {
         $record['keywords'] .= '<category scheme="'.$url.'" term="'.$k.'" />'.chr(10);

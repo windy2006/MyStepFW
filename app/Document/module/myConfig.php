@@ -8,7 +8,8 @@ if(myReq::check('post')) {
     $config->choice->para_4 = !$config->choice->para_4;
 }
 $config->merge(PATH.'data/config/config.php');
-$config->save('ini');
+// GET 仅演示内存修改；只有显式提交才导出演示配置。
+if(myReq::check('post')) $config->save('ini');
 
 $list = $config->build(PATH.'data/config/setting_multi.php');
 echo '<form method="post" action="">';

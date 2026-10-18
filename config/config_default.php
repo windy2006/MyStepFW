@@ -34,14 +34,14 @@ $setting['upload']['free_dl'] = false;
 
 $setting['template'] = array();
 $setting['template']['name'] = 'main';
-$setting['template']['path'] = 'template';
+$setting['template']['path'] = 'app/myStep/template';
 $setting['template']['style'] = '';
 
 $setting['session'] = array();
 $setting['session']['expire'] = 30;
 $setting['session']['name'] = 'MyStepSession';
 $setting['session']['mode'] = 'sess_file';
-$setting['session']['path'] = './cache/session/';
+$setting['session']['path'] = 'cache/session/';
 $setting['session']['gc'] = true;
 $setting['session']['trans_sid'] = false;
 

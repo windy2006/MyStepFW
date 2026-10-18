@@ -8,108 +8,48 @@ if(($web_cur = \app\CMS\checkVal($website, 'web_id', $web_id))!==false) {
 switch($method) {
     case 'delete':
         CMS::$log = $mystep->getLanguage('admin_art_tag_delete');
-        $db->build($web_cur['setting']->db->pre.'news_tag')->field('tag')->where('id','n=',$id);
-        if($tag = $db->result()) {
-            $db->build($web_cur['setting']->db->pre.'news_show')
-                ->field(['tag'=>"(REPLACE(tag,'".$tag.",',''))"])
-                ->where('tag','like',$tag);
-            $db->update();
-            $db->build($web_cur['setting']->db->pre.'news_show')
-                ->field(['tag'=>"(REPLACE(tag,',".$tag."',''))"])
-                ->where('tag','like',$tag);
-            $db->update();
-            $db->build($web_cur['setting']->db->pre.'news_tag')->where('id','n=',$id);
-            $db->delete();
+        $pre = $web_cur['setting']->db->pre;
+        $tagsTable = $db->quoteIdentifier($pre.'news_tag');
+        $newsTable = $db->quoteIdentifier($pre.'news_show');
+        $tag = $db->fetchValue('SELECT tag FROM '.$tagsTable.' WHERE id=?', [(int)$id]);
+        if($tag!==false) {
+            // 参数绑定保护引号；按完整标签筛选，兼容单标签、相邻重复标签及头尾位置。
+            $articles=$db->fetchAll("SELECT news_id,tag FROM ".$newsTable." WHERE LOCATE(?,CONCAT(',',tag,','))>0", [','.$tag.',']);
+            if($articles===false) myStep::info('error_para');
+            foreach($articles as $article) {
+                $remaining=array_filter(explode(',',$article['tag']),function($value) use ($tag) { return $value!==$tag; });
+                $db->execute('UPDATE '.$newsTable.' SET tag=? WHERE news_id=?', [implode(',',$remaining),$article['news_id']]);
+            }
+            $db->execute('DELETE FROM '.$tagsTable.' WHERE id=?', [(int)$id]);
         }
         CMS::redirect();
         break;
     case 'rebuild':
         set_time_limit(0);
         CMS::$log = $mystep->getLanguage('admin_art_tag_rebuild');
-        $db2 = new myDB('mysql', $S->db->host, $S->db->user, $S->db->password, $S->db->charset);
-        $db2->connect(false, $S->db->name);
-        $db2->build($web_cur['setting']->db->pre.'news_tag')
-            ->field(['count'=>0]);
-        $db2->update();
-        $db->reconnect(true, $S->db->name);
-
-        $n = 1;
-        $db->build($web_cur['setting']->db->pre.'news_show')
-            ->field('news_id,tag')
-            ->order('news_id');
-        $db->select();
-        while($record = $db->getRS()) {
-            $the_tag = $record['tag'];
-            $the_tag = str_replace('，', ',', $the_tag);
-            $the_tag = str_replace('；', ',', $the_tag);
-            $the_tag = str_replace(' ', '_', $the_tag);
-            $the_tag = explode(',', $the_tag);
-            for($n=0,$m=count($the_tag); $n<$m; $n++) {
-                $the_tag[$n] = trim($the_tag[$n], '_');
-                if(strlen($the_tag[$n])<4 || preg_match('/[\d\.]+/', $the_tag[$n])) {
-                    $db2->build($web_cur['setting']->db->pre.'news_show')
-                        ->field(['tag'=>"(replace(tag, '".$the_tag[$n].",', ''))"])
-                        ->where('news_id', 'n=', $record['news_id']);
-                    $db2->update();
-                    $db2->build($web_cur['setting']->db->pre.'news_show')
-                        ->field(['tag'=>"(replace(tag, ',".$the_tag[$n]."', ''))"])
-                        ->where('news_id', 'n=', $record['news_id']);
-                    $db2->update();
-                    continue;
-                }
-                if(strlen($the_tag[$n]>50)) {
-                    $the_tag[$n] = s::substr($the_tag[$n], 0, 50);
-                }
-                $db2->build($web_cur['setting']->db->pre.'news_tag')
-                    ->field('id')
-                    ->where('tag','=',$the_tag[$n]);
-                if($db2->result()) {
-                    $db2->build($web_cur['setting']->db->pre.'news_tag')
-                        ->field([
-                            'count'=>'+1',
-                            'update_date'=>'(UNIX_TIMESTAMP())'
-                        ])
-                        ->where('tag','=',$the_tag[$n]);
-                    $db2->update();
-                } else {
-                    $db2->build($web_cur['setting']->db->pre.'news_tag')
-                        ->values(0, $the_tag[$n], 1, 0, 'UNIX_TIMESTAMP()', 'UNIX_TIMESTAMP()');
-                    $db2->insert();
-                }
-            }
-            if(++$n%50===0) {
-                $db2->reconnect(false, $S->db->name);
-            }
+        $pre = $web_cur['setting']->db->pre;
+        $tagsTable = $db->quoteIdentifier($pre.'news_tag');
+        $newsTable = $db->quoteIdentifier($pre.'news_show');
+        // 先读完再写，避免覆盖活动结果集；按文章去重后一次统计，去掉逐标签全表 LIKE 扫描。
+        $articles = $db->fetchAll('SELECT news_id,tag FROM '.$newsTable);
+        $existing = $db->fetchAll('SELECT id,tag FROM '.$tagsTable);
+        if($articles===false || $existing===false) myStep::info('error_para');
+        $counts = []; $now = time();
+        foreach($articles as $record) {
+            $tags = \app\CMS\normalizeTags($record['tag']);
+            $text = implode(',',$tags);
+            if($text!==$record['tag']) $db->execute('UPDATE '.$newsTable.' SET tag=? WHERE news_id=?', [$text,$record['news_id']]);
+            foreach($tags as $tag) $counts[$tag]=($counts[$tag] ?? 0)+1;
         }
-        $db2->build($web_cur['setting']->db->pre.'news_tag')
-            ->where([
-                array('click','n<',5),
-                array('add_date','f<','UNIX_TIMESTAMP()-60*60*24*10','and')
-            ]);
-        $db2->delete();
-        $db->free();
-
-        $n = 1;
-        $db->build($web_cur['setting']->db->pre.'news_tag')->field('id,tag');
-        $db->select();
-        while($record = $db->getRS()) {
-            $db2->build($web_cur['setting']->db->pre.'news_show')
-                ->field('count(*)')
-                ->where('tag','like',$record['tag']);
-            $counter = $db2->result();
-            $db2->build($web_cur['setting']->db->pre.'news_tag')
-                ->field(['count'=>$counter])
-                ->where('id','n=',$record['id']);
-            $db2->update();
-            if(++$n%50===0) {
-                $db2->reconnect(false, $S->db->name);
-            }
+        foreach($existing as $record) {
+            $tag=$record['tag'];
+            if(!isset($counts[$tag])) $db->execute('DELETE FROM '.$tagsTable.' WHERE id=?', [$record['id']]);
+            else $db->execute('UPDATE '.$tagsTable.' SET count=?,update_date=? WHERE id=?', [$counts[$tag],$now,$record['id']]);
         }
-        $db2->build($web_cur['setting']->db->pre.'news_tag')
-            ->where('count','n=', 0);
-        $db2->delete();
-        $db2->close();
-        unset($db2);
+        $known = array_fill_keys(array_column($existing,'tag'),true);
+        foreach($counts as $tag=>$total) if(!isset($known[$tag])) {
+            $db->execute('INSERT INTO '.$tagsTable.' (tag,count,click,add_date,update_date) VALUES (?,?,0,?,?)', [(string)$tag,$total,$now,$now]);
+        }
         CMS::redirect();
         break;
     case 'list':
@@ -140,7 +80,7 @@ function build_page() {
     $order_type = r::g('order_type');
     if(empty($order_type)) $order_type = 'desc';
 
-    $query = 'keyword='.$keyword.'&web_id='.$web_cur['web_id'].'&order='.$order.'&order_type='.$order_type;
+    $query = http_build_query(['keyword'=>$keyword, 'web_id'=>$web_cur['web_id'], 'order'=>$order, 'order_type'=>$order_type], '', '&', PHP_QUERY_RFC3986);
     list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
     $db->build($web_cur['setting']->db->pre.'news_tag')

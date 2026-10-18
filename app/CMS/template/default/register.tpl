@@ -36,10 +36,10 @@
                         </div>
                         <input name="captcha" type="text" class="form-control" placeholder="<!--lng_login_captcha_msg-->" need="" />
                         <div class="input-group-append">
-                            <img id="captcha" src="captcha/&core=CMS&" height="33" keep-url />
+                            <img id="captcha" src="<!--captcha_url|html-->" height="33" keep-url />
                         </div>
                         <div class="input-group-append">
-                            <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src+=(new Date().getTime());return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>
+                            <span class="input-group-text"><a href="#" title="<!--lng_login_refresh-->" onclick="document.getElementById('captcha').src=queryURL(document.getElementById('captcha').src, {t:Date.now()});return false;"><span class="glyphicon glyphicon-refresh"></span></a></span>
                         </div>
                     </div>
                     <div class="text-right">
@@ -51,4 +51,4 @@
         </div>
     </div>
 </div>
-<script type="application/javascript" src="/static/js/checkForm.js"></script>
+<script type="application/javascript" src="<!--path_root-->static/js/checkForm.js"></script>

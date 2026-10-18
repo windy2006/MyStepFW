@@ -5,12 +5,14 @@ CssMin
 
 This repository is a copy of CssMin by Joe Scylla, previously hosted on [Google Code](https://code.google.com/p/cssmin/), to support [Composer](https://getcomposer.org/). Please refer to the original homepage of CssMin on Google Code for more info: http://code.google.com/p/cssmin/
 
+This [GitHub fork](https://github.com/PhrozenByte/cssmin) aims to be the go-to address for Joe Scylla's CssMin. It was converted into a Composer library utilizing Composer's autoloader with the original non-concatenated PHP sources and aims to also include fixes from other CssMin forks. Even though this project isn't actively developed, we accept pull requests fixing existing problems, like compatibility issues with later PHP versions. Visit us on GitHub for more info: https://github.com/PhrozenByte/cssmin
+
 What is CssMin?
 ---------------
 
-CssMin is a css parser and minfier. It minifies css by removing unneeded whitespace character, comments, empty blocks and empty declarations. In addition declaration values can get rewritten to shorter notation if available. The minification if configurable.
+CssMin is a CSS parser and minfier. It minifies CSS by removing unneeded whitespace characters, comments, empty blocks and empty declarations. In addition declaration values can get rewritten to shorter notations if available. The minification is configurable.
 
-CssMin has some benefits. It supports the rewrite of CSS Level 3 properties to their browser specific counterparts and is able to simulate CSS Variables.
+CssMin has some benefits. It supports the rewrite of CSS Level 3 properties to their browser specific counterparts and is able to simulate CSS variables.
 
 Install
 -------

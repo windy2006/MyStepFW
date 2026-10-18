@@ -7,10 +7,10 @@ global $info_app;
     <li>参数网址测试 1：<a href="<!--root-->dir1/dir2/"><!--root-->dir1/dir2/</a> </li>
     <li>参数网址测试 2：<a href="<!--root-->?para1=111&para2=222"><!--root-->?para1=111&amp;para2=222</a> </li>
     <li>参数网址测试 3：<a href="<!--root-->dir1/dir2?para1=111&para2=222"><!--root-->dir1/dir2?para1=111&amp;para2=222</a> </li>
-    <li>数组格式的路径信息：$info_app['path'] = <?=var_export($info_app['path'], 1)?> </li>
-    <li>数组格式的url参数：$info_app['para'] = <?=var_export($info_app['para'],1)?> </li>
-    <li>字符串格式的路径信息：$info_app['route'] = <?=$info_app['route']?> </li>
-    <li>$_GET = <?=var_export($_GET, 1)?>
+    <li>数组格式的路径信息：$info_app['path'] = <?=htmlspecialchars(var_export($info_app['path'], 1),ENT_QUOTES,'UTF-8')?> </li>
+    <li>数组格式的url参数：$info_app['para'] = <?=htmlspecialchars(var_export($info_app['para'],1),ENT_QUOTES,'UTF-8')?> </li>
+    <li>字符串格式的路径信息：$info_app['route'] = <?=htmlspecialchars($info_app['route'],ENT_QUOTES,'UTF-8')?> </li>
+    <li>$_GET = <?=htmlspecialchars(var_export($_GET, 1),ENT_QUOTES,'UTF-8')?>
 </ul>
 
 <h5 class="mt-4">自定义路由测试：</h5>

@@ -11,7 +11,7 @@
                 <option value="<!--user_group_group_id-->" <!--user_group_selected-->><!--user_group_name--></option>
                 <!--loop:end-->
             </select>
-            <input type="text" name="keyword" class="form-control" value="<!--keyword-->" placeholder="请输入查询关键字" />
+            <input type="text" name="keyword" class="form-control" value="<!--keyword|html-->" placeholder="请输入查询关键字" />
             <div class="input-group-append">
                 <button class="btn btn-light btn-outline-secondary" name="keyword" type="button">检索</button>
             </div>
@@ -22,11 +22,11 @@
                         col-xs-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
             <thead class="thead-light">
             <tr class="text-center">
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order_type=<!--order_type-->">编号</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=username&order_type=<!--order_type-->">用户名称</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=group_id&order_type=<!--order_type-->">用户组</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=email&order_type=<!--order_type-->">电子邮件</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=reg_date&order_type=<!--order_type-->">注册日期</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order_type=<!--order_type-->">编号</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=username&order_type=<!--order_type-->">用户名称</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=group_id&order_type=<!--order_type-->">用户组</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=email&order_type=<!--order_type-->">电子邮件</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=reg_date&order_type=<!--order_type-->">注册日期</a></th>
                 <th width="92">相关操作</th>
             </tr>
             </thead>
@@ -36,7 +36,7 @@
                 <td><!--record_user_id--></td>
                 <td><!--record_username--></td>
                 <td><!--record_group_name--></td>
-                <td><a href="mailto:<!--record_email-->" /><!--record_email--></a></td>
+                <td><a href="mailto:<!--record_email-->"><!--record_email--></a></td>
                 <td><!--record_reg_date--></td>
                 <td class="align-middle">
                     <div class="btn-group">
@@ -56,15 +56,15 @@
 <script type="application/javascript">
     $(function(){
         $('#group').change(function(){
-            location.href=global.root_fix+'?group_id='+this.value;
+            location.href=queryURL(global.root_fix, {group_id:this.value});
         });
         $('input[name=keyword]').keypress(function(e){
             if(e.keyCode==13) {
-                location.href=global.root_fix+'?group_id=<!--group_id-->&keyword='+this.value;
+                location.href=queryURL(global.root_fix, {group_id:'<!--group_id-->',keyword:this.value});
             }
         });
         $('button[name=keyword]').click(function(e){
-            location.href=global.root_fix+'?group_id=<!--group_id-->&keyword='+$('input[name=keyword]').val();
+            location.href=queryURL(global.root_fix, {group_id:'<!--group_id-->',keyword:$('input[name=keyword]').val()});
         });
         global.root_fix += 'user/detail/';
     });

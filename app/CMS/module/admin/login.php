@@ -1,8 +1,7 @@
 <?PHP
 require 'inc.php';
-if(r::svr('QUERY_STRING')=='out') {
-    r::removeCookie('ms_cms_op');
-    r::sessionEnd();
+if(r::g('out') !== null) {
+    $mystep->logout();
     myStep::info('login_logout', $path_admin);
 } elseif(r::s('ms_cms_op')!='') {
     CMS::redirect($path_admin);
@@ -10,9 +9,8 @@ if(r::svr('QUERY_STRING')=='out') {
     $err_no = 0;
     if(strtolower($captcha) == strtolower(r::s('captcha'))) {
         $usr = r::p('username');
-        $pwd = r::p('password');
+        $pwd = r::p('password', '!');
         if(($result = $mystep->login($usr, $pwd))===1) {
-            r::setCookie('ms_cms_op', $usr.chr(9).md5($pwd), 60*60*24);
             myStep::info('login_ok', $path_admin);
         } else {
             $err_no = 2;
@@ -24,6 +22,7 @@ if(r::svr('QUERY_STRING')=='out') {
 }
 $tpl_setting['name'] = 'login';
 $t = new myTemplate($tpl_setting);
+$t->assign('captcha_url', myStep::setURL('captcha/?core=CMS'));
 $t->assign('path_admin', $path_admin);
 $content = $mystep->render($t);
 $tpl->assign('path_admin', $path_admin);

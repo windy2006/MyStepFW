@@ -24,12 +24,12 @@
                         col-xs-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
             <thead class="thead-light">
             <tr class="text-center no-wrap">
-                <th><a class="text-dark" href="?order_type=<!--order_type-->&idx=<!--idx-->&web_id=<!--web_id-->">编号</a></th>
-                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=web_id&idx=<!--idx-->&web_id=<!--web_id-->">所属网站</a></th>
-                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=idx&idx=<!--idx-->&web_id=<!--web_id-->">链接索引</a></th>
-                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=name&idx=<!--idx-->&web_id=<!--web_id-->">链接名称</a></th>
-                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=image&idx=<!--idx-->&web_id=<!--web_id-->">链接图形</a></th>
-                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=level&idx=<!--idx-->&web_id=<!--web_id-->">显示级别</a></th>
+                <th><a class="text-dark" href="?order_type=<!--order_type-->&idx=<!--idx|url-->&web_id=<!--web_id-->">编号</a></th>
+                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=web_id&idx=<!--idx|url-->&web_id=<!--web_id-->">所属网站</a></th>
+                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=idx&idx=<!--idx|url-->&web_id=<!--web_id-->">链接索引</a></th>
+                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=name&idx=<!--idx|url-->&web_id=<!--web_id-->">链接名称</a></th>
+                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=image&idx=<!--idx|url-->&web_id=<!--web_id-->">链接图形</a></th>
+                <th><a class="text-dark" href="?order_type=<!--order_type-->&order=level&idx=<!--idx|url-->&web_id=<!--web_id-->">显示级别</a></th>
                 <th width="92">操作</th>
             </tr>
             </thead>
@@ -64,10 +64,10 @@ $(function(){
         $('select[name=web_id]').val(web_id).hide();
     }
     $('select[name=web_id]').change(function(){
-        location.href=global.root_fix+'?web_id='+this.value;
+        location.href=queryURL(global.root_fix, {web_id:this.value});
     });
     $('select[name=idx]').change(function(){
-        location.href=global.root_fix+'?idx='+this.value;
+        location.href=queryURL(global.root_fix, {web_id:'<!--web_id-->',idx:this.value});
     });
     global.root_fix += 'function/link/';
 });

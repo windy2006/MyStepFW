@@ -1,10 +1,31 @@
 <?PHP
+
+/**
+ * 文件：lib/chs2cht.dic.php
+ * 功能说明：简繁与地区用语转换字典
+ *   登记简繁字词映射及chs2cht/chg_lng_custom转换函数。
+ *
+ * 方法目录：
+ *   chs2cht($content, $type=1) — 简繁转换
+ *   chg_lng_custom($content, $to) — 语系转换
+ *
+ * 使用说明：
+ *   1. 通常由myString的简繁转换入口加载；也可require_once后调用全局函数。
+ *   2. 输入为字符串；简繁/地区转换使用各函数声明的目标代号。
+ *   3. 转换函数通过myString检测并转为UTF-8执行字词替换，再恢复来源编码。
+ *
+ * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
+ *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
+ *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ */
 /**
  * Simplified / Traditional Chinese conversion tables
  *
  * Automatically generated using code and data in includes/zhtable/
  * Do not modify directly!
  */
+
+global $zh2Hant, $zh2Hans, $zh2CN, $zh2SG, $zh2TW, $zh2HK;
 
 $zh2Hant = array(
 '㑩' => '儸',
@@ -17805,10 +17826,11 @@ $zh2SG = array(
 );
 
 /**
- * 简繁转换
- * @param $content
- * @param int $mode 1 - 繁体， 2 - 简体
- * @return array|string
+ * 功能说明：简繁转换
+ *
+ * @param string $content 需要转换的文本，自动检测编码后转换并恢复来源编码
+ * @param int $type 1转繁体，其他值转简体；兼容历史0/2用法（默认：1）
+ * @return string 转换后并恢复来源编码的文本
  */
 function chs2cht($content, $type=1) {
         $charset = myString::charset($content);
@@ -17825,10 +17847,11 @@ function chs2cht($content, $type=1) {
 }
 
 /**
- * 语系转换
- * @param $content
- * @param $to
- * @return array|string
+ * 功能说明：语系转换
+ *
+ * @param string $content 需要转换的文本，按检测到的来源编码返回
+ * @param string $to 目标代号：chs/cht/cn/sg/tw/hk
+ * @return string 按目标地区替换并恢复来源编码的文本
  */
 function chg_lng_custom($content, $to) {
         $charset = myString::charset($content);

@@ -1,0 +1,259 @@
+/* 通用桌面布局；850px及以下改为固定顶栏和可收起的下拉导航。 */
+/* 通用插件页面保持各自业务模板，颜色、卡片和操作控件沿用Admin风格。 */
+.adm-plugin-page .card { border: 1px solid #e4eaf3; border-radius: 10px; margin-bottom: 20px !important; overflow: hidden; box-shadow: 0 2px 4px #11264a03; }
+.adm-plugin-page .card-header { background: #fff !important; color: #26334d !important; border-bottom: 1px solid #e6ecf5; padding: 18px 23px; }
+.adm-plugin-page .card-header .btn { padding: 4px 12px !important; }
+.adm-plugin-page .table { font-size: 13px; }
+.adm-plugin-page .table th, .adm-plugin-page .table td { padding: 12px; border-color: #eef2f7; vertical-align: middle; }
+.adm-plugin-page .table th { background: #f8fafd; color: #637086; }
+.adm-plugin-page .btn { background: #2465c5; border-color: #2465c5; color: #fff; border-radius: 6px; }
+.adm-plugin-page .btn:hover { background: #1753a9; border-color: #1753a9; }
+.adm-body {
+    margin: 0;
+    background: #f4f6fa;
+    color: #26334d;
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+}
+.adm-shell { min-height: 100vh; }
+.adm-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1100;
+    box-sizing: border-box;
+    width: 228px;
+    padding: 28px 18px;
+    overflow-y: auto;
+    background: #13233f;
+    color: #d8e0ed;
+    display: flex;
+    flex-direction: column;
+}
+.adm-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white !important;
+    text-decoration: none !important;
+    font-size: 22px;
+    font-weight: 600;
+    padding: 0 10px 26px;
+}
+.adm-brand b { background: #6be5c3; color: #13233f; border-radius: 12px; width: 40px; text-align: center; }
+.adm-brand small { display: block; font: 9px/1.6 monospace; letter-spacing: 2px; color: #90a5c7; }
+.adm-sidebar h3 { font-size: 11px; letter-spacing: 2px; color: #90a5c7; margin: 23px 12px 8px; }
+.adm-sidebar .adm-link { display: block; color: #c8d6e9; padding: 8px 12px; border-radius: 7px; }
+.adm-sidebar .adm-link:hover, .adm-sidebar .adm-link[aria-current=page] { background: #243b5e; color: #6be5c3; text-decoration: none; }
+.adm-legacy { margin-top: 32px; color: #90a5c7; padding: 12px; font-size: 12px; }
+.adm-workspace { margin-left: 228px; padding-top: 72px; min-width: 0; }
+.adm-topbar {
+    position: fixed;
+    top: 0;
+    left: 228px;
+    right: 0;
+    z-index: 1200;
+    height: 72px;
+    padding: 0 36px;
+    background: #fff;
+    border-bottom: 1px solid #e8edf5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    color: #7b879b;
+}
+.adm-topbar-start, .adm-account { display: flex; gap: 16px; align-items: center; min-width: 0; }
+.adm-breadcrumb { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.adm-account { flex-shrink: 0; }
+.adm-topbar form { margin: 0; }
+.adm-topbar button { background: transparent; color: #637086; padding: 4px 10px; border: 0; cursor: pointer; }
+.adm-topbar .adm-nav-toggle { display: none; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid #d9e1ee; border-radius: 6px; white-space: nowrap; }
+.adm-mobile-brand { display: none; color: #1e304c; font-weight: 600; }
+.adm-main { padding: 34px 36px; max-width: 1540px; margin: auto; }
+.adm-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.adm-heading p { font: 10px/1.5 monospace; letter-spacing: 2px; color: #8592a7; margin: 0 0 6px; }
+.adm-heading h1 { font-size: 27px; font-weight: 600; margin: 0; color: #1e304c; }
+.adm-status { background: #e1f6ef; color: #237761; border: 1px solid #cae9de; padding: 5px 10px; border-radius: 20px; font-size: 11px; }
+.adm-panel { background: #fff; border: 1px solid #e4eaf3; border-radius: 10px; margin-bottom: 20px; padding: 23px; box-shadow: 0 2px 4px #11264a03; }
+.adm-panel h2 { font-size: 16px; font-weight: 600; margin: 0 0 20px; }
+.adm-panel h3 { font-size: 14px; margin: 24px 0 12px; }
+.adm-panel legend { font-size: 14px; margin-bottom: 10px; }
+.adm-field { display: flex; flex-direction: column; gap: 6px; max-width: 100%; margin-bottom: 16px; }
+.adm-field > span { font-size: 13px; font-weight: 500; }
+.adm-panel input:not([type=checkbox]):not([type=radio]), .adm-panel select, .adm-panel textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid #d9e1ee;
+    border-radius: 6px;
+    background: #fff;
+    color: #26334d;
+    font: inherit;
+}
+.adm-panel textarea { font: 13px/1.7 ui-monospace, SFMono-Regular, monospace; tab-size: 4; resize: vertical; }
+.adm-field small { color: #8b96a9; }
+/* 单/复选框保留浏览器原生交互，避免继承文本框的全宽和内边距。 */
+.adm-panel input[type=radio], .adm-panel input[type=checkbox] {
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    flex: 0 0 18px;
+    margin: 0 8px 0 0;
+    padding: 0;
+    vertical-align: middle;
+    accent-color: #2465c5;
+    cursor: pointer;
+}
+.adm-panel input[type=radio]:focus-visible, .adm-panel input[type=checkbox]:focus-visible { outline: 2px solid #2465c5; outline-offset: 3px; }
+.adm-panel input[type=radio]:disabled, .adm-panel input[type=checkbox]:disabled { cursor: not-allowed; }
+/* myConfig生成的选项由模板容器分组；应用/插件的复选项复用相同外观。 */
+.adm-config-control > label, .adm-panel fieldset > label {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    margin: 4px 8px 4px 0;
+    padding: 6px 12px;
+    border: 1px solid #d9e1ee;
+    border-radius: 7px;
+    background: #f8fafd;
+    color: #4b5b73;
+    font-size: 13px;
+    line-height: 1.6;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.adm-config-control > label:hover, .adm-panel fieldset > label:hover { border-color: #93b5e8; background: #f0f5fd; }
+.adm-config-control > label:has(input:checked), .adm-panel fieldset > label:has(input:checked) { border-color: #2465c5; background: #edf4ff; color: #1753a9; }
+.adm-config-control > label:has(input:focus-visible), .adm-panel fieldset > label:has(input:focus-visible) { outline: 2px solid #93b5e8; outline-offset: 2px; }
+.adm-config-control > label:has(input:disabled), .adm-panel fieldset > label:has(input:disabled) { opacity: .6; cursor: not-allowed; }
+.adm-config-control > [type=switch] { display: inline-flex; align-items: center; min-height: 36px; }
+.adm-config-control > [type=switch] label { margin: 0; cursor: pointer; }
+.adm-button { display: inline-block; border: 0; border-radius: 6px; background: #2465c5; color: white; font: inherit; font-size: 13px; font-weight: 500; line-height: 1.7; padding: 9px 18px; text-decoration: none; cursor: pointer; }
+.adm-button:hover { background: #1753a9; color: white; text-decoration: none; }
+.adm-button:disabled { opacity: .6; cursor: wait; }
+.adm-panel form + form { margin-top: 18px; }
+.adm-link { color: #2465c5; margin-right: 10px; }
+/* 配置、数据表、语言和年月等导航选项：分隔项目并以服务端当前状态突出选择。 */
+.adm-options { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+.adm-option {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    max-width: 100%;
+    padding: 9px 16px;
+    border: 1px solid #bccbdf;
+    border-radius: 7px;
+    background: #f4f7fc;
+    color: #304968;
+    font-weight: 500;
+    line-height: 1.6;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+.adm-option small { font-size: 12px; font-weight: 400; opacity: .85; }
+.adm-option:hover { border-color: #2465c5; background: #e9f1ff; color: #1753a9; text-decoration: none; }
+.adm-option:focus-visible { outline: 3px solid #93b5e8; outline-offset: 3px; }
+.adm-option[aria-current=page] { border-color: #2465c5; background: #2465c5; color: #fff; font-weight: 600; }
+.adm-option[aria-current=page]::before { content: "✓"; flex-shrink: 0; font-weight: 700; }
+.adm-panel .adm-option-label { margin: 0 0 10px; color: #4b5b73; font-size: 13px; }
+.adm-option-group + .adm-option-group { margin-top: 18px; padding-top: 16px; border-top: 1px solid #e4eaf3; }
+.adm-table-wrap { overflow: auto; }
+.adm-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.adm-table th { color: #8a96a9; font-size: 12px; font-weight: 500; text-align: left; padding: 10px 12px; background: #f8fafd; border-bottom: 1px solid #e6ecf5; white-space: nowrap; }
+.adm-table td { padding: 12px; border-bottom: 1px solid #eef2f7; vertical-align: top; overflow-wrap: anywhere; }
+.adm-table tr:last-child td { border-bottom: 0; }
+.adm-table td form { display: inline-block; margin: 2px 4px 2px 0; }
+.adm-table td button, .adm-table td .adm-button { padding: 4px 9px; font-size: 12px; }
+.adm-empty { text-align: center; color: #8e9ab0; padding: 32px !important; }
+.adm-notice:empty, .adm-error:empty { display: none; }
+.adm-notice { border: 1px solid #bfe3d1; background: #e8f6ee; padding: 12px 16px; border-radius: 7px; color: #20734c; }
+.adm-error { color: #b4233d; }
+.adm-footer { padding: 24px 36px; color: #98a4b7; font-size: 11px; }
+.adm-captcha { width: 128px; height: auto; cursor: pointer; margin-bottom: 16px; }
+.adm-panel pre { max-height: 480px; overflow: auto; background: #f6f8fc; padding: 16px; border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.adm-panel summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
+/* 同组动作的链接和POST表单保持对齐，覆盖连续表单的纵向间距。 */
+.adm-panel .adm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.adm-panel .adm-actions > form { display: flex; align-items: center; margin: 0; }
+.adm-panel .adm-plugin-actions { gap: 6px; }
+.adm-app-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.adm-app-heading h3 { margin: 0; overflow-wrap: anywhere; }
+.adm-app-item + .adm-app-item { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e4eaf3; }
+.adm-actions .adm-button:disabled { background: #e5eaf2; color: #8995a8; opacity: 1; cursor: not-allowed; }
+.adm-panel .adm-rows td input:not([type=checkbox]):not([type=radio]) { min-width: 110px; }
+.adm-filter { max-width: 320px; margin-bottom: 15px !important; }
+@media (max-width:850px) {
+    .adm-workspace { margin-left: 0; padding-top: 64px; }
+    .adm-topbar { height: 64px; left: 0; padding: 0 18px; }
+    .adm-topbar .adm-nav-toggle { display: inline-flex; }
+    .adm-mobile-brand { display: inline; }
+    .adm-sidebar { display: none; top: 64px; bottom: auto; right: 0; width: auto; max-height: calc(100vh - 64px); padding: 12px 18px 20px; box-shadow: 0 12px 24px #11264a35; }
+    .adm-sidebar.is-open { display: flex; }
+    .adm-sidebar .adm-brand { display: none; }
+    .adm-sidebar h3 { margin-top: 16px; }
+    .adm-sidebar .adm-link { padding: 10px 12px; }
+    .adm-legacy { margin-top: 12px; }
+    .adm-main { padding: 22px 18px; }
+    .adm-status { display: none; }
+}
+@media (max-width:600px) {
+    .adm-topbar { padding: 0 12px; gap: 8px; }
+    .adm-topbar-start, .adm-account { gap: 10px; }
+    .adm-breadcrumb { display: none; }
+    .adm-heading h1 { font-size: 23px; }
+    .adm-main { padding: 22px 12px; }
+    .adm-panel { padding: 18px; }
+    .adm-footer { padding: 20px 12px; }
+}
+
+/* 配置行按组交替底色；分组与子设置均使用独立标题，窄屏改为上下排列。 */
+.adm-config-section { border: 1px solid #dbe4f0; border-radius: 8px; overflow: hidden; margin: 0 0 20px; }
+.adm-config-heading { padding: 13px 16px; background: #eaf1fb; border-left: 4px solid #2465c5; }
+.adm-config-heading small { display: block; color: #536b8c; margin-bottom: 3px; }
+.adm-panel .adm-config-heading h3 { margin: 0; color: #244a7e; font-size: 15px; font-weight: 600; }
+.adm-config-rows { margin-bottom: 18px; border: 1px solid #e1e7f0; border-radius: 7px; overflow: hidden; }
+.adm-config-section > .adm-config-rows { margin: 0; border: 0; border-radius: 0; }
+.adm-config-rows > .adm-config-row { display: grid; grid-template-columns: minmax(130px, 22%) minmax(0, 1fr); column-gap: 20px; row-gap: 6px; margin: 0; padding: 16px; border-bottom: 1px solid #e1e7f0; background: #fff; }
+.adm-config-rows > .adm-config-row:nth-child(even), .adm-table tbody tr:nth-child(even) { background: #f2f6fc; }
+.adm-config-rows > .adm-config-row:last-child { border-bottom: 0; }
+.adm-config-row > span { padding-top: 8px; overflow-wrap: anywhere; }
+.adm-config-row > small { grid-column: 2; color: #63748c; }
+.adm-config-row > small:empty { display: none; }
+.adm-config-control { min-width: 0; }
+.adm-panel-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.adm-panel .adm-panel-heading h2, .adm-panel .adm-panel-heading form { margin: 0; }
+.adm-help { color: #63748c; margin: 0 0 16px; line-height: 1.8; }
+.adm-plugin-orders td { vertical-align: middle; }
+.adm-plugin-orders td small { display: block; color: #7b879b; }
+.adm-panel .adm-plugin-orders input[type=number] { width: 96px; text-align: center; }
+.adm-form-actions { margin-top: 18px; }
+@media (max-width:600px) {
+    .adm-config-rows > .adm-config-row { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+    .adm-config-row > span { padding-top: 0; }
+    .adm-config-row > small { grid-column: 1; }
+}
+
+/* PHP 7.4 phpinfo原生样式；限定内容区域，表格自适应并保留溢出滚动。 */
+#adm-phpinfo { overflow-x: auto; background-color: #fff; color: #222; font: 16px/normal sans-serif; }
+#adm-phpinfo pre { margin: 0; padding: 0; border-radius: 0; background: transparent; font-family: monospace; }
+#adm-phpinfo a:link { color: #009; text-decoration: none; background-color: #fff; }
+#adm-phpinfo a:hover { text-decoration: underline; }
+#adm-phpinfo table { border-collapse: collapse; border: 0; width: 934px; max-width: 100%; box-shadow: 1px 2px 3px #ccc; }
+#adm-phpinfo .center { text-align: center; }
+#adm-phpinfo .center table { margin: 1em auto; text-align: left; }
+#adm-phpinfo .center th { text-align: center !important; }
+#adm-phpinfo td, #adm-phpinfo th { border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px; }
+#adm-phpinfo th { position: sticky; top: 0; background: inherit; }
+#adm-phpinfo h1 { font-size: 150%; }
+#adm-phpinfo h2 { font-size: 125%; margin: .83em 0; }
+#adm-phpinfo .p { text-align: left; }
+#adm-phpinfo .e { background-color: #ccf; width: 300px; font-weight: bold; }
+#adm-phpinfo .h { background-color: #99c; font-weight: bold; }
+#adm-phpinfo .v { background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word; }
+#adm-phpinfo .v i { color: #999; }
+#adm-phpinfo img { float: right; border: 0; }
+#adm-phpinfo hr { width: 934px; max-width: 100%; background-color: #ccc; border: 0; height: 1px; }

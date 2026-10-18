@@ -18,10 +18,10 @@ global $info_app;
 
 <h5 class="mt-4">URL信息解析：</h5>
 <ul style="width:96%;height:auto;overflow-x:hidden;overflow-y:auto;border:1px gray dashed;padding:10px 20px;margin:20px auto;">
-    <li>数组格式的路径信息：$info_app['path'] = <?=var_export($info_app['path'], 1)?> </li>
-    <li>数组格式的url参数：$info_app['para'] = <?=var_export($info_app['para'],1)?> </li>
-    <li>字符串格式的路径信息：$info_app['route'] = <?=$info_app['route']?> </li>
-    <li>$_GET = <?=var_export($_GET, 1)?> </li>
+    <li>数组格式的路径信息：$info_app['path'] = <?=htmlspecialchars(var_export($info_app['path'], 1),ENT_QUOTES,'UTF-8')?> </li>
+    <li>数组格式的url参数：$info_app['para'] = <?=htmlspecialchars(var_export($info_app['para'],1),ENT_QUOTES,'UTF-8')?> </li>
+    <li>字符串格式的路径信息：$info_app['route'] = <?=htmlspecialchars($info_app['route'],ENT_QUOTES,'UTF-8')?> </li>
+    <li>$_GET = <?=htmlspecialchars(var_export($_GET, 1),ENT_QUOTES,'UTF-8')?> </li>
 </ul>
 
 <h5 class="mt-4">route.php 代码：</h5>

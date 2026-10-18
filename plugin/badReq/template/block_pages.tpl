@@ -19,13 +19,14 @@
 </ul>
 <script type="application/javascript">
     $(function(){
+        const jumpURL=<!--badreq_list_url_json-->;
         $('input[name=jump]').keypress(function(e){
             if(e.keyCode===13) {
-                location.href=global.root_fix+'?<!--query-->&page='+this.value;
+                location.href=queryURL(jumpURL,{page:this.value});
             }
         });
         $('button[name=jump]').click(function(e){
-            location.href=global.root_fix+'?<!--query-->&page='+$('input[name=jump]').val();
+            location.href=queryURL(jumpURL,{page:$('input[name=jump]').val()});
         });
     });
 </script>

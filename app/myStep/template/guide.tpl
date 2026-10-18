@@ -1,50 +1,17 @@
-<div class="mb-5 mb-sm-2">
-    <ul id="idx_list" class="nav nav-pills">
-        <li class="nav-item">
-            <a class="nav-link active" href="#all">全部显示</a>
-        </li>
-    </ul>
-    <div id="container" class="p-0"></div>
+<div class="guide-heading"><h2>框架指南</h2><p>按主题阅读现有文档；内容直接来自网站文档目录，应用与站点资料单独分类。</p></div>
+<!--if:start key="guide_error"-->
+<section class="guide-article"><h2><!--guide_title|html--></h2><p><!--guide_error|html--></p><a href="<!--guide_home|html-->">返回文档目录</a></section>
+<!--else-->
+<div class="guide-layout">
+    <aside class="guide-nav"><details class="guide-directory" open><summary>文档目录</summary><nav aria-label="框架文档">
+        <!--loop:start key="groups"--><!--groups_content--><!--loop:end-->
+    </nav></details></aside>
+    <article class="guide-article">
+        <header class="guide-meta"><h2><!--guide_title|html--></h2><span>文档来源：<!--guide_path|html--></span></header>
+        <details class="guide-outline"><summary>本篇章节</summary><ul>
+            <!--loop:start key="outline"--><li data-level="<!--outline_level|html-->"><a href="<!--outline_url|html-->"><!--outline_title|html--></a></li><!--loop:end-->
+        </ul></details>
+        <div class="guide-document"><!--guide_html--></div>
+    </article>
 </div>
-<script type="application/javascript">
-let detail = <!--detail-->;
-$(function(){
-    let obj, obj_sub;
-    let i,m,x;
-    for(i=0,m=detail.length;i<m;i++) {
-        $('<li class="nav-item">\n' +
-            '  <a class="nav-link" href="#section_'+i+'">'+detail[i].section+'</a>\n' +
-            '</li>').appendTo('#idx_list');
-        obj = $('<div class="card mb-3" id="section_'+i+'"><div class="card-header bg-secondary text-white"><span class="fa fa-book"></span> '+detail[i].section+'</div></div>');
-        if(typeof(detail[i].describe)!=='undefined') {
-            obj.append('<div class="card-body bg-light">'+detail[i].describe+'</div>');
-        }
-        obj_sub = $('<table class="table table-sm table-hover m-0"></table>');
-        if(typeof detail[i].detail.length==='undefined') {
-            for(x in detail[i].detail) {
-                $('<tr class="table-secondary">\n' +
-                    '  <td class="pl-4"><span class="fa fa-sticky-note-o"></span> '+x+'</td>\n' +
-                    '</tr><tr>\n' +
-                    '  <td class="pl-5">'+detail[i].detail[x].replace(/[\r\n]+$/, '')+'</td>\n' +
-                    '</tr>').appendTo(obj_sub);
-            }
-            obj.append(obj_sub);
-        }
-        $('#container').append(obj);
-    }
-    $('#idx_list a').click(function(e){
-        e.preventDefault();
-        let idx = this.href.replace(/^.+#/, '#');
-        $('#idx_list a').removeClass('active');
-        $(this).addClass('active');
-        if(idx=='#all') {
-            $('#container').find('div.card').fadeIn(1000);
-        } else {
-            $('#container').find('div.card').hide();
-            $(idx).slideDown(500);
-        }
-        resizeMain();
-        return false;
-    });
-})
-</script>
+<!--if:end-->

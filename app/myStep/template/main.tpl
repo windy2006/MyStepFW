@@ -26,7 +26,10 @@
     </div>
     <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link" href="<!--path_admin-->/login?out"><span class="glyphicon glyphicon-log-out"></span> <!--lng_page_logout--></a>
+            <form method="post" action="<!--logout_url|html-->" data-ms-logout data-ms-csrf="<!--logout_csrf|html-->" class="m-0">
+                <input type="hidden" name="out" value="1">
+                <button type="submit" class="btn btn-link nav-link"><span class="glyphicon glyphicon-log-out"></span> <!--lng_page_logout--></button>
+            </form>
         </li>
     </ul>
 </header>

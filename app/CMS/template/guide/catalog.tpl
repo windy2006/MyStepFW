@@ -12,7 +12,7 @@
             <ul class="nav justify-content-center pre_list mb-3">
                 <!--loop:start key="prefix"-->
                 <li class="nav-item mx-3">
-                    <a class="btn btn-<!--prefix_class-->" href="?pre=<!--prefix_name-->"><!--prefix_name--></a>
+                    <a class="btn btn-<!--prefix_class-->" href="?pre=<!--prefix_name|url-->"><!--prefix_name--></a>
                 </li>
                 <!--loop:end-->
             </ul>

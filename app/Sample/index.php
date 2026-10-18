@@ -11,11 +11,8 @@ if(!defined('URL_FIX')) $root = $root.$info_app['app'].'/';
 $tpl_sub->assign('root', $root);
 $tpl_sub->assign('root2', ROOT_WEB);
 $tpl_sub->assign('code', htmlentities(myFile::getLocal(__FILE__)));
-//重制敏感信息
-$ms_setting->gen->s_usr = '******';
-$ms_setting->gen->s_pwd = '******';
-$ms_setting->email->password = '******';
-$ms_setting->db->password = '******';
+// 仅展示配置副本；控制器和连接对象的内部属性可能含口令，公开页面只显示类名。
+$demo_setting = \app\sample\publicSetting($ms_setting->get());
 //参数列表及模版循环赋值
 foreach ([
     'info_app' => '当前app基本信息',
@@ -27,7 +24,8 @@ foreach ([
     'db' => '数据库对象，参见MySQL【<a href="/Document/mysql" target="_blank">使用样例</a>】 【<a href="/Document/mysql/detail" target="_blank">方法说明</a>】',
     'cache' => '缓存对象，参见【<a href="/Document/myCache" target="_blank">使用样例</a>】 【<a href="/Document/myCache/detail" target="_blank">方法说明</a>】',
 ] as $k => $v) {
-    $tpl_sub->setLoop('para', ['name'=>'$'.$k, 'comment'=>$v, 'detail'=>print_r($$k, true)]);
+    $value = $k==='ms_setting' ? $demo_setting : (is_object($$k) ? ['class'=>get_class($$k)] : $$k);
+    $tpl_sub->setLoop('para', ['name'=>'$'.$k, 'comment'=>$v, 'detail'=>htmlspecialchars(print_r($value,true),ENT_QUOTES,'UTF-8')]);
 }
 //编译子模版页面并赋值到主模版对应变量中
 $tpl->assign('main', $tpl_sub->render('', false));

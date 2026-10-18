@@ -23,21 +23,21 @@ function getAttachment() {
         \myController::header('404');
     }
     $file = array_pop($info_app['path']);
-    $idx = explode('.', $file);
-    $path = FILE.date($S->upload->path_mode, intval($idx[0]));
-    if(is_file($path.$file)) {
-        if(in_array(strtolower($idx[2]), ['png','jpg']) && is_null(\myReq::get('org'))) {
-            $cache = CACHE.'app/CMS/img/'.date($S->upload->path_mode, intval($idx[0])).$file;
+    $record = \myAttachment::find(FILE, $file, $S->upload->path_mode);
+    if($record) {
+        $source = $record['file'];
+        if(in_array(strtolower(pathinfo($source, PATHINFO_EXTENSION)), ['png','jpg','jpeg']) && is_null(\myReq::get('org'))) {
+            $cache = CACHE.'app/CMS/img/'.hash('sha256', $source.filemtime($source).serialize((array)$S->watermark)).'.'.strtolower(pathinfo($source, PATHINFO_EXTENSION));
             if(!is_file($cache)) {
-                $img = new \myImg($path.$file);
+                $img = new \myImg($source);
                 $size = $img->getSize();
                 if($size[0]>$S->watermark->thumb) {
                     $height = ceil($S->watermark->thumb * ($size[1]/$size[0]));
                     $img->thumb($S->watermark->thumb, $height, $cache);
-                    $img->destory();
+                    $img->destroy();
                     unset($img);
                 } else {
-                    \myFile::copy($path.$file, $cache);
+                    \myFile::copy($source, $cache);
                 }
                 if(strpos($S->watermark->mode, '2')!==false && file_exists(ROOT.$S->watermark->img)) {
                     \myFile::rename($cache, $cache.'.bak');
@@ -51,7 +51,7 @@ function getAttachment() {
                         'bgcolor' => $S->watermark->txt_bgcolor,
                     ]);
                     \myFile::del($cache.'.bak');
-                    $img->destory();
+                    $img->destroy();
                     unset($img);
                 }
             }
@@ -78,19 +78,7 @@ function getUserInfo() {
         $user_info['group'] = $user_info['name'];
         $user_info['name'] = \r::s('ms_cms_user');
     } else {
-        $ms_user = \r::cookie('ms_cms_user');
         $user_info = null;
-        if(!is_null($ms_user)) {
-            list($usr, $pwd) = explode(chr(9), $ms_user);
-            $db->build($S->db->pre.'users')
-                ->field('group_id,hash')
-                ->where('username','=',$usr)
-                ->where('password','=',$pwd);
-            if($record=$db->record()) {
-                \r::s('ms_cms_user', $usr);
-                \r::s('ms_cms_user_group', empty($record['hash'])?$record['group_id']:1);
-            }
-        }
         if(is_null($user_info)) {
             $user_info = \app\CMS\checkVal($user_group, 'group_id', 1);
             $user_info['group'] = $user_info['name'];
@@ -198,36 +186,7 @@ function buildList($idx) {
                ->field('cat_id,web_id,pid,name,idx,show,order,type,link,layer,view_lvl,prefix,keyword,comment')
                ->order('web_id')->order('cat_id');
             $cat = $db->records();
-            $id_list = array_column($cat, 'cat_id');
-            for($i=0,$m=count($cat);$i<$m;$i++) {
-                if($cat[$i]['pid']==0) {
-                    $cat[$i]['layer'] = 1;
-                } else {
-                    $p = $cat[array_search($cat[$i]['pid'], $id_list)];
-                    $cat[$i]['layer'] = $p['layer']+1;
-                    $cat[$i]['order'] = $p['order'].'.'.$cat[$i]['order'];
-                }
-            }
-            usort($cat, function($a, $b) {
-                if($a['layer'] == $b['layer']) {
-                    return ($a['order'] == $b['order']) ? 0 : (
-                        version_compare($a['order'], $b['order'])==-1 ? -1 : 1
-                    );
-                } else {
-                    return ($a['layer'] < $b['layer']) ? 1 : -1;
-                }
-            });
-            $id_list = array_column($cat, 'cat_id');
-            for($i=0,$m=count($cat);$i<$m;$i++) {
-                if($cat[$i]['layer']>1) {
-                    $pid = array_search($cat[$i]['pid'], $id_list);
-                    if(!isset($cat[$pid]['sub'])) $cat[$pid]['sub'] = [];
-                    $cat[$pid]['sub'][] = $cat[$i];
-                    unset($cat[$i]);
-                }
-            }
-            $cat = array_values($cat);
-            $cache_para = $cat;
+            $cache_para = categoryTree($cat);
             break;
         case 'link':
             $link_txt = array();
@@ -299,13 +258,93 @@ function setCatList($list, $layer=1, $order='') {
     return $result;
 }
 
+/**
+ * 按字段查找记录，兼容关联键和稀疏数组；缺字段的记录直接跳过。
+ * @param array $list 记录集合
+ * @param string $key 字段名
+ * @param mixed $val 匹配值，沿用历史宽松比较
+ * @return array|false 首条匹配记录；不存在返回 false
+ */
 function getPara($list, $key, $val) {
     if(!is_array($list)) return false;
-    for($i=0,$m=count($list);$i<$m;$i++) {
-        if(!isset($list[$i]) || !isset($list[$i][$key])) return false;
-        if($list[$i][$key]==$val) return $list[$i];
-    }
+    foreach($list as $row) if(is_array($row) && isset($row[$key]) && $row[$key]==$val) return $row;
     return false;
+}
+
+/**
+ * 从平面栏目记录构建有序树，不依赖父栏目的编号先后；孤儿和环在内存中断开为根。
+ * @param array $rows 数据库栏目记录，含 cat_id、pid、web_id、order
+ * @return array 有序根栏目，子节点写入 sub，layer 根据实际树深度重算；不修改数据库
+ */
+function categoryTree($rows) {
+    $nodes = []; $done = []; $children = [];
+    foreach($rows as $row) if(is_array($row) && isset($row['cat_id']) && $row['cat_id']>0) {
+        unset($row['sub']); $nodes[(int)$row['cat_id']] = $row;
+    }
+    foreach($nodes as $id=>&$row) {
+        $pid = (int)($row['pid'] ?? 0);
+        if(!isset($nodes[$pid]) || $pid===$id || ($row['web_id'] ?? 0)!=($nodes[$pid]['web_id'] ?? 0)) $pid=0;
+        $row['pid']=$pid;
+    }
+    unset($row);
+    foreach($nodes as $id=>$row) {
+        $seen=[]; $current=$id;
+        while($current && !isset($done[$current])) {
+            if(isset($seen[$current])) { $nodes[$current]['pid']=0; break; }
+            $seen[$current]=true; $current=$nodes[$current]['pid'];
+        }
+        foreach($seen as $key=>$unused) $done[$key]=true;
+    }
+    foreach($nodes as $id=>$row) $children[$row['pid']][]=$id;
+    foreach($children as &$ids) usort($ids, function($a,$b) use (&$nodes) {
+        $x=$nodes[$a]; $y=$nodes[$b];
+        $web=($x['web_id'] ?? 0)<=>($y['web_id'] ?? 0);
+        return $web ?: (version_compare((string)($x['order'] ?? 0),(string)($y['order'] ?? 0)) ?: ($a<=>$b));
+    });
+    unset($ids);
+    $make=function($pid,$layer) use (&$make,&$nodes,&$children) {
+        $result=[];
+        foreach($children[$pid] ?? [] as $id) {
+            $row=$nodes[$id]; $row['layer']=$layer;
+            if(isset($children[$id])) $row['sub']=$make($id,$layer+1);
+            $result[]=$row;
+        }
+        return $result;
+    };
+    return $make(0,1);
+}
+
+/**
+ * 获取从根到当前栏目的路径，遇到缺失父级或循环时返回空数组。
+ * @param array $rows 平面栏目列表
+ * @param int|string $id 当前栏目编号
+ * @return array 根到当前栏目的记录列表；0、缺失或无效关系返回 []
+ */
+function categoryPath($rows,$id) {
+    $map=[]; $seen=[]; $path=[];
+    foreach($rows as $row) if(isset($row['cat_id'])) $map[(int)$row['cat_id']]=$row;
+    $id=(int)$id;
+    while($id>0) {
+        if(isset($seen[$id]) || !isset($map[$id])) return [];
+        $seen[$id]=true; $path[]=$map[$id]; $id=(int)$map[$id]['pid'];
+    }
+    return array_reverse($path);
+}
+
+/**
+ * 统一分隔符、去掉空标签及纯数字标签，每篇文章的重复标签只计一次。
+ * @param string $text 逗号/中文逗号/分号分隔的标签文本
+ * @return array 去重后的标签；保留含数字的名称、单字中文和引号，最多50个字符
+ */
+function normalizeTags($text) {
+    $tags=[];
+    foreach(explode(',',str_replace(['，','；',';'],',',(string)$text)) as $tag) {
+        $tag=trim(str_replace(' ','_',$tag),'_'."\t\r\n");
+        if($tag==='' || preg_match('/\A[\d.]+\z/D',$tag)) continue;
+        $tag=mb_substr($tag,0,50,'UTF-8');
+        $tags[$tag]=$tag;
+    }
+    return array_values($tags);
 }
 
 function removeNewsCache($news_id, $web_id=0) {
@@ -331,30 +370,86 @@ function removeNewsCache($news_id, $web_id=0) {
     return true;
 }
 
-function getPageList($total, $page=1, $page_size=20, $qstr='') {
-    if(is_null($total)) $total = 0;
-    if(is_null($page_size)) $page_size = 20;
-    if(!is_numeric($page) || $page < 1) $page = 1;
-    $page = (INT)$page;
-    $page_count = ceil($total/$page_size);
-    if($page < 1) $page = 1;
-    if($page > $page_count) $page = $page_count;
-    if(!empty($qstr)) $qstr .= '&';
-    $keys = array_keys(\myReq::r('[ALL]'));
-    $qstr = reset($keys).'?'.$qstr.'page=';
-    $record_start = ($page-1) * $page_size;
-    if($record_start < 0) $record_start = 0;
-    $page_arr = array();
-    $page_arr['total'] = $total;
-    $page_arr['page_current'] = $page;
-    $page_arr['page_count'] = $page_count;
-    $page_arr['link_first'] = ($page<=1 ? 'javascript:' : $qstr.'1');
-    $page_arr['link_prev'] = ($page<=1 ? 'javascript:' : $qstr.($page-1));
-    $page_arr['link_next'] = ($page==$page_count ? 'javascript:' : $qstr.($page+1));
-    $page_arr['link_last'] = ($page==$page_count ? 'javascript:' : $qstr.$page_count);
-    return array($page_arr, $record_start, $page_size);
+/**
+ * 生成功能路径的完整应用地址，统一适配绑定域名、子目录及三种路由模式。
+ * @param string|null $path 相对应用的路径；null 使用当前已解析路径，空串返回应用入口
+ * @param array $query 查询参数字典，由 queryURL 统一编码（默认：[]）
+ * @return string 可用于跳转或模板的原始 URL；写入 HTML 属性时需再做 HTML 转义
+ */
+function getURL($path=null, $query=[]) {
+    global $info_app;
+    if($path === null) $path = implode('/', $info_app['path'] ?? []);
+    $prefix = defined('URL_FIX') ? '' : ($info_app['app'] ?? 'CMS').'/';
+    return queryURL(\myStep::setURL(ROOT_WEB.$prefix.ltrim($path, '/')), $query);
 }
 
+/**
+ * 合并 URL 查询参数，保留 index.php? 路由首段及锚点，避免重复问号或丢失路径。
+ * @param string $url 原始 URL，可为完整地址或已转换的应用地址
+ * @param array $params 待覆盖的查询参数；null 删除对应参数（默认：[]）
+ * @return string 以 RFC 3986 编码参数后的 URL；不对完整 URL 作 HTML 转义
+ */
+function queryURL($url, $params=[]) {
+    $url = (string)$url;
+    $hash = '';
+    if(($at = strpos($url, '#')) !== false) { $hash = substr($url, $at); $url = substr($url, 0, $at); }
+    $parts = explode('?', $url, 2);
+    $path = $parts[0];
+    $query = $parts[1] ?? '';
+    $route = '';
+    if(preg_match('#/index\.php$#', $path) && $query !== '' && strpos(explode('&', $query, 2)[0], '=') === false) {
+        $parts = explode('&', $query, 2); $route = $parts[0]; $query = $parts[1] ?? '';
+    }
+    parse_str($query, $values);
+    foreach($params as $key => $value) {
+        if($value === null) unset($values[$key]);
+        else $values[$key] = $value;
+    }
+    $query = http_build_query($values, '', '&', PHP_QUERY_RFC3986);
+    return $path.($route !== '' ? '?'.$route.($query === '' ? '' : '&'.$query) : ($query === '' ? '' : '?'.$query)).$hash;
+}
+
+/**
+ * 计算分页位置并生成当前功能的分页地址；保留筛选条件，不依赖 GET 参数顺序。
+ * @param int $total 记录数，负数按零处理
+ * @param int $page 当前页，超出范围时归入有效页（默认：1）
+ * @param int|null $page_size 每页记录数，空值或非正值回退 20（默认：20）
+ * @param string|array $qstr 附加筛选参数，覆盖当前 GET 中同名参数（默认：''）
+ * @return array 分页信息、起始记录偏移、每页条数；零记录时当前页仍为 1
+ */
+function getPageList($total, $page=1, $page_size=20, $qstr='') {
+    $total = max(0, (int)$total);
+    $page_size = (int)$page_size > 0 ? (int)$page_size : 20;
+    $page_count = (int)ceil($total/$page_size);
+    $page = min(max(1, (int)$page), max(1, $page_count));
+    if(!is_array($qstr)) parse_str(ltrim((string)$qstr, '?&'), $qstr);
+    $params = array_replace($_GET, $qstr);
+    $page_arr = ['total'=>$total, 'page_current'=>$page, 'page_count'=>$page_count];
+    foreach(['first'=>1, 'prev'=>max(1, $page-1), 'next'=>min(max(1, $page_count), $page+1), 'last'=>max(1, $page_count)] as $name => $number) {
+        $page_arr['link_'.$name] = getURL(null, array_replace($params, ['page'=>$number]));
+    }
+    return [$page_arr, ($page-1)*$page_size, $page_size];
+}
+
+/**
+ * 将 CMS 链接转换为绝对地址，供 RSS、Atom、站点地图等无页面基准的输出使用。
+ * @param string $url 应用相对路径、根路径、协议相对或完整 HTTP(S) URL
+ * @return string 带当前协议和目标主机的绝对 URL；调用方负责 XML/HTML 转义
+ */
+function absoluteURL($url) {
+    $scheme = \isHttps() ? 'https:' : 'http:';
+    if(strpos($url, '//') === 0) return $scheme.$url;
+    if(preg_match('#^https?://#i', $url)) return $url;
+    if(substr($url, 0, 1) !== '/') $url = getURL($url);
+    return $scheme.'//'.\myReq::svr('HTTP_HOST').$url;
+}
+
+/**
+ * 生成文章、栏目或标签链接；路径段独立编码，跨站链接采用目标子站域名。
+ * @param array|string $data 文章/栏目记录，或标签名称；记录可包含 cat_id、cat_idx、news_id、web_id
+ * @param string $mode news 为文章、catalog 为栏目、tag 为标签（默认：'news'）
+ * @return string 当前路由模式的应用地址；跨站返回 //domain/path，HTML 输出时需作属性转义
+ */
 function getLink($data, $mode='news') {
     global $news_cat_plat, $website, $web_info, $info_app, $S;
     $link = ROOT_WEB;
@@ -373,16 +468,16 @@ function getLink($data, $mode='news') {
     switch($mode) {
         case 'news':
             $link .= 'article/';
-            if(isset($cat)) $link .= urlencode($cat['idx']).'/';
+            if(isset($cat)) $link .= rawurlencode($cat['idx']).'/';
             $link .= $data['news_id'];
             break;
         case 'catalog':
             if(isset($cat)) {
-                $link .= 'catalog/'.urlencode($cat['idx']).'/';
+                $link .= 'catalog/'.rawurlencode($cat['idx']).'/';
             }
             break;
         case 'tag':
-            $link .= 'tag/'.(is_string($data)?$data:$data['tag']);
+            $link .= 'tag/'.rawurlencode(is_string($data)?$data:$data['tag']);
             break;
     }
     $link = \myStep::setURL($link);
@@ -478,7 +573,7 @@ foreach($result as $news) {
     $news['tags'] = '';
     $tags = explode(',', $news['tag']);
     for($i=0,$m=count($tags);$i<$m;$i++) {
-        $news['tags'] .= '<a href="'.\app\CMS\getLink($tags[$i],'tag').'" target="_blank">'.$tags[$i].'</a>';
+        $news['tags'] .= '<a href="'.htmlspecialchars(\app\CMS\getLink($tags[$i],'tag'), ENT_QUOTES, 'UTF-8').'" target="_blank">'.htmlspecialchars($tags[$i], ENT_QUOTES, 'UTF-8').'</a>';
     }
     
     foreach($news['style'] as $k) {
@@ -686,7 +781,7 @@ function parsePages(\myTemplate &$tpl, &$tag_attrs = array()){
     global $tpl_setting;
     $tpl_content = $tpl->getTemplate($tpl_setting['path'].'/'.$tpl_setting['style'].'/block_pages.tpl');
     list($block, $tag_attrs['unit'], $tag_attrs['unit_blank']) = $tpl->getBlock($tpl_content, 'if');
-    $tag_attrs['unit'] = preg_replace('#<!--(link_\w+)-->#', '<?=$page_info[\'\1\']?>', $tag_attrs['unit']);
+    $tag_attrs['unit'] = preg_replace('#<!--(link_\w+)-->#', '<?=htmlspecialchars($page_info[\'\1\'], ENT_QUOTES, \'UTF-8\')?>', $tag_attrs['unit']);
     $tag_attrs['unit'] = str_replace('<!--page_count-->', '<?=$page_info[\'page_count\']?>', $tag_attrs['unit']);
     $tag_attrs['unit'] = stripslashes($tag_attrs['unit']);
     $tag_attrs['unit_blank'] = stripslashes($tag_attrs['unit_blank']);
@@ -720,12 +815,9 @@ function getSubcat($id='', &$cat_info=false) {
     if($id>0) {
         if(($cat_info = checkVal($news_cat_plat, 'cat_id', $id))!==false) {
             if($cat_info['pid']>0) {
-                $pid_list = [$cat_info['pid'], $id];
-                while($cat_info['pid']>0) {
-                    $cat_info = checkVal($news_cat_plat, 'cat_id', $cat_info['pid']);
-                    if($cat_info['pid']==0) break;
-                    array_unshift($pid_list, $cat_info['pid']);
-                }
+                $path = categoryPath($news_cat_plat,$id);
+                if(!$path) { $cat_info=false; return []; }
+                $pid_list = array_column($path,'cat_id');
                 $cat_info = checkVal($news_cat_web, 'cat_id', $pid_list[0]);
                 for($i=1,$m=count($pid_list);$i<$m;$i++) {
                     $cat_cur = checkVal($cat_info['sub'], 'cat_id', $pid_list[$i]);
@@ -765,7 +857,7 @@ function buildSQL($paras) {
     $db->build($S->db->pre.'news_cat', array(
         'mode' => 'left',
         'field' => 'cat_id'
-    ))->field('idx','name as catalog');
+    ))->field('idx as cat_idx','name as catalog');
     if(isset($paras['catalog']) && $paras['catalog']!=0) {
         $db->build($S->db->pre.'news_cat')->where([
                 ['cat_id', 'n=', $paras['catalog']],
@@ -806,13 +898,9 @@ function buildSQL($paras) {
         $db->build($tbl)->where('subject', 'like', '['.$paras['prefix'].']%', 'and');
     }
     if(isset($paras['keyword']) && strlen($paras['keyword'])>=4) {
-        $db->build($web['setting']->db->pre.'news_detail', array(
-            'mode' => 'left',
-            'field' => 'news_id'
-        ))->where([
-            ['(t0.subject)', 'like', $paras['keyword']],
-            ['content', 'like', $paras['keyword'], 'or']
-        ]);
+        $detail = $db->quoteIdentifier($web['setting']->db->pre.'news_detail');
+        $keyword = $db->safeValue('%'.$paras['keyword'].'%');
+        $db->build($tbl)->where("(t0.subject LIKE '".$keyword."' OR EXISTS (SELECT 1 FROM ".$detail." AS d WHERE d.news_id=t0.news_id AND d.content LIKE '".$keyword."'))", 'f=', 1);
     }
     $db->build($tbl)->where([
             ['expire', 'is', null],

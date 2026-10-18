@@ -1,6 +1,26 @@
- server {
-    // Add the code below to server(location) section
-    if ($request_uri !～* "\.(jpg|png|gif|ico|css|js|json|html|htm|woff|woff2|eot|svg|ttf|map|zip)$") {
-        rewrite ^((?!index\.php).+)$    /index.php?$1;
+# Include inside the nginx http {} block. Set root/server_name/FPM for your environment.
+# HTTPS/certificates are configured by the hosting environment; this example uses HTTP.
+server {
+    listen 80;
+    server_name mystep.com cms.mystep.com admin.mystep.com doc.mystep.com sample.mystep.com api.mystep.com guide.mystep.com;
+    root /path/to/MyStepFW;
+    index index.php;
+    location = /index.php {
+        include fastcgi.conf;
+        fastcgi_pass 127.0.0.1:9000; # Or the PHP 7.4 FPM socket for your server.
     }
+    location ~ ^/index\.php/ {
+        rewrite ^/index\.php(/.*)$ /index.php?$1 last;
+    }
+    location ~ (?:^|/)\. { return 404; }
+    location ~* ^/(?:config|lib|tests|maintenance)(?:/|$) { return 404; }
+    location ~ ^/cache/(?!script/) { return 404; }
+    location ~* \.(?:php[0-9]?|phtml|phar|db|sqlite|sql|log|bak|ini|env|lock)(?:/|$) { return 404; }
+    location ~* ^/(?:static|cache/script|vendor)/.+\.(?:css|js|map|json|png|jpe?g|gif|webp|ico|svg|woff2?|eot|ttf|ttc|otf|html?|txt)$ {
+        disable_symlinks on from=$document_root;
+        try_files $uri =404;
+        expires 7d;
+    }
+    location / { rewrite ^ /index.php last; }
+
 }

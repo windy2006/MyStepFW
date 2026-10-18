@@ -2,7 +2,10 @@
   "name": "mystep/framework",
   "description": "MyStep PHP Framework",
   "minimum-stability": "stable",
-  "keywords": ["framework", "mystep"],
+  "keywords": [
+    "framework",
+    "mystep"
+  ],
   "license": "Apache-2.0",
   "type": "project",
   "authors": [
@@ -12,19 +15,17 @@
     }
   ],
   "require": {
-    "php": "^7.0",
-    "erusev/parsedown": "^2.0.x-dev",
-    "mrclay/jsmin-php": "^2.4.0",
-    "meenie/javascript-packer": "^1.1",
-    "phrozenbyte/cssmin": "^v3.0.2"
+    "php": "^7.4",
+    "erusev/parsedown": "^1.8.0",
+    "mrclay/jsmin-php": "^2.4.3",
+    "phrozenbyte/cssmin": "^3.0.4"
   },
   "config": {
-    "preferred-install": "dist"
-  },
-  "repositories": {
-    "packagist": {
-      "type": "composer",
-      "url": "https://mirrors.aliyun.com/composer/"
-    }
+    "preferred-install": "dist",
+    "platform": {
+      "php": "7.4.0"
+    },
+    "sort-packages": true,
+    "optimize-autoloader": true
   }
 }

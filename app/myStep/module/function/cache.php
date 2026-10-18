@@ -14,8 +14,7 @@ if(!empty($id)) {
         myFile::mkdir(CACHE.'language');
     }
     if($id & 8) {
-        myFile::del(CACHE.'data');
-        myFile::mkdir(CACHE.'data');
+        if(!myStep::clearDataCache()) throw new RuntimeException('数据缓存清除失败，请检查缓存存储状态。');
     }
     if($id & 16) {
         myFile::del(CACHE.'session');

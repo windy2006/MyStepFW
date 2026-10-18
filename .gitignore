@@ -1,0 +1,39 @@
+# 本机工具与版本库元数据
+.DS_Store
+.svn/
+.idea/
+.codex/
+.agents/
+__pycache__/
+
+# 网站运行数据与生成索引
+/cache/
+/files/
+/config/config.php
+/config/class.php
+/config/domain.php
+/config/route.php
+/config/route_plugin.php
+/config/route.php.sources.json
+/config/construction/construction.php
+/config/priority/
+*.log
+*.lock
+!composer.lock
+*.db-wal
+*.db-shm
+*.db-journal
+**/config_new.php
+
+# 更新服务的生成资料
+/plugin/manager/check_file.php
+/plugin/manager/check_app.php
+/plugin/manager/check_plugin.php
+/plugin/manager/pack/
+/plugin/manager/update/
+/plugin/manager/rollback/
+/app/Document/data/minify/cache.*
+
+# 请求过滤插件的运行状态
+/plugin/badReq/ban_ip.php
+/plugin/badReq/data.db

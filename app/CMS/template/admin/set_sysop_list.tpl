@@ -5,13 +5,13 @@
     </div>
     <div class="form-inline mt-5 pt-3 mx-auto">
         <div class="input-group mb-2 mb-md-0 mx-auto px-2">
-            <select class="input-group-prepend custom-select" name="group_id" onchange="location.href='?group_id='+this.options[this.selectedIndex].value">
+            <select class="input-group-prepend custom-select" name="group_id">
                 <option value="">所有群组</option>
                 <!--loop:start key="sys_group"-->
                 <option value="<!--sys_group_group_id-->" <!--sys_group_selected-->><!--sys_group_name--></option>
                 <!--loop:end-->
             </select>
-            <input type="text" name="keyword" class="form-control" value="<!--keyword-->" placeholder="请输入查询关键字" />
+            <input type="text" name="keyword" class="form-control" value="<!--keyword|html-->" placeholder="请输入查询关键字" />
             <div class="input-group-append">
                 <button class="btn btn-light btn-outline-secondary" name="keyword" type="button">检索</button>
             </div>
@@ -21,10 +21,10 @@
         <table class="table table-sm table-striped table-bordered table-hover my-md-3 bg-white">
             <thead class="thead-light">
             <tr class="text-center">
-                <th width="40"><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order_type=<!--order_type-->">编号</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=username&order_type=<!--order_type-->">用户名称</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=group_id&order_type=<!--order_type-->">用户组</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&group_id=<!--group_id-->&order=email&order_type=<!--order_type-->">电子邮件</a></th>
+                <th width="40"><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order_type=<!--order_type-->">编号</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=username&order_type=<!--order_type-->">用户名称</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=group_id&order_type=<!--order_type-->">用户组</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&group_id=<!--group_id-->&order=email&order_type=<!--order_type-->">电子邮件</a></th>
                 <th width="92">操作</th>
             </tr>
             </thead>
@@ -53,15 +53,15 @@
 <script type="application/javascript">
     $(function(){
         $('select[name=group_id]').change(function(){
-            location.href=global.root_fix+'?group_id='+this.options[this.selectedIndex].value;
+            location.href=queryURL(global.root_fix, {group_id:this.options[this.selectedIndex].value});
         });
         $('input[name=keyword]').keypress(function(e){
             if(e.keyCode==13) {
-                location.href=global.root_fix+'?group_id=<!--group_id-->&keyword='+this.value;
+                location.href=queryURL(global.root_fix, {group_id:'<!--group_id-->',keyword:this.value});
             }
         });
         $('button[name=keyword]').click(function(e){
-            location.href=global.root_fix+'?group_id=<!--group_id-->&keyword='+$('input[name=keyword]').val();
+            location.href=queryURL(global.root_fix, {group_id:'<!--group_id-->',keyword:$('input[name=keyword]').val()});
         });
         $('button[name=show_all]').click(function(e){
             location.href = global.root_fix;

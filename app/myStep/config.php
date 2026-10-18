@@ -12,9 +12,9 @@ $setting['web']['title'] = '管理后台 - 迈思框架 MyStep Framework';
 
 $setting['template'] = array();
 $setting['template']['name'] = 'main';
-$setting['template']['path'] = 'template';
+$setting['template']['path'] = 'app/myStep/template';
 $setting['template']['style'] = '';
 
 $setting['db'] = array();
-$setting['db']['auto'] = false;
+$setting['db']['auto'] = true;
 return $setting;

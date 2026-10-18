@@ -1,16 +1,16 @@
 <?PHP
 global $catalog, $prefix, $page, $limit, $loop, $query, $count, $page_size;
 $catalog = $info_app['path'][1]??'';
-if(preg_match('#(%[A-E0-9])#', $catalog)) $catalog = urldecode($catalog);
+$catalog = urldecode($catalog);
 $cat_info = false;
 $prefix = r::g('pre')??'';
+if(!is_string($prefix)) $prefix='';
 $tpl_setting['name'] = 'catalog';
 
 if(!empty($catalog)) {
     if(is_numeric($catalog)) {
         $cat_info = \app\CMS\getPara($news_cat_plat, 'cat_id', $catalog);
     } else {
-        $catalog = str_replace('+', ' ', $catalog );
         $cat_info = \app\CMS\getPara($news_cat_plat, 'idx', $catalog);
     }
     if($cat_info!==false) {
@@ -22,7 +22,7 @@ if(!empty($catalog)) {
         $catalog = '';
     }
 }
-if(is_file(PATH.'template/custom/cat_'.$cat_info['cat_id'].'.tpl')) {
+if($cat_info!==false && is_file(PATH.'template/custom/cat_'.$cat_info['cat_id'].'.tpl')) {
     $tpl_setting['style'] = 'custom';
     $tpl_setting['name'] = 'cat_'.$cat_info['cat_id'];
 } elseif(!empty($cat_info['type'])) {
@@ -51,23 +51,10 @@ if(!empty($catalog)) {
             'class' => ($cat_info['prefix'][$i]==$prefix)?'primary':'secondary'
         ]);
     }
-    $path_list = [];
-    $pid = $cat_info['pid'];
-    if($pid==0) $pid = $cat_info['cat_id'];
-    while($pid>0) {
-        $the_cat = \app\CMS\getPara($news_cat_plat, 'cat_id', $pid);
-        $path_list[] = [
-            'name' => $the_cat['name'],
-            'link' => \app\CMS\getLink($the_cat, 'catalog')
-        ];
-        $pid = $the_cat['pid'];
-    }
-    for($i=count($path_list)-1;$i>=0;$i--) {
-        $t->setLoop('cat_list', $path_list[$i]);
-    }
-    if($cat_info['name']!=$path_list[0]['name']) {
-        $t->setLoop('cat_list', ['name'=>$cat_info['name'], 'link'=>\app\CMS\getLink($cat_info, 'catalog')]);
-    }
+    $path_list = \app\CMS\categoryPath($news_cat_plat,$cat_info['cat_id']);
+    foreach($path_list as $the_cat) $t->setLoop('cat_list', [
+        'name'=>$the_cat['name'], 'link'=>\app\CMS\getLink($the_cat,'catalog')
+    ]);
 } else {
     $page_size = $S->list->txt;
     $S->web->title = $mystep->getLanguage('page_update').'_'.$S->web->title;
@@ -77,27 +64,15 @@ if(!empty($catalog)) {
     ]);
 }
 
-$db->build($S->db->pre_sub.'news_show')
-    ->field('count(*)');
-if(!empty($prefix)) $db->build($S->db->pre_sub.'news_show')->where('subject','like','['.$prefix.']%');
-if($catalog>0) {
-    $db->build($S->db->pre.'news_cat', array(
-        'mode' => 'left',
-        'field' => 'cat_id'
-    ))->where([
-            ['cat_id', 'n=', $catalog],
-            ['pid', 'n=', $catalog, 'or'],
-            ['pid', 'in', '(select cat_id from '.$S->db->pre.'news_cat where pid='.intval($catalog).')', 'or'],
-        ], 'and'
-    );
-}
-$count = $db->result();
+$count = $db->count(\app\CMS\buildSQL(['catalog'=>$catalog,'prefix'=>$prefix]));
 $page = r::g('page', 'int') ?? 1;
+list($page_info,$record_start,$page_size) = \app\CMS\getPageList($count,$page,$page_size);
+$page = $page_info['page_current'];
 $query = '';
-if(!empty($prefix)) $query = 'pre='.$prefix;
+if(!empty($prefix)) $query = http_build_query(['pre'=>$prefix], '', '&', PHP_QUERY_RFC3986);
 $t->assign('prefix', $prefix);
 $t->assign('cat_name', $cat_info['name']??$mystep->getLanguage('page_update'));
 $t->assign('cat_id', $catalog);
 $t->assign('news_cat', myString::toJson($news_cat_plat));
-$limit = (($page-1)*$page_size).','.$page_size;
+$limit = $record_start.','.$page_size;
 $loop = $S->list->txt;

@@ -42,7 +42,7 @@
                 </tr>
             </table>
             <div id="tfoot">
-                <button class="btn btn-primary btn-sm mr-3" type="submit"> 重新应用所有路由信息 </button>
+                <button class="btn btn-primary btn-sm mr-3" type="submit"> 更新路由及插件设置 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
                 <button class="btn btn-primary btn-sm mr-3" type="button" id="upload"> 上传新应用 </button>
             </div>

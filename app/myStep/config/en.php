@@ -43,7 +43,7 @@ $setting_detail['template'] = array(
         ),
         'path' => array(
             'name' => 'Path',
-            'describe' => 'The path which save the template files',
+            'describe' => 'Template path relative to the website root, e.g. app/myStep/template',
             'type' => array('text', '', '30')
         ),
         'style' => array(

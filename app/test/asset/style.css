@@ -1,0 +1,14 @@
+body {
+    background-color: #c5face;
+}
+header {
+    text-align: center;
+    padding: 10px 20px;
+}
+div.col-sm {
+    margin: 0 5px;
+    padding: 0;
+}
+div.card {
+    border-radius: 10px;
+}

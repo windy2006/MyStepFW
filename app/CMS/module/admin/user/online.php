@@ -14,7 +14,7 @@ if(!empty($keyword)) $condition[] = array('data','like',$keyword);
 $db->build($S->db->pre.'user_online')->field('count(*)')->where($condition);
 $count = $db->result();
 $page = r::g('page', 'int');
-$query = 'keyword='.$keyword.'&order='.$order.'&order_type='.$order_type;
+$query = http_build_query(['keyword'=>$keyword, 'order'=>$order, 'order_type'=>$order_type], '', '&', PHP_QUERY_RFC3986);
 list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
 $db->build($S->db->pre.'user_online')

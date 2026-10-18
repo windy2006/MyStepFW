@@ -1,9 +1,10 @@
 <div class="card mb-5 mb-sm-2">
     <div class="card-header bg-info text-white">
         <b><span class="glyphicon glyphicon-info-sign"></span> 框架更新</b>
-        <a class="btn btn-primary btn-sm float-right py-0 border" href="<!--root_web--><!--path_admin-->/function/plugin/setting/?idx=manager">设置</a>
+        <a class="btn btn-primary btn-sm float-right py-0 border" href="<!--plugin_setting_url|html-->">设置</a>
     </div>
     <div class="card-body p-0 table-responsive">
+        <div id="manager-feedback" class="alert m-3 d-none" role="alert" aria-live="polite"></div>
         <table class="table table-striped table-hover m-0">
             <tr>
                 <td style="width:120px;">当前框架版本</td>
@@ -71,8 +72,8 @@
                     <td><!--app_ver--></td>
                     <td><!--app_remote--></td>
                     <td class="btn-group">
-                        <a class="btn btn-sm btn-info" href="/<!--path_admin-->/setting/<!--app_app-->">设置</a>
-                        <a class="btn btn-sm btn-info" href="<!--app_link-->" target="">更新</a>
+                        <a class="btn btn-sm btn-info" href="<!--app_setting_url|html-->">设置</a>
+                        <a class="btn btn-sm btn-info <!--app_update_class-->" href="<!--app_link|html-->" target="">更新</a>
                         <a class="btn btn-sm btn-info" href="<!--url_prefix-->manager/pack/app/<!--app_app-->" target="">打包</a>
                     </td>
                 </tr>
@@ -103,8 +104,8 @@
                     <td><!--plugin_ver--></td>
                     <td><!--plugin_remote--></td>
                     <td class="btn-group">
-                        <a class="btn btn-sm btn-info" href="/<!--path_admin-->/function/plugin/setting/?idx=<!--plugin_idx-->">设置</a>
-                        <a class="btn btn-sm btn-info" href="<!--plugin_link-->" target="">更新</a>
+                        <a class="btn btn-sm btn-info" href="<!--plugin_setting_url|html-->">设置</a>
+                        <a class="btn btn-sm btn-info <!--plugin_update_class-->" href="<!--plugin_link|html-->" target="">更新</a>
                         <a class="btn btn-sm btn-info" href="<!--url_prefix-->manager/pack/plugin/<!--plugin_idx-->" target="">打包</a>
                     </td>
                 </tr>
@@ -127,6 +128,7 @@ jQuery.vendor('jquery.powerUpload', {
             errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
             url: '<!--url_prefix-->manager/upload',
             uploadFinished:function(i,file,result,timeDiff){
+                showUpdateFeedback(result.message || (result.error?'上传更新失败':'更新完成'),!!result.error);
                 if(result.error!=0) {
                     alert("上传失败！\n原因：" + result.message);
                 } else {
@@ -201,6 +203,7 @@ function checkModify(mode) {
         }
     }, "json").fail(function (e) {
         console.log(e);
+        loadingShow();
         alert('校验失败！');
     });
 }
@@ -213,6 +216,7 @@ $('#link_3').click(function(){
         }
     }).fail(function (e) {
         console.log(e);
+        loadingShow();
         alert('操作失败！');
     });
 });
@@ -227,6 +231,7 @@ $('#link_5').click(function(){
         location.replace(url);
     }, 'text').fail(function (e) {
         console.log(e);
+        loadingShow();
         alert('文件打包失败！');
     });
 });
@@ -245,42 +250,50 @@ $('#link_6').click(function(){
         if(info['miss']!=null) {
             list.push.apply(list,info['miss']);
         }
-        if(info.length==0) {
+        if(list.length==0) {
+            loadingShow();
             alert("未发现改变的文件！");
         } else {
             loadingShow('获取差异文件……');
-            $.post("http://<!--link-->/api/plugin_manager/difference", {'data':JSON.stringify(list)}, function(info){
+            $.post("<!--update_url-->/api/plugin_manager/difference", {'data':JSON.stringify(list)}, function(info){
                 if(info==false || typeof(info.error)!="undefined") {
                     alert("服务器校验失败 或 文件无需更新！");
                     loadingShow();
                     return;
                 }
                 try {
+                    loadingShow();
                     if(info.link.length>2) {
                         alert("文件正在下载。。。");
-                        location.href = "http://<!--link-->"+info.link;
+                        location.href = new URL(info.link, "<!--update_url-->/").href;
                     }
                 } catch(e) {
                     alert("文件获取失败，请检查相关设置！");
                 }
             }, "json").fail(function (e) {
                 console.log(e);
+                loadingShow();
                 alert('差异文件失败！');
             });
         }
         
     }, "json").fail(function (e) {
         console.log(e);
+        loadingShow();
         alert('服务器校验失败！');
     });
 });
 let update_info = null;
+function showUpdateFeedback(message,error) {
+    $('#manager-feedback').text(String(message || '')).removeClass('d-none alert-danger alert-success').addClass(error?'alert-danger':'alert-success');
+}
 function checkUpdate() {
     if(update_info==null) {
         alert("系统当前版本已为最新，无需更新！");
         return;
     }
     let result = "";
+    const escapeUpdate = value => $('<div>').text(String(value)).html();
     result += '\
 <div class="font-weight-bold text-center"  style="font-size:16px;">\
     更新详情\
@@ -290,8 +303,8 @@ function checkUpdate() {
         for(let ver in update_info) {
             result += '\
 <div class="mb-3">\
-    <div class="font-weight-bold border-bottom">Version: '+ver+'</div>\
-    <div>'+update_info[ver].replace(/[\r\n]+/g, "<br />")+'</div>\
+    <div class="font-weight-bold border-bottom">Version: '+escapeUpdate(ver)+'</div>\
+    <div>'+escapeUpdate(update_info[ver]).replace(/[\r\n]+/g, "<br />")+'</div>\
 </div>\
 ';
         }
@@ -305,7 +318,9 @@ function applyUpdate(mode) {
     $.get("<!--url_prefix-->manager/download?m="+mode, function(info){
         loadingShow();
         try {
+            showUpdateFeedback(info.info,!!info.error);
             alert_org(info.info);
+            if(info.error) return;
             if(info.link.length>2) {
                 location.href = info.link;
             } else {
@@ -316,19 +331,26 @@ function applyUpdate(mode) {
         }
     }, "json").fail(function (e) {
         console.log(e);
+        loadingShow();
+        showUpdateFeedback('更新请求失败，请检查服务器响应后重试。',true);
         alert('操作失败！');
     });
 }
 $(function(){
     $.get("<!--url_prefix-->manager/check/version?"+Math.random(), function(info){
-        if(info.version=='') return;
-        if(info.version.length>0) {
-            $('<a href="javascript:" onclick="checkUpdate()">点击更新（v'+info.version+'）</a>').appendTo("#info");
+        if(info.error || typeof info.version!=='string') {
+            $('#info').text('版本检查失败，请检查更新服务器连接');
+            return;
         }
-        update_info = info.detail;
+        if(info.version.length>0) {
+            $('<a href="javascript:" onclick="checkUpdate()"></a>').text('点击更新（v'+info.version+'）').appendTo("#info");
+            update_info = info.detail;
+        } else {
+            $('#info').text('已是最新版本');
+        }
     }, "json").fail(function (e) {
         console.log(e);
-        alert('操作失败！');
+        $('#info').text('版本检查失败，请检查更新服务器连接');
     });
 });
 </script>

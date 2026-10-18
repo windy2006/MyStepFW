@@ -1,4 +1,13 @@
 <?PHP
+/**
+ * 文件：app/myStep/module/function/plugin.php
+ * 功能说明：原后台插件安装、配置、绑定、启停、排序、卸载及打包管理。
+ * 方法目录：本文件不声明具名函数；状态切换闭包的参数及功能见调用处PHPDoc。
+ * 使用说明：由后台管理路由在身份、POST和CSRF检查后包含；依赖当前控制器、模板及插件公共接口。
+ *   应用绑定和排序复用setPluginApps/setPluginOrder；卸载钩子成功后才删除注册记录。
+ *   仅未安装插件允许删除目录；排序和状态切换在注册表排他锁内完成。
+ */
+if(!interface_exists('interface_plugin',false)) require_once PLUGIN.'interface_plugin.class.php';
 $method = '';
 if(isset($info_app['path'][3])) $method = $info_app['path'][3];
 
@@ -13,9 +22,9 @@ if(!$mydb->check()) {
         array('intro', 200),
     ));
 }
-$idx = myReq::get('idx');
+$idx = myReq::get('idx','!');
+if($idx!==null && $idx!=='' && (!is_string($idx) || !preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$idx))) myStep::info('page_error_plugin');
 if(!empty($idx)) {
-    if(!interface_exists('interface_plugin')) require_once(PLUGIN.'/interface_plugin.class.php');
     $flag = true;
     $class = 'plugin_'.$idx;
     if(!class_exists($class) && is_file(PLUGIN.$idx.'/class.php')) include(PLUGIN.$idx.'/class.php');
@@ -36,25 +45,6 @@ if($installed && $method=='view') {
 } elseif (!$installed && $method=='setting') {
     myStep::redirect(str_replace('setting', 'view', myReq::server('REQUEST_URI')));
 }
-function checkApp($apps, $idx) {
-    $dirs = myFile::find('', APP, false, myFile::DIR);
-    $dirs = array_map(function ($v) {return basename($v);} , $dirs);
-    foreach($dirs as $k) {
-        $plugin = [];
-        if(is_file(APP.$k.'/plugin.php')) $plugin = include(APP.$k.'/plugin.php');
-        if(in_array($k, $apps)) {
-            if(!in_array($idx, $plugin)) {
-                $plugin[] = $idx;
-            }
-        } else {
-            if(($n = array_search($idx, $plugin))!==false) {
-                unset($plugin[$n]);
-                $plunin = array_values($plugin);
-            }
-        }
-        myFile::saveFile(APP.$k.'/plugin.php', '<?PHP'.chr(10).'return '.var_export($plugin, true).';');
-    }
-}
 
 switch($method) {
     case 'view':
@@ -64,7 +54,6 @@ switch($method) {
                 $config->set($_POST['setting']);
                 $config->save('php');
             }
-            if(isset($_POST['apps'])) checkApp($_POST['apps'], $idx);
 
             call_user_func(array($class, 'install'));
             $mydb->insert(array(
@@ -75,6 +64,7 @@ switch($method) {
                 'name' => $info['name'],
                 'intro' => $info['intro'],
             ), true);
+            setPluginApps($idx, $_POST['apps'] ?? [], is_array($info['app'] ?? null) ? $info['app'] : []);
             myStep::info('plugin_installed', $app_root.'/function/plugin/');
         }
         $check = $class::check($check_info);
@@ -86,7 +76,7 @@ switch($method) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
             $config->save('php');
-            if(isset($_POST['apps'])) checkApp($_POST['apps'], $idx);
+            setPluginApps($idx, $_POST['apps'] ?? [], is_array($info['app'] ?? null) ? $info['app'] : []);
             myStep::redirect($app_root.'/function/plugin/');
         }
         $t->assign($info);
@@ -136,34 +126,38 @@ switch($method) {
         }
         break;
     case 'active':
-        $active = $mydb->result('idx='.$idx, 'active');
-        $mydb->update('idx='.$idx, array('active' => 1 - (int)$active));
+        // 状态读取和切换处于同一注册表排他锁，避免并发切换丢失一次操作。
+        if(!$installed) myStep::info('page_error_plugin');
+        if($mydb->mutate(
+            /**
+             * 功能说明：切换锁内读取到的目标插件状态。
+             * 闭包依赖：通过use捕获idx。
+             * @param array &$rows 当前注册记录，引用修改
+             * @return bool 找到并更新目标后返回true
+             * @throws InvalidArgumentException 目标在获取锁前已经被卸载
+             */
+            function(&$rows) use ($idx) {
+                foreach($rows as &$row) if($row['idx']===$idx) {$row['active']=trim($row['active'])==='1' ? 0 : 1;return true;}
+                throw new InvalidArgumentException('Plugin is not installed');
+            }
+        )!==true) throw new RuntimeException('Cannot update plugin state');
         myStep::redirect($app_root.'/function/plugin/');
         break;
     case 'delete':
+        if($installed) myStep::info('page_error_plugin');
         myFile::del(PLUGIN.$idx);
         myStep::info('plugin_delete_done');
         break;
     case 'uninstall':
-        $mydb->delete('idx='.$idx);
+        if(!$installed) myStep::info('page_error_plugin');
         call_user_func(array($class, 'uninstall'));
-        checkApp([], $idx);
+        $mydb->delete('idx='.$idx);
+        setPluginApps($idx, []);
         myStep::info('plugin_uninstalled', $app_root.'/function/plugin/');
         break;
     case 'pack':
-        if(!empty($idx) || is_dir(PLUGIN.$idx)) {
-            $pack_file = ROOT.'cache/tmp/pack/'.$idx.'.plugin';
-            $dir = PLUGIN.$idx;
-            $mypacker = $mystep->getInstance('myPacker', PLUGIN.$idx, $pack_file);
-            if(class_exists('plugin_manager')) {
-                plugin_manager::checkConfig($dir);
-                $mypacker->addIgnore(plugin_manager::IGNORE);
-            }
-            $mypacker->pack();
-            myFile::del($dir.'/config_new.php');
-            unset($mypacker);
-            myStep::file($pack_file);
-        }
+        $package=buildPluginPackage($idx);
+        myStep::file($package['file'],$package['name']);
         break;
     case 'upload':
         if(myReq::check('files')) {
@@ -209,17 +203,15 @@ switch($method) {
         break;
     default:
         if(myReq::check('post')) {
-            $idx = myReq::post('idx');
-            $order = myReq::post('order');
-            $records = $mydb->records();
-            foreach($records as $k => $v) {
-                if(($key=array_search($v['idx'], $idx))!==false) {
-                    $records[$k]['order'] = $order[$key];
-                }
+            $ids = myReq::post('idx');
+            $values = myReq::post('order');
+            if(!is_array($ids) || !is_array($values) || count($ids)!==count($values)) throw new InvalidArgumentException('Invalid plugin order fields');
+            $orders=[];$values=array_values($values);
+            foreach(array_values($ids) as $position=>$id) {
+                if(!is_string($id) || array_key_exists($id,$orders)) throw new InvalidArgumentException('Invalid plugin order identifier');
+                $orders[$id]=$values[$position];
             }
-            $records = $mydb->setOrder($records, 'order', 'desc');
-            $mydb->empty();
-            $mydb->insert($records, true);
+            setPluginOrder($orders);
         }
         $dirs = myFile::find('', PLUGIN, false, myFile::DIR);
         $dirs = array_map(function ($v) {return basename($v);} , $dirs);

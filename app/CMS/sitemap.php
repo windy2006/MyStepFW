@@ -14,15 +14,18 @@ $tpl_cache = array(
     'path' => CACHE.'app/'.$app.'/html/'.$web_info['idx'].'/',
     'expire' => 60*60*24*7
 );
-$tpl = new myTemplate($tpl_setting, $tpl_cache);
-header('Content-Type: application/xml; charset='.$S->gen->charset);
-$mystep->checkCache($tpl);
-
+// 缓存命中也会执行 CMS shutdown 统计，须先完成应用/子站设置与数据库选择。
 $S->merge(APP.$app.'/config.php');
 $db_pre = $S->db->pre;
 $S->merge(APP.$app.'/website/config_'.$web_info['idx'].'.php');
 $S->db->pre_sub = $S->db->pre;
 $S->db->pre = $db_pre;
+$db->connect($S->db->pconnect, $S->db->name);
+
+$tpl = new myTemplate($tpl_setting, $tpl_cache);
+header('Content-Type: application/xml; charset='.$S->gen->charset);
+$mystep->checkCache($tpl);
+
 
 $charset_tag = '<?xml version="1.0" encoding="'.$S->gen->charset.'"?>'."\n";
 $tpl->assign('charset_tag', $charset_tag);
@@ -32,12 +35,12 @@ $to = array("&amp;", "&apos;", "&quot;", "&gt;", "&lt;");
 $url = (isHttps()?'https':'http').'://'.myReq::svr('HTTP_HOST');
 
 $record = array();
-$record['url'] = $url;
+$record['url'] = \app\CMS\absoluteURL(\app\CMS\getURL(''));
+$record['url'] = str_replace($from, $to, $record['url']);
 $record['date'] = date("Y-m-d");
 $record['priority'] = "1";
 $tpl->setLoop("record", $record);
 
-$db->connect($S->db->pconnect, $S->db->name);
 $db->setCache($cache, 600);
 $news_count_max = $db->result('select max(news_count) as cnt from (select count(*) as news_count from '.$S->db->pre_sub.'news_show where web_id='.$web_info['web_id'].' group by cat_id) as tmp');
 if($news_count_max==0) $news_count_max = 1;
@@ -47,7 +50,7 @@ $news_cat_plat = $cache->func('\app\CMS\setCatList', [$news_cat]);
 for($i=0, $m=count($news_cat_plat); $i<$m; $i++) {
     if($news_cat_plat[$i]['web_id']!=$web_info['web_id']) continue;
     $record = array();
-    $record['url'] = empty($news_cat_plat[$i]['link']) ? ($url.\app\CMS\getLink($news_cat_plat[$i], 'catalog')) : $news_cat_plat[$i]['link'];
+    $record['url'] = \app\CMS\absoluteURL(empty($news_cat_plat[$i]['link']) ? \app\CMS\getLink($news_cat_plat[$i], 'catalog') : $news_cat_plat[$i]['link']);
     $record['url'] = str_replace($from, $to, $record['url']);
     $record['date'] = substr($db->result('select max(add_date) from '.$S->db->pre_sub.'news_show where cat_id='.$news_cat_plat[$i]['cat_id']), 0, 10);
     if(empty($record['date'])) $record['date'] = date("Y-m-d");

@@ -18,9 +18,7 @@ function api() {
     global $S;
     $para = func_get_args();
     //需要注意 $para 中的最后一个参数可能是格式变量（如json或xml）
-    $result = \myConfig::o2a($S);
-    $result = $result['setting'];
-    unset($result['db'], $result['gen']['s_usr'], $result['gen']['s_pwd'], $result['email']['password']);
+    $result = publicSetting($S->get());
     foreach($para as $v) {
         if(isset($result[$v])) {
             $result = $result[$v];
@@ -70,6 +68,20 @@ function routeTest() {
     } else {
         echo '请尝试连续刷新，超过3次后将会报错<br /><br />';
     }
-    echo '当前URL路径 ： '.$first.'<br /><br />';
+    echo '当前URL路径 ： '.htmlspecialchars($first,ENT_QUOTES,'UTF-8').'<br /><br />';
     echo '上一个函数的返回值 ： '.end($last).'<br />';
+}
+
+/**
+ * 生成公开演示配置副本，递归隐藏凭据，不改变运行中的配置。
+ * @param array $setting 已导出的配置数组
+ * @return array 隐去数据库及密码、密钥、令牌等字段的副本
+ */
+function publicSetting($setting) {
+    $result=[];
+    foreach($setting as $key=>$value) {
+        if(preg_match('/(?:password|passwd|pwd|secret|token|s_usr|etag|credential|(?:^|_)pass(?:$|_)|(?:^|_)key(?:$|_))/i',(string)$key) || $key==='db') continue;
+        $result[$key]=is_array($value) ? publicSetting($value) : $value;
+    }
+    return $result;
 }

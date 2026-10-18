@@ -1,5 +1,6 @@
 <?PHP
 $rule = array(
+    array('/ms_csrf', 'mySecurity::respond'),
     array('/api/[str]/[any]', 'myStep::api'),
     array('/module/[str]/[any]', 'myStep::module'),
     array('/sitemap', 'myStep::appFunc,sitemap'),
@@ -12,6 +13,7 @@ $rule = array(
     array('/'.$GLOBALS['ms_setting']->gen->path_admin.'/[any]', array('app\myStep\logCheck', 'myStep::getModule')),
 );
 $api = array(
+    'csrf' => 'mySecurity::respond',
     'error' => 'app\myStep\getError',
     'data' => 'app\myStep\getData',
     'autoComplete' => 'app\myStep\autoComplete',

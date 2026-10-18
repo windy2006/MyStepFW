@@ -13,35 +13,8 @@ r::regAlias(array(
             'gl' => 'global',
 ));
 
-$req = new myReq(array(
-            'path' => '/',
-            'prefix' => 'pre_'
-        ), array(
-            'id' => r::cookie('sid'),
-            'name' => 'cool',
-            'path' => PATH.'data/session/',
-            'expire' => 30,
-            'gc' => true,
-            'trans_sid' => true
-        ));
-
-sess_mysql::set(array(
-    'host' => '192.168.1.47:3306',
-    'user' => 'root',
-    'pass' => 'cfnadb!@#$%',
-    'db_name' => 'mystep',
-    'charset' => 'gbk',
-));
-sess_mysql::set(array(
-    'host' => '127.0.0.1:3306',
-    'user' => 'root',
-    'pass' => '123456',
-    'db_name' => 'mystep',
-    'charset' => 'gbk',
-));
-//r::sessionStart('sess_mysql', true);
-r::sessionStart('sess_file', true);
-
+// 框架已经初始化请求和会话。示例不能再次 init/sessionStart，避免切换真实用户的会话。
+// 如需演示独立的 sess_file/sess_mysql 处理器，请在隔离的 CLI 测试中配置。
 r::setCookie('cookie_test1', 'xxxx1', 3000);
 r::setCookie('cookie_test2', 'xxxx2', 3000);
 r::removeCookie('cookie_test1');
@@ -52,9 +25,9 @@ r::s('sess_test1', 'xxxxxxx1');
 r::s('sess_test2', $i+1);
 r::removeSession('sess_test1');
 
-echo "QueryString : ".r::svr('Query_String')."<br>";
+echo "QueryString : ".htmlspecialchars(r::svr('Query_String') ?? '',ENT_QUOTES,'UTF-8')."<br>";
 echo "IP : ".r::ip()."<br>";
 
 echo '<pre>';
-var_dump($_COOKIE, $_SESSION);
+echo htmlspecialchars(var_export(['cookie_test2'=>r::cookie('cookie_test2'),'sess_test2'=>r::s('sess_test2')],true),ENT_QUOTES,'UTF-8');
 echo '</pre>';

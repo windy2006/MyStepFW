@@ -8,51 +8,69 @@ class CMS extends myStep {
      * @param string $pwd
      * @return int
      */
-    public function login($usr='', $pwd='') {
-        $result = 0;
+    public function login($usr='', $pwd='', $remember = 86400) {
+        global $db, $S;
+        $explicit = $usr !== '' || $pwd !== '';
         if(parent::ms_login($usr, $pwd)) {
-            $result = 1;
-            if(empty($usr)) {
-                $usr = $this->setting->gen->s_usr;
-                $pwd = $this->setting->gen->s_pwd;
-            }
-            r::s('ms_cms_op', $usr);
+            r::s('ms_cms_op', $this->setting->gen->s_usr);
             r::s('ms_cms_group', 1);
-            r::setCookie('ms_cms_op', $usr.chr(9).$pwd, 60*60*24);
-        } else {
-            if(!empty($usr) && !empty($pwd)) {
-                $pwd = md5($pwd);
-                $ms_user = $usr.chr(9).$pwd;
-            } else {
-                $ms_user = myReq::cookie('ms_cms_op');
-            }
-            if(!empty($ms_user)) {
-                list($usr, $pwd) = explode(chr(9), $ms_user);
-                global $db, $S;
-                $db->build($S->db->pre.'sys_op')
-                    ->field('group_id')
-                    ->where('username','=',$usr)
-                    ->where('password','=',$pwd);
-                if($group_id=$db->result()) {
-                    r::s('ms_cms_op', $usr);
-                    r::s('ms_cms_group', $group_id);
-                    r::setCookie('ms_cms_op', $usr.chr(9).$pwd, 60*60*24);
-                    $result = 1;
-                } else {
-                    $db->build($S->db->pre.'users')
-                        ->field('group_id')
-                        ->where('username','=',$usr)
-                        ->where('password','=',$pwd);
-                    if($group_id=$db->result()) {
-                        r::s('ms_cms_user', $usr);
-                        r::s('ms_cms_user_group', $group_id);
-                        $result = 2;
-                    }
-                }
-            }
+            r::s('sysop', 'y');
+            if($explicit) $this->rememberAdmin($remember);
+            return 1;
         }
-        if($result===1) r::s('sysop', 'y');
-        return $result;
+        $cache_mode = $db->cache();
+        $db->cache(0);
+        try {
+            foreach([['sys_op','ms_cms_op','ms_cms_group',1], ['users','ms_cms_user','ms_cms_user_group',2]] as $type) {
+                list($table, $cookie, $group, $result) = $type;
+                $token = $explicit ? false : myAuth::readToken(r::cookie($cookie));
+                $name = $explicit ? $usr : ($token['u'] ?? r::s($cookie));
+                if(!is_string($name) || $name === '') continue;
+                $db->build($S->db->pre.$table)->where('username', '=', $name);
+                $record = $db->record();
+                if(!$record) continue;
+                $scope = 'cms:'.$S->db->name.':'.$S->db->pre.$table;
+                $version = hash('sha256', $record['password']);
+                $active = !$explicit && r::s($cookie) === $name && r::s($cookie.'_version') === $version;
+                $valid = $explicit ? myAuth::verifyPassword($pwd, $record['password'])
+                    : ($active || myAuth::verifyToken(r::cookie($cookie), $name, $record['password'], $scope, $S->web->etag));
+                if(!$valid) continue;
+                if($explicit && myAuth::needsUpgrade($record['password'])) {
+                    $hash = myAuth::hashPassword($pwd);
+                    $db->build($S->db->pre.$table)->field(['password'=>$hash])->where('username','=',$name)->where('password','=',$record['password']);
+                    if($db->update() !== 1) {
+                        $db->build($S->db->pre.$table)->where('username', '=', $name);
+                        $current = $db->record();
+                        if(!$current || !myAuth::verifyPassword($pwd, $current['password'])) continue;
+                        $hash = $current['password'];
+                    }
+                    $record['password'] = $hash;
+                }
+                if(r::s($cookie) !== $name) myAuth::renewSession();
+                r::s($cookie, $name);
+                r::s($cookie.'_version', hash('sha256', $record['password']));
+                r::s($group, $table === 'users' && !empty($record['hash']) ? 1 : $record['group_id']);
+                if($result === 1) r::s('sysop', 'y');
+                if($explicit) {
+                    if($remember > 0) r::setCookie($cookie, myAuth::makeToken($name, $record['password'], $scope, $S->web->etag, $remember), min(31536000, (int)$remember));
+                    else r::removeCookie($cookie);
+                }
+                return $result;
+            }
+        } finally {
+            $db->cache($cache_mode);
+        }
+        if(!$explicit) {
+            foreach(['ms_cms_op', 'ms_cms_user'] as $cookie) {
+                r::removeSession($cookie);
+                r::removeSession($cookie.'_version');
+                if(r::cookie($cookie) !== null) r::removeCookie($cookie);
+            }
+            r::removeSession('ms_cms_group');
+            r::removeSession('ms_cms_user_group');
+            r::removeSession('sysop');
+        }
+        return 0;
     }
 
     /**
@@ -61,6 +79,8 @@ class CMS extends myStep {
      */
     public function logout() {
         myReq::removeCookie('ms_cms_op');
+        myReq::removeCookie('ms_cms_user');
+        myReq::removeCookie('ms_auth');
         myReq::sessionEnd();
         return true;
     }
@@ -71,12 +91,10 @@ class CMS extends myStep {
     public static function log() {
         global $db, $S, $group_info, $id;
         $link = (isHttps()?'https':'http').'://'.r::svr('HTTP_HOST').r::svr('REQUEST_URI');
-        if(strpos($link, '_ok')) $link = r::svr('REFERER');
+        if(strpos($link, '_ok')) $link = r::svr('REFERER') ?: $link;
         if(!empty($id)) {
-            $link = str_replace('&id=' . $id, '', $link);
-            if (!preg_match('#/' . $id . '$#', $link)) $link .= '&id=' . $id;
+            if (!preg_match('#/' . preg_quote((string)$id, '#') . '/?$#', parse_url($link, PHP_URL_PATH) ?? '')) $link = \app\CMS\queryURL($link, ['id'=>$id]);
         }
-        if(preg_match('/(%[\w]{2})+/', $link)) $link = urldecode($link);
         if(strlen($link)>250) $link = s::substr($link, 0, 250);
         $db->build($S->db->pre.'sys_log')
             ->field([
@@ -156,23 +174,11 @@ class CMS extends myStep {
         }
         $db->build($S->db->pre.'user_online')->field('count(distinct ip)');
         $count_online = $db->result();
-        $db->build($S->db->pre.'counter')->field('pv,iv,online')->where('date','f=','curdate()');
-        if($record = $db->record()) {
-            $pv = $record['pv'] + 1;
-            $iv = $record['iv'] + $new_ip;
-            $online = max($record['online'], $count_online);
-        }else{
-            $pv = 1;
-            $iv = 1;
-            $online = 1;
-        }
-        $db->build($S->db->pre.'counter')->field([
-            'date' => 'curdate()',
-            'pv' => $pv,
-            'iv' => $iv,
-            'online' => $online
-        ]);
-        return $db->replace();
+        $table=$db->quoteIdentifier($S->db->pre.'counter');
+        return $db->execute('INSERT INTO '.$table.' (`date`,pv,iv,online) VALUES (CURDATE(),1,?,?) '
+            .'ON DUPLICATE KEY UPDATE pv=pv+1,iv=iv+VALUES(iv),online=GREATEST(online,VALUES(online))',
+            [$new_ip,max(1,(int)$count_online)]);
+
     }
 
     /**
@@ -182,15 +188,15 @@ class CMS extends myStep {
      */
     public static function checkPower($idx) {
         global $ms_setting;
-        $op = myReq::cookie('ms_cms_op') ?? myReq::session('sysop');
+        $op = myReq::session('sysop');
         switch($idx) {
             case 'upload':
             case 'remove_ul':
-                $flag = !is_null($op);
+                $flag = $op === 'y';
                 break;
             default:
                 $referer = myReq::server('http_referer');
-                $flag = (strpos($referer, myReq::server('http_host')) > 0) || $ms_setting->upload->free_dl || r::s('sysop');
+                $flag = mySecurity::trustedReferer($referer) || $ms_setting->upload->free_dl || r::s('sysop') === 'y';
         }
         return $flag;
     }

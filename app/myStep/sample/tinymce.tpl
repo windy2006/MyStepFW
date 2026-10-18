@@ -29,7 +29,7 @@
 <script type="application/javascript" src="/vendor/tinymce/tinymce.min.js"></script>
 <script type="text/javascript">
 function tinymceInit(obj){
-    if(!checkSetting()) return;
+    if(!checkSetting(100, tinymceInit, [obj])) return;
     if(obj==null) obj = 'textarea';
     tinymce.init({
         language:'zh_CN',

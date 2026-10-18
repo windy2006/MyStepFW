@@ -4,7 +4,7 @@
     </div>
     <div class="form-inline mt-5 pt-3 mx-auto">
         <div class="input-group mb-2 mb-md-0 mx-auto px-2">
-            <input type="text" name="keyword" class="input-group-prepend" value="<!--keyword-->" placeholder="请输入查询关键字" />
+            <input type="text" name="keyword" class="input-group-prepend" value="<!--keyword|html-->" placeholder="请输入查询关键字" />
             <div class="input-group-append">
                 <button class="btn btn-light btn-outline-secondary" name="keyword" type="button">检索</button>
             </div>
@@ -15,11 +15,11 @@
                         col-xs-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
             <thead class="thead-light">
             <tr class="text-center no-wrap">
-                <th width="120"><a class="text-dark" href="?keyword=<!--keyword-->&order=ip&&order_type=<!--order_type-->">IP</a></th>
+                <th width="120"><a class="text-dark" href="?keyword=<!--keyword|url-->&order=ip&order_type=<!--order_type-->">IP</a></th>
                 <th width="100">用户名称</th>
                 <th width="100">用户组</th>
-                <th width="160"><a class="text-dark" href="?keyword=<!--keyword-->&order=refresh&order_type=<!--order_type-->">刷新时间</a></th>
-                <th><a class="text-dark" href="?keyword=<!--keyword-->&order=url&order_type=<!--order_type-->">浏览页面</a></th>
+                <th width="160"><a class="text-dark" href="?keyword=<!--keyword|url-->&order=refresh&order_type=<!--order_type-->">刷新时间</a></th>
+                <th><a class="text-dark" href="?keyword=<!--keyword|url-->&order=url&order_type=<!--order_type-->">浏览页面</a></th>
             </tr>
             </thead>
             <tbody>
@@ -49,11 +49,11 @@ $(function(){
     });
     $('input[name=keyword]').keypress(function(e){
         if(e.keyCode==13) {
-            location.href=global.root_fix+'?keyword='+this.value;
+            location.href=queryURL(global.root_fix, {keyword:this.value});
         }
     });
     $('button[name=keyword]').click(function(e){
-        location.href=global.root_fix+'?keyword='+$('input[name=keyword]').val();
+        location.href=queryURL(global.root_fix, {keyword:$('input[name=keyword]').val()});
     });
     global.root_fix += 'user/online/';
     $("a[type]").click(function() {

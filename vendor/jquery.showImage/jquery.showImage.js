@@ -47,7 +47,8 @@ jQuery.fn.showImage = function(options) {
 
     container.bind("contextmenu",function(){return false;}).bind("selectstart",function(){return false;});
     container.show();
-    $("<div/>").addClass("container_show").html('<span class="jump back">&nbsp;</span><div class="main"><a href="###" target="_blank" title="Click to show the image in a new window."><img src="static/images/dummy.png" /></a></div><span class="jump forward">&nbsp;</span>').appendTo(container);
+    // 透明占位图不发起相对路径请求，兼容多级路由和子目录部署。
+    $("<div/>").addClass("container_show").html('<span class="jump back">&nbsp;</span><div class="main"><a href="###" target="_blank" title="Click to show the image in a new window."><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" /></a></div><span class="jump forward">&nbsp;</span>').appendTo(container);
     $("<div/>").addClass("container_list").html('<a class="arrow back">&nbsp;</a><div class="wrapper"></div><a class="arrow forward">&nbsp;</a>').appendTo(container);
     container_show = container.find(".container_show");
     container_show.css("width", '100%');

@@ -48,7 +48,7 @@ $(function() {
         $('select[name=web_id]').val(web_id).parent().hide();
     }
     $('select[name=web_id]').change(function () {
-        location.href = global.root_fix+'?web_id=' + this.value;
+        location.href = queryURL(global.root_fix, {web_id:this.value});
     });
     global.root_fix += 'article/custom/';
 });

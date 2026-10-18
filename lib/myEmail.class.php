@@ -10,22 +10,76 @@
 *           BUT PLEASE HOLD THIS ITEM.      *
 *                                           *
 ********************************************/
+/**
+ * 文件：lib/myEmail.class.php
+ * 功能说明：MIME邮件构建及SMTP传输工具
+ *   提供发件人/收件人、附件、内嵌资源与MIME编码，并包含兼容SMTP传输类。
+ *
+ * 方法目录：
+ *   public myEmail::init($from='', $charset='UTF-8') — 参数初始化
+ *   public myEmail::setSubject($subject) — 设置邮件主题
+ *   public myEmail::setFrom($email, $name='', $auto=true) — 设置邮件发送人
+ *   public myEmail::setContent($content, $isHtml=true, $body_alt='') — 设置邮件内容
+ *   public myEmail::addEmail($email, $name='', $type='to') — 校验并登记一个邮箱到to/cc/bcc/reply分组
+ *   public myEmail::to($email, $name = '') — 添加收件人
+ *   public myEmail::cc($email, $name = '') — 添加抄送人
+ *   public myEmail::bcc($email, $name = '') — 添加暗送人
+ *   public myEmail::reply($email, $name = '') — 添加回复人
+ *   public myEmail::formatEmail($email_list) — 格式化邮件地址
+ *   public myEmail::addHeader($name, $value) — 添加邮件头
+ *   public myEmail::addAttachment($filecontent, $filename = '', $embed=false, $filetype = 'application/octet-stream') — 添加附件
+ *   public myEmail::addFile($file, $filename='', $embed=false, $filetype = 'application/octet-stream') — 添加附件文件
+ *   public myEmail::setFile($file, $embed = false) — 附件编码
+ *   public myEmail::buildMail() — 邮件编码
+ *   public myEmail::send($para=array(), $single=false, $priority=3) — 邮件发送
+ *   public SMTP::__construct() — 初始化SMTP端口、连接及错误状态
+ *   public SMTP::Connect($host, $port = 0, $tval = 30) — 按主机、端口和超时时间建立SMTP套接字连接
+ *   public SMTP::StartTLS() — 发送STARTTLS并将当前SMTP连接升级为TLS
+ *   public SMTP::Authenticate($username, $password) — 使用用户名和密码执行SMTP LOGIN认证
+ *   public SMTP::Connected() — 检查SMTP套接字是否存在且尚未到达流末尾
+ *   public SMTP::Close() — 关闭SMTP套接字并清空连接状态
+ *   public SMTP::Data($msg_data) — 发送DATA命令及完整邮件内容，处理行长和点转义
+ *   public SMTP::Hello($host = '') — 优先发送EHLO，失败时回退HELO问候
+ *   private SMTP::SendHello($hello, $host) — 发送指定的EHLO/HELO问候并检查服务器响应
+ *   public SMTP::Mail($from) — 发送MAIL FROM以开始一轮邮件事务
+ *   public SMTP::Quit($close_on_error = true) — 发送QUIT并按响应及参数决定是否关闭连接
+ *   public SMTP::Recipient($to) — 发送RCPT TO登记一个信封收件人
+ *   public SMTP::Reset() — 发送RSET以放弃当前邮件事务
+ *   public SMTP::SendAndMail($from) — 发送兼容SMTP的SAML FROM命令
+ *   public SMTP::Turn() — 记录TURN未实现错误并返回false
+ *   public SMTP::getError() — 取得最近一次SMTP错误结构
+ *   private SMTP::get_lines() — 读取SMTP多行响应，直到最后一行或连接结束
+ *
+ * 使用说明：
+ *   1. 先设置发件人、主题、正文和收件人，再传SMTP配置发送。
+ *   2. 附件名称/邮件头按实现过滤；地址和传输配置仍需由调用方提供有效值。
+ *   3. 底部SMTP类保留上游版权说明及协议细节；测试邮件应发送到受控测试服务。
+ *
+ * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
+ *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
+ *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ */
+
 
 /**
-电子邮件发送：
-    $mail = new myEmail();
-    $mail->init($from, $charset, $log_file);
-    $mail->setFrom('from@mailserver.com', 'name');
-    $mail->setSubject('mail subject');
-    $mail->setContent('mail content', true);
-    $mail->addEmail('anymail@server.com', 'recipient name', 'to');
-    $mail->addEmail('anymail1@server.com', 'recipient name', 'cc');
-    $mail->addFile($file_at_server, $filename, $filetype, $embed);
-    $mail->addHeader('Disposition-Notification-To', 'anymail@server.com');
-    $mail->send(array('mode'=>'smtp', 'host'=>'mailserver', 'port'=>25, 'user'=>'username', 'password'=>'psw'), true);
-      or
-    $mail->send(array('mode'=>'ssl', 'host'=>'smtp.gmail.com', 'port'=>465, 'user'=>'username@gmail.com', 'password'=>'password'));
-*/
+ * 功能说明：构建邮件头、地址、正文及附件，并通过SMTP发送MIME邮件
+ *
+ * 使用说明：
+ *   1. 先设置发件人、主题、正文和收件人，再传SMTP配置发送。
+ *   2. 附件名称/邮件头按实现过滤；地址和传输配置仍需由调用方提供有效值。
+ *   3. 底部SMTP类保留上游版权说明及协议细节；测试邮件应发送到受控测试服务。
+ *
+ * 使用示例：
+ *     $mail = new myEmail($from, 'UTF-8');
+ *     $mail->setSubject('主题'); $mail->setContent('<p>正文</p>', true);
+ *     $mail->to('recipient@example.com', '收件人');
+ *     $mail->addFile($path, 'report.pdf', false, 'application/pdf');
+ *     $result = $mail->send($smtpOptions);
+ *
+ * 方法目录：参见本文件顶部；只列直接声明，继承和trait别名沿用原声明注释。
+ *
+ * @example ../app/Document/module/myEmail.php 框架现有演示，仅作为文档引用，不在检查时执行
+ */
 Class myEmail extends myBase {
     use myTrait;
 
@@ -33,6 +87,7 @@ Class myEmail extends myBase {
         $isHtml = true,
         $charset = 'UTF-8',
         $from = '',
+        $from_email = '',
         $to = array(),
         $reply = array(),
         $cc = array(),
@@ -55,13 +110,15 @@ Class myEmail extends myBase {
                         );
 
     /**
-     * 参数初始化
-     * @param string $from
-     * @param string $charset
+     * 功能说明：参数初始化
+     *
+     * @param string $from 源文件路径或发送方地址，按对应入口解释（默认：''）
+     * @param string $charset 字符编码名称，例如UTF-8；是否自动检测由具体入口决定（默认：'UTF-8'）
+     * @return void 无返回值。
      */
     public function init($from='', $charset='UTF-8') {
-        if(!empty($from)) $this->setFrom($from);
         if(!empty($charset)) $this->charset = $charset;
+        if(!empty($from)) $this->setFrom($from);
         $boundary_str = 'mystep_'.Chop('b'.md5(uniqid(time()))).'_mystep';
         $this->boundary['body'] = '===Body_'.$boundary_str.'===';
         $this->boundary['attach'] = '===Attach_'.$boundary_str.'===';
@@ -69,8 +126,10 @@ Class myEmail extends myBase {
     }
 
     /**
-     * 设置邮件主题
-     * @param $subject
+     * 功能说明：设置邮件主题
+     *
+     * @param string $subject 邮件主题文本
+     * @return void 无返回值。
      */
     public function setSubject($subject) {
         $subject = str_replace(chr(13), '', $subject);
@@ -81,37 +140,43 @@ Class myEmail extends myBase {
     }
 
     /**
-     * 设置邮件发送人
-     * @param $email
-     * @param string $name
-     * @param bool $auto
-     * @return bool
+     * 功能说明：设置邮件发送人
+     *
+     * @param string $email 合法的发件人邮箱地址
+     * @param string $name 发件人显示姓名（默认：''）
+     * @param bool $auto 是否同时添加为reply地址（默认：true）
+     * @return bool 邮箱有效并登记为true，否则为false；auto为true时还登记回复地址
      */
     public function setFrom($email, $name='', $auto=true) {
         $email = trim($email);
-        if(!preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2,4}$/i', $email)) return false;
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) return false;
+        $plain_name = $name;
         $name = trim(preg_replace('/[\r\n]+/', '', $name));
         $name = myString::setCharset($name, $this->charset);
         if(empty($name)) {
-            $this->from = strstr($email, '@', true);
+            $this->from = $email;
         } else {
             $name = '=?'.$this->charset.'?B?'.base64_encode($name).'?=';
             $this->from = $name . ' <' . $email . '>';
         }
+        $this->from_email = $email;
         ini_set('sendmail_from', $email);
         if($auto) {
-            $this->addEmail($email, $name, 'reply');
+            $this->addEmail($email, $plain_name, 'reply');
         }
         return true;
     }
 
     /**
-     * 设置邮件内容
-     * @param $content
-     * @param bool $isHtml
-     * @param string $body_alt
+     * 功能说明：设置邮件内容
+     *
+     * @param string $content 待处理或输出的内容字节串
+     * @param bool $isHtml 正文是否按HTML格式构建（默认：true）
+     * @param string $body_alt HTML邮件对应的纯文本正文，空串不单独设置（默认：''）
+     * @return void 无返回值。
      */
     public function setContent($content, $isHtml=true, $body_alt='') {
+        if($body_alt !== '') $body_alt = chunk_split(base64_encode(myString::setCharset($body_alt, $this->charset)));
         $this->body = '';
         $boundary = $this->boundary['body'];
         $this->isHtml = $isHtml;
@@ -149,11 +214,12 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 添加邮件
-     * @param $email
-     * @param string $name
-     * @param string $type
-     * @return false|int
+     * 功能说明：校验并登记一个邮箱到to/cc/bcc/reply分组
+     *
+     * @param string $email 电子邮件地址
+     * @param string $name 该邮箱的显示姓名，空串使用地址本身（默认：''）
+     * @param string $type 地址分组：to、cc、bcc或reply（默认：'to'）
+     * @return int 1表示地址有效并登记，0表示地址无效
      */
     public function addEmail($email, $name='', $type='to') {
         $type = strtolower($type);
@@ -162,16 +228,18 @@ Content-Transfer-Encoding: base64
         if(empty($name)) $name = strstr($email, '@', true);
         $name = trim(preg_replace('/[\r\n]+/', '', $name));
         $name = myString::setCharset($name, $this->charset);
-        if($flag = preg_match('/^[\w\-\.]+@(([\w\-]+)[.])+[a-z]{2,4}$/i', $email)) {
+        if($flag = (int)(filter_var($email, FILTER_VALIDATE_EMAIL) !== false)) {
             array_push($this->$type, array($email, $name));
         }
         return $flag;
     }
 
     /**
-     * 添加收件人
-     * @param $email
-     * @param string $name
+     * 功能说明：添加收件人
+     *
+     * @param string|array $email 单个邮箱地址，或邮箱列表/显示名到地址的映射
+     * @param string $name 单个邮箱对应的显示姓名（默认：''）
+     * @return void 无返回值。
      */
     public function to($email, $name = '') {
         if(is_array($email)) {
@@ -185,9 +253,11 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 添加抄送人
-     * @param $email
-     * @param string $name
+     * 功能说明：添加抄送人
+     *
+     * @param string|array $email 单个邮箱地址，或邮箱列表/显示名到地址的映射
+     * @param string $name 单个邮箱对应的显示姓名（默认：''）
+     * @return void 无返回值。
      */
     public function cc($email, $name = '') {
         if(is_array($email)) {
@@ -201,9 +271,11 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 添加暗送人
-     * @param $email
-     * @param string $name
+     * 功能说明：添加暗送人
+     *
+     * @param string|array $email 单个邮箱地址，或邮箱列表/显示名到地址的映射
+     * @param string $name 单个邮箱对应的显示姓名（默认：''）
+     * @return void 无返回值。
      */
     public function bcc($email, $name = '') {
         if(is_array($email)) {
@@ -217,9 +289,11 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 添加回复人
-     * @param $email
-     * @param string $name
+     * 功能说明：添加回复人
+     *
+     * @param string|array $email 单个邮箱地址，或邮箱列表/显示名到地址的映射
+     * @param string $name 单个邮箱对应的显示姓名（默认：''）
+     * @return void 无返回值。
      */
     public function reply($email, $name = '') {
         if(is_array($email)) {
@@ -228,40 +302,36 @@ Content-Transfer-Encoding: base64
                 $this->addEmail($v, $k, 'reply');
             }
         } else {
-            $this->addEmail($email, $name, 'reply');
+            $this->addEmail($email, $plain_name, 'reply');
         }
     }
 
     /**
-     * 格式化邮件地址
-     * @param $email_list
-     * @return array|string
+     * 功能说明：格式化邮件地址
+     *
+     * @param array $email_list 地址/姓名二元组或二元组列表
+     * @return string|array 单个地址二元组返回MIME地址文本，地址列表返回文本数组，空列表返回空数组
+     * @phpstan-param array{0:string,1?:string}|list<array{0:string,1?:string}> $email_list
+     * @phpstan-return string|list<string>
      */
     public function formatEmail($email_list) {
-        if(!is_array($email_list[0])) {
-            if(empty($email_list[1])) {
-                $result = $email_list[0];
-            } else {
-                $result = '"' . $email_list[1] . '" <'. $email_list[0] . '>';
-            }
-        } else {
-            $result = array();
-            foreach($email_list as $email) {
-                if(empty($email[1])) {
-                    $result[] = $email[0];
-                } else {
-                    $result[] = '"' . $email[1] . '" <' . $email[0] . '>';
-                }
-            }
+        if(!$email_list) return [];
+        $single = !is_array($email_list[0]);
+        $list = $single ? [$email_list] : $email_list;
+        $result = [];
+        foreach($list as $email) {
+            $name = $email[1] ?? '';
+            $result[] = $name === '' ? $email[0] : '=?'.$this->charset.'?B?'.base64_encode($name).'?= <'.$email[0].'>';
         }
-        return $result;
+        return $single ? $result[0] : $result;
     }
 
     /**
-     * 添加邮件头
-     * @param $name
-     * @param $value
-     * @return bool
+     * 功能说明：添加邮件头
+     *
+     * @param string $name 邮件头字段名，会移除换行
+     * @param string $value 邮件头字段值，会移除换行
+     * @return true 移除名称/值中的换行并追加后固定返回true，不校验邮件头业务语义
      */
     public function addHeader($name, $value) {
         $name = str_replace(chr(13), '', $name);
@@ -275,13 +345,18 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 添加附件
-     * @param $filecontent
-     * @param string $filename
-     * @param bool $embed
-     * @param string $filetype
+     * 功能说明：添加附件
+     *
+     * @param string $filecontent 附件的原始二进制内容
+     * @param string $filename 附件展示名称或文件路径，按方法用途解释（默认：''）
+     * @param bool $embed 是否按邮件内嵌资源而非普通附件处理（默认：false）
+     * @param string $filetype 附件的MIME类型（默认：'application/octet-stream'）
+     * @return void 无返回值。
+     * @throws InvalidArgumentException 附件名称为空或包含路径/控制字符等非法内容
      */
     public function addAttachment($filecontent, $filename = '', $embed=false, $filetype = 'application/octet-stream') {
+        if(preg_match('/[\r\n\x00]/', $filename.$filetype) || !preg_match('~^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+$~iD', $filetype)) throw new InvalidArgumentException('Invalid MIME attachment header');
+        $filename = str_replace(['\\', '"'], '_', $filename);
         $this->file_count++;
         if($filename=='') {
             $filename = 'attachment_'.$this->file_count;
@@ -302,23 +377,29 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 添加附件文件
-     * @param $file
-     * @param string $filename
-     * @param bool $embed
-     * @param string $filetype
+     * 功能说明：添加附件文件
+     *
+     * @param string $file 目标文件路径
+     * @param string $filename 附件展示名称或文件路径，按方法用途解释（默认：''）
+     * @param bool $embed 是否按邮件内嵌资源而非普通附件处理（默认：false）
+     * @param string $filetype 附件的MIME类型（默认：'application/octet-stream'）
+     * @return bool 文件可读取并已登记为true；文件不存在或读取失败为false
      */
     public function addFile($file, $filename='', $embed=false, $filetype = 'application/octet-stream') {
         $filecontent = file_get_contents($file);
+        if($filecontent === false) return false;
         if(empty($filename)) $filename = basename($file);
-        $this->addAttachment($filecontent, $filename, $filetype, $embed);
+        $this->addAttachment($filecontent, $filename, $embed, $filetype);
+        return true;
     }
 
     /**
-     * 附件编码
-     * @param $file
-     * @param bool $embed
-     * @return string
+     * 功能说明：附件编码
+     *
+     * @param array $file 含content/name/type等字段的内部附件记录
+     * @param bool $embed 是否按邮件内嵌资源而非普通附件处理（默认：false）
+     * @return string 含MIME类型、Base64正文及附件/CID头的邮件片段
+     * @phpstan-param array{content:string,name:string,type:string} $file
      */
     public function setFile($file, $embed = false) {
         $content = $file['content'];
@@ -329,7 +410,6 @@ Content-Transfer-Encoding: base64
         if($embed) {
             $cid='__'.$file['name'].'@mystep__';
             $return .= 'Content-ID: <'.$cid.'>'.chr(10).chr(10);
-            $this->content=str_replace($file['name'], 'cid:'.$cid, $this->content);
         }else {
             $return .= 'Content-Disposition: attachment;'.chr(10).' filename="'.$file['name'].'"'.chr(10).chr(10);
         }
@@ -338,130 +418,99 @@ Content-Transfer-Encoding: base64
     }
 
     /**
-     * 邮件编码
-     * @return string
+     * 功能说明：邮件编码
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return string 由当前地址、正文、附件及边界构建的完整邮件内容，不执行发送
      */
     public function buildMail() {
-        $multipart = 'Content-Type: multipart/mixed;
-  boundary = "'.$this->boundary['attach'].'"
-
-  This is a multi-part message in MIME format created by Windy2000(windy2006@gmail.com).
-
---'.$this->boundary['attach'].'
-Content-Type: multipart/related;
-          boundary="'.$this->boundary['embed'].'";
-          type=\'multipart/alternative\'
-
---'.$this->boundary['embed'].'
-Content-Type: multipart/alternative;
-          boundary="'.$this->boundary['body'].'"
-
-
-        ';
-        if(!$this->isHtml && isset($this->files['embed'])) {
-            $this->files['attach'] += $this->files['embed'];
-            $this->files['embed'] = array();
-        }
-        $attachmentCount = isset($this->files['attach'])?count($this->files['attach']):0;
-        $attachmentContent = '';
-        $embedCount = isset($this->files['embed'])?count($this->files['embed']):0;
-        $embedContent = '';
-
-        if($attachmentCount!=0) {
-            for($i = $attachmentCount-1;$i>=0;$i--) {
-                $attachmentContent .= chr(10).'--'.$this->boundary['attach'].chr(10).$this->setFile($this->files['attach'][$i], false);
+        $content = $this->content;
+        $embedded = '';
+        foreach($this->files['embed'] ?? [] as $file) {
+            if($this->isHtml) {
+                $cid = '__'.$file['name'].'@mystep__';
+                $content = str_replace($file['name'], 'cid:'.$cid, $content);
+                $embedded .= '--'.$this->boundary['embed']."\n".$this->setFile($file, true);
             }
-            $attachmentContent .= chr(10).'--'.$this->boundary['attach'].'--'.chr(10);
         }
-
-        if($embedCount!=0) {
-            for($i = $embedCount-1;$i>=0;$i--) {
-                $embedContent .= chr(10).'--'.$this->boundary['embed'].chr(10).$this->setFile($this->files['embed'][$i], true);
-            }
-            $embedContent .= chr(10).'--'.$this->boundary['embed'].'--'.chr(10);
-        }
-        $this->body = str_replace('<!--content-->', chunk_split(base64_encode($this->content)), $this->body);
-        $multipart.= $this->body;
-        $multipart.= $embedContent;
-        $multipart.= $attachmentContent;
-        $multipart = rtrim($multipart);
-        return $multipart;
+        $body = str_replace('<!--content-->', chunk_split(base64_encode($content)), $this->body);
+        $message = 'Content-Type: multipart/mixed; boundary="'.$this->boundary['attach'].'"'."\n\n";
+        $message .= '--'.$this->boundary['attach']."\n";
+        $message .= 'Content-Type: multipart/related; boundary="'.$this->boundary['embed'].'"'."\n\n";
+        $message .= '--'.$this->boundary['embed']."\n";
+        $message .= 'Content-Type: multipart/alternative; boundary="'.$this->boundary['body'].'"'."\n".$body;
+        $message .= $embedded.'--'.$this->boundary['embed']."--\n";
+        $attachments = $this->files['attach'] ?? [];
+        if(!$this->isHtml) $attachments = array_merge($attachments, $this->files['embed'] ?? []);
+        foreach($attachments as $file) $message .= '--'.$this->boundary['attach']."\n".$this->setFile($file, false);
+        $message .= '--'.$this->boundary['attach']."--\n";
+        return str_replace("\n", "\r\n", str_replace("\r", '', $message));
     }
 
     /**
-     * 邮件发送
-     * @param array $para
-     * @param bool $single
-     * @param int $priority
-     * @return array|bool
+     * 功能说明：邮件发送
+     *
+     *
+     * 副作用：会连接SMTP并提交邮件；返回成功只表示SMTP接受该次提交，最终投递由邮件服务器处理。连接在finally中关闭。
+     * SMTP配置：host必填；mode为smtp/ssl/ssl/tls/tls之一，tls表示STARTTLS；port默认按模式选25/465/587，user为空时不认证，password默认空串。
+     *
+     * @param array $para SMTP连接配置，包含host以及认证/端口/TLS等已支持项（默认：array()）
+     * @param bool $single 是否逐个收件人单独发送（默认：false）
+     * @param int $priority 邮件优先级，按SMTP邮件头约定使用1至5（默认：3）
+     * @return array|false 成功执行流程后为逐收件人的状态文本数组；缺少发件人/收件人/主机或SMTP流程失败为false
+     * @phpstan-param array{host:string,port?:int,mode?:string,user?:string,password?:string} $para
+     * @phpstan-return list<string>|false
      */
     public function send($para=array(), $single=false, $priority=3) {
-        if($this->from=='') $this->from = ini_get('sendmail_from');
-        $this->addHeader('Return-Path', $this->from);
+        if($this->from_email === '' && !$this->setFrom(ini_get('sendmail_from'))) return false;
         $mail_list = array_merge($this->to, $this->cc, $this->bcc);
-        if($single==false) {
-            if(count($this->to)>0) $this->addHeader('To', implode(',', $this->formatEmail($this->to)));
-            if(count($this->cc)>0) $this->addHeader('Cc', implode(',', $this->formatEmail($this->cc)));
-            if(count($this->bcc)>0) $this->addHeader('Bcc', implode(',', $this->formatEmail($this->bcc)));
-        }
-        $this->addHeader('From', $this->from);
-        if(count($this->reply)>0) $this->addHeader('Reply-To', implode(',', $this->formatEmail($this->reply)));
-        $this->addHeader('Subject', $this->subject);
-        $this->addHeader('Message-ID',  sprintf('<%s@%s>', md5(uniqid(time())), $_SERVER['HTTP_HOST']));
-        if(!preg_match('/[1-5]/', $priority)) $priority = 3;
-        $this->addHeader('X-Priority', $priority);
-        $this->addHeader('X-Mailer', 'MyStepFramework');
-        $this->addHeader('MIME-Version', '1.0');
-
-        $mail_content = implode(chr(13).chr(10), $this->headers).chr(13).chr(10);
-        $mail_content .= $this->buildMail();
-
-        if(empty($para['mode'])) $para['mode'] = 'smtp';
-        $smtp = new SMTP();
-        if(!$smtp->Connect((($para['mode']=='ssl' || $para['mode']=='ssl/tls')?'ssl://':'').$para['host'], $para['port'], 10)) {
-            $this->error('Cannot connect to the mail server!');
-            return false;
-        }
-        if(!$smtp->Hello($_SERVER['HTTP_HOST'])) {
-            $this->error('Cannot send messege to the mail server!');
-            return false;
-        }
-        if($para['mode']=='tls' || $para['mode']=='ssl/tls') {
-            if(!$smtp->StartTLS()) {
-                $this->error('TLS error!');
-                return false;
+        if(!$mail_list || empty($para['host'])) return false;
+        $mode = strtolower($para['mode'] ?? 'smtp');
+        $smtp = new SMTP(); $this->result = []; $failure = '';
+        $hello = preg_replace('/[^a-zA-Z0-9.-]/', '', $_SERVER['SERVER_NAME'] ?? 'localhost');
+        try {
+            $implicit = in_array($mode, ['ssl','ssl/tls'], true);
+            if(!$smtp->Connect(($implicit ? 'ssl://' : '').$para['host'], $para['port'] ?? ($implicit ? 465 : ($mode === 'tls' ? 587 : 25)), 10)) $failure = 'Cannot connect to mail server';
+            elseif(!$smtp->Hello($hello)) $failure = 'SMTP greeting failed';
+            elseif($mode === 'tls' && (!$smtp->StartTLS() || !$smtp->Hello($hello))) $failure = 'TLS negotiation failed';
+            elseif(!empty($para['user']) && !$smtp->Authenticate($para['user'], $para['password'] ?? '')) $failure = 'SMTP authentication failed';
+            if($failure === '') {
+                $groups = $single ? array_map(function($recipient) { return [$recipient]; }, $mail_list) : [$mail_list];
+                $mime = $this->buildMail();
+                foreach($groups as $group) {
+                    if(!$smtp->Mail($this->from_email)) { $failure = 'Bad sender email'; break; }
+                    $accepted = [];
+                    foreach($group as $recipient) {
+                        if($smtp->Recipient($recipient[0])) $accepted[] = $recipient;
+                        else $this->result[] = $recipient[0].' sent error!';
+                    }
+                    if(!$accepted) { $smtp->Reset(); continue; }
+                    $headers = $this->headers;
+                    $headers[] = 'From: '.$this->from;
+                    $headers[] = 'To: '.($single ? implode(',', $this->formatEmail($group)) : ($this->to ? implode(',', $this->formatEmail($this->to)) : 'undisclosed-recipients:;'));
+                    if(!$single && $this->cc) $headers[] = 'Cc: '.implode(',', $this->formatEmail($this->cc));
+                    if($this->reply) $headers[] = 'Reply-To: '.implode(',', $this->formatEmail($this->reply));
+                    $headers[] = 'Subject: '.$this->subject;
+                    $headers[] = 'Date: '.date('r');
+                    $headers[] = 'Message-ID: <'.bin2hex(random_bytes(16)).'@'.($hello ?: 'localhost').'>';
+                    $headers[] = 'MIME-Version: 1.0';
+                    $headers[] = 'X-Priority: '.max(1, min(5, (int)$priority));
+                    $sent = $smtp->Data(implode("\r\n", $headers)."\r\n".$mime);
+                    foreach($accepted as $recipient) $this->result[] = $recipient[0].($sent ? ' sent successfully!' : ' sent error!');
+                    if(!$sent) { $failure = 'SMTP DATA failed'; break; }
+                    $smtp->Reset();
+                }
             }
-            $smtp->Hello($_SERVER['HTTP_HOST']);
-        }
-        if(isset($para['user'])) {
-            if(!$smtp->Authenticate($para['user'], $para['password'])) {
-                $this->error('Authenticate Failed!');
-                return false;
-            }
-        }
-        if(!$smtp->Mail(ini_get('sendmail_from'))) {
-            $this->error('Bad sender email');
-            return false;
-        }
-        for($i=0,$m=count($mail_list); $i<$m; $i++) {
-            if($smtp->Recipient($mail_list[$i][0])) {
-                $info = ' sent successfully!';
-            } else {
-                $info = ' sent error!';
-            }
-            $this->result[] = $mail_list[$i][0].$info;
-        }
-        if(!$smtp->Data($mail_content)) {
-            $this->error('Mail send Failed!');
-            return false;
-        }
-        $smtp->Reset();
-        if($smtp->Connected()) {
-            $smtp->Quit();
+        } finally {
+            if($smtp->Connected()) $smtp->Quit();
             $smtp->Close();
         }
+        if($failure !== '') { $this->error($failure); return false; }
         return $this->result;
     }
+
+
 }
 
 /**
@@ -478,14 +527,25 @@ Content-Type: multipart/alternative;
  */
 
 /**
+ * 功能说明：MIME邮件使用的SMTP套接字传输实现，保留原作者版权说明
+ *
+ * 使用说明：
+ *   1. 先设置发件人、主题、正文和收件人，再传SMTP配置发送。
+ *   2. 附件名称/邮件头按实现过滤；地址和传输配置仍需由调用方提供有效值。
+ *   3. 底部SMTP类保留上游版权说明及协议细节；测试邮件应发送到受控测试服务。
+ *
+ * 补充说明：
  * SMTP is rfc 821 compliant and implements all the rfc 821 SMTP
  * commands except TURN which will always return a not implemented
  * error. SMTP also provides some utility methods for sending mail
  * to an SMTP server.
  * original author: Chris Ryan
+ *
+ * 方法目录：参见本文件顶部；只列直接声明，继承和trait别名沿用原声明注释。
  */
 
 class SMTP {
+
     /**
      *  SMTP server port
      *  @var int
@@ -525,9 +585,12 @@ class SMTP {
         private $helo_rply; // the reply the server sent to us for HELO
 
     /**
-     * Initialize the class so that the data is in a known state.
+     * 功能说明：初始化SMTP端口、连接及错误状态
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return void 初始化或释放资源，无返回值。
      * @access public
-     * @return void
      */
         public function __construct() {
                 $this->smtp_conn = 0;
@@ -542,7 +605,8 @@ class SMTP {
         /////////////////////////////////////////////////
 
     /**
-     * Connect to the server specified on the port specified.
+     * 功能说明：按主机、端口和超时时间建立SMTP套接字连接
+     *
      * If the port is not specified use the default SMTP_PORT.
      * If tval is specified then a connection will try and be
      * established with the server for that number of seconds.
@@ -551,8 +615,12 @@ class SMTP {
      *
      * SMTP CODE SUCCESS: 220
      * SMTP CODE FAILURE: 421
+     *
+     * @param string $host 服务器主机名或地址
+     * @param int $port 服务器端口，0使用该协议的默认端口（默认：0）
+     * @param int $tval 建立SMTP连接时的超时秒数（默认：30）
+     * @return bool 建立连接并取得成功问候响应为true，连接/握手失败为false
      * @access public
-     * @return bool
      */
         public function Connect($host, $port = 0, $tval = 30) {
                 // set the error val to null so there is no confusion
@@ -570,11 +638,10 @@ class SMTP {
                 }
 
                 // connect to the smtp server
-                $this->smtp_conn = @fsockopen($host,        // the host of the server
-                        $port,        // the port to use
-                        $errno,   // error number if any
-                        $errstr,  // error message if any
-                        $tval);   // give up after ? secs
+                $peer = preg_replace('#^(?:ssl|tls|tcp)://#i', '', $host);
+                $context = stream_context_create(['ssl'=>['verify_peer'=>true, 'verify_peer_name'=>true, 'allow_self_signed'=>false, 'peer_name'=>trim($peer, '[]')]]);
+                $target = (strpos($host, '://') === false ? 'tcp://' : '').$host.':'.$port;
+                $this->smtp_conn = @stream_socket_client($target, $errno, $errstr, $tval, STREAM_CLIENT_CONNECT, $context);
                 // verify we connected properly
                 if(empty($this->smtp_conn)) {
                         $this->error = array("error" => "Failed to connect to server",
@@ -598,17 +665,21 @@ class SMTP {
                         echo "SMTP -> FROM SERVER:" . $announce . $this->CRLF . '<br />';
                 }
 
+                if(substr($announce, 0, 3) !== '220') { $this->Close(); return false; }
                 return true;
         }
 
     /**
-     * Initiate a TLS communication with the server.
+     * 功能说明：发送STARTTLS并将当前SMTP连接升级为TLS
      *
      * SMTP CODE 220 Ready to start TLS
      * SMTP CODE 501 Syntax error (no parameters allowed)
      * SMTP CODE 454 TLS not available due to temporary reason
-     * @access public
+     *
+     * 参数说明：无显式参数。
+     *
      * @return bool success
+     * @access public
      */
         public function StartTLS() {
                 $this->error = null; # to avoid confusion
@@ -647,10 +718,14 @@ class SMTP {
         }
 
     /**
-     * Performs SMTP authentication.  Must be run after running the
+     * 功能说明：使用用户名和密码执行SMTP LOGIN认证
+     *
      * Hello() method.  Returns true if successfully authenticated.
+     *
+     * @param string $username 认证用户名
+     * @param string $password 认证密码
+     * @return bool LOGIN认证各步骤成功为true，服务器拒绝或协议错误为false
      * @access public
-     * @return bool
      */
         public function Authenticate($username, $password) {
                 // Start authentication
@@ -708,9 +783,12 @@ class SMTP {
         }
 
     /**
-     * Returns true if connected to a server otherwise false
+     * 功能说明：检查SMTP套接字是否存在且尚未到达流末尾
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return bool 套接字存在且未结束为true；已断开时清理状态并返回false
      * @access public
-     * @return bool
      */
         public function Connected() {
                 if(!empty($this->smtp_conn)) {
@@ -729,11 +807,15 @@ class SMTP {
         }
 
     /**
-     * Closes the socket and cleans up the state of the class.
+     * 功能说明：关闭SMTP套接字并清空连接状态
+     *
      * It is not considered good to use this function without
      * first trying to use QUIT.
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return void 无返回值。
      * @access public
-     * @return void
      */
         public function Close() {
                 $this->error = null; // so there is no confusion
@@ -750,7 +832,8 @@ class SMTP {
         /////////////////////////////////////////////////
 
     /**
-     * Issues a data command and sends the msg_data to the server
+     * 功能说明：发送DATA命令及完整邮件内容，处理行长和点转义
+     *
      * finializing the mail transaction. $msg_data is the message
      * that is to be send with the headers. Each header needs to be
      * on a single line followed by a <CRLF> with the message headers
@@ -765,8 +848,10 @@ class SMTP {
      *         SMTP CODE FAILURE: 552, 554, 451, 452
      * SMTP CODE FAILURE: 451, 554
      * SMTP CODE ERROR  : 500, 501, 503, 421
+     *
+     * @param string $msg_data 已构建的完整MIME邮件内容
+     * @return bool DATA正文被服务器接受为true，命令或提交响应失败为false
      * @access public
-     * @return bool
      */
         public function Data($msg_data) {
                 $this->error = null; // so no confusion is caused
@@ -894,7 +979,8 @@ class SMTP {
         }
 
     /**
-     * Sends the HELO command to the smtp server.
+     * 功能说明：优先发送EHLO，失败时回退HELO问候
+     *
      * This makes sure that we and the server are in
      * the same known state.
      *
@@ -902,8 +988,10 @@ class SMTP {
      *
      * SMTP CODE SUCCESS: 250
      * SMTP CODE ERROR  : 500, 501, 504, 421
+     *
+     * @param string $host 用于EHLO/HELO问候的客户端主机名，空串自动选择（默认：''）
+     * @return bool EHLO或回退的HELO成功为true，两者均失败为false
      * @access public
-     * @return bool
      */
         public function Hello($host = '') {
                 $this->error = null; // so no confusion is caused
@@ -931,9 +1019,13 @@ class SMTP {
         }
 
     /**
-     * Sends a HELO/EHLO command.
+     * 功能说明：发送指定的EHLO/HELO问候并检查服务器响应
+     *
+     * @param string $hello SMTP问候命令，通常为EHLO或HELO
+     * @param string $host EHLO/HELO中声明的客户端主机名
+     * @return bool 服务器接受指定问候命令为true，否则为false
      * @access private
-     * @return bool
+     * @internal 框架内部实现入口；应用优先调用对应公开方法
      */
         private function SendHello($hello, $host) {
                 fputs($this->smtp_conn, $hello . " " . $host . $this->CRLF);
@@ -962,7 +1054,8 @@ class SMTP {
         }
 
     /**
-     * Starts a mail transaction from the email address specified in
+     * 功能说明：发送MAIL FROM以开始一轮邮件事务
+     *
      * $from. Returns true if successful or false otherwise. If True
      * the mail transaction is started and then one or more Recipient
      * commands may be called followed by a Data command.
@@ -972,8 +1065,10 @@ class SMTP {
      * SMTP CODE SUCCESS: 250
      * SMTP CODE SUCCESS: 552, 451, 452
      * SMTP CODE SUCCESS: 500, 501, 421
+     *
+     * @param string $from SMTP MAIL FROM信封发件人地址
+     * @return bool 服务器接受MAIL FROM为true，否则为false
      * @access public
-     * @return bool
      */
         public function Mail($from) {
                 $this->error = null; // so no confusion is caused
@@ -1008,15 +1103,18 @@ class SMTP {
         }
 
     /**
-     * Sends the quit command to the server and then closes the socket
+     * 功能说明：发送QUIT并按响应及参数决定是否关闭连接
+     *
      * if there is no error or the $close_on_error argument is true.
      *
      * Implements from rfc 821: QUIT <CRLF>
      *
      * SMTP CODE SUCCESS: 221
      * SMTP CODE ERROR  : 500
+     *
+     * @param bool $close_on_error QUIT失败时是否仍关闭连接（默认：true）
+     * @return bool QUIT响应成功为true；失败为false，是否仍关闭由close_on_error决定
      * @access public
-     * @return bool
      */
         public function Quit($close_on_error = true) {
                 $this->error = null; // so there is no confusion
@@ -1060,7 +1158,8 @@ class SMTP {
         }
 
     /**
-     * Sends the command RCPT to the SMTP server with the TO: argument of $to.
+     * 功能说明：发送RCPT TO登记一个信封收件人
+     *
      * Returns true if the recipient was accepted false if it was rejected.
      *
      * Implements from rfc 821: RCPT <SP> TO:<forward-path> <CRLF>
@@ -1068,8 +1167,10 @@ class SMTP {
      * SMTP CODE SUCCESS: 250, 251
      * SMTP CODE FAILURE: 550, 551, 552, 553, 450, 451, 452
      * SMTP CODE ERROR  : 500, 501, 503, 421
+     *
+     * @param string $to SMTP RCPT TO信封收件人地址
+     * @return bool 服务器接受当前收件人为true，否则为false，不代表最终邮件投递成功
      * @access public
-     * @return bool
      */
         public function Recipient($to) {
                 $this->error = null; // so no confusion is caused
@@ -1103,7 +1204,8 @@ class SMTP {
         }
 
     /**
-     * Sends the RSET command to abort and transaction that is
+     * 功能说明：发送RSET以放弃当前邮件事务
+     *
      * currently in progress. Returns true if successful false
      * otherwise.
      *
@@ -1111,8 +1213,11 @@ class SMTP {
      *
      * SMTP CODE SUCCESS: 250
      * SMTP CODE ERROR  : 500, 501, 504, 421
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return bool 服务器确认RSET为true，否则为false
      * @access public
-     * @return bool
      */
         public function Reset() {
                 $this->error = null; // so no confusion is caused
@@ -1147,7 +1252,8 @@ class SMTP {
         }
 
     /**
-     * Starts a mail transaction from the email address specified in
+     * 功能说明：发送兼容SMTP的SAML FROM命令
+     *
      * $from. Returns true if successful or false otherwise. If True
      * the mail transaction is started and then one or more Recipient
      * commands may be called followed by a Data command. This command
@@ -1159,8 +1265,10 @@ class SMTP {
      * SMTP CODE SUCCESS: 250
      * SMTP CODE SUCCESS: 552, 451, 452
      * SMTP CODE SUCCESS: 500, 501, 502, 421
+     *
+     * @param string $from SMTP MAIL FROM信封发件人地址
+     * @return bool 服务器接受SAML FROM为true，否则为false
      * @access public
-     * @return bool
      */
         public function SendAndMail($from) {
                 $this->error = null; // so no confusion is caused
@@ -1194,7 +1302,8 @@ class SMTP {
         }
 
     /**
-     * This is an optional command for SMTP that this class does not
+     * 功能说明：记录TURN未实现错误并返回false
+     *
      * support. This method is here to make the RFC821 Definition
      * complete for this class and __may__ be implimented in the future
      *
@@ -1203,8 +1312,11 @@ class SMTP {
      * SMTP CODE SUCCESS: 250
      * SMTP CODE FAILURE: 502
      * SMTP CODE ERROR  : 500, 503
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return false 固定返回false，同时记录未实现错误
      * @access public
-     * @return bool
      */
         public function Turn() {
                 $this->error = array("error" => "This method, TURN, of the SMTP ".
@@ -1216,9 +1328,12 @@ class SMTP {
         }
 
     /**
-     * Get the current error
+     * 功能说明：取得最近一次SMTP错误结构
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return array|null 最近错误字段组成的数组；无错误时为null
      * @access public
-     * @return array
      */
         public function getError() {
                 return $this->error;
@@ -1229,13 +1344,18 @@ class SMTP {
         /////////////////////////////////////////////////
 
     /**
-     * Read in as many lines as possible
+     * 功能说明：读取SMTP多行响应，直到最后一行或连接结束
+     *
      * either before eof or socket timeout occurs on the operation.
      * With SMTP we can tell if we have more lines to read if the
      * 4th character is '-' symbol. If it is a space then we don't
      * need to read anything else.
+     *
+     * 参数说明：无显式参数。
+     *
+     * @return string 读到的SMTP响应原文，可能为空或在超时/断开时只包含部分行
      * @access private
-     * @return string
+     * @internal 框架内部实现入口；应用优先调用对应公开方法
      */
         private function get_lines() {
                 $data = "";
@@ -1246,10 +1366,12 @@ class SMTP {
                                 echo "SMTP -> get_lines(): \$str is \"$str\"" . $this->CRLF . '<br />';
                         }
                         $data .= $str;
+                        if(strlen($data) > 65536) break;
                         if($this->do_debug >= 4) {
                                 echo "SMTP -> get_lines(): \$data is \"$data\"" . $this->CRLF . '<br />';
                         }
                         // if 4th character is a space, we are done reading, break the loop
+                        if($str === false || $str === '' || (stream_get_meta_data($this->smtp_conn)['timed_out'] ?? false)) break;
                         if(substr($str, 3, 1) == " ") { break; }
                 }
                 return $data;

@@ -23,7 +23,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">密码确认</span>
                         </div>
-                        <input type="password" name="password" id="pwd_r" class="form-control" placeholder="如有修改请与前项保持一致">
+                        <input type="password" name="password_r" id="pwd_r" class="form-control" placeholder="如有修改请与前项保持一致">
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -40,4 +40,4 @@
         </div>
     </div>
 </div>
-<script type="application/javascript" src="/static/js/checkForm.js"></script>
+<script type="application/javascript" src="<!--path_root-->static/js/checkForm.js"></script>

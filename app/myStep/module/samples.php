@@ -4,6 +4,8 @@ $tpl_setting['name'] = $info_app['path'][2] ?? '';
 $content = '';
 if(is_file($tpl_setting['path'].$tpl_setting['name'].'.tpl')) {
     $t = new myTemplate($tpl_setting);
+    $t->assign('sample_assets', myStep::setURL('myStep/asset/samples/'));
+    $t->assign('sample_loading', myStep::setURL('static/images/loading_img.gif'));
     myReq::session('sign_upload', 'y');
     $content = $mystep->render($t);
     unset($t);

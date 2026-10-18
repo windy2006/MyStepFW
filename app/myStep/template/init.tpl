@@ -20,7 +20,7 @@
 <body>
 
 <div class="p-5 text-center">
-    <img src="/static/images/logo.png" />
+    <img src="<!--path_root-->static/images/logo.png" />
 </div>
 
 <div id="main" class="container">
@@ -58,9 +58,9 @@
 <footer class="border-top text-center mt-3 text-secondary fixed-bottom bg-light pt-2 font-sm">
     <p>Powered by 『 MyStep Framework 』&nbsp;Copyright&copy; 2010-2022 <a href="mailto:windy2006@gmail.com">windy2006@gmail.com</a></p>
 </footer>
-<script type="application/javascript" src="/static/js/jquery.js"></script>
-<script type="application/javascript" src="/static/js/bootstrap.bundle.js"></script>
-<script type="application/javascript" src="/static/js/checkForm.js"></script>
+<script type="application/javascript" src="<!--path_root-->static/js/jquery.js"></script>
+<script type="application/javascript" src="<!--path_root-->static/js/bootstrap.bundle.js"></script>
+<script type="application/javascript" src="<!--path_root-->static/js/checkForm.js"></script>
 <!--page_end-->
 </body>
 <script type="application/javascript">

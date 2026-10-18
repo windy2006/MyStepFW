@@ -121,7 +121,7 @@ $setting_detail['template'] = array(
         ),
         'path' => array(
             'name' => '模版路径',
-            'describe' => '模版的存放位置（相对于本应用的相对路径）',
+            'describe' => '模版的存放位置（相对于网站根，例如app/Admin/template）',
             'type' => array('text', '', '30')
         ),
         'style' => array(

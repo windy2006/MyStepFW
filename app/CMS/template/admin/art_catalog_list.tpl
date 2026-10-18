@@ -61,7 +61,7 @@ $(function(){
     if(web_id !== '1') {
         $('#web_id').val(web_id).parent().hide();
     }
-    let refer = '<!--back_url-->';
+    let refer = decodeURIComponent('<!--back_url|url-->');
     if(refer.match(/catalog\/(\w+)/) || location.search.indexOf('Refresh')) {
         if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
             $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){

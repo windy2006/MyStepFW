@@ -24,8 +24,8 @@ $filter = '*'.str_replace(',', ', *', $info['ext']);
 $filter = explode(',', $filter);
 $files = array();
 foreach($filter as $f) {
-    if(myFile::find($f, myFile::realPath($info['path'])))
-        $files += myFile::find($f, myFile::realPath($info['path']));
+    if(myFile::find($f, myPath::absolute($info['path'])))
+        $files += myFile::find($f, myPath::absolute($info['path']));
 }
 $i = 0;
 foreach($files as $class) {

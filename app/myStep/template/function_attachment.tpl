@@ -61,9 +61,9 @@ $(function(){
         if(!confirm('是否确认删除该附件？')) return;
         let idx = $(this).attr('file_idx');
         if(idx.indexOf('/')>0) {
-            location.href = location.href = location.href.replace(location.search, '')+'?m=del&idx='+idx;
+            $.post(location.href.replace(location.search, '')+'?m=del', {idx:idx}, function(){ location.reload(); });
         } else {
-            $.get('<!--url_prefix-->api/myStep/remove/'+idx, function(data, status){
+            $.post('<!--url_prefix-->api/myStep/remove/'+idx, function(data, status){
                 if(data.error==='0' && status==='success') {
                     alert('附件已删除！');
                     location.reload();

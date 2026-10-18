@@ -21,11 +21,11 @@
     $(function(){
         $('input[name=jump]').keypress(function(e){
             if(e.keyCode===13) {
-                location.href=global.root_fix+'?<!--query-->&page='+this.value;
+                location.href=queryURL($(this).closest('ul').find('a.page-link').last().attr('href'), {page:this.value});
             }
         });
         $('button[name=jump]').click(function(e){
-            location.href=global.root_fix+'?<!--query-->&page='+$('input[name=jump]').val();
+            location.href=queryURL($(this).closest('ul').find('a.page-link').last().attr('href'), {page:$(this).closest('ul').find('input[name=jump]').val()});
         });
     });
 </script>

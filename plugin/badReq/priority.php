@@ -1,139 +1,85 @@
-<?PHP
-global $ip, $ua, $list, $url, $info;
-$list = @include(PLUGIN.'badReq/ban_ip.php');
-$ip = myReq::ip();
+<?php
 
-if(is_array($list) && isset($list[$ip])) {
-    if(strpos($list[$ip], 'http')===0) {
-        header('Location: '.$list[$ip], 302);
-    } else {
-        die($list[$ip]);
-    }
-}
+/**
+ * 文件：plugin/badReq/priority.php
+ * 功能说明：请求过滤插件的前置执行脚本
+ *
+ * 方法目录：
+ *   本文件不直接声明具名方法或函数。
+ *
+ * 回调目录：
+ *   回调 1：在独立作用域中执行封禁、Cookie 验证、可疑请求记录和跳转。
+ *   回调 2：将达到近期阈值的 IP 登记到封禁字典。
+ *
+ * 使用说明：
+ *   1. 安装时由 setPriority 复制到 CONFIG/priority，引用源资源使用 PLUGIN 常量。
+ *   2. 在独立闭包作用域中执行，早于常规应用会话与认证；封禁和重定向分支可直接退出。
+ *   3. 仅活动插件的已安装前置脚本由框架执行；源文件调整后需通过安装流程重新发布复制文件。
+ *
+ * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码保持 PHP 7.4 兼容。
+ *       方法目录覆盖本文件直接声明；闭包参数及捕获变量说明见各回调旁 PHPDoc。
+ */
 
-$ua = myReq::svr('HTTP_USER_AGENT')??'';
-$ua = substr($ua, 0, 250);
-$setting = new myConfig(PLUGIN.'badReq/config.php');
-
-$url = (isHttps()?'https':'http').'://'.myReq::svr('HTTP_HOST').str_replace('.php/', '.php?', myReq::svr('REQUEST_URI'));
-$info = parse_url($url);
-$info['url'] = $url;
-$info['path'] = substr($info['path']??'', 0, 250);
-$info['path'] = htmlspecialchars($info['path']);
-$info['query'] = substr($info['query']??'', 0, 250);
-if(preg_match('#(&.+)$#',$info['path'], $match)) {
-    $info['path'] = str_replace($match[1], '',$info['path']);
-    $info['query'] .= $match[1];
-}
-$url = $setting->forward;
-if(empty($url)) $url = '/';
-
-if(preg_match('#^\w+$#', $setting->cookie) &&
-    stripos($ua, 'bot')===false &&
-    stripos($ua, 'spider')===false &&
-    stripos(implode('.', $info), 'api')===false
-) {
-    $cookie_idx = 'BQ_'.$setting->cookie.'_'.md5(date('Hd'));
-    $check = myReq::cookie($cookie_idx) ?? 0;
-    myReq::setCookie($cookie_idx, $check+1, 60*60);
-    if($check===0) {
-        echo '<script>setTimeout(function(){location.reload();},1000);</script>';
+// 独立作用域执行优先过滤，避免覆盖框架 $setting/$url 等全局变量。
+require_once PLUGIN.'interface_plugin.class.php';
+require_once PLUGIN.'badReq/class.php';
+(
+/**
+ * 功能说明：在独立作用域中执行封禁、Cookie 验证、可疑请求记录和跳转。
+ *
+ * 闭包依赖：global ms_setting、框架路径常量及请求环境；不启动常规 Session。
+ *
+ * 参数说明：无显式参数。
+ *
+ * @return void 正常请求返回；封禁、验证等待或跳转分支可能直接结束请求
+ */
+function() {
+    global $ms_setting;
+    $ip=myReq::ip();$list=is_file(PLUGIN.'badReq/ban_ip.php') ? include PLUGIN.'badReq/ban_ip.php' : [];
+    if(is_array($list) && isset($list[$ip])) {
+        $message=$list[$ip];
+        if(is_string($message) && !preg_match('/[\r\n]/',$message) && filter_var($message,FILTER_VALIDATE_URL) && preg_match('#^https?://#i',$message)) {
+            header('Location: '.$message,true,302);
+        } else {http_response_code(403);echo htmlspecialchars((string)$message,ENT_QUOTES,'UTF-8');}
         exit;
     }
-}
-
-$record = function () {
-    global $ip, $ua, $list, $url, $info;
-    $cnt = 0;
-    $time = myReq::svr('REQUEST_TIME');
-    if(extension_loaded('sqlite3')) {
-        $db = new myDb('sqlite', PLUGIN.'badReq/data.db');
-        $db->build('requests')->field('count(*) as cnt')
-            ->where('ip', 'like', myReq::ip().'%')
-            ->where([
-                ['ua', '=', $ua, 'and'],
-                ['req', 'n>=', $time-30, 'and'],
-                'or'
-            ]);
-        $cnt = $db->result() ?? 0;
-        $db->build('[reset]');
-        if($cnt==0 || $db->result('select count(*) as cnt from requests where ip like "'.$ip.'%" and url="'.$info['path'].'"')==0) {
-            $data = [
-                'ip'=>myReq::ip(),
-                'url'=>$info['path'],
-                'qry'=>$info['query'],
-                'ua'=>$ua,
-                'cnt'=>1,
-                'req'=>$time
-            ];
-            $db->build('requests')->field($data);
-            $db->insert();
-        } else {
-            $data = [
-                'ua'=>$ua,
-                'cnt'=>'+1',
-                'req'=>$time
-            ];
-            $db->build('requests')->field($data)
-                ->where([
-                    ['ua', '=', $ua, 'and'],
-                    ['req', 'n>=', $time-30, 'and']
-                ]);
-            $db->update();
-        }
-        $db->close();
+    $setting=new myConfig(PLUGIN.'badReq/config.php');
+    $ua=substr(myReq::svr('HTTP_USER_AGENT') ?? '',0,250);
+    $uri=myReq::svr('REQUEST_URI') ?? '/';$parts=parse_url($uri);
+    if($parts===false) return;
+    $info=['path'=>substr($parts['path'] ?? '/',0,250),'query'=>substr($parts['query'] ?? '',0,250)];
+    $script=($parts['path'] ?? '')===ROOT_WEB.'index.php';
+    if($script && $info['query']!=='' && strpos(explode('&',$info['query'],2)[0],'=')===false) {
+        $q=explode('&',$info['query'],2);$info['path']=substr($q[0],0,250);$info['query']=$q[1] ?? '';
     }
-    if($cnt>=3 && is_array($list)) {
-        $list[$ip] = $url;
-        krsort($list, SORT_NUMERIC);
-        $result = '<?PHP
-return '.var_export($list, true).';';
-        myFile::saveFile(PLUGIN.'/badReq/ban_ip.php', $result);
+    $api=preg_match('#(?:^|/)api(?:/|$)#i',$info['path']);
+    if(is_string($setting->cookie) && preg_match('/\A\w+\z/D',$setting->cookie) && stripos($ua,'bot')===false && stripos($ua,'spider')===false && !$api) {
+        $key='BQ_'.$setting->cookie.'_'.date('YmdH');$value=myReq::cookie($key,'!');
+        $count=is_scalar($value) ? max(0,(int)$value) : 0;myReq::setCookie($key,min(1000000,$count+1),3600);
+        if($count===0) {echo '<script>setTimeout(function(){location.reload();},1000);</script>';exit;}
     }
-};
-
-$flag = false;
-if(empty($ua) && stripos(implode('.', $info), 'api')===false) {
-    $flag = true;
-} elseif($ms_setting->router->mode!=='rewrite' && trim($info['path'], '/')!='index.php') {
-    $flag = true;
-    $record();
-} else {
-    if(isset($info['query'])) {
-        $bad_chars = explode(',', $setting->bad_chars);
-        foreach ($bad_chars as $k) {
-            if(strpos($info['query'], $k)!==false) {
-                $flag = true;
-                $record();
-            }
-        }
-    }
-    $ext = pathinfo($info['path'], PATHINFO_EXTENSION);
-    if($info['path']!='/index.php' && !empty($ext) && strlen($ext)<=5 && !in_array($ext, explode(',', $ms_setting->gen->static))) {
-        $flag = true;
-        $record();
-    }
-}
-if($flag) {
+    $flag=$ua==='' && !$api;
+    // PATH_INFO及查询字符串路由本来就是合法入口，不能按“非rewrite”模式一律拦截。
+    foreach(explode(',',(string)$setting->bad_chars) as $char) if($char!=='' && strpos($info['query'],$char)!==false) {$flag=true;break;}
+    $ext=strtolower(pathinfo($info['path'],PATHINFO_EXTENSION));
+    $allowed=array_map('strtolower',explode(',',(string)$ms_setting->gen->static));
+    if(!$script && $ext!=='' && strlen($ext)<=5 && !in_array($ext,$allowed,true)) $flag=true;
+    if(!$flag) return;
+    $forward=is_string($setting->forward) && $setting->forward!=='' ? $setting->forward : ROOT_WEB;
+    if(plugin_badReq::record($ip,$info,$ua,(int)(myReq::svr('REQUEST_TIME') ?? time()))>=3) plugin_badReq::bans(
+    /**
+     * 功能说明：将达到近期阈值的 IP 登记到封禁字典。
+     *
+     * 闭包依赖：通过 use 捕获 ip、forward。
+     *
+     * @param array $list 当前封禁字典
+     * @return array 加入当前 IP 处理地址后的字典
+     */
+    function($list) use ($ip,$forward) {$list[$ip]=$forward;return $list;});
     if($setting->post && myReq::check('post')) {
-        $result = $ip.chr(10).'-------'.chr(10).
-            date('Y-m-d H:i:s').chr(10).'-------'.chr(10).
-            $info['url'].chr(10).'-------'.chr(10).
-            var_export($_POST, true).chr(10).'-------'.chr(10);
-        if(myReq::check('files')) {
-            $result .= var_export($_FILES, true).'-------'.chr(10);
-            $result .= myFile::getLocal(array_pop($_FILES)['tmp_name']);
-        }
-        myFile::saveFile(CACHE.'tmp/post/'.date('Ymd').'/'.getMicrotime().'.txt', $result, 'ab');
+        $log=$ip."\n".date('Y-m-d H:i:s')."\n".$info['path']."\n".var_export(plugin_badReq::redact($_POST),true)."\n";
+        $file=CACHE.'tmp/post/'.date('Ymd').'/'.time().'.'.bin2hex(random_bytes(6)).'.txt';
+        myFile::saveFile($file,substr($log,0,16384));
     }
-    myStep::redirect($url.'?wd='.urlencode($info['path']).'&q='.urlencode($info['path']), 302);
-    exit;
-}
-
-unset(
-    $GLOBALS['ip'],
-    $GLOBALS['ua'],
-    $GLOBALS['list'],
-    $GLOBALS['url'],
-    $GLOBALS['info']
-);
+    myStep::redirect(pluginQueryURL($forward,['wd'=>$info['path'],'q'=>$info['query']]),302);
+})();

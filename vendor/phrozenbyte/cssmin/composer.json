@@ -5,16 +5,36 @@
     "type": "library",
     "license": "MIT",
     "homepage": "http://code.google.com/p/cssmin/",
+    "support": {
+        "source": "https://github.com/PhrozenByte/cssmin",
+        "issues": "https://github.com/PhrozenByte/cssmin/issues"
+    },
     "authors": [
         {
             "name": "Joe Scylla",
             "email": "joe.scylla@gmail.com",
-            "homepage": "https://profiles.google.com/joe.scylla"
+            "homepage": "https://profiles.google.com/joe.scylla",
+            "role": "Original Author"
+        },
+        {
+            "name": "Daniel Rudolf",
+            "homepage": "https://www.daniel-rudolf.de",
+            "role": "Maintainer"
         }
     ],
+    "replace": {
+        "natxet/cssmin": "*",
+        "skeeks/cssmin": "*",
+        "surda/cssmin": "*",
+        "skavunga/cssmin": "*",
+        "innogames/cssmin": "*",
+        "supa86000/zf2-css-min": "*",
+        "supa-creation/php-css-min": "*"
+    },
     "require": {
         "php": ">=5.0"
     },
+    "bin": [ "bin/cssmin" ],
     "autoload": {
         "classmap": [ "src/" ]
     }

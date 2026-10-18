@@ -28,11 +28,13 @@ $setting['content']['get_remote_img'] = true;
 
 $setting['template'] = array();
 $setting['template']['name'] = 'main';
-$setting['template']['path'] = 'template';
+$setting['template']['path'] = 'app/CMS/template';
 $setting['template']['style'] = 'default';
 
 $setting['session'] = array();
 $setting['session']['mode'] = 'sess_mystep';
+// 独立数据库会话使用独立Cookie，避免与文件会话相互更换ID。
+$setting['session']['name'] = 'MyStepCMSSession';
 
 $setting['list'] = array();
 $setting['list']['txt'] = 20;

@@ -1,24 +1,62 @@
-整体描述
---------
-迈思框架（MyStep Framework）是一套基于 **[PHP 7.0]** 的web开发框架，旨在构建一个可以便捷调用常用功能，以最简洁的代码实现目标功能，同时具备高度可扩展性，可通过代理模式，方便的将第三方功能模块集成到框架中。
-- 路由系统 - 框架通过 rewrite 方法接管所有响应，除 static 目录和自定义扩展类型外，其他文件均无法直接通过 url 访问，兼具高可控性和安全性。 （IIS对应web.config，Apache对应.htaccess，Nginx需参考目录下文件手动添加）。
-- 模版系统 - 采用二次编译模式，严格实现模板与程序的分离，通过通俗的标签模式调用各类数据。基本模板格式简单易学，方便制作，只要对HTML有一定了解的设计师均可以很快上手，模板修改后即时生效。同时具备高度可扩展性，可根据实际需要任意扩充模版标签。
-- 插件系统 - 扩展框架功能，无论是功能增强、系统优化、前台展示均可与系统无缝连接。内容评分、评论、投票、专题、检索、采集、统计等都可以通过插件实现。
-- 应用接口 - 系统为各类插件提供了丰富的接口，无论是api、模板标签、代码嵌入、脚本附加、登录处理，都可以通过系统接口便捷地实现，为二次开发或插件开发提供最大限度的支持和自由。
-- 缓存机制 - 通过数据、页面、浏览器三层缓存机制保证系统高效运行。
-- 域名绑定 - 每个应用或路由规则（仅限一级目录）均可以通过框架绑定到独立域名。
-- 多语言支持 - 系统可以随意添加语言包，通过调整参数立即变化。
-- Composer - 框架支持通过composer添加附属功能及相关依赖，具体请参见[composer文档](https://docs.phpcomposer.com/00-intro.html "简介")
+# 迈思框架
 
-Summary
---------
-MyStep Framework is a website framework based on **[PHP 7.0]**, which focus on building a development toolkit that can call common functions with an easier way, and coding a functional website with more concise code. The framework is also highly scalable. With the agent mode and composer, the third-party function modules can be convenient to integrate into the framework.
-- Routing - With the rewriting module of server, MyStepFW can handle all the requesting for static files and functions.
-- Template - With 2-steps compilation, MyStepFW strictly separate the program code from the view code, and you can also expand the template function with custom tag.
-- Plugin - Expand MyStepFW function which can be seamlessly connected with the system. 
-- API - MyStepFW provides rich API for various use with different formats, and provides maximum convenience for application or secondary development.
-- Cache - MyStepFW can be efficiently run by three-layer caching mechanism of data, page and browser side.
-- Domain - Each application or routing rule can be bound to an independent domain name through MyStepFW.
-- I18n - MyStepFW can add language package easily and can be change immediately by adjusting parameters.
-- Composer - MyStepFW supports compile new functions and related dependencies through composer. Please refer to [composer document](https://docs.phpcomposer.com/00-intro.html "Introduction") for details.
+迈思框架是一套以 **PHP 7.4** 为运行目标的轻量化网站开发框架，将路由、模板、配置、数据库、缓存、认证和常用工具整合为可复用的基础能力。通过独立应用组织业务、通过插件扩展功能，让开发者用较少的重复代码完成网站开发，并保持功能清晰、便于维护。
 
+## 主要特色
+
+| 能力 | 功能与特点 |
+| --- | --- |
+| **独立应用** | 一个框架承载多个应用；应用核心类继承框架核心，直接调用配置、模板、数据库等资源。业务脚本、模板、语言及素材保存在自己的目录，按功能拆分模块与对应模板。 |
+| **灵活路由** | 支持地址重写、路径信息和查询字符串三种模式；提供命名参数、正则规则、字面路径、中间件和接口路由。兼容子目录部署，可将应用或指定路由入口绑定到独立域名。 |
+| **模板与业务分离** | 使用变量、循环、条件、分支和子模板组织页面；支持嵌套、自定义标签、显式转义、风格切换及默认模板回退。编译结果复用，模板及依赖变更后自动重新编译。 |
+| **可扩展插件** | 提供安装、卸载、启停、应用绑定及运行顺序管理；支持页面钩子、模板标签、功能模块、独立路由、接口和优先脚本。标准插件管理页可根据来源复用后台布局。 |
+| **集中配置** | 支持全局、应用及入口配置分层合并，兼容多种配置格式；根据字段结构自动生成设置表单。保存采用加锁与原子替换，并可检测并发修改，减少重复编写设置界面的工作。 |
+| **统一数据库调用** | 提供数据库代理、链式查询构建及查询结果读取；内置 MySQL、SQLite、SQL Server 和轻量文件数据库驱动。按驱动能力提供参数绑定、事务、嵌套保存点及查询缓存。 |
+| **分层缓存** | 支持数据缓存、模板编译缓存、页面缓存及浏览器缓存；数据缓存可选文件或数据库后端，并通过扩展接入其他服务。提供命名空间、有效期、命中状态及带计算锁的缓存读取。 |
+| **接口与对象扩展** | 通过统一接口登记和调用业务方法，支持 JSON、XML 等输出；对象代理、方法别名、动态方法和资源实例复用便于整合已有代码及第三方组件。 |
+| **认证与请求保护** | 提供登录状态、密码验证、记住登录及可配置会话存储，配套请求方法限制、跨站请求伪造令牌、来源检查、上传校验、私有路径保护和异常日志。 |
+| **常用工具** | 覆盖文件与目录、请求、上传、字符串与转码、图片处理、邮件、加密、反射、拼音、简繁转换、压缩归档、资源压缩及电子表格导出，减少常见功能的重复实现。 |
+| **前端公共能力** | 提供资源加载、地址与查询参数处理、界面交互、延迟加载等公共函数；统一表单校验规则可处理必填、格式、长度及字段关联，并与配置表单配合使用。 |
+| **多语言与多风格** | 配置字段说明、界面语言和模板风格分别管理；应用与插件可提供自己的语言包、模板和资源，在统一机制下扩展展示方式。 |
+| **后台与维护** | 内置后台管理配置、应用、插件、语言、缓存、日志及文档；新旧后台共用框架资源。配套管理插件提供系统打包、安装及在线／离线更新，并反馈文件权限或发布失败原因。 |
+
+## 效率设计
+
+框架从请求执行、重复计算、资源传输和应用编码四个方面减少开销：
+
+- **按请求走必要流程**：公共文件、接口、页面及跳转采用不同响应路径；应用模块和功能对象可按需加载，数据库可按配置延迟连接，避免每次请求都执行完整业务流程。
+- **复用解析与编译结果**：路由规则生成可复用的注册表，模板编译为可执行代码；类索引和请求内资源实例减少重复查找、创建与解析。
+- **减少重复查询与渲染**：数据、查询结果及页面可按业务需要缓存；模板编译与页面缓存分别管理，既能复用模板，也能为动态页面关闭内容缓存。
+- **控制并发重复工作**：支持锁能力的缓存后端可在未命中时加锁复查，减少热点数据同时失效后的重复计算；文件缓存采用分片、原子发布及有预算的过期回收。
+- **减少传输与内存占用**：支持脚本和样式合并、压缩与缓存，文件响应使用内容标识和条件请求减少重复下载，并提供按需压缩及分块文件输出。
+- **缩减应用代码**：核心类继承、模块与模板对应、配置自动表单、公共校验、对象代理和插件接口，让业务代码集中在数据与规则上，公共流程由框架复用。
+
+缓存、数据库及压缩能力均可按实际场景配置；事务、查询缓存和计算锁以所选驱动支持的能力为准。
+
+## 目录与开发约定
+
+| 目录 | 用途 |
+| --- | --- |
+| `lib/` | 框架公共类库、数据库、缓存和会话驱动。 |
+| `app/` | 框架核心应用及独立业务应用，各应用保存自己的代码、模板与资源。 |
+| `plugin/` | 插件及其配置、模块、模板和资源。 |
+| `config/` | 全局配置、类索引、路由登记及优先脚本。 |
+| `static/` | 公共脚本、样式、素材与前端开发文档。 |
+| `cache/`、`files/` | 运行缓存与业务文件，按用途管理访问和清理。 |
+| `vendor/` | 第三方组件及自动加载文件，由依赖配置统一管理。 |
+| `docs/`、`tests/` | 分类开发文档、维护说明、测试脚本及隔离夹具。 |
+
+动态请求由根目录 `index.php` 统一进入。配置中的本地目录采用相对于网站根的路径，运行时由框架解析为绝对路径；应用与插件的专属功能保留在各自目录，公共类库保持通用。
+
+## 开始使用与开发
+
+准备 PHP 7.4 运行环境，并按使用的数据库、图片、归档等功能启用相应扩展。配置网站根目录及统一入口；地址重写不可用时，可选择另外两种路由模式。首次访问按安装初始化流程生成配置，再通过后台管理应用、插件和运行参数。
+
+- [文档总览](docs/README.md)：按主题查阅框架机制、教程和维护资料。
+- [框架执行流程](docs/framework/execution.md)：了解请求、路由、认证、模块和响应之间的关系。
+- [应用编写规范](app/README.md)与[第一个应用](docs/guides/first-application.md)：按统一结构开始开发。
+- [插件编写规范](plugin/README.md)与[第一个插件](docs/guides/first-plugin.md)：扩展框架与应用功能。
+- [前端开发文档](static/README.md)：主要变量、公共函数、表单规则与示例。
+- [测试与验证说明](tests/README.md)：各类测试的入口、依赖及运行范围。
+
+后台的“框架指南”可直接阅读上述文档，原文更新后重新打开即可。框架采用[阿帕奇许可证第二版](LICENSE.txt)。

@@ -1,6 +1,7 @@
 <style>
     #pic_container img {
         width: 100%;
+        max-width: 100%;
         height: auto;
         margin-bottom: 10px;
         border-right: 1px gray solid;
@@ -10,17 +11,17 @@
 <div class="card w-100 mb-5 mb-sm-2">
     <div class="card-body text-center">
         <div id="pic_container">
-            <img title="风景 1" data-src="https://desk-fd.zol-img.com.cn/t_s1024x768c5/g5/M00/02/07/ChMkJ1bKy_uIN_N3AApOcJMI5RwAALIxgAOlSwACk6I362.jpg" alt="" />
+            <img title="山湖倒影" data-src="<!--sample_assets|html-->lake.jpg" alt="山湖倒影" />
             <br />
-            <img title="风景 2" data-src="https://desk-fd.zol-img.com.cn/t_s1024x768c5/g5/M00/02/07/ChMkJ1bKy_qIWw7HAAYESY7XmCcAALIxQPiaFIABgRh602.jpg" alt="" />
+            <img title="海岸椰林" data-src="<!--sample_assets|html-->coast.jpg" alt="海岸椰林" />
             <br />
-            <img title="风景 3" data-src="https://desk-fd.zol-img.com.cn/t_s1024x768c5/g5/M00/02/07/ChMkJ1bKy_qIe0rEABHa6MR1maYAALIxQPobLMAEdsA496.jpg" alt="" />
+            <img title="林间光影" data-src="<!--sample_assets|html-->forest.jpg" alt="林间光影" />
             <br />
-            <img title="风景 4" data-src="https://desk-fd.zol-img.com.cn/t_s1024x768c5/g3/M09/0B/0F/Cg-4V1Ru7QOIRV1bAAZWxhKDGCYAARnZwA9PSQABlbe088.jpg" alt="" />
+            <img title="山林瀑布" data-src="<!--sample_assets|html-->waterfall.jpg" alt="山林瀑布" />
             <br />
-            <img title="风景 5" data-src="https://desk-fd.zol-img.com.cn/t_s1024x768c5/g5/M00/02/07/ChMkJlbKy_SIU9ZYAAhhFsfDzXkAALIxQBorLAACGEu653.jpg" alt="" />
+            <img title="沙丘风光" data-src="<!--sample_assets|html-->desert.jpg" alt="沙丘风光" />
             <br />
-            <img title="风景 6" data-src="https://desk-fd.zol-img.com.cn/t_s1024x768c5/g5/M00/02/07/ChMkJlbKy_SIHIAsAAYw0WmXJp8AALIxQB2GzYABjDp786.jpg" alt="" />
+            <img title="日落山谷" data-src="<!--sample_assets|html-->sunset.jpg" alt="日落山谷" />
             <br />
         </div>
     </div>
@@ -30,6 +31,7 @@
         callback:function(){
             $("#pic_container").powerImage({
                 selector: 'data-src',
+                image: '<!--sample_loading|html-->',
                 width: '100%',
                 zoom: true
             });

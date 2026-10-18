@@ -51,7 +51,7 @@ switch($method) {
                 ->where('id', 'n=', $id);
             $db->update();
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/article/custom/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -101,7 +101,7 @@ function build_page($method) {
 
         $tpl->assign('title', ($method=='add'?$mystep->getLanguage('admin_art_custom_add'):$mystep->getLanguage('admin_art_custom_edit')));
         $tpl->assign('method', $method);
-        $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+        $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/article/custom/'));
     }
     $db->free();
     $tpl->assign('web_id', $web_id??'');

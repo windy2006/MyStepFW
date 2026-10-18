@@ -78,11 +78,11 @@ function setHighlight(editor, brush) {
     insertContent(str);
 }
 function uploadInit() {
-    if(!checkSetting()) return;
+    if(!checkSetting(100, uploadInit)) return;
     $.vendor('jquery.powerUpload', {
         callback:function(){
             let opts = {
-                url: setting.url_prefix+'api/myStep/upload?core=CMS',
+                url: queryURL(setting.url_prefix+'api/myStep/upload', {core:'CMS'}),
                 title: '请选择需要上传的文件',
                 mode: 'browse',
                 max_files: 5,
@@ -473,7 +473,7 @@ $(function(){
         }
     });
     tinyMCE.PluginManager.add('myStep_cms', tinyMCE.plugins.myStep_cms);
-    $.getScript(global.root+'cache/script/editor_plugin_cms.js', function(){
+    $.getScript(global.root+'cache/script/editor_plugin_'+setting.app+'.js', function(){
         global.editor_btn += ' upload change'
         if(typeof(setting_tinymce_ext)!='undefined') $.extend(setting_tinymce, setting_tinymce_ext);
         if(typeof(setting_tinymce_btn)!='undefined') setting_tinymce.toolbar2 += ' | '+setting_tinymce_btn;

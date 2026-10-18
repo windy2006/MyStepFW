@@ -10,47 +10,89 @@
 *           BUT PLEASE HOLD THIS ITEM.      *
 *                                           *
 ********************************************/
+/**
+ * 文件：lib/myImg.class.php
+ * 功能说明：GD图像绘制、变换及图表工具
+ *   包含myImg图像操作和coordinateMaker坐标/图表辅助，支持验证码、水印、缩略图。
+ *
+ * 方法目录：
+ *   public static myImg::setLimits($bytes = 33554432, $dimension = 16384, $pixels = 24000000) — 设置图像输入字节、单边尺寸及总像素预算
+ *   public static myImg::validDimensions($width, $height) — 检查图像尺寸、像素及估算内存是否在预算内
+ *   public static myImg::inspect($file) — 读取并验证本地图像的格式、文件大小及像素信息
+ *   public myImg::init() — 释放原画布后按位置参数加载图片或创建指定宽高的画布
+ *   public myImg::create($trueImage = true, $background = NULL) — 生成画板
+ *   public myImg::setTile($tile, $point = NULL, $width = NULL, $height = NULL) — 设置区域贴图
+ *   public myImg::setTransparent($para) — 设置透明色（可为点、索引色和数组色）
+ *   public myImg::randomColor($rand = false, $alpha = true) — 优先随机复用登记颜色，或分配新的随机GD颜色
+ *   public myImg::load($image, &$data = array()) — 读取图片文件，并返回图片信息
+ *   public myImg::rotate($angle, $img = NULL) — 旋转画布
+ *   public myImg::resize($rate, $img = NULL) — 按比例缩放画布（可选择返回图像源）
+ *   public myImg::crop($point, $width, $height, $img = NULL) — 截取画布的一部分（可选择返回图像源）
+ *   public myImg::paste($img, $point = array(0, 0), $alpha = 100) — 将一图像源粘贴到画布的某一位置
+ *   public myImg::setLine($thickness = 1, $style = NULL, $brush = NULL) — 设定画线的粗细、风格、笔刷
+ *   public myImg::setFilter($filtertype = IMG_FILTER_COLORIZE, $args = array()) — 为图像添加滤镜效果
+ *   public myImg::getSize($img = NULL) — 返回图像源的宽、高
+ *   public myImg::getColor($point, $mode = true) — 取得画布某点的颜色
+ *   public myImg::setColor($idx = '') — 设置颜色
+ *   public myImg::fill($point = array(0, 0), $color = '', $color_border = NULL) — 从一点向画布右下填充
+ *   public myImg::drawLine($p_start, $p_end, $color='') — 画线
+ *   public myImg::drawRectangle($point, $width, $height, $color_border = '', $color_fill = '') — 画矩形
+ *   public myImg::drawPolygon($points, $color_border = '', $color_fill = '') — 画多边形
+ *   public myImg::drawFiveSidedStar($point, $radius, $color_border = '', $color_fill = '', $star=true, $spiky=0.5) — 画五角星
+ *   public myImg::drawEllipse($point, $width, $height, $color_border = '', $color_fill = '') — 画椭圆
+ *   public myImg::drawArc($point, $width, $height, $arc = array(0, 360), $color_border = '', $color_fill = '') — 画圆弧
+ *   public myImg::drawPie($data, $point, $width, $height, $mask = 20, $ext_value = 0, $distance = 0, $start_angle = 0) — 画饼图
+ *   public myImg::drawZigzag($points, $color_line = '') — 画折线
+ *   public myImg::drawString($text, $point, $color='', $font='', $font_size = 12, $angle = 0) — 添加文字
+ *   public myImg::setFont($font) — 设置字体
+ *   public myImg::getFontSize($text, $size = 12, $angle = 0) — 取得字符串的占位大小
+ *   public myImg::addNoise($number) — 添加干扰点
+ *   public myImg::make($type='', $file='') — 输出图像源到浏览器或文件
+ *   public myImg::destroy($img = NULL) — 释放图像源
+ *   public myImg::transString($str, $charset = 'gbk') — 字符集转换
+ *   public myImg::checkPoint() — 检测点的有效性
+ *   public myImg::check($img = NULL) — 检测图像源的有效性
+ *   public myImg::gif_info($filename) — 读取GIF信息
+ *   public myImg::captcha($str, $font, $fontsize = 16) — 生成验证码
+ *   public myImg::watermark($watermark, $position=1, $img_dst='', $para=array()) — 添加图片或文字水印并输出到浏览器或目标文件
+ *   public myImg::thumb($dstW, $dstH, $img_dst='') — 制作缩略图
+ *   public coordinateMaker::init($width = 400, $height = 400, $origin = array(0, 0), $args = array(true, array(0xee, 0xee, 0xee))) — 初始化实例
+ *   public coordinateMaker::setOrigin($point) — 设置原点位置
+ *   public coordinateMaker::setPara($para = array()) — 设置坐标参数
+ *   public coordinateMaker::getPoint($point) — 取得相对原点坐标的实际位置
+ *   public coordinateMaker::getScalePoint($point, $trans = true) — 按坐标比例换算点位置，可选择转换到画布坐标
+ *   public coordinateMaker::buileCoordinate($padding = 20) — 绘制坐标系
+ *   public coordinateMaker::drawZigzag($data_lst, $color_lst='', $data_str='', $show_value = true, $legend_point = NULL) — 画折线
+ *   public coordinateMaker::drawBar($data_lst, $color_lst='', $data_str='', $show_value = false, $legend_point = NULL) — 按数据系列绘制柱状图及可选数值和图例
+ *   public coordinateMaker::drawPie($data, $point, $width, $height, $data_str = '', $mode = 1, $legend = 0, $mask = 20, $ext_value = 0, $distance = 0, $start_angle = 0) — 绘制饼图，并标注数值/百分比及可选图例
+ *
+ * 使用说明：
+ *   1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+ *   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
+ *   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
+ *
+ * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
+ *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
+ *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ */
+
 
 /**
-    图形处理
-        $myImg = new myImg($width, $height, $cr)                          // 构造函数
-        $myImg->create($trueImage, $background)                           // 生成画板
-        $myImg->setTile($image, $point, $width, $height)                  // 设置区域贴图
-        $myImg->setTransparent($color)                                    // 设置透明色（可为点、索引色和数组色）
-        $myImg->randomColor($rand)                                        // 随机颜色
-        $myImg->load($image, &$data)                                      // 读取图片文件，并返回图片信息
-        $myImg->rotate($angle, $img)                                      // 旋转画布
-        $myImg->resize($rate, $return, $img)                              // 按比例缩放画布（可选择返回图像源）
-        $myImg->crop($point, $width, $height, $img, $return)              // 截取画布的一部分（可选择返回图像源）
-        $myImg->paste($img, $point, $alpha, $gray)                        // 将一图像源粘贴到画布的某一位置
-        $myImg->setLine($thickness, $style, $brush)                       // 设定画线的粗细、风格、笔刷
-        $myImg->setFilter($filtertype, $img, $arg)                        // 为图像添加滤镜效果
-        $myImg->getSize($img)                                             // 返回图像源的宽、高
-        $myImg->getColor($point, $mode)                                   // 取得画布某点的颜色
-        $myImg->setColor($idx)                                            // 设置颜色
-        $myImg->checkPoint()                                              // 检测点的有效性
-        $myImg->check()                                                   // 检测图像源的有效性
-        $myImg->fill($point, $color, $color_border)                       // 从一点向画布右下填充
-        $myImg->drawLine($p_start, $p_end, $color)                        // 画线
-        $myImg->drawRectangle($point, $width, $height, $color_line, $color_fill)                    // 画矩形
-        $myImg->drawPolygon($points, $color_line, $color_fill)                                      // 画多边形
-        $myImg->drawFiveSidedStar($point, $radius, $color_line, $color_fill, $star, $spiky)         // 画五角星
-        $myImg->drawEllipse($point, $width, $height, $color, $fill)                                 // 画椭圆
-        $myImg->drawArc($point, $width, $height, $arc, $color, $fill)                               // 画椭圆弧
-        $myImg->drawPie($data, $point, $width, $height, $mask, $ext_value, $distance, $start_angle) // 画饼图
-        $myImg->drawZigzag($points, $color_line)                                                    // 画折线
-        $myImg->drawString($text, $point, $color, $font, $font_size, $angle)                        // 添加文字
-        $myImg->setFont($font)                                                                      // 设置字体
-        $myImg->getFontSize($text, $size, $angle)                                                   // 取得字符串的占位大小
-        $myImg->addNoise($number)                                                                   // 添加干扰点
-        $myImg->make($type, $file, $img)                                                            // 输出图像源到浏览器或文件
-        $myImg->destroy($img)                                                                       // 释放图像源
-        $myImg->transString($str)                                                                   // 字符集转换
-        $myImg->gif_info($filename)                                                                 // 读取GIF信息
-        $myImg->captcha($str, $font, $fontsize)                                                     // 生成验证码
-        $myImg->watermark($watermark, $position, $img_dst, $para)                                   // 添加图片水印
-        $myImg->thumb($dstW, $dstH, $img_dst)                                                       // 制作缩略图
-*/
+ * 功能说明：基于GD管理画布、图像转换、绘制、验证码、水印及缩略图
+ *
+ * 使用说明：
+ *   1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+ *   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
+ *   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
+ *
+ * 使用示例：
+ *     $img = new myImg(320, 180, [true, 'white']);
+ *     $img->drawLine([0, 0], [100, 80], 'red')->make('png', $target);
+ *
+ * 方法目录：参见本文件顶部；只列直接声明，继承和trait别名沿用原声明注释。
+ *
+ * @example ../app/Document/module/myImg.php 框架现有演示，仅作为文档引用，不在检查时执行
+ */
 class myImg extends myBase {
     use myTrait;
 
@@ -76,9 +118,54 @@ class myImg extends myBase {
         $file_date = array(),
         $true_color = false;
 
+    protected static $limits = ['bytes'=>33554432, 'dimension'=>16384, 'pixels'=>24000000];
+
     /**
-     * 初始化实例
-     * @return $this|bool|void
+     * 功能说明：设置图像输入字节、单边尺寸及总像素预算
+     *
+     * @param int $bytes 最大允许处理的字节数，必须为正整数（默认：33554432）
+     * @param int $dimension 图像单边允许的最大像素数（默认：16384）
+     * @param int $pixels 图像总像素数量上限（默认：24000000）
+     * @return void 无返回值。
+     * @throws InvalidArgumentException 字节、尺寸或像素预算不是正整数
+     */
+    public static function setLimits($bytes = 33554432, $dimension = 16384, $pixels = 24000000) {
+        foreach([$bytes, $dimension, $pixels] as $limit) if(!is_int($limit) || $limit <= 0) throw new InvalidArgumentException('Image limits must be positive integers');
+        self::$limits = ['bytes'=>$bytes, 'dimension'=>$dimension, 'pixels'=>$pixels];
+    }
+
+    /**
+     * 功能说明：检查图像尺寸、像素及估算内存是否在预算内
+     *
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @return bool 所有尺寸/像素/内存预算检查均通过为true
+     */
+    public static function validDimensions($width, $height) {
+        if(!is_numeric($width) || !is_numeric($height) || $width < 1 || $height < 1 || !is_finite((float)$width) || !is_finite((float)$height)) return false;
+        $pixels = (float)$width * (float)$height;
+        if($width > self::$limits['dimension'] || $height > self::$limits['dimension'] || $pixels > self::$limits['pixels']) return false;
+        $memory = myFile::getByte(ini_get('memory_limit'));
+        return $memory <= 0 || $pixels * 8 + 1048576 < $memory - memory_get_usage(true);
+    }
+
+    /**
+     * 功能说明：读取并验证本地图像的格式、文件大小及像素信息
+     *
+     * @param string $file 目标文件路径
+     * @return array|false getimagesize返回的图像信息；无效/超预算为false
+     */
+    public static function inspect($file) {
+        if(!is_file($file) || filesize($file) > self::$limits['bytes']) return false;
+        $data = @getimagesize($file);
+        return $data && self::validDimensions($data[0], $data[1]) ? $data : false;
+    }
+
+    /**
+     * 功能说明：释放原画布后按位置参数加载图片或创建指定宽高的画布
+     *
+     * @param mixed ...$args 图片路径，或宽度、高度、create参数数组[真彩,背景]（历史位置参数，由func_get_args读取）
+     * @return $this|false 返回当前实例；图像加载失败为false
      */
     public function init() {
         $this->destroy();
@@ -96,7 +183,7 @@ class myImg extends myBase {
             $this->file_date = $data;
             $this->file = $args[0];
             $this->true_color = imageistruecolor($this->img);
-        } elseif(is_numeric($args[0]) && is_numeric($args[1])) {
+        } elseif(is_numeric($args[0]) && isset($args[1]) && is_numeric($args[1])) {
             $this->width = $args[0];
             $this->height = $args[1];
             if(!isset($args[2])) $args[2] = array();
@@ -106,12 +193,16 @@ class myImg extends myBase {
     }
 
     /**
-     * 生成画板
-     * @param bool $trueImage
-     * @param null $background
-     * @return $this
+     * 功能说明：生成画板
+     *
+     * @param bool $trueImage true创建真彩画布，false创建调色板画布（默认：true）
+     * @param array|int|string|null $background 画布背景颜色，null采用实现默认背景（默认：NULL）
+     * @return $this|false 画布创建后返回当前实例；尺寸超预算为false
      */
     public function create($trueImage = true, $background = NULL) {
+        if(!self::validDimensions($this->width, $this->height)) return false;
+        $this->destroy();
+        $this->color_lst = [];
         $this->img = $trueImage ? imagecreatetruecolor($this->width, $this->height) : imagecreate($this->width, $this->height);
         $this->setColor('red', 255, 0, 0);
         $this->setColor('green', 0, 255, 0);
@@ -133,10 +224,7 @@ class myImg extends myBase {
         $color_pie[] = array(137, 91, 74);
         $color_pie[] = array(255, 203, 3);
         $color_pie[] = array(153, 204, 0);
-        if(!function_exists('color_cmp')) {
-            function color_cmp($a, $b) {return (rand(0, 10) > 7) ? -1 : 1;};
-        }
-        uksort($color_pie, 'color_cmp');
+        shuffle($color_pie);
         $i = 1;
         foreach($color_pie as $value) {
             $this->setColor('pie_'.$i, $value);
@@ -158,12 +246,13 @@ class myImg extends myBase {
     }
 
     /**
-     * 设置区域贴图
-     * @param $tile
-     * @param null $point
-     * @param null $width
-     * @param null $height
-     * @return $this
+     * 功能说明：设置区域贴图
+     *
+     * @param string $tile 平铺图片的本地路径
+     * @param array|null $point 填充区域左上角[x,y]，null采用[0,0]（默认：NULL）
+     * @param int|float|null $width 填充宽度，null采用当前画布宽度（默认：NULL）
+     * @param int|float|null $height 填充高度，null采用当前画布高度（默认：NULL）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setTile($tile, $point = NULL, $width = NULL, $height = NULL) {
         if($tile = $this->load($tile)) {
@@ -178,9 +267,10 @@ class myImg extends myBase {
     }
 
     /**
-     * 设置透明色（可为点、索引色和数组色）
-     * @param $para
-     * @return $this
+     * 功能说明：设置透明色（可为点、索引色和数组色）
+     *
+     * @param array|int|string $para 取色坐标[x,y]、已登记颜色名或GD颜色值
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setTransparent($para) {
         if($this->checkPoint($para)) {
@@ -198,6 +288,13 @@ class myImg extends myBase {
      * @param bool $alpha
      * @return int|mixed
      */
+    /**
+     * 功能说明：优先随机复用登记颜色，或分配新的随机GD颜色
+     *
+     * @param bool $rand true优先从已登记颜色中随机选取（默认：false）
+     * @param bool $alpha true生成带透明度的随机颜色，false生成不透明颜色（默认：true）
+     * @return int|false 分配或复用的GD颜色索引；底层分配失败为false
+     */
     public function randomColor($rand = false, $alpha = true) {
         if(count($this->color_lst)>0 && $rand) {
             return $this->color_lst[array_rand($this->color_lst)];
@@ -207,15 +304,19 @@ class myImg extends myBase {
     }
 
     /**
-     * 读取图片文件，并返回图片信息
-     * @param $image
-     * @param array $data
-     * @return bool|resource
+     * 功能说明：读取图片文件，并返回图片信息
+     *
+     *
+     * 资源所有权：直接调用load得到独立句柄，调用方负责imagedestroy；经init加载时由当前图像实例管理，destroy可显式释放。
+     *
+     * @param string $image 待加载的图片文件路径
+     * @param array &$data 引用输出的图片格式/尺寸等getimagesize信息（默认：array()）
+     * @return resource|false 新GD图像句柄；格式、资源预算或解码失败为false；独立句柄由调用方释放
      */
     public function load($image, &$data = array()) {
-        if(!is_file($image)) return false;
+        if(!self::inspect($image)) return false;
         $info = array();
-        $data = getimagesize($image, $info);
+        $data = @getimagesize($image, $info);
         if(!$data) return false;
         switch(true) {
             case ($data[2]==1 && (imagetypes() & IMG_GIF)):
@@ -237,6 +338,19 @@ class myImg extends myBase {
                 return false;
             break;
         }
+        if(!$img) return false;
+        if($data[2] === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($image, 'IFD0', true, false);
+            $orientation = (int)($exif['IFD0']['Orientation'] ?? 1);
+            if(in_array($orientation, [2, 4, 5, 7], true)) imageflip($img, in_array($orientation, [4, 5], true) ? IMG_FLIP_VERTICAL : IMG_FLIP_HORIZONTAL);
+            $angle = [3=>180, 5=>-90, 6=>-90, 7=>-90, 8=>90][$orientation] ?? 0;
+            if($angle) {
+                $rotated = imagerotate($img, $angle, 0);
+                if(!$rotated) { imagedestroy($img); return false; }
+                imagedestroy($img); $img = $rotated;
+            }
+            $data[0] = imagesx($img); $data[1] = imagesy($img);
+        }
         $type_list = array('unknow', 'GIF', 'JPG', 'PNG', 'SWF', 'PSD', 'BMP', 'TIFF(intel byte order)', 'TIFF(motorola byte order)', 'JPC', 'JP2', 'JPX', 'JB2', 'SWC', 'IFF', 'WBMP', 'XBM');
         $data[2] = $type_list[$data[2]];
         $data[3] = $info;
@@ -244,30 +358,50 @@ class myImg extends myBase {
     }
 
     /**
-     * 旋转画布
-     * @param $angle
-     * @param null $img
-     * @return $this|bool|resource
+     * 功能说明：旋转画布
+     *
+     *
+     * 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
+     *
+     * 调用示例：
+     *     $rotated = $image->rotate(90, $source);
+     *     if ($rotated !== false) { imagedestroy($rotated); } // 独立返回句柄由调用方释放
+     *
+     * @param int|float $angle 旋转或文字倾斜角度，单位度
+     * @param resource|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
+     * @return $this|resource|false img为null时替换当前画布并返回自身；传入图像时返回新句柄；无效/超限为false
      */
     public function rotate($angle, $img = NULL) {
-        if(is_null($img)) {
-            $new_img = imagerotate($this->img, $angle, 0);
-            $this->destroy();
-            $this->img = $new_img;
-            if(fmod($angle, 90)!==0) $this->setTransparent(array(0, 0));
+        if(!is_numeric($angle) || !is_finite((float)$angle)) return false;
+        $own = $img === null; $loaded = false;
+        $source = $own ? $this->img : $img;
+        if(!$this->check($source)) { $source = $this->load($source); $loaded = true; }
+        if(!$source) return false;
+        try {
+            $radians = deg2rad(fmod($angle, 360));
+            $w = imagesx($source); $h = imagesy($source);
+            $width = ceil(round(abs($w*cos($radians))+abs($h*sin($radians)), 6));
+            $height = ceil(round(abs($w*sin($radians))+abs($h*cos($radians)), 6));
+            if(!self::validDimensions($width, $height)) return false;
+            $rotated = imagerotate($source, $angle, imagecolorallocatealpha($source, 0, 0, 0, 127));
+            if(!$rotated) return false;
+            imagesavealpha($rotated, true);
+            if(!$own) return $rotated;
+            $this->destroy(); $this->img = $rotated;
             list($this->width, $this->height) = $this->getSize();
             return $this;
-        } else {
-            if(!$this->check($img) && (($img=$this->load($img))===false)) return false;
-            return imagerotate($img, $angle, IMG_COLOR_TRANSPARENT);
-        }
+        } finally { if($loaded) imagedestroy($source); }
     }
 
     /**
-     * 按比例缩放画布（可选择返回图像源）
-     * @param $rate
-     * @param null $img
-     * @return $this|bool|resource
+     * 功能说明：按比例缩放画布（可选择返回图像源）
+     *
+     *
+     * 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
+     *
+     * @param int|float|array $rate 正缩放倍率，或目标边界[宽,高]；边界模式保持比例且不放大
+     * @param resource|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
+     * @return $this|resource|false img为null时替换当前画布；传入图像时返回新句柄；比例/尺寸/加载无效为false
      */
     public function resize($rate, $img = NULL) {
         if($return = is_null($img)) $img = $this->img;
@@ -279,10 +413,14 @@ class myImg extends myBase {
             $new_height = min($new_height, $height);
             $rate = min($new_width/$width, $new_height/$height);
         }
-        $new_width = $width * $rate;
-        $new_height = $height * $rate;
+        if(!is_numeric($rate) || $rate <= 0) return false;
+        $new_width = max(1, (int)round($width * $rate));
+        $new_height = max(1, (int)round($height * $rate));
+        if(!self::validDimensions($new_width, $new_height)) return false;
         if(function_exists('imagecopyresampled')) {
             $new_img = imagecreatetruecolor($new_width, $new_height);
+            imagealphablending($new_img, false);
+            imagesavealpha($new_img, true);
             imagecopyresampled($new_img, $img, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
         } else {
             $new_img = imagecreate($new_width, $new_height);
@@ -300,19 +438,26 @@ class myImg extends myBase {
     }
 
     /**
-     * 截取画布的一部分（可选择返回图像源）
-     * @param $point
-     * @param $width
-     * @param $height
-     * @param null $img
-     * @return $this|bool|resource
+     * 功能说明：截取画布的一部分（可选择返回图像源）
+     *
+     *
+     * 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
+     *
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @param resource|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
+     * @return $this|resource|false img为null时替换当前画布；指定图像时返回裁剪句柄；坐标/尺寸/加载无效为false
      */
     public function crop($point, $width, $height, $img = NULL) {
         if($flag = is_null($img)) $img = $this->img;
         if(!$this->check($img) && (($img=$this->load($img))===false)) return false;
+        if(!$this->checkPoint($point) || !self::validDimensions($width, $height)) return false;
         $new_img = imagecreatetruecolor($width, $height);
+        imagealphablending($new_img, false);
+        imagesavealpha($new_img, true);
         imagecopyresampled($new_img, $img, 0, 0, $point[0], $point[1], $width, $height, $width, $height);
-        if($flag) {
+        if(!$flag) {
             return $new_img;
         } else {
             $this->destroy();
@@ -324,11 +469,12 @@ class myImg extends myBase {
     }
 
     /**
-     * 将一图像源粘贴到画布的某一位置
-     * @param $img
-     * @param array $point
-     * @param int $alpha
-     * @return $this|bool
+     * 功能说明：将一图像源粘贴到画布的某一位置
+     *
+     * @param resource|string $img 待粘贴的GD图像句柄或图片路径
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定（默认：array(0, 0)）
+     * @param int $alpha 1至100执行透明合成，非正值执行灰阶合成，大于100直接拷贝（默认：100）
+     * @return $this|false 粘贴后返回当前实例；源图像加载失败为false
      */
     public function paste($img, $point = array(0, 0), $alpha = 100) {
         if(!$this->check($img) && (($img=$this->load($img))===false)) return false;
@@ -343,11 +489,12 @@ class myImg extends myBase {
     }
 
     /**
-     * 设定画线的粗细、风格、笔刷
-     * @param int $thickness
-     * @param null $style
-     * @param null $brush
-     * @return $this
+     * 功能说明：设定画线的粗细、风格、笔刷
+     *
+     * @param int $thickness 绘线厚度，单位像素（默认：1）
+     * @param array|null $style GD线条样式颜色序列，null不设置（默认：NULL）
+     * @param resource|null $brush GD画笔图像句柄，null不设置（默认：NULL）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setLine($thickness = 1, $style = NULL, $brush = NULL) {
         imagesetthickness($this->img, $thickness);
@@ -369,10 +516,11 @@ class myImg extends myBase {
     }
 
     /**
-     * 为图像添加滤镜效果
-     * @param int $filtertype
-     * @param array $args
-     * @return $this
+     * 功能说明：为图像添加滤镜效果
+     *
+     * @param int $filtertype GD的IMG_FILTER_*滤镜常量（默认：IMG_FILTER_COLORIZE）
+     * @param array $args 按目标函数顺序传入的附加参数（默认：array()）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setFilter($filtertype = IMG_FILTER_COLORIZE, $args = array()) {
         if(!is_array($args)) $args = array($args);
@@ -382,9 +530,11 @@ class myImg extends myBase {
     }
 
     /**
-     * 返回图像源的宽、高
-     * @param null $img
-     * @return array
+     * 功能说明：返回图像源的宽、高
+     *
+     * @param resource|null $img GD图像句柄；null使用当前画布（默认：NULL）
+     * @return array [宽,高]像素二元组；当前/指定句柄无效时返回[0,0]
+     * @phpstan-return array{int,int}
      */
     public function getSize($img = NULL) {
         if(is_null($img)) $img = $this->img;
@@ -393,10 +543,12 @@ class myImg extends myBase {
     }
 
     /**
-     * 取得画布某点的颜色
-     * @param $point
-     * @param bool $mode
-     * @return $this|array|bool|int
+     * 功能说明：取得画布某点的颜色
+     *
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param bool $mode true返回GD颜色索引，false返回RGBA组成信息（默认：true）
+     * @return $this|array|int|false mode为true返回颜色索引，为false返回RGBA映射；无效点/画布可返回自身，GD读取失败为false
+     * @phpstan-return $this|array{red:int,green:int,blue:int,alpha:int}|int|false
      */
     public function getColor($point, $mode = true) {
         if(!$this->check()) return $this;
@@ -413,9 +565,11 @@ class myImg extends myBase {
     }
 
     /**
-     * 设置颜色
-     * @param string $idx
-     * @return $this
+     * 功能说明：设置颜色
+     *
+     * @param string $idx 颜色索引名，空串自动分配；附加参数指定RGB及透明度（默认：''）
+     * @param mixed ...$args [R,G,B]及可选透明度，或R/G/B及可选透明度；GD透明度0至127（历史位置参数，由func_get_args读取）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setColor($idx = '') {
         if(empty($idx)) $idx = 'idx_'.(count($this->color_lst)+1);
@@ -448,11 +602,12 @@ class myImg extends myBase {
     }
 
     /**
-     * 从一点向画布右下填充
-     * @param array $point
-     * @param string $color
-     * @param null $color_border
-     * @return $this
+     * 功能说明：从一点向画布右下填充
+     *
+     * @param array $point 泛洪填充起点[x,y]，不是矩形区域边界（默认：array(0, 0)）
+     * @param string|int $color 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param int|null $color_border GD边界颜色值；null普通泛洪填充，非null填充到该颜色边界（默认：NULL）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function fill($point = array(0, 0), $color = '', $color_border = NULL) {
         $color = isset($this->color_lst[$color]) ? $this->color_lst[$color] : $this->randomColor();
@@ -465,11 +620,12 @@ class myImg extends myBase {
     }
 
     /**
-     * 画线
-     * @param $p_start
-     * @param $p_end
-     * @param string $color
-     * @return $this
+     * 功能说明：画线
+     *
+     * @param array $p_start 线段起点坐标[x,y]
+     * @param array $p_end 线段终点坐标[x,y]
+     * @param string|int $color 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawLine($p_start, $p_end, $color='') {
         if($color=="style") {
@@ -486,13 +642,14 @@ class myImg extends myBase {
     }
 
     /**
-     * 画矩形
-     * @param $point
-     * @param $width
-     * @param $height
-     * @param string $color_border
-     * @param string $color_fill
-     * @return $this
+     * 功能说明：画矩形
+     *
+     * @param array $point 矩形左上角在画布上的坐标[x,y]
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @param string|int $color_border 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param string|int $color_fill 已登记颜色的索引名；未登记时采用随机颜色；空串不执行填充（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawRectangle($point, $width, $height, $color_border = '', $color_fill = '') {
         if(!empty($color_fill)) {
@@ -505,11 +662,12 @@ class myImg extends myBase {
     }
 
     /**
-     * 画多边形
-     * @param $points
-     * @param string $color_border
-     * @param string $color_fill
-     * @return $this
+     * 功能说明：画多边形
+     *
+     * @param array $points 依绘制顺序排列的二维坐标列表
+     * @param string|int $color_border 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param string|int $color_fill 已登记颜色的索引名；未登记时采用随机颜色；空串不执行填充（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawPolygon($points, $color_border = '', $color_fill = '') {
         if(count($points)==1) {
@@ -537,14 +695,15 @@ class myImg extends myBase {
     }
 
     /**
-     * 画五角星
-     * @param $point
-     * @param $radius
-     * @param string $color_border
-     * @param string $color_fill
-     * @param bool $star
-     * @param float $spiky
-     * @return myImg
+     * 功能说明：画五角星
+     *
+     * @param array $point 图形中心在画布上的坐标[x,y]
+     * @param int|float $radius 图形外接半径，单位像素
+     * @param string|int $color_border 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param string|int $color_fill 已登记颜色的索引名；未登记时采用随机颜色；空串不执行填充（默认：''）
+     * @param bool $star true绘制星形，false绘制正多边形（默认：true）
+     * @param float $spiky 星形内外半径比例（默认：0.5）
+     * @return $this 委托drawPolygon绘制后返回当前实例
      */
     public function drawFiveSidedStar($point, $radius, $color_border = '', $color_fill = '', $star=true, $spiky=0.5) {
         $x = $point[0];
@@ -583,13 +742,14 @@ class myImg extends myBase {
     }
 
     /**
-     * 画椭圆
-     * @param $point
-     * @param $width
-     * @param $height
-     * @param string $color_border
-     * @param string $color_fill
-     * @return $this
+     * 功能说明：画椭圆
+     *
+     * @param array $point 图形中心在画布上的坐标[x,y]
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @param string|int $color_border 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param string|int $color_fill 已登记颜色的索引名；未登记时采用随机颜色；空串不执行填充（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawEllipse($point, $width, $height, $color_border = '', $color_fill = '') {
         if(!empty($color_fill)) {
@@ -602,14 +762,15 @@ class myImg extends myBase {
     }
 
     /**
-     * 画圆弧
-     * @param $point
-     * @param $width
-     * @param $height
-     * @param array $arc
-     * @param string $color_border
-     * @param string $color_fill
-     * @return $this
+     * 功能说明：画圆弧
+     *
+     * @param array $point 图形中心在画布上的坐标[x,y]
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @param array $arc 起始/结束角度数组[start,end]，单位度（默认：array(0, 360)）
+     * @param string|int $color_border 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param string|int $color_fill 已登记颜色的索引名；未登记时采用随机颜色；空串不执行填充（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawArc($point, $width, $height, $arc = array(0, 360), $color_border = '', $color_fill = '') {
         if(!empty($color_fill)) {
@@ -622,19 +783,21 @@ class myImg extends myBase {
     }
 
     /**
-     * 画饼图
-     * @param $data
-     * @param $point
-     * @param $width
-     * @param $height
-     * @param int $mask
-     * @param int $ext_value
-     * @param int $distance
-     * @param int $start_angle
-     * @return $this
+     * 功能说明：画饼图
+     *
+     * @param array $data 按扇区顺序排列的非负数值列表
+     * @param array $point 图形中心在画布上的坐标[x,y]
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @param int $mask 饼图立体厚度，单位像素（默认：20）
+     * @param int|float $ext_value 额外计入总量但不绘制的数值（默认：0）
+     * @param int|float $distance 扇区向外分离的距离，单位像素（默认：0）
+     * @param int|float $start_angle 首个扇区起始角度（默认：0）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawPie($data, $point, $width, $height, $mask = 20, $ext_value = 0, $distance = 0, $start_angle = 0) {
         $data_sum = array_sum($data) + $ext_value;
+        if($data_sum <= 0) return $this;
         $angle = array();
         $angle_sum = array($start_angle);
         $m=count($data);
@@ -670,10 +833,11 @@ class myImg extends myBase {
     }
 
     /**
-     * 画折线
-     * @param $points
-     * @param string $color_line
-     * @return $this
+     * 功能说明：画折线
+     *
+     * @param array $points 依绘制顺序排列的二维坐标列表
+     * @param string|int $color_line 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawZigzag($points, $color_line = '') {
         if(count($points)==1) {
@@ -691,14 +855,15 @@ class myImg extends myBase {
     }
 
     /**
-     * 添加文字
-     * @param $text
-     * @param $point
-     * @param string $color
-     * @param string $font
-     * @param int $font_size
-     * @param int $angle
-     * @return $this
+     * 功能说明：添加文字
+     *
+     * @param string $text 要绘制或测量的文本
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param string|int $color 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
+     * @param string $font 字体文件路径或实现支持的字体名（默认：''）
+     * @param int $font_size 文字大小（默认：12）
+     * @param int|float $angle 旋转或文字倾斜角度，单位度（默认：0）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawString($text, $point, $color='', $font='', $font_size = 12, $angle = 0) {
         $color = isset($this->color_lst[$color]) ? $this->color_lst[$color] : $this->randomColor();
@@ -714,9 +879,10 @@ class myImg extends myBase {
     }
 
     /**
-     * 设置字体
-     * @param $font
-     * @return $this
+     * 功能说明：设置字体
+     *
+     * @param string $font 字体文件路径或实现支持的字体名
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setFont($font) {
         if(is_file($font)) {
@@ -726,11 +892,13 @@ class myImg extends myBase {
     }
 
     /**
-     * 取得字符串的占位大小
-     * @param $text
-     * @param int $size
-     * @param int $angle
-     * @return array
+     * 功能说明：取得字符串的占位大小
+     *
+     * @param string|int $text 待测量文字；未设置TTF或size为0时，数值表示GD内置字体编号
+     * @param int $size 待测量文字的字号（默认：12）
+     * @param int|float $angle 旋转或文字倾斜角度，单位度（默认：0）
+     * @return array 二元数组[宽,高]，单位像素；未设置TTF时按内置字体测量
+     * @phpstan-return array{int,int}
      */
     public function getFontSize($text, $size = 12, $angle = 0) {
         if($size == 0 || empty($this->font)) {
@@ -738,28 +906,30 @@ class myImg extends myBase {
             $result = array(imagefontwidth($text), imagefontheight($text));
         } else {
             $points = imagettfbbox($size, $angle, $this->font, $text);
-            $result = array(($points[2]- $points[0]), ($points[3]- $points[5]));
+            $result = [max($points[0],$points[2],$points[4],$points[6])-min($points[0],$points[2],$points[4],$points[6]), max($points[1],$points[3],$points[5],$points[7])-min($points[1],$points[3],$points[5],$points[7])];
         }
         return $result;
     }
 
     /**
-     * 添加干扰点
-     * @param $number
-     * @return $this
+     * 功能说明：添加干扰点
+     *
+     * @param int $number 需要添加的随机干扰点数量
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function addNoise($number) {
         for($i=0; $i<$number; $i++) {
-            imageSetPixel($this->img, rand(0, $this->width), rand(0, $this->height), $this->randomColor(true));
+            imageSetPixel($this->img, rand(0, $this->width-1), rand(0, $this->height-1), $this->randomColor(true));
         }
         return $this;
     }
 
     /**
-     * 输出图像源到浏览器或文件
-     * @param string $type
-     * @param string $file
-     * @return $this|false
+     * 功能说明：输出图像源到浏览器或文件
+     *
+     * @param string $type 输出图像格式，空串沿用当前格式（默认：''）
+     * @param string $file 保存路径；空串直接输出图像响应（默认：''）
+     * @return $this|false 输出/保存调用完成后返回当前实例；没有有效图像为false，底层编码错误不保证由返回值反映
      */
     public function make($type='', $file='') {
         if(empty($type)) $type = $this->dst_type;
@@ -783,7 +953,7 @@ class myImg extends myBase {
                 break;
             default:
                 $func = 'imagejpeg';
-                $contentType = 'imagejpeg';
+                $contentType = 'image/jpeg';
                 break;
         }
 
@@ -798,21 +968,26 @@ class myImg extends myBase {
     }
 
     /**
-     * 释放图像源
-     * @param null $img
-     * @return bool
+     * 功能说明：释放图像源
+     *
+     * @param resource|null $img GD图像句柄；null使用当前画布（默认：NULL）
+     * @return bool 指定或当前GD句柄的释放结果；无有效句柄为false
      */
     public function destroy($img = NULL) {
-        if(is_null($img)) $img = $this->img;
+        $own = is_null($img);
+        if($own) $img = $this->img;
         if(!$this->check($img)) return false;
-        return imagedestroy($img);
+        $result = imagedestroy($img);
+        if($own) $this->img = null;
+        return $result;
     }
 
     /**
-     * 字符集转换
-     * @param $str
-     * @param string $charset
-     * @return array|string
+     * 功能说明：字符集转换
+     *
+     * @param string $str 待处理的字符串
+     * @param string $charset 无myString时后备分支使用的字符编码提示；正常myString分支固定转为UTF-8（默认：'gbk'）
+     * @return string|false 通常转换为UTF-8；兼容后备分支可能沿用检测编码，iconv失败可为false
      */
     public function transString($str, $charset = 'gbk') {
         switch(true) {
@@ -832,8 +1007,10 @@ class myImg extends myBase {
     }
 
     /**
-     * 检测点的有效性
-     * @return bool
+     * 功能说明：检测点的有效性
+     *
+     * @param array ...$args 需要逐个校验的[x,y]数值坐标数组，至少一个（历史位置参数，由func_get_args读取）
+     * @return bool 至少一个参数且所有参数均为两个数值组成的数组时为true，否则为false
      */
     public function checkPoint() {
         $count = func_num_args();
@@ -848,9 +1025,10 @@ class myImg extends myBase {
     }
 
     /**
-     * 检测图像源的有效性
-     * @param null $img
-     * @return bool
+     * 功能说明：检测图像源的有效性
+     *
+     * @param resource|null $img GD图像句柄；null使用当前画布（默认：NULL）
+     * @return bool 目标为有效GD资源时为true；null检查当前画布
      */
     public function check($img = NULL) {
         if(is_null($img)) $img = $this->img;
@@ -859,30 +1037,39 @@ class myImg extends myBase {
     }
 
     /**
-     * 读取GIF信息
-     * @param $filename
-     * @return mixed
+     * 功能说明：读取GIF信息
+     *
+     * @param string $filename 附件展示名称或文件路径，按方法用途解释
+     * @return array|false 含signatur/version/width/height/flag/trans_red/trans_green/trans_blue的GIF信息；头/调色板无效为false
+     * @phpstan-return array{signatur:string,version:string,width:int,height:int,flag:int,trans_red:int,trans_green:int,trans_blue:int}|false
      */
     public function gif_info($filename) {
-        $fp = fopen($filename, 'rb');
-        $result = fread($fp, 13);
-        $file['signatur'] = substr($result, 0, 3);
-        $file['version'] = substr($result, 3, 3);
-        $file['width'] = ord(substr($result, 6, 1))+ord(substr($result, 7, 1))*256;
-        $file['height'] = ord(substr($result, 8, 1))+ord(substr($result, 9, 1))*256;
-        $file['flag'] = ord(substr($result, 10, 1))>>7;
-        $file['trans_red'] = ord(substr($result, ord(substr($result, 11))*3, 1));
-        $file['trans_green'] = ord(substr($result, ord(substr($result, 11))*3+1, 1));
-        $file['trans_blue'] = ord(substr($result, ord(substr($result, 11))*3+2, 1)) ;
-        fclose($fp);
-        return $file;
+        $fp = @fopen($filename, 'rb');
+        if(!$fp) return false;
+        try {
+            $header = fread($fp, 13);
+            if(strlen($header) !== 13 || !in_array(substr($header, 0, 6), ['GIF87a','GIF89a'], true)) return false;
+            $packed = ord($header[10]); $palette = '';
+            if($packed & 0x80) {
+                $size = 3*(1 << (($packed & 7)+1));
+                $palette = fread($fp, $size);
+                if(strlen($palette) !== $size) return false;
+            }
+            $offset = ord($header[11])*3;
+            $rgb = strlen($palette) >= $offset+3 ? array_values(unpack('C3', substr($palette, $offset, 3))) : [0,0,0];
+            $dimensions = unpack('vwidth/vheight', substr($header, 6, 4));
+            return ['signatur'=>'GIF', 'version'=>substr($header,3,3), 'width'=>$dimensions['width'], 'height'=>$dimensions['height'],
+                'flag'=>$packed >> 7, 'trans_red'=>$rgb[0], 'trans_green'=>$rgb[1], 'trans_blue'=>$rgb[2]];
+        } finally { fclose($fp); }
     }
 
     /**
-     * 生成验证码
-     * @param $str
-     * @param $font
-     * @param int $fontsize
+     * 功能说明：生成验证码
+     *
+     * @param string $str 待处理的字符串
+     * @param string $font 字体文件路径或实现支持的字体名
+     * @param int $fontsize 验证码文字大小（默认：16）
+     * @return void 无返回值。
      */
     public function captcha($str, $font, $fontsize = 16) {
         $this->setFont($font);
@@ -922,12 +1109,13 @@ class myImg extends myBase {
     }
 
     /**
-     * 添加图片水印
-     * @param $watermark
-     * @param int $position
-     * @param string $img_dst
-     * @param array $para
-     * @return $this|bool|myImg|void
+     * 功能说明：添加图片或文字水印并输出到浏览器或目标文件
+     *
+     * @param string $watermark 水印图片路径；路径不存在时作为文字水印
+     * @param int $position POS_*位置常量；未匹配的位置数值作为居中水印的旋转角度（默认：1）
+     * @param string $img_dst 输出图片路径，空串按方法约定输出或修改当前实例（默认：''）
+     * @param array $para 图片支持rate/alpha；文字支持alpha/font/fontsize/fontcolor/bgcolor（默认：array()）
+     * @return $this 水印处理及输出后返回当前实例
      */
     public function watermark($watermark, $position=1, $img_dst='', $para=array()) {
         $this->dst_type = 'jpg';
@@ -1089,7 +1277,9 @@ class myImg extends myBase {
                 $this->img = $img_out->img;
                 $this->make($this->dst_type, $img_dst);
                 $img_txt->destroy();
-                $img_out->destroy();
+                $this->width = $img_out->width;
+                $this->height = $img_out->height;
+                $img_out->img = null;
             } else {
                 $this->drawString($watermark, array(0, 0), $fontcolor, $font, $fontsize);
                 $this->make($this->dst_type, $img_dst);
@@ -1099,13 +1289,15 @@ class myImg extends myBase {
     }
 
     /**
-     * 制作缩略图
-     * @param $dstW
-     * @param $dstH
-     * @param string $img_dst
-     * @return $this|bool|myImg|void
+     * 功能说明：制作缩略图
+     *
+     * @param int $dstW 缩略图目标宽度，单位像素
+     * @param int $dstH 缩略图目标高度，单位像素
+     * @param string $img_dst 输出图片路径，空串按方法约定输出或修改当前实例（默认：''）
+     * @return $this|false 返回当前实例；目标已存在时直接加载，尺寸/缩放/加载失败为false
      */
     public function thumb($dstW, $dstH, $img_dst='') {
+        if(!self::validDimensions($dstW, $dstH) || !$this->check()) return false;
         if(is_file($img_dst)) return $this->init($img_dst);
         $this->dst_type = 'jpg';
         if(!empty($img_dst)) {
@@ -1115,7 +1307,7 @@ class myImg extends myBase {
         $srcW = $this->width;
         $srcH = $this->height;
         $rate = min($dstW/$srcW, $dstH/$srcH);
-        $this->resize($rate);
+        if($this->resize($rate) === false) return false;
 
         $img_out = new myImg($dstW, $dstH);
         $img_out->create(true, array(0xff, 0xff, 0xff));
@@ -1125,23 +1317,23 @@ class myImg extends myBase {
         $this->destroy();
         $this->img = $img_out->img;
         $this->make($this->dst_type, $img_dst);
-        $img_out->destroy();
+        $this->width = $dstW;
+        $this->height = $dstH;
+        $img_out->img = null;
         return $this;
     }
 }
 
 /**
-    统计图生成
-        $coordinateMaker = new coordinateMaker($width, $height, $origin, $cr)        //构造函数
-        $coordinateMaker->setOrigin($point)                                          //设置原点位置
-        $coordinateMaker->setPara()                                                  //设置坐标参数
-        $coordinateMaker->getPoint($point)                                           //取得相对原点坐标的实际位置
-        $coordinateMaker->getScalePoint($point, $trans)                              //俺比例取得相对原点坐标的实际位置
-        $coordinateMaker->buileCoordinate($padding)                                  //绘制坐标系
-        $coordinateMaker->drawZigzag($data_lst, $color_lst, $data_str, $show_value, $legend_point)                               //画折线
-        $coordinateMaker->drawBar($data_lst, $color_lst, $data_str, $show_value, $legend_point)                                  //画柱
-        $coordinateMaker->drawPie($data, $data_str, $point, $width, $height, $mode, $mask, $ext_value, $distance, $start_angle)  //画饼
-*/
+ * 功能说明：继承myImg的坐标换算及折线、柱状、饼图绘制工具
+ *
+ * 使用说明：
+ *   1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+ *   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
+ *   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
+ *
+ * 方法目录：参见本文件顶部；只列直接声明，继承和trait别名沿用原声明注释。
+ */
 class coordinateMaker extends myImg {
     public
         $origin = array(0, 0),
@@ -1159,12 +1351,13 @@ class coordinateMaker extends myImg {
         $fix_y = -10;
 
     /**
-     * 初始化实例
-     * @param int $width
-     * @param int $height
-     * @param array $origin
-     * @param array $args
-     * @return $this|bool|myImg|void
+     * 功能说明：初始化实例
+     *
+     * @param int|float $width 宽度，图像/画布场景以像素为单位（默认：400）
+     * @param int|float $height 高度，图像/画布场景以像素为单位（默认：400）
+     * @param array $origin 坐标原点[x,y]（默认：array(0, 0)）
+     * @param array $args 传给父类create的参数数组：[是否真彩,背景颜色/图片]（默认：array(true, array(0xee, 0xee, 0xee))）
+     * @return $this 初始化坐标画布、原点和坐标设置后返回当前实例
      */
     public function init($width = 400, $height = 400, $origin = array(0, 0), $args = array(true, array(0xee, 0xee, 0xee))) {
         $this->width = $width;
@@ -1175,9 +1368,10 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 设置原点位置
-     * @param $point
-     * @return $this
+     * 功能说明：设置原点位置
+     *
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setOrigin($point) {
         if(!$this->checkPoint($point)) return $this;
@@ -1186,9 +1380,10 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 设置坐标参数
-     * @param array $para
-     * @return $this
+     * 功能说明：设置坐标参数
+     *
+     * @param array $para scale_x/scale_y、distance_x/distance_y、start_x/start_y、text_x/text_y和font等坐标配置（默认：array()）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function setPara($para = array()) {
         $this->scale_x = isset($para['scale_x']) ? $para['scale_x'] : 1;
@@ -1210,9 +1405,10 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 取得相对原点坐标的实际位置
-     * @param $point
-     * @return $this|array
+     * 功能说明：取得相对原点坐标的实际位置
+     *
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @return array|$this 有效坐标返回[画布x,画布y]；无效点返回当前实例
      */
     public function getPoint($point) {
         if(!$this->checkPoint($point)) return $this;
@@ -1220,10 +1416,11 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 俺比例取得相对原点坐标的实际位置
-     * @param $point
-     * @param bool $trans
-     * @return $this|array|coordinateMaker
+     * 功能说明：按坐标比例换算点位置，可选择转换到画布坐标
+     *
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param bool $trans 是否执行坐标系方向转换（默认：true）
+     * @return array|$this 有效坐标返回缩放/转换后的[x,y]；无效点返回当前实例
      */
     public function getScalePoint($point, $trans = true) {
         if(!$this->checkPoint($point)) return $this;
@@ -1235,11 +1432,16 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 绘制坐标系
-     * @param int $padding
-     * @return $this
+     * 功能说明：绘制坐标系
+     *
+     * @param int $padding 坐标轴与画布边缘的留白像素（默认：20）
+     * @return $this 返回当前实例，支持链式调用。
+     * @throws InvalidArgumentException 坐标刻度方向无效或刻度数量超过10000
      */
     public function buileCoordinate($padding = 20) {
+        foreach([[$this->distance_x,$this->scale_x,$this->width],[$this->distance_y,$this->scale_y,$this->height]] as $axis) {
+            if($axis[0] != 0 && ($axis[0]*$axis[1] <= 0 || $axis[2]/($axis[0]*$axis[1]) > 10000)) throw new InvalidArgumentException('Invalid or excessive coordinate ticks');
+        }
         $axis_x_start = array($padding, $this->origin[1]);
         $axis_x_end = array($this->width - $padding, $this->origin[1]);
         $axis_y_start = array($this->origin[0], $padding);
@@ -1321,13 +1523,16 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 画折线
-     * @param $data_lst
-     * @param string $color_lst
-     * @param string $data_str
-     * @param bool $show_value
-     * @param null $legend_point
-     * @return $this|myImg
+     * 功能说明：画折线
+     *
+     * 多系列模式的data_lst按系列排列，data_str与color_lst逐系列对应。当前点生成循环依赖show_value，绘制折线时应保留true。
+     *
+     * @param array $data_lst 需要绘制的数据系列
+     * @param array|string $color_lst 各数据系列的颜色列表，空串采用默认配色（默认：''）
+     * @param array|string $data_str 数据点/系列标签，空串不提供自定义标签（默认：''）
+     * @param bool $show_value 是否在图上绘制数值（默认：true）
+     * @param array|null $legend_point 图例起点坐标[x,y]，null采用默认位置（默认：NULL）
+     * @return $this 绘图及图例处理后返回当前实例
      */
     public function drawZigzag($data_lst, $color_lst='', $data_str='', $show_value = true, $legend_point = NULL) {
         if(is_string($color_lst)) {
@@ -1377,15 +1582,17 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 画柱
-     * @param $data_lst
-     * @param string $color_lst
-     * @param string $data_str
-     * @param bool $show_value
-     * @param null $legend_point
-     * @return $this
+     * 功能说明：按数据系列绘制柱状图及可选数值和图例
+     *
+     * @param array $data_lst 需要绘制的数据系列
+     * @param array|string $color_lst 各数据系列的颜色列表，空串采用默认配色（默认：''）
+     * @param array|string $data_str 数据点/系列标签，空串不提供自定义标签（默认：''）
+     * @param bool $show_value 是否在图上绘制数值（默认：false）
+     * @param array|null $legend_point 图例起点坐标[x,y]，null采用默认位置（默认：NULL）
+     * @return $this 返回当前实例，支持链式调用。
      */
     public function drawBar($data_lst, $color_lst='', $data_str='', $show_value = false, $legend_point = NULL) {
+        if(!$data_lst) return $this;
         $distance = $this->start_x;
         list($font_width, $font_height) = $this->getFontSize(4, 0);
         if(is_string($color_lst)) {
@@ -1404,7 +1611,8 @@ class coordinateMaker extends myImg {
                 }
             }
         } else {
-            $cnt = min(count($data_lst[0]), count($data_str), count($color_lst));
+            $cnt = min(count((array)$data_lst[0]), count((array)$data_str), count($color_lst));
+            if($cnt === 0) return $this;
             $bar_width = ceil(($this->distance_x*$this->scale_x - 100)/$cnt);
             if($bar_width > 20) $bar_width = 20;
             $m=count($data_lst);
@@ -1436,23 +1644,27 @@ class coordinateMaker extends myImg {
     }
 
     /**
-     * 画饼
-     * @param $data
-     * @param $point
-     * @param $width
-     * @param $height
-     * @param string $data_str
-     * @param int $mode
-     * @param int $legend
-     * @param int $mask
-     * @param int $ext_value
-     * @param int $distance
-     * @param int $start_angle
-     * @return $this|myImg
+     * 功能说明：绘制饼图，并标注数值/百分比及可选图例
+     *
+     * @param array $data 按扇区顺序排列的数值列表
+     * @param array $point 饼图中心在画布上的坐标[x,y]
+     * @param int|float $width 宽度，图像/画布场景以像素为单位
+     * @param int|float $height 高度，图像/画布场景以像素为单位
+     * @param array|string $data_str 数据点/系列标签，空串不提供自定义标签（默认：''）
+     * @param int $mode 0显示原始数值，其他值显示向上取整的百分比（默认：1）
+     * @param int $legend 0不绘制图例，1在右侧绘制，其他非零值在下方绘制（默认：0）
+     * @param int $mask 饼图立体厚度，单位像素（默认：20）
+     * @param int|float $ext_value 额外计入总量但不绘制的数值（默认：0）
+     * @param int|float $distance 扇区向外分离的距离，单位像素（默认：0）
+     * @param int|float $start_angle 首个扇区起始角度（默认：0）
+     * @return $this 饼图、数值及图例处理后返回当前实例；空总量不绘制标签
      */
     public function drawPie($data, $point, $width, $height, $data_str = '', $mode = 1, $legend = 0, $mask = 20, $ext_value = 0, $distance = 0, $start_angle = 0) {
+        if($width <= 0 || $height <= 0) return $this;
+        if(!is_array($data_str)) $data_str = array_fill(0, count($data), '');
         parent::drawPie($data, $point, $width, $height, $mask, $ext_value, $distance, $start_angle);
         $data_sum = array_sum($data) + $ext_value;
+        if($data_sum <= 0) return $this;
         $angle = array();
         $angle_sum = array($start_angle);
         $m=count($data);
@@ -1476,7 +1688,7 @@ class coordinateMaker extends myImg {
             } else {
                 $value = ceil($data[$i]*100/$data_sum).'%';
             }
-            $value_show = $data_str[$i].chr(10).$value;
+            $value_show = ($data_str[$i] ?? '').chr(10).$value;
             $radian = deg2rad($angle_sum[$i]+$angle[$i]/2);
             $the_point = array(ceil($point[0]+$radius*cos($radian)*($width/$height)), ceil($point[1]+$radius*sin($radian)));
             $this->drawString($value_show, array($the_point[0]+1, $the_point[1]+1), 'white');

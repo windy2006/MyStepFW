@@ -19,6 +19,10 @@ switch($method) {
             CMS::redirect();
         }
         $data = r::p('[ALL]');
+        $data['password'] = r::p('password', '!') ?? '';
+        // 确认字段保留在前端，服务端独立检查并在写入前剔除；兼容旧页面省略该字段。
+        $confirmation = r::p('password_r', '!') ?? r::p('password_c', '!');
+        if($confirmation !== null && $data['password'] !== $confirmation) myStep::info('checkform_err_password');
         if($data['username'] != $data['username_org']) {
             $db->build($S->db->pre.'users')->field('user_id')->where('username','=',$data['username']);
             if($db->result()!==false) {
@@ -26,12 +30,12 @@ switch($method) {
             }
         }
         CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_detail_add':'admin_user_detail_edit');
-        if(empty($data['password'])) {
+        if($data['password'] === '') {
             unset($data['password']);
         } else {
-            $data['password'] = md5($data['password']);
+            $data['password'] = myAuth::hashPassword($data['password']);
         }
-        unset($data['user_id'], $data['username_org'], $data['password_r']);
+        unset($data['user_id'], $data['username_org'], $data['password_r'], $data['password_c']);
         if($method=='add_ok') {
             $data['reg_date'] = $S->info->time;
             $db->build($S->db->pre.'users')->field($data);
@@ -40,7 +44,7 @@ switch($method) {
             $db->build($S->db->pre.'users')->field($data)->where('user_id','n=',$id);
             $db->update();
         }
-        myStep::$goto_url = preg_replace('#'.preg_quote($method).'$#', '', r::svr('REQUEST_URI'));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/user/detail/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
         break;
     default:
         $content = build_page('list');
@@ -71,7 +75,7 @@ function build_page($method) {
         $count = $db->result();
 
         $page = r::g('page', 'int');
-        $query = 'keyword='.$keyword.'&group_id='.$group_id.'&order='.$order.'&order_type='.$order_type;
+        $query = http_build_query(['keyword'=>$keyword, 'group_id'=>$group_id, 'order'=>$order, 'order_type'=>$order_type], '', '&', PHP_QUERY_RFC3986);
         list($page_info, $record_start, $page_size) = \app\CMS\getPageList($count, $page, $S->list->txt, $query);
 
         $db->build($S->db->pre.'users')
@@ -114,7 +118,7 @@ function build_page($method) {
         $user_group[$i]['selected'] = ($user_group[$i]['group_id']==$group_id?'selected':'');
         $tpl->setLoop('user_group', $user_group[$i]);
     }
-    $tpl->assign('back_url', r::svr('HTTP_REFERER'));
+    $tpl->assign('back_url', r::svr('HTTP_REFERER') ?: \app\CMS\getURL($S->web->path_admin.'/user/detail/'));
     $tpl->assign('method', $method);
     $db->free();
     return $mystep->render($tpl);

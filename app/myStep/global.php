@@ -14,6 +14,8 @@ if(isset($tpl)) {
     $tpl->assign('db', empty($ms_setting->db->password)?'n':'y')
         ->assign('path', trim($path, '/'))
         ->assign('path_root', ROOT_WEB)
-        ->assign('path_admin', str_replace('//', '/', mystep::$url_prefix.$app_root))
+        ->assign('path_admin', $app_root)
+        ->assign('logout_url', myStep::setURL(trim($ms_setting->gen->path_admin, '/').'/login'))
+        ->assign('logout_csrf', myStep::setURL('api/myStep/csrf?core=myStep'))
         ->setCacheMode(false);
 }

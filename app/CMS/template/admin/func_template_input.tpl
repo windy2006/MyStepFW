@@ -28,7 +28,7 @@
             <div class="position-fixed bg-white border-top w-100" style="right:0;bottom:0;z-index:9;">
                 <div class="float-right p-2 border-0">
                     <button class="btn btn-primary btn-sm mr-3" type="submit"> 确 认 </button>
-                    <button class="btn btn-primary btn-sm" type="button" onClick="location.href='<!--back_url-->'"> 返 回 </button>
+                    <button class="btn btn-primary btn-sm" type="button" onClick="location.href=this.getAttribute('data-back-url')" data-back-url="<!--back_url|html-->"> 返 回 </button>
                 </div>
             </div>
         </form>
@@ -37,27 +37,27 @@
 <script  type="text/javascript">
 $(function() {
     $.setCSS([
-        '/vendor/codemirror/lib/codemirror.css',
-        '/vendor/codemirror/addon/fold/foldgutter.css',
-        '/vendor/codemirror/addon/display/fullscreen.css'
+        '<!--path_root-->vendor/codemirror/lib/codemirror.css',
+        '<!--path_root-->vendor/codemirror/addon/fold/foldgutter.css',
+        '<!--path_root-->vendor/codemirror/addon/display/fullscreen.css'
     ]);
     $.setJS([
-        "/vendor/codemirror/lib/codemirror.js",
-        "/vendor/codemirror/mode/php/php.js",
-        "/vendor/codemirror/addon/edit/matchbrackets.js",
-        "/vendor/codemirror/addon/selection/active-line.js",
-        "/vendor/codemirror/mode/clike/clike.js",
-        "/vendor/codemirror/addon/fold/foldcode.js",
-        "/vendor/codemirror/addon/fold/foldgutter.js",
-        "/vendor/codemirror/addon/fold/brace-fold.js",
-        "/vendor/codemirror/addon/fold/xml-fold.js",
-        "/vendor/codemirror/addon/fold/indent-fold.js",
-        "/vendor/codemirror/addon/fold/comment-fold.js",
-        "/vendor/codemirror/addon/display/fullscreen.js",
-        "/vendor/codemirror/mode/javascript/javascript.js",
-        "/vendor/codemirror/mode/xml/xml.js",
-        "/vendor/codemirror/mode/css/css.js",
-        "/vendor/codemirror/mode/htmlmixed/htmlmixed.js",
+        "<!--path_root-->vendor/codemirror/lib/codemirror.js",
+        "<!--path_root-->vendor/codemirror/mode/php/php.js",
+        "<!--path_root-->vendor/codemirror/addon/edit/matchbrackets.js",
+        "<!--path_root-->vendor/codemirror/addon/selection/active-line.js",
+        "<!--path_root-->vendor/codemirror/mode/clike/clike.js",
+        "<!--path_root-->vendor/codemirror/addon/fold/foldcode.js",
+        "<!--path_root-->vendor/codemirror/addon/fold/foldgutter.js",
+        "<!--path_root-->vendor/codemirror/addon/fold/brace-fold.js",
+        "<!--path_root-->vendor/codemirror/addon/fold/xml-fold.js",
+        "<!--path_root-->vendor/codemirror/addon/fold/indent-fold.js",
+        "<!--path_root-->vendor/codemirror/addon/fold/comment-fold.js",
+        "<!--path_root-->vendor/codemirror/addon/display/fullscreen.js",
+        "<!--path_root-->vendor/codemirror/mode/javascript/javascript.js",
+        "<!--path_root-->vendor/codemirror/mode/xml/xml.js",
+        "<!--path_root-->vendor/codemirror/mode/css/css.js",
+        "<!--path_root-->vendor/codemirror/mode/htmlmixed/htmlmixed.js",
     ], true, function() {
         let editor = CodeMirror.fromTextArea($id("file_content"), {
             mode: "<!--file_type-->",
