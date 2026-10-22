@@ -14,9 +14,12 @@
 /**
  * 文件：lib/mySecurity.class.php
  * 功能说明：请求边界与输出安全辅助
- *   提供 CSRF 令牌、同源判定、危险请求拦截及 HTML 表单和链接保护。
+ *   提供启动期输入预算、CSRF令牌、同源判定、危险请求拦截及HTML表单和链接保护。
  *
  * 方法目录：
+ *   public static mySecurity::inspectRequest(array $server, array $input, array $limits = []) — 有预算地检查已解析输入和声明体积，返回拒绝原因。
+ *   private static mySecurity::requestShape($value, $depth, array &$remaining, array $limits) — 在固定深度和累计预算内检查输入，不复制或序列化请求内容。
+ *   public static mySecurity::guardRequest() — 在框架应用和会话启动前拒绝超预算请求，不把它当作PHP解析器补丁。
  *   public static mySecurity::token() — 获取当前会话的 CSRF 令牌，缺失或格式异常时重新生成
  *   public static mySecurity::valid($token) — 校验提交的 CSRF 令牌是否与当前会话中保存的令牌一致
  *   public static mySecurity::origins() — 汇总允许访问当前应用的来源地址，并去重返回
@@ -30,9 +33,10 @@
  *   public static mySecurity::decorate($html) — 为已渲染的完整 HTML 页面注入会话令牌和前端安全适配脚本
  *
  * 使用说明：
- *   1. 在业务处理前调用 guard()；写请求通过 X-CSRF-Token 或 _ms_csrf 携带会话令牌。
- *   2. 调用前应已启动目标应用的会话，并准备好框架配置、域名及路由上下文。
- *   3. 在模板渲染或缓存读取后调用 decorate()；装饰结果不得写回共享页面缓存。
+ *   1. 框架init()自动调用guardRequest()检查已解析输入；启动前的PHP/Web限制另行配置。
+ *   2. 在业务处理前调用 guard()；写请求通过 X-CSRF-Token 或 _ms_csrf 携带会话令牌。
+ *   3. CSRF检查前应已启动目标应用会话，并准备好框架配置、域名及路由上下文。
+ *   4. 在模板渲染或缓存读取后调用 decorate()；装饰结果不得写回共享页面缓存。
  *
  * 说明：目录列出本文件直接声明的全部方法；参数、返回值及异常详见各方法 PHPDoc。
  *       原生签名保持 PHP 7.4 兼容，PHPDoc 类型仅用于说明。
@@ -40,10 +44,10 @@
 
 
 /**
- * 功能说明：在请求入口和最终 HTML 输出阶段提供会话安全保护。
+ * 功能说明：提供启动期输入预算及请求入口和最终HTML输出阶段的会话安全保护。
  *
  * 使用说明：
- *   1. 依赖已启动的 Session 以及框架配置、域名绑定和路由上下文。
+ *   1. guardRequest()不依赖会话；CSRF等方法依赖已启动的Session及框架配置、域名和路由。
  *   2. 写请求携带目标应用会话的 CSRF 令牌，不能假定不同应用共享同一令牌。
  *   3. decorate() 在页面缓存读取后执行，装饰结果不得写入共享缓存。
  *   4. 来源、动作识别及 CSRF 校验不替代登录、权限和资源归属检查。
@@ -52,6 +56,92 @@
  * 方法目录：参见本文件顶部。
  */
 class mySecurity {
+    /**
+     * 功能说明：有预算地检查已解析输入和声明体积，返回拒绝原因。
+     *
+     * 仅检查Content-Length及PHP已经生成的输入数组，不读取php://input、临时上传文件或
+     * 反序列化内容。缺少声明长度时仍检查输入结构，但无法据此限制原始或解码请求体。
+     * PHP解析请求可能早于此检查；本方法不修复PHP内核漏洞，也不能计算原始multipart分段数。
+     *
+     * @param array $server 请求服务器变量，只读取CONTENT_LENGTH
+     * @param array $input GET、POST、COOKIE、FILES等来源数组组成的集合，不修改原数组
+     * @param array $limits depth/nodes/bytes/body_bytes的正整数覆盖值（默认：[]）
+     * @return array 无问题为[]；拒绝时返回status及固定error文字，不回显输入
+     * @throws InvalidArgumentException 受信预算配置无效；深度不得超过64
+     */
+    public static function inspectRequest(array $server, array $input, array $limits = []) {
+        $defaults=['depth'=>32,'nodes'=>4096,'bytes'=>8388608,'body_bytes'=>33554432];
+        if(array_diff_key($limits,$defaults)) throw new InvalidArgumentException('Unknown request limit');
+        $limits=array_replace($defaults,$limits);
+        foreach($limits as $value) if(!is_int($value) || $value<1) throw new InvalidArgumentException('Request limits require positive integers');
+        if($limits['depth']>64) throw new InvalidArgumentException('Request depth exceeds supported limit');
+        if(isset($server['CONTENT_LENGTH']) && $server['CONTENT_LENGTH']!=='') {
+            $length=$server['CONTENT_LENGTH'];
+            if((!is_int($length) && !is_string($length)) || !preg_match('/\A[0-9]+\z/D',(string)$length)) return ['status'=>400,'error'=>'Invalid request length'];
+            $length=ltrim((string)$length,'0');if($length==='')$length='0';$maximum=(string)$limits['body_bytes'];
+            if(strlen($length)>strlen($maximum) || (strlen($length)===strlen($maximum) && strcmp($length,$maximum)>0)) return ['status'=>413,'error'=>'Request body exceeds configured limit'];
+        }
+        $remaining=['nodes'=>$limits['nodes'],'bytes'=>$limits['bytes']];
+        foreach($input as $value) if(!self::requestShape($value,0,$remaining,$limits)) return ['status'=>413,'error'=>'Request input exceeds configured limits'];
+        return [];
+    }
+
+    /**
+     * 功能说明：在固定深度和累计预算内检查输入，不复制或序列化请求内容。
+     *
+     * 使用strlen取得字节长度，先与剩余额度比较再相减，避免累计整数溢出；循环引用
+     * 同样受到深度预算限制。只接受数组、字符串及普通标量，不调用对象的字符串转换。
+     *
+     * @param mixed $value 当前输入节点，数组按写时复制语义只读遍历
+     * @param int $depth 当前数组深度，来源数组从0开始
+     * @param array &$remaining 剩余nodes与bytes额度，由各来源共同消耗
+     * @param array $limits 已验证预算，包含depth等字段
+     * @return bool 输入结构及字节数均在预算内时为true
+     */
+    private static function requestShape($value, $depth, array &$remaining, array $limits) {
+        if(is_array($value)) {
+            if($depth>$limits['depth']) return false;
+            foreach($value as $key=>$item) {
+                if($remaining['nodes']<1) return false;
+                $remaining['nodes']--;$bytes=is_string($key)?strlen($key):0;
+                if($bytes>$remaining['bytes']) return false;
+                $remaining['bytes']-=$bytes;
+                if(!self::requestShape($item,$depth+1,$remaining,$limits)) return false;
+            }
+            return true;
+        }
+        if(is_string($value)) {
+            $bytes=strlen($value);if($bytes>$remaining['bytes'])return false;
+            $remaining['bytes']-=$bytes;return true;
+        }
+        return $value===null || is_int($value) || is_float($value) || is_bool($value);
+    }
+
+    /**
+     * 功能说明：在框架应用和会话启动前拒绝超预算请求，不把它当作PHP解析器补丁。
+     *
+     * 预算可由入口受信常量MYSTEP_REQUEST_LIMITS覆盖；POST还受实际post_max_size的
+     * 较小正值限制。拒绝时直接输出不缓存的固定JSON，不创建会话、路由或应用对象。
+     * 请求体解析可能已在本方法之前完成；无Content-Length的请求仍需Web服务器限制。
+     *
+     * 参数说明：无显式参数。
+     * @return void 合法请求返回；400/413响应后结束请求，HEAD不输出正文
+     * @throws InvalidArgumentException 入口预算常量不是数组或预算配置无效
+     */
+    public static function guardRequest() {
+        $limits=defined('MYSTEP_REQUEST_LIMITS')?MYSTEP_REQUEST_LIMITS:[];
+        if(!is_array($limits)) throw new InvalidArgumentException('Request limits must be an array');
+        if(($_SERVER['REQUEST_METHOD']??'GET')==='POST') {
+            $post=myFile::getByte(ini_get('post_max_size'));
+            if($post>0 && $post<=PHP_INT_MAX && (!array_key_exists('body_bytes',$limits) || is_int($limits['body_bytes']))) $limits['body_bytes']=min($limits['body_bytes']??33554432,(int)$post);
+        }
+        $problem=self::inspectRequest($_SERVER,[$_GET,$_POST,$_COOKIE,$_FILES],$limits);
+        if(!$problem)return;
+        http_response_code($problem['status']);header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');
+        if(($_SERVER['REQUEST_METHOD']??'GET')!=='HEAD')echo json_encode(['error'=>$problem['error']]);
+        exit;
+    }
+
     /**
      * 功能说明：获取当前会话的 CSRF 令牌，缺失或格式异常时重新生成
      *

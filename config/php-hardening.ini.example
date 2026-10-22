@@ -1,0 +1,17 @@
+; PHP请求解析前的防护示例。必须合并到实际php.ini或启动时扫描的conf.d文件，
+; 重启所有PHP工作进程后核对Web/FPM中的实际值；放在网站目录不会自动生效。
+; 这些设置只减少部分攻击路径，不能替代PHP的完整安全补丁。
+
+session.upload_progress.enabled = 0
+post_max_size = 32M
+upload_max_filesize = 24M
+max_input_vars = 1000
+max_input_nesting_level = 16
+max_file_uploads = 20
+log_errors = On
+display_errors = Off
+
+; 仅在已经配置Web请求上限和独立工作进程的外部内存约束后评估以下应急策略。
+; 不要单独取消内存上限；不要用RLIMIT_AS/RLIMIT_DATA替代。
+; PHP-FPM优先使用相应pool中的php_admin_value，避免应用改回有限值。
+; memory_limit = -1

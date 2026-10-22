@@ -1,3 +1,5 @@
+# 请求体大小限制先于PHP应用运行；不能替代PHP安全补丁。
+LimitRequestBody 33554432
 RewriteEngine on
 #RewriteCond %{REQUEST_URI} !\.(jpg|png|gif|ico|css|js|json|html|htm|woff|woff2|eot|svg|ttf|map|zip)$
 RewriteRule ^((?!index\.php).+)$ index.php?$1 [QSA,L]

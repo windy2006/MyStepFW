@@ -1,0 +1,19 @@
+; 合并到现有站点的PHP-FPM pool，保留原有pool名称、账号、socket和进程管理设置。
+; 此文件没有pool段名，不能作为完整php-fpm.conf直接启动。
+; 修改后检查配置并重启全部worker，核对Web进程中的实际值。
+; 只减少特定攻击路径，不替代PHP安全补丁。
+
+php_admin_flag[session.upload_progress.enabled] = off
+php_admin_value[post_max_size] = 32M
+php_admin_value[upload_max_filesize] = 24M
+php_admin_value[max_input_vars] = 1000
+php_admin_value[max_input_nesting_level] = 16
+php_admin_value[max_file_uploads] = 20
+
+; 以下配置必须在已部署请求体限制及外部进程内存约束后单独评估，默认不启用。
+; 框架、独立安装器及打包示例识别此环境开关，不再写入自身memory_limit。
+; php_admin_value[memory_limit] = -1
+; env[MYSTEP_PRESERVE_MEMORY_LIMIT] = 1
+
+; 紧急情况下可评估每个worker只处理一次请求；会明显降低吞吐量，仍非完整修复。
+; pm.max_requests = 1

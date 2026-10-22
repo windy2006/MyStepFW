@@ -512,7 +512,7 @@ myStep;
         break;
     default:
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        if(getenv('MYSTEP_PRESERVE_MEMORY_LIMIT')!=='1') ini_set('memory_limit', '512M');
         $pack_file = "mystep.pack";
         InstallAccess('./','directory');InstallAccess('install.log');
         InstallAccess($pack_file,'read');InstallAccess($pack_file,'delete');

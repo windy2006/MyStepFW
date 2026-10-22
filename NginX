@@ -5,7 +5,12 @@ server {
     server_name mystep.com cms.mystep.com admin.mystep.com doc.mystep.com sample.mystep.com api.mystep.com guide.mystep.com;
     root /path/to/MyStepFW;
     index index.php;
+    # 交给PHP前限制请求体；压缩内容还须在解码层限制，大文件导入需协调额度。
+    client_max_body_size 32m;
+    client_body_timeout 15s;
+    client_header_timeout 15s;
     location = /index.php {
+        fastcgi_request_buffering on;
         include fastcgi.conf;
         fastcgi_pass 127.0.0.1:9000; # Or the PHP 7.4 FPM socket for your server.
     }

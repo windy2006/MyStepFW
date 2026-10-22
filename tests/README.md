@@ -1,6 +1,6 @@
 # tests 文件汇总与运行说明
 
-整理日期：2026-10-18。按实际脚本核对用途、入口、依赖和数据影响。当前共 52 个测试／夹具文件：33 个 PHP、11 个 Python、7 个 JavaScript、1 个 HTML；另有本说明。文件名含 browser 不一定需要浏览器，fixture 也不一定是独立测试入口，见下表。
+整理日期：2026-10-22。按实际脚本核对用途、入口、依赖和数据影响。当前共 53 个测试／夹具文件：34 个 PHP、11 个 Python、7 个 JavaScript、1 个 HTML；另有本说明。文件名含 browser 不一定需要浏览器，fixture 也不一定是独立测试入口，见下表。
 
 ## 1. 先区分两个目录
 
@@ -16,7 +16,7 @@
 | 目录 | 用途 | 文件数 |
 | --- | --- | ---: |
 | [core/](core/) | 核心流程、路由、启动与路径 | 6 |
-| [security/](security/) | 认证、账户与安全桥接 | 5 |
+| [security/](security/) | 输入预算、认证、账户与安全桥接 | 6 |
 | [utilities/](utilities/) | 公共工具、编码与资源 | 4 |
 | [extensions/](extensions/) | API、通用扩展和XML Excel | 2 |
 | [templates/](templates/) | 模板与缓存兼容 | 1 |
@@ -64,6 +64,7 @@ SQLite、Memcached 和 SQLSRV 替身检查不代表相应真实服务器均已�
 
 | 文件 | 功能 | 运行方式 | 依赖／影响范围 |
 | --- | --- | --- | --- |
+| [request_limits.php](security/request_limits.php) | 已解析输入累计预算、长度溢出、循环/深层数组及非法配置 | `php tests/security/request_limits.php` | CLI小型合成数据，不制造OOM、不修改站点配置 |
 | [security_regression.php](security/security_regression.php) | 密码与签名令牌、认证、请求来源及 TLS 客户端边界 | `php tests/security/security_regression.php` | 默认临时文件；--database 使用 MySQL 临时表；TLS 子场景由 https_fixture.py 提供服务 |
 | [account_workflow.php](security/account_workflow.php) | CMS 管理员与用户账户修改的真实模块流程 | `php tests/security/account_workflow.php` | 直接连接已配置 MySQL 的 mystep_cms；使用 workflow_* TEMPORARY 表，无 --database 开关 |
 | [password_confirmation_regression.php](security/password_confirmation_regression.php) | CMS 后台管理员／用户密码确认及保留原密码行为 | `php tests/security/password_confirmation_regression.php` | 直接连接 mystep_cms；使用 confirm_* TEMPORARY 表和子进程 |
@@ -113,7 +114,7 @@ SQLite、Memcached 和 SQLSRV 替身检查不代表相应真实服务器均已�
 | 文件 | 功能及运行方式 | 依赖／数据影响 |
 | --- | --- | --- |
 | [admin_http_fixture.py](admin/admin_http_fixture.py) | `python3 tests/admin/admin_http_fixture.py`；284次HTTP：真实 init/go、Admin 和旧后台、登录／退出、三种路由、文档分类／正文／非法参数、下载、插件、上传及缓存动作 | 随机临时站点、测试账户和 SQLite；包括测试 CAPTCHA 端点及写操作，但只出现在夹具站点，不向正式后台提交表单 |
-| [execution_http_fixture.py](core/execution_http_fixture.py) | `python3 tests/core/execution_http_fixture.py`；执行主干、API、CSRF、HEAD/304、BOM、gzip 和大文件 | 临时应用／配置／资源及回环 PHP 服务，不请求正式业务 |
+| [execution_http_fixture.py](core/execution_http_fixture.py) | `python3 tests/core/execution_http_fixture.py`；输入预算、服务器内存策略、执行主干、API、CSRF、HEAD/304、BOM、gzip 和大文件 | 临时应用／配置／资源及回环 PHP 服务，不请求正式业务 |
 | [extension_http_fixture.py](extensions/extension_http_fixture.py) | `python3 tests/extensions/extension_http_fixture.py`；API 内容类型、异常编码和 XML Excel 下载 | 回环 PHP 服务；临时输出，检查 UTF-8／GBK、文件名头部和字节长度 |
 | [session_http_fixture.py](session/session_http_fixture.py) | `python3 tests/session/session_http_fixture.py`；Cookie 属性、会话保持／结束及后端失败 | 临时 sess_file／失败替身和回环 HTTP；仅模拟 HTTPS 标志以检查 Secure，不能据此证明 TLS 握手 |
 | [utility_io_fixture.py](utilities/utility_io_fixture.py) | `python3 tests/utilities/utility_io_fixture.py`；SMTP 信封／Bcc／MIME、multipart 上传、大小／扩展／图片拒绝 | 自建回环 SMTP 与 PHP 服务，不投递真实邮箱；上传目标和邮件样本在临时目录 |

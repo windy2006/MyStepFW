@@ -1146,7 +1146,11 @@ code;
      *
      * 参数说明：无显式参数。
      *
-     * @return void 设置核心路径、配置、自动加载及请求上下文；损坏/旧根路径的类索引自动原子重建
+     * Web请求在类加载注册后、缓存清理和应用/会话启动前检查已解析输入预算；
+     * PHP解析器已可能处理请求，此检查不能替代运行时补丁及Web服务器限制。
+     *
+     * @return void 设置核心路径、配置、自动加载及请求上下文；超预算请求返回400/413并结束
+     * @throws InvalidArgumentException 受信的MYSTEP_REQUEST_LIMITS配置无效
      * @throws RuntimeException 无法完整发布类索引
      */
     public static function init() {
@@ -1154,6 +1158,8 @@ code;
         ob_start();
         $registry = myClassLoader::load(CONFIG.'class.php');
         self::regClass($registry['rules']);
+        // 这里只能检查PHP已解析的输入；服务器仍须在解析前限制请求并修补PHP。
+        if(PHP_SAPI!=='cli' && PHP_SAPI!=='phpdbg') mySecurity::guardRequest();
         if($registry['reset']) {
             myFile::del(CONFIG.'route.php');
             myFile::del(CACHE.'template');
@@ -1306,6 +1312,10 @@ code;
     /**
      * 功能说明：执行框架
      *
+     * 加载配置、优先脚本及路由并分流请求。服务器环境变量
+     * MYSTEP_PRESERVE_MEMORY_LIMIT=1时保留启动期memory_limit，不写入gen.memory；
+     * 该开关本身不改变内存上限，外部应用仍须遵循服务器锁定的管理策略。
+     *
      * 参数说明：无显式参数。
      *
      * @return void 无返回值。
@@ -1334,7 +1344,8 @@ code;
         }
         foreach($active as $name => $unused) if(isset($priority[$name])) include($priority[$name]);
 
-        ini_set('memory_limit', $ms_setting->gen->memory);
+        // 仅服务器显式启用时保留启动期内存策略，避免把应急的-1改回有限值。
+        if(getenv('MYSTEP_PRESERVE_MEMORY_LIMIT')!=='1') ini_set('memory_limit', $ms_setting->gen->memory);
         if($ms_setting->gen->debug) self::setOp('debug');
         $host = strtolower(preg_replace('/:\d+$/', '', (string)myReq::server('HTTP_HOST')));
         $domain = [];

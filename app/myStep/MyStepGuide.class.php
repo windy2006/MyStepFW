@@ -63,6 +63,7 @@ class MyStepGuide {
                 'extensions'=>['接口与扩展','docs/framework/extensions.md'],
                 'utilities'=>['通用工具','docs/framework/utilities.md'],
                 'security'=>['请求安全与附件','docs/framework/security-attachments.md'],
+                'php-runtime'=>['PHP运行时加固','docs/framework/php-runtime-hardening.md'],
             ],
             '前端开发'=>[
                 'frontend'=>['前端文档入口','static/README.md'],

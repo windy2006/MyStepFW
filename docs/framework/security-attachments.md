@@ -1,6 +1,12 @@
 # 附件链路与请求安全
 
-整理日期：2026-10-18。目标运行环境：PHP 7.4。以当前令牌和 POST 调用约定为准。
+整理日期：2026-10-22。目标运行环境：PHP 7.4。以当前令牌和 POST 调用约定为准。
+
+## 启动期的已解析输入预算
+
+`myStep::init()` 在注册类加载器后、应用/优先脚本及会话启动前调用 `mySecurity::guardRequest()`，累计检查 GET、POST、COOKIE、FILES 的深度、节点、字符串字节和声明请求体长度。默认深度32、节点4096、字符串8 MiB、声明体积32 MiB；POST还遵循实际post_max_size较小正值。非法长度返回400，超预算返回413，固定JSON且不创建会话，HEAD无正文。CLI/phpdbg跳过。
+
+入口可用受信常量 `MYSTEP_REQUEST_LIMITS` 配置。此检查发生在PHP解析请求之后，不能修复PHP内核漏洞；原始multipart分段、头部、缺少声明长度的流及解码正文仍须由前置层限制。部署示例、内存策略开关及PHP安全补丁边界见 [PHP运行时加固](php-runtime-hardening.md)。
 
 ## 附件定位、日志与管理入口
 

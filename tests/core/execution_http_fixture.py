@@ -1,6 +1,6 @@
 """临时站点通过真实 init/go/start/路由/模板/API/文件出口验证；不访问现有业务。"""
 from pathlib import Path
-import tempfile,subprocess,socket,time,urllib.request,urllib.error,http.cookiejar,json,hashlib,os,gzip
+import tempfile,subprocess,socket,time,urllib.request,urllib.error,http.cookiejar,json,hashlib,os,gzip,urllib.parse
 source=Path(__file__).resolve().parents[2]
 # 正式测试位于 tests/core/；允许在私有工作目录编写时明确源码根目录。
 source=Path(os.environ.get('MYSTEP_EXECUTION_SOURCE',str(source)))
@@ -50,11 +50,12 @@ class Fixture extends myStep {
  }
  public static function matched(){global $mystep,$tpl_setting;$tpl=new myTemplate($tpl_setting);$tpl->assign('main','matched-page');$mystep->show($tpl);}
  public static function apiEcho($value=''){return ['value'=>$value];}
+ public static function memoryPolicy(){header('Content-Type: application/json');echo json_encode(['memory'=>ini_get('memory_limit')]);}
 }
 ''')
  (root/'app/Fixture/lib.php').write_text('<?php myController::regModule("Fixture_widget",function(){echo "callback-module";});')
  (root/'app/myStep/lib.php').write_text('<?php require_once APP."Fixture/Fixture.class.php";')
- (root/'app/Fixture/route.php').write_text('<?php $rule=[["/matched", "Fixture::matched"]];')
+ (root/'app/Fixture/route.php').write_text('<?php $rule=[["/matched", "Fixture::matched"],["/memory-policy", "Fixture::memoryPolicy"]];')
  (root/'app/myStep/route.php').write_text('<?php $rule=[["/ms_csrf","mySecurity::respond"],["/api/[str]/[any]","myStep::api"],["/module/[str]/[any]","myStep::module"]];$api=["echo"=>"Fixture::apiEcho"];')
  (root/'app/Fixture/index.php').write_text('<?php echo "fallback-page";')
  (root/'app/Fixture/template/main.tpl').write_text('<html><head><title>Fixture</title></head><body><!--page_start--><!--main--><!--page_end--></body></html>')
@@ -69,6 +70,7 @@ define('ROOT',__DIR__.'/');define('LIB',ROOT.'lib/');define('VENDOR',SOURCE.'/ve
 foreach(['APP'=>'app/','CONFIG'=>'config/','PLUGIN'=>'plugin/','CACHE'=>'cache/','STATICS'=>'static/','FILE'=>'files/'] as $key=>$value)define($key,ROOT.$value);
 spl_autoload_register(function($name){foreach([LIB.$name.'.class.php',LIB.'database/'.$name.'.class.php'] as $file)if(is_file($file)){require_once $file;return;}});
 require_once LIB.'myStep.class.php';
+if(getenv('FIXTURE_BODY_BYTES'))define('MYSTEP_REQUEST_LIMITS',['body_bytes'=>(int)getenv('FIXTURE_BODY_BYTES')]);
 $path=parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH);
 if($path==='/sub/etag'){myController::etag('fixture');echo 'fresh';exit;}
 if($path==='/sub/probe-file'){
@@ -106,6 +108,14 @@ echo 'unexpected-return';
     try:
      with socket.create_connection(('127.0.0.1',port),timeout=.1):break
     except OSError:time.sleep(.05)
+   # 有界小请求验证框架在应用、会话和优先脚本前拒绝深层输入；不制造OOM或崩溃。
+   deep='x'+('[n]'*33)
+   for name in ['GET','POST']:
+    query=urllib.parse.urlencode({deep:'test'})
+    body,h=request('matched'+('?' + query if name=='GET' else ''),status=413,method=name,headers={'Content-Type':'application/x-www-form-urlencoded'} if name=='POST' else None,data=query.encode() if name=='POST' else None)
+    assert json.loads(body)['error']=='Request input exceeds configured limits' and not h.get('Set-Cookie')
+    assert not (root/'trace').exists()
+   body,h=request('matched?'+urllib.parse.urlencode({deep:'test'}),status=413,method='HEAD');assert body==b'' and not h.get('Set-Cookie') and not (root/'trace').exists()
    body,h=request('matched');assert b'matched-page' in body and b'unexpected-return' not in body;assert 'no-store' in h['Cache-Control'];assert (root/'trace').read_text()=='start:/sub/\nend\n'
    body,h=request('fallback');assert body==b'fallback-page';assert (root/'trace').read_text().endswith('start:/sub/\nend\n')
    body,h=request('index.php?matched&x=1');assert b'matched-page' in body
@@ -151,6 +161,30 @@ echo 'unexpected-return';
     (root/'config/class.php').write_text(valid_index)
    process.terminate();process.wait(timeout=10);log.seek(0);messages=log.read();assert 'PHP Warning' not in messages and 'PHP Fatal' not in messages,messages
    assert not (root/'error.log').exists() or (root/'error.log').stat().st_size==0,(root/'error.log').read_text()
+   # 两个独立进程验证：缺省沿用应用16M，显式开关保留服务器32M；不取消内存上限。
+   for preserve,expected in [('0','16M'),('1','32M')]:
+    sock=socket.socket();sock.bind(('127.0.0.1',0));policy_port=sock.getsockname()[1];sock.close()
+    env=os.environ.copy();env['MYSTEP_PRESERVE_MEMORY_LIMIT']=preserve;env['FIXTURE_BODY_BYTES']='128'
+    with tempfile.TemporaryFile(mode='w+') as policy_log:
+     worker=subprocess.Popen([php,'-d','memory_limit=32M','-S',f'127.0.0.1:{policy_port}','-t',str(outer),str(root/'index.php')],stdout=policy_log,stderr=policy_log,env=env)
+     try:
+      for _ in range(80):
+       try:
+        with socket.create_connection(('127.0.0.1',policy_port),timeout=.1):break
+       except OSError:time.sleep(.05)
+      base=f'http://127.0.0.1:{policy_port}/sub/'
+      with urllib.request.urlopen(base+'memory-policy',timeout=15) as response:assert json.loads(response.read())=={'memory':expected}
+      rows.append({'path':'memory-policy','status':200,'preserve':preserve,'memory':expected})
+      trace=(root/'trace').read_bytes()
+      req=urllib.request.Request(base+'matched',data=b' '*129,headers={'Content-Type':'application/json'})
+      try:response=urllib.request.urlopen(req,timeout=15)
+      except urllib.error.HTTPError as err:response=err
+      with response:
+       assert response.status==413 and json.loads(response.read())['error']=='Request body exceeds configured limit' and not response.headers.get('Set-Cookie')
+      assert (root/'trace').read_bytes()==trace
+      rows.append({'path':'matched','status':413,'method':'POST','body_bytes':129})
+     finally:
+      worker.terminate();worker.wait(timeout=10);policy_log.seek(0);messages=policy_log.read();assert 'PHP Warning' not in messages and 'PHP Fatal' not in messages,messages
    print(f'Execution HTTP fixture: {len(rows)} scenarios passed; large file {large_size} bytes under PHP 16 MiB; business requests: 0')
    if os.environ.get('MYSTEP_EXECUTION_HTTP_RESULTS'):Path(os.environ['MYSTEP_EXECUTION_HTTP_RESULTS']).write_text(json.dumps(rows,ensure_ascii=False,indent=2))
   except Exception:

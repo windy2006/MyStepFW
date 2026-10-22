@@ -1,6 +1,6 @@
 # MyStepFW 文档目录
 
-整理日期：2026-10-18。同类文档已合并为单一主题；规范、开发教程与具体应用／插件说明分开维护。后续修改直接更新对应主题，不继续新增同题修复记录。
+整理日期：2026-10-22。同类文档已合并为单一主题；规范、开发教程与具体应用／插件说明分开维护。后续修改直接更新对应主题，不继续新增同题修复记录。
 
 ## 后台阅读入口
 
@@ -26,7 +26,8 @@
 | [模板](framework/templates.md) | 标签、嵌套、转义、编译／页面缓存和旧 switch 兼容 |
 | [接口与扩展](framework/extensions.md) | myApi、myTrait、myBase、myExcel |
 | [通用工具](framework/utilities.md) | 文件、请求、上传、图片、归档、字符集、邮件及加密 |
-| [请求安全与附件](framework/security-attachments.md) | CSRF、方法、来源、附件索引及访问边界 |
+| [请求安全与附件](framework/security-attachments.md) | 输入预算、CSRF、方法、来源、附件索引及访问边界 |
+| [PHP 运行时加固](framework/php-runtime-hardening.md) | 内核风险边界、输入预算、服务器内存策略及启动配置示例 |
 | [前端开发文档](../static/README.md) | static 中的变量、加载流程、公共函数、表单规则、扩展与示例 |
 | [公共 JavaScript 维护记录](framework/javascript.md) | global.js、checkForm.js 的历史修复、兼容性及验证说明 |
 | [依赖维护](framework/dependencies.md) | Composer 锁定组件、vendor 用途及保留决定 |
