@@ -361,4 +361,3 @@ $result = sess_file::gc($maxlifetime);
 ```
 
 定位：`lib/session/sess_file.class.php:309`。
-

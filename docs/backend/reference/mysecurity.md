@@ -451,4 +451,3 @@ $result = mySecurity::decorate($html);
 ```
 
 定位：`lib/mySecurity.class.php:379`。
-

@@ -136,4 +136,3 @@ $result = myPath::settings($data, $app);
 ```
 
 定位：`lib/myPath.class.php:110`。
-

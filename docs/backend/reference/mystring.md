@@ -832,4 +832,3 @@ $result = myString::substr($string, $start, $length, $mode);
 ```
 
 定位：`lib/myString.class.php:817`。
-

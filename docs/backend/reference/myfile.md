@@ -1114,4 +1114,3 @@ $result = myFile::importPublicImage($url, $directory);
 ```
 
 定位：`lib/myFile.class.php:1212`。
-

@@ -1379,4 +1379,3 @@ $result = $instance->drawPie($data, $point, $width, $height, $data_str, $mode, $
 ```
 
 定位：`lib/myImg.class.php:1662`。
-

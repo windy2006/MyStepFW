@@ -1,8 +1,8 @@
 {
-    "ref": "master",
-    "head": "9ba21e70c7d17121ed64a216f64c489dd6274069",
-    "remote_verified": false,
-    "commits": 153,
+    "ref": "origin/master",
+    "head": "b6abfec6cc3a318b7e10a5eeb83f0d346c40f54e",
+    "remote_verified": true,
+    "commits": 154,
     "entries": [
         {
             "id": "history-index",

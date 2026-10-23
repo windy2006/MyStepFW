@@ -162,4 +162,3 @@ public static function gc($maxlifetime);
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
 定位：`lib/session/interface_session.class.php:86`。
-

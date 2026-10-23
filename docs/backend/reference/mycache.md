@@ -456,4 +456,3 @@ $result = $instance->rememberLocked($key, $producer, $ttl, $timeout);
 ```
 
 定位：`lib/myCache.class.php:386`。
-

@@ -414,4 +414,3 @@ $result = sess_mysql::gc($maxlifetime);
 ```
 
 定位：`lib/session/sess_mysql.class.php:329`。
-

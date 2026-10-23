@@ -96,4 +96,3 @@ $result = pinyin($str, $abbr);
 ```
 
 定位：`lib/pinyin.php:75`。
-

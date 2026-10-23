@@ -152,4 +152,3 @@ $result = myAttachment::remove($root, $id, $mode);
 ```
 
 定位：`lib/myAttachment.class.php:143`。
-

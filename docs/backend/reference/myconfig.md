@@ -609,4 +609,3 @@ $result = $instance->build($detail, $idx, $ext_setting);
 ```
 
 定位：`lib/myConfig.class.php:572`。
-

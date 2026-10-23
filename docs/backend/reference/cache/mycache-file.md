@@ -424,4 +424,3 @@ $result = $instance->synchronized($key, $operation, $timeout);
 ```
 
 定位：`lib/cache/myCache_File.class.php:340`。
-

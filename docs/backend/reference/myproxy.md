@@ -275,4 +275,3 @@ $result = $instance->regAlias($alias);
 ```
 
 定位：`lib/myProxy.class.php:211`。
-

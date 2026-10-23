@@ -343,4 +343,3 @@ $result = $instance->result($mode);
 ```
 
 定位：`lib/myPacker.class.php:375`。
-

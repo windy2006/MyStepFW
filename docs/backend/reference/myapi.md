@@ -594,4 +594,3 @@ $result = $instance->run($method, $para, $return, $charset);
 ```
 
 定位：`lib/myApi.class.php:426`。
-

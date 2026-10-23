@@ -79,4 +79,3 @@ $result = chg_lng_custom($content, $to);
 ```
 
 定位：`lib/chs2cht.dic.php:17856`。
-

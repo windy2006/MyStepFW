@@ -140,4 +140,3 @@ $result = myClassLoader::normalize($rules, $check);
 ```
 
 定位：`lib/myClassLoader.class.php:187`。
-

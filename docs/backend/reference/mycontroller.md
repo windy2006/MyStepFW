@@ -1125,4 +1125,3 @@ $result = myController::header($idx, $para, $exit);
 ```
 
 定位：`lib/myController.class.php:1015`。
-

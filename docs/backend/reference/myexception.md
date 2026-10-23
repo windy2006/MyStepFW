@@ -304,4 +304,3 @@ $result = myException::getLines($file, $line, $scope);
 ```
 
 定位：`lib/myException.class.php:406`。
-

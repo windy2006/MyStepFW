@@ -295,4 +295,3 @@ $result = $instance->sqlUnpack($data, $valid);
 ```
 
 定位：`lib/cache/myCacheCodec.class.php:199`。
-

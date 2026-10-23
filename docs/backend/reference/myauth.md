@@ -316,4 +316,3 @@ $result = myAuth::renewSession();
 ```
 
 定位：`lib/myAuth.class.php:229`。
-

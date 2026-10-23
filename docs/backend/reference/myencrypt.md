@@ -246,4 +246,3 @@ $result = myEncrypt::open($envelope, $key);
 ```
 
 定位：`lib/myEncrypt.class.php:202`。
-

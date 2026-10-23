@@ -977,4 +977,3 @@ $result = $instance->getBlock($tpl_content, $tag, $idx);
 ```
 
 定位：`lib/myTemplate.class.php:898`。
-

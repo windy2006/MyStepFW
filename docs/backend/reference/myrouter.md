@@ -499,4 +499,3 @@ $result = myRouter::saveRegistry($file, $formats, $rules, $apis);
 ```
 
 定位：`lib/myRouter.class.php:587`。
-

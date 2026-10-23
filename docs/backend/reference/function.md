@@ -433,4 +433,3 @@ $result = debug_check();
 ```
 
 定位：`lib/function.php:405`。
-

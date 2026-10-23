@@ -447,4 +447,3 @@ $result = $instance->make($charset);
 ```
 
 定位：`lib/myExcel.class.php:330`。
-

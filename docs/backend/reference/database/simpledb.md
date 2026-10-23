@@ -738,4 +738,3 @@ $result = $instance->setOrder($result, $col, $mode);
 ```
 
 定位：`lib/database/simpleDB.class.php:402`。
-

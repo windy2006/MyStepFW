@@ -190,7 +190,7 @@ protected $escaper = null;
 ```
 
 ```text
-public 
+public
         $join = array(
             'mode' => 'left',
             'field' => '',
@@ -1674,4 +1674,3 @@ $result = $instance->delete();
 ```
 
 定位：`lib/myDb.class.php:2143`。
-

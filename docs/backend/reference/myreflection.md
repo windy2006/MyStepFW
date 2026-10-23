@@ -321,4 +321,3 @@ $result = $instance->check($name, $type);
 ```
 
 定位：`lib/myReflection.class.php:367`。
-
