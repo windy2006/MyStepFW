@@ -27,10 +27,10 @@ foreach($dirs as $k) {
     if(!is_file($k)) continue;
     $info = include($k);
     $info['remote'] = $remote_ver[$info['app']] ?? '';
-    $info['link'] = '#';
+    $info['remote_display'] = $info['remote'] === '' ? '待检查' : $info['remote'];
+    $info['link'] = myStep::setURL('manager/app/'.rawurlencode($info['app']));
     $info['update_class'] = 'd-none';
     if(!empty($info['remote']) && version_compare($info['remote'], $info['ver'])>0) {
-        $info['link'] = myStep::setURL('manager/app/'.rawurlencode($info['app']));
         $info['update_class'] = '';
     }
     $info['setting_url'] = ($page_app??'myStep')==='Admin'
@@ -51,10 +51,10 @@ foreach($files as $k) {
     if(!is_file($k)) continue;
     $info = include($k);
     $info['remote'] = $remote_ver[$info['idx']] ?? '';
-    $info['link'] = '#';
+    $info['remote_display'] = $info['remote'] === '' ? '待检查' : $info['remote'];
+    $info['link'] = myStep::setURL('manager/plugin/'.rawurlencode($info['idx']));
     $info['update_class'] = 'd-none';
     if(!empty($info['remote']) && version_compare($info['remote'], $info['ver'])>0) {
-        $info['link'] = myStep::setURL('manager/plugin/'.rawurlencode($info['idx']));
         $info['update_class'] = '';
     }
     $info['setting_url'] = pluginAdminURL('function/plugin/setting/',['idx'=>$info['idx']],$page_app??'myStep');
@@ -62,9 +62,10 @@ foreach($files as $k) {
 }
 
 
+$update_server = plugin_manager::updateServer();
 $paras = [
     'version' => include(CONFIG.'version.php'),
-    'link'=> $mystep->setting->web->update
+    'link'=> $update_server === '' ? '未设置，请在插件设置中配置' : $update_server
 ];
 $tpl_sub->assign($paras);
-$tpl_sub->assign('update_url',htmlspecialchars(plugin_manager::updateBase($ms_setting->web->update),ENT_QUOTES,'UTF-8'));
+$tpl_sub->assign('update_url',htmlspecialchars($update_server === '' ? '' : plugin_manager::updateBase($update_server),ENT_QUOTES,'UTF-8'));

@@ -113,12 +113,14 @@ class Admin extends myStep {
     /**
      * 功能说明：执行白名单分发、统一异常处理和POST重定向。
      * @param string $path 页面路径（默认值见方法签名）
-     * @return void 输出页面；动作成功303，校验422、冲突409、异常500
+     * @return void 输出页面；动作成功303；API管理AJAX返回JSON，校验422、冲突409、异常500
      * @throws Throwable 校验、回调或文件操作异常继续传递
      */
     public function handle($path = '') {
         $this->adminPage = $path;
+        $ajax=$path==='function/api' && ($_SERVER['REQUEST_METHOD']??'GET')==='POST' && ($_SERVER['HTTP_X_REQUESTED_WITH']??'')==='XMLHttpRequest';
         if(!$this->authorized()) {
+            if($ajax){http_response_code(401);header('Content-Type: application/json; charset=UTF-8');header('Cache-Control: no-store');echo json_encode(['ok'=>false,'message'=>'登录已失效，请重新登录。'],JSON_UNESCAPED_UNICODE);return;}
             $this->loginPage();
             return;
         }
@@ -156,6 +158,7 @@ class Admin extends myStep {
                     myController::file($result['download']['file'], $result['download']['name']);
                     return;
                 }
+                if($ajax){header('Content-Type: application/json; charset=UTF-8');header('Cache-Control: no-store');echo json_encode($result,JSON_UNESCAPED_UNICODE);return;}
                 myReq::session('_admin_notice', $result['message']??'操作完成。');
                 self::redirect($this->url($result['page']??$path, $result['query']??[]), 303);
             }
@@ -170,6 +173,7 @@ class Admin extends myStep {
             $this->audit($path, $this->input('_action', 'view'), false);
             $expected = $error instanceof InvalidArgumentException || $error instanceof UnexpectedValueException || $error->getCode() === 409;
             http_response_code($error->getCode() === 409?409:($expected?422:500));
+            if($ajax){header('Content-Type: application/json; charset=UTF-8');header('Cache-Control: no-store');echo json_encode(['ok'=>false,'message'=>$expected?$error->getMessage():'处理失败，请检查服务器日志。'],JSON_UNESCAPED_UNICODE);if(!$expected)error_log('Admin '.$path.': '.$error->getMessage());return;}
             $content = $this->view('message', ['message_title' => '操作未完成', 'message' => $expected?$error->getMessage():'处理失败，请检查服务器日志。', 'back_url' => $this->url($path)]);
             if(!$expected)error_log('Admin ' . $path . ': ' . $error->getMessage());
         }

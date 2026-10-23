@@ -1,0 +1,50 @@
+{
+    "ref": "master",
+    "head": "9ba21e70c7d17121ed64a216f64c489dd6274069",
+    "remote_verified": false,
+    "commits": 153,
+    "entries": [
+        {
+            "id": "history-index",
+            "title": "更新历史",
+            "path": "docs/history/README.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2026",
+            "title": "2026年更新历史",
+            "path": "docs/history/2026.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2023",
+            "title": "2023年更新历史",
+            "path": "docs/history/2023.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2022",
+            "title": "2022年更新历史",
+            "path": "docs/history/2022.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2021",
+            "title": "2021年更新历史",
+            "path": "docs/history/2021.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2020",
+            "title": "2020年更新历史",
+            "path": "docs/history/2020.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2019",
+            "title": "2019年更新历史",
+            "path": "docs/history/2019.md",
+            "group": "更新历史"
+        }
+    ]
+}

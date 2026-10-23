@@ -850,25 +850,8 @@ code;
      */
     public static function api($path) {
         global $ms_setting, $domain;
-        $origin = myReq::server('HTTP_ORIGIN');
-        header('Vary: Origin', false);
-        if($origin !== null) {
-            $current = (isHttps() ? 'https://' : 'http://').myReq::server('HTTP_HOST');
-            $extra = $ms_setting->web->cors_origins ?? [];
-            if(is_object($extra)) $extra = (array)$extra;
-            if(!is_array($extra)) $extra = array_filter(array_map('trim', explode(',', (string)$extra)));
-            if(!self::apiOriginAllowed($origin, $current, $domain, $ms_setting->cookie->domain ?? '', $extra)) {
-                http_response_code(403);
-                header('Content-Type: application/json; charset=utf-8');
-                echo '{"error":"Origin is not allowed"}';
-                exit;
-            }
-            header('Access-Control-Allow-Origin: '.$origin);
-            header('Access-Control-Allow-Credentials: true');
-        }
-        header('Access-Control-Allow-Methods: POST,GET,OPTIONS');
-        header('Access-Control-Allow-Headers: Content-MD5,X-Alt-Referer,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,X-CSRF-Token');
-        if(strtoupper((string)myReq::server('REQUEST_METHOD')) === 'OPTIONS') { http_response_code(204); exit; }
+        $http=myApi::httpConfiguration();
+        myApi::httpCors($http,$path);
         if(strpos($path, 'myStep/plugin_')===0) $path = substr($path, 7);
         $path = preg_replace('#&.+$#', '', $path);
         $path = explode('/', trim($path, '/'));
@@ -903,22 +886,19 @@ code;
                 $ms_setting->merge(APP.$app_name.'/config.php');
                 $method = $api_list[$plugin][$name];
                 $type = end($path);
-                if($type===false) $type='json';
+                if($type===false) $type=$http['default_format'];
                 $flag = true;
             } elseif(isset($api_list[$app_name][$name])) {
                 $ms_setting->merge(APP.$app_name.'/config.php');
                 $method = $api_list[$app_name][$name];
                 $type = end($path);
-                if($type===false) $type='json';
+                if($type===false) $type=$http['default_format'];
                 $path = array_slice($path, 1);
                 $flag = true;
             }
             if($flag) {
-                $parameters = myReq::getValue('get', '[ALL]');
-                if(!in_array(strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET','HEAD'], true)) $parameters = array_replace($parameters, myReq::getValue('post', '[ALL]'));
-                // core已用于选择认证/应用上下文，不再占用业务API的位置参数。
-                unset($parameters['core']);
-                $path = array_merge($parameters, $path);
+                $policy=myApi::httpPolicy($plugin??$app_name,$name,$http);
+                list($type,$path)=myApi::httpArguments($path,$policy,$http,$type);
                 if(is_file(APP.$app_name.'/lib.php')) require_once(APP.$app_name.'/lib.php');
                 if(is_callable($method)) {
                     $api = new myApi();
@@ -1315,6 +1295,8 @@ code;
      * 加载配置、优先脚本及路由并分流请求。服务器环境变量
      * MYSTEP_PRESERVE_MEMORY_LIMIT=1时保留启动期memory_limit，不写入gen.memory；
      * 该开关本身不改变内存上限，外部应用仍须遵循服务器锁定的管理策略。
+     * 全局api分组由框架配置补齐；专属域名在当前请求内提供API虚拟前缀，不改绑定文件。
+     * @throws RuntimeException API专属域名与现有应用绑定冲突
      *
      * 参数说明：无显式参数。
      *
@@ -1323,6 +1305,11 @@ code;
     public static function go() {
         global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache, $host, $domain;
         $ms_setting = new myConfig(CONFIG.'config.php');
+        $api=$ms_setting->value('api',null);
+        if($api===null){$api=myApi::httpConfiguration();unset($api['endpoints']);}
+        else {$api=myApi::httpSettings(is_object($api)?myConfig::o2a($api):$api);}
+        // 正常页面有完整全局分组时不读取逐接口策略；旧站点仍保留兼容回退。
+        $ms_setting->merge(['api'=>$api]);
 
         $uri = parse_url((string)myReq::svr('REQUEST_URI'), PHP_URL_PATH) ?: '/';
         if(preg_match('#^'.preg_quote(ROOT_WEB, '#').'(sitemap|atom|rss)(?:\.xml|/)$#i', $uri, $match)) {
@@ -1364,6 +1351,15 @@ code;
                     $ms_setting->router->url_fix = '/'.$rule;
                 }
             }
+        }
+        if($ms_setting->api->domain!=='') {
+            $apiHost=parse_url('http://'.$ms_setting->api->domain,PHP_URL_HOST);
+            if($host===$apiHost) {
+                if(defined('URL_FIX') && URL_FIX!=='api')throw new RuntimeException('API domain conflicts with an existing binding');
+                if(!defined('URL_FIX'))define('URL_FIX','api');
+                $ms_setting->router->url_fix='/api';
+            }
+            if(!isset($domain[$apiHost]))$domain[$apiHost]='/api/(\\w+)/(.*)';
         }
         $router = new myRouter((array)$ms_setting->router);
         $the_file = ROOT.preg_replace('#&.+$#', '', $router->route['p']);

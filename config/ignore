@@ -4,3 +4,4 @@ config.php
 route.php
 domain.php
 route_plugin.php
+api.php

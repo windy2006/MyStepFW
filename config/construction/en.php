@@ -111,11 +111,16 @@ $setting_detail['web'] = array(
             'describe' => 'Split with common in order, and the files in static folder will be load to all the pages',
             'type' => array('text', '', '150')
         ),
-        'update' => array(
-            'name' => 'Update URL',
-            'describe' => 'From the URL your can get the newest update of the Framework',
-            'type' => array('text', '_', '200')
-        ),
+    ]
+);
+
+$setting_detail['api'] = array(
+    'name' => 'API Settings',
+    'list' => [
+        'enabled' => ['name'=>'Enabled','describe'=>'Enable framework APIs; administration settings remain accessible when disabled.','type'=>['radio',['Enabled'=>'true','Disabled'=>'false']]],
+        'default_format' => ['name'=>'Default format','describe'=>'Used when no recognized response format is provided.','type'=>['select',['JSON'=>'json','XML'=>'xml','Text'=>'string','Hex'=>'hex','Code'=>'code']]],
+        'body_bytes' => ['name'=>'Body limit','describe'=>'Bytes, 1 to 33554432; applies to all request formats and parameter modes. Smaller server/PHP limits still apply.','type'=>['text','digital','10']],
+        'domain' => ['name'=>'Dedicated domain','describe'=>'Example: api.mystep.com, optional port, no scheme or path. Leave empty to generate ordinary API paths.','type'=>['text',false,'260']],
     ]
 );
 

@@ -21,7 +21,7 @@
             </tr>
             <tr>
                 <td>更新地址</td>
-                <td><!--link--><b>（如果更新来源不确定或者DNS被劫持，可能会造成不可预测的问题！）</b></td>
+                <td><!--link|html--><b>（如果更新来源不确定或者DNS被劫持，可能会造成不可预测的问题！）</b></td>
             </tr>
             <tr>
                 <td>文件校验</td>
@@ -67,18 +67,18 @@
             </thead>
             <tbody>
             <!--loop:start key='app'-->
-                <tr title="<!--app_intro-->" align="center">
+                <tr title="<!--app_intro|html-->" align="center" data-manager-kind="app" data-manager-id="<!--app_app|html-->">
                     <td align="left"><!--app_name--></td>
                     <td><!--app_ver--></td>
-                    <td><!--app_remote--></td>
+                    <td class="manager-remote-version"><!--app_remote_display|html--></td>
                     <td class="btn-group">
                         <a class="btn btn-sm btn-info" href="<!--app_setting_url|html-->">设置</a>
-                        <a class="btn btn-sm btn-info <!--app_update_class-->" href="<!--app_link|html-->" target="">更新</a>
+                        <a class="btn btn-sm btn-info manager-update <!--app_update_class-->" href="<!--app_link|html-->" target="">更新</a>
                         <a class="btn btn-sm btn-info" href="<!--url_prefix-->manager/pack/app/<!--app_app-->" target="">打包</a>
                     </td>
                 </tr>
             <!--loop:end-->
-            <tbody>
+            </tbody>
         </table>
     </div>
 </div>
@@ -99,18 +99,18 @@
             </thead>
             <tbody>
             <!--loop:start key='plugin'-->
-                <tr title="<!--plugin_intro-->" align="center">
+                <tr title="<!--plugin_intro|html-->" align="center" data-manager-kind="plugin" data-manager-id="<!--plugin_idx|html-->">
                     <td align="left"><!--plugin_name--></td>
                     <td><!--plugin_ver--></td>
-                    <td><!--plugin_remote--></td>
+                    <td class="manager-remote-version"><!--plugin_remote_display|html--></td>
                     <td class="btn-group">
                         <a class="btn btn-sm btn-info" href="<!--plugin_setting_url|html-->">设置</a>
-                        <a class="btn btn-sm btn-info <!--plugin_update_class-->" href="<!--plugin_link|html-->" target="">更新</a>
+                        <a class="btn btn-sm btn-info manager-update <!--plugin_update_class-->" href="<!--plugin_link|html-->" target="">更新</a>
                         <a class="btn btn-sm btn-info" href="<!--url_prefix-->manager/pack/plugin/<!--plugin_idx-->" target="">打包</a>
                     </td>
                 </tr>
             <!--loop:end-->
-            <tbody>
+            </tbody>
         </table>
     </div>
 </div>
@@ -236,6 +236,7 @@ $('#link_5').click(function(){
     });
 });
 $('#link_6').click(function(){
+    if(!hasUpdateServer()) return;
     loadingShow("正在确认差异文件……");
     $.get("<!--url_prefix-->manager/check_server", function(info){
         if(info==false || typeof(info.error)!="undefined") {
@@ -314,6 +315,7 @@ function checkUpdate() {
     }
 }
 function applyUpdate(mode) {
+    if(!hasUpdateServer()) return;
     loadingShow("系统正在获取更新，请耐心等待！");
     $.get("<!--url_prefix-->manager/download?m="+mode, function(info){
         loadingShow();
@@ -336,20 +338,48 @@ function applyUpdate(mode) {
         alert('操作失败！');
     });
 }
+// 按服务端组件标识刷新版本列；更新资格由 PHP 比较，避免浏览器重新实现版本规则。
+function refreshComponentVersions(info, unavailable) {
+    $('[data-manager-kind]').each(function(){
+        const row = $(this), kind = row.attr('data-manager-kind'), id = row.attr('data-manager-id');
+        const versions = info && info[kind];
+        const version = versions && Object.prototype.hasOwnProperty.call(versions,id) ? versions[id] : null;
+        row.find('.manager-remote-version').text(typeof version === 'string' && version !== '' ? version : (unavailable || '未提供'));
+        const updates = info && info.updates && info.updates[kind];
+        row.find('.manager-update').toggleClass('d-none',!(typeof version === 'string' && version !== '' && updates && updates[id] === true));
+    });
+}
+function hasUpdateServer() {
+    if("<!--update_url-->" !== '') return true;
+    showUpdateFeedback('请先在 manager 插件设置中填写更新网址；离线上传更新仍可使用。',true);
+    return false;
+}
 $(function(){
+    if("<!--update_url-->" === '') {
+        refreshComponentVersions(null,'未配置');
+        $('#info').text('未设置更新网址，仅支持离线更新');
+        return;
+    }
     $.get("<!--url_prefix-->manager/check/version?"+Math.random(), function(info){
         if(info.error || typeof info.version!=='string') {
+            refreshComponentVersions(null,'检查失败');
             $('#info').text('版本检查失败，请检查更新服务器连接');
             return;
         }
+        refreshComponentVersions(info);
         if(info.version.length>0) {
             $('<a href="javascript:" onclick="checkUpdate()"></a>').text('点击更新（v'+info.version+'）').appendTo("#info");
             update_info = info.detail;
+        } else if(info.server_version && info.server_compare > 0) {
+            $('#info').text('服务器版本 v'+info.server_version+'，尚无可用升级包');
+        } else if(info.server_version && info.server_compare < 0) {
+            $('#info').text('本地版本高于服务器（v'+info.server_version+'）');
         } else {
-            $('#info').text('已是最新版本');
+            $('#info').text('已是最新版本'+(info.server_version?'（服务器 v'+info.server_version+'）':''));
         }
     }, "json").fail(function (e) {
         console.log(e);
+        refreshComponentVersions(null,'检查失败');
         $('#info').text('版本检查失败，请检查更新服务器连接');
     });
 });

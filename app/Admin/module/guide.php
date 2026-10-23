@@ -16,14 +16,18 @@ return [
     'guide' => function() {
         require_once APP.'myStep/MyStepGuide.class.php';
         $this->ui->addCSS(APP.'myStep/asset/guide.css');
+        $this->ui->addJS(STATICS.'js/checkForm.js');$this->ui->addJS(APP.'myStep/asset/guide.js');
         $reader=new MyStepGuide($this->ui->url('guide'));
+        // 局部请求仍经过Admin::authorized；片段沿用当前风格的myTemplate模板。
+        $article=function($data){return $this->ui->view('guide_article',['guide_title'=>$data['title'],'guide_path'=>$data['path'],'guide_html'=>$data['html']],['outline'=>$data['outline']]);};
+        if(isset($_GET['_guide']))$reader->ajax($_GET['_guide'],$_GET['doc']??null,$_GET['q']??null,$article);
         try {$data=$reader->page(myReq::get('doc','!'));}
         catch(OutOfBoundsException $error) {
             http_response_code(404);
             return $this->ui->view('guide',['guide_title'=>'文档不存在','guide_error'=>$error->getMessage(),'guide_home'=>$this->ui->url('guide')],[],['guide_error'=>true]);
         }
         $groups=[];
-        foreach($data['groups'] as $group) $groups[]=['content'=>$this->ui->view('guide_group',['title'=>$group['title']],['links'=>$group['links']])];
-        return $this->ui->view('guide',['guide_title'=>$data['title'],'guide_path'=>$data['path'],'guide_html'=>$data['html']],['groups'=>$groups,'outline'=>$data['outline']]);
+        foreach($data['groups'] as $group) $groups[]=['content'=>$this->ui->view('guide_group',['title'=>$group['title']],['links'=>$group['links']],['open'=>$group['open']])];
+        return $this->ui->view('guide',['guide_title'=>$data['title'],'guide_path'=>$data['path'],'guide_html'=>$data['html'],'guide_id'=>$data['id'],'guide_home'=>$this->ui->url('guide'),'guide_query'=>is_string($_GET['q']??null)?mb_substr($_GET['q'],0,80,'UTF-8'):'','guide_article'=>$article($data)],['groups'=>$groups,'outline'=>$data['outline']]);
     },
 ];

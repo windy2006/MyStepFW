@@ -1,6 +1,9 @@
 # Admin 应用
 
-核心类、21 个功能模块、模板、设置保存及界面行为统一维护在 [Admin 应用开发与维护](../../docs/applications/Admin.md)。应用源码仍全部位于本目录。
+应用源码、核心类、服务类、功能模块及模板均保存在本目录。页面和动作由pages.php声明，处理脚本在module/，对应展示文件在template/，不另在公共lib放置应用实现。
 
-- [通用 app 编写规范](../README.md)
-- [文档总目录](../../docs/README.md)
+- [通用app编写规范](../README.md)
+- [新版应用实战](../../docs/development/app/README.md)
+- [新版框架指南](../../docs/README.md)
+
+旧版Admin维护说明已集中归档，不作为当前指南的另一套正文展示。

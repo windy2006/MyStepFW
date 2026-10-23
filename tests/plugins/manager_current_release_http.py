@@ -16,11 +16,12 @@ def php_json(value):return 'json_decode('+literal(json.dumps(value,ensure_ascii=
 def require(value,message):
  if not value:raise AssertionError(message)
 current=subprocess.check_output([php,'-r','echo require $argv[1];',str(source/'config/version.php')],text=True).strip()
+admin_version=subprocess.check_output([php,'-r',"$info=require $argv[1];echo $info['ver'];",str(source/'app/Admin/info.php')],text=True).strip()
 old='0.0.0'
 require(subprocess.check_output([php,'-r','echo version_compare($argv[1],$argv[2],">")?"yes":"no";',current,old],text=True)=='yes','Current release must be newer than the fixture baseline')
-members=['lib/myStep.class.php','lib/myRouter.class.php','lib/myConfig.class.php','lib/myDb.class.php','lib/myCache.class.php','lib/mySecurity.class.php','lib/cache/myCacheCodec.class.php','lib/session/sess_file.class.php','plugin/manager/class.php','plugin/manager/template/manager.tpl','app/Admin/AdminService.class.php','static/js/global.js','static/js/checkForm.js','config/version.php']
+members=['lib/myApi.class.php','config/config_default.php','app/myStep/MyStepApiManager.class.php','lib/myStep.class.php','lib/myRouter.class.php','lib/myConfig.class.php','lib/myDb.class.php','lib/myCache.class.php','lib/mySecurity.class.php','lib/cache/myCacheCodec.class.php','lib/session/sess_file.class.php','plugin/manager/class.php','plugin/manager/template/manager.tpl','app/Admin/AdminService.class.php','static/js/global.js','static/js/checkForm.js','config/version.php']
 expected={name:hashlib.sha256((source/name).read_bytes()).hexdigest() for name in members}
-protected_paths=['config/config.php','config/version.php','plugin/plugin.db','plugin/manager/config.php','plugin/manager/version.php','plugin/manager/check_file.php','plugin/manager/check_app.php','plugin/manager/check_plugin.php']
+protected_paths=['config/config.php','config/version.php','plugin/plugin.db','plugin/manager/config.php','plugin/manager/version.php','plugin/manager/check_file.php','plugin/manager/check_app.php','plugin/manager/check_plugin.php','config/api.php']
 protected={name:hashlib.sha256((source/name).read_bytes()).hexdigest() if (source/name).is_file() else None for name in protected_paths}
 with tempfile.TemporaryDirectory(prefix='mystep-current-release-') as tmp:
  outer=Path(tmp);clientport=free_port();masterport=free_port();tlsport=free_port();base=f'http://127.0.0.1:{clientport}';remote=f'https://127.0.0.1:{tlsport}/master'
@@ -33,7 +34,7 @@ with tempfile.TemporaryDirectory(prefix='mystep-current-release-') as tmp:
   skipped=[]
   for name in names:
    path=Path(directory)/name
-   if (name=='cache' and Path(directory)!=source/'lib') or path.is_symlink() or name in ['.svn','.git','.DS_Store','file','files','pack','rollback','update','config.php','config_new.php','plugin.php','check_file.php','check_app.php','check_plugin.php','error.log','ban_ip.php'] or name.endswith(('.db','.db-wal','.db-shm','.lock','.log')):skipped.append(name)
+   if (name=='cache' and Path(directory)!=source/'lib') or path.is_symlink() or (name=='plugin.php' and Path(directory).parent.name=='app') or name in ['.svn','.git','.DS_Store','file','files','pack','rollback','update','config.php','config_new.php','check_file.php','check_app.php','check_plugin.php','error.log','ban_ip.php'] or name.endswith(('.db','.db-wal','.db-shm','.lock','.log')):skipped.append(name)
   return skipped
  template=outer/'snapshot';template.mkdir()
  for name in ['lib','app/myStep','app/Admin','plugin/manager','static','vendor','config/construction']:
@@ -62,14 +63,14 @@ myStep::init();
  for name in ['master','online','offline','latest']:
   root=outer/name;shutil.copytree(template,root);roots[name]=root
   for path in ['cache','files','config/priority']:(root/path).mkdir(parents=True,exist_ok=True)
-  config="<?php include __DIR__.'/config_default.php';$setting['gen']['s_usr']='release-fixture';$setting['gen']['s_pwd']="+literal(password_hash)+";$setting['gen']['cache_page']=false;$setting['gen']['debug']=false;$setting['gen']['language']='chs';$setting['db']['auto']=false;$setting['cookie']['prefix']='"+name+"_';$setting['router']['mode']='rewrite';$setting['web']['gzip_level']=-1;$setting['web']['update']="+literal(remote)+";$setting['web']['title']='Local release fixture';return $setting;"
+  config="<?php include __DIR__.'/config_default.php';$setting['gen']['s_usr']='release-fixture';$setting['gen']['s_pwd']="+literal(password_hash)+";$setting['gen']['cache_page']=false;$setting['gen']['debug']=false;$setting['gen']['language']='chs';$setting['db']['auto']=false;$setting['cookie']['prefix']='"+name+"_';$setting['router']['mode']='rewrite';$setting['web']['gzip_level']=-1;$setting['web']['title']='Local release fixture';return $setting;"
   write(root,'config/config.php',config)
   write(root,'app/myStep/config.php',"<?php return ['gen'=>['cache_page'=>false,'path_admin'=>'console'],'db'=>['auto'=>false]];")
   write(root,'config/class.php',"<?php return [['path'=>'lib/','ext'=>'.class.php,.php','idx'=>['interface_plugin'=>'../plugin/interface_plugin.class.php']],['path'=>'lib/database/','ext'=>'.class.php,.php']];")
   write(root,'config/domain.php','<?php return [];')
   write(root,'app/myStep/plugin.php',"<?php return ['manager'];")
   write(root,'app/Admin/plugin.php','<?php return [];')
-  write(root,'plugin/manager/config.php',"<?php return ['update'=>true,'pack'=>true];")
+  write(root,'plugin/manager/config.php',"<?php return ['update'=>true,'pack'=>true,'update_url'=>"+literal(remote)+"];")
   route=(root/'app/myStep/route.php').read_text().replace('$rule = array(',"$rule = array(array('/_release_captcha','releaseFixtureCaptcha'),",1);write(root,'app/myStep/route.php',route)
   setup="define('ROOT',"+literal(str(root)+'/')+");define('LIB',ROOT.'lib/');require LIB.'function.php';spl_autoload_register(function($name){foreach([LIB.$name.'.class.php',LIB.'database/'.$name.'.class.php'] as $file)if(is_file($file)){require_once $file;return;}});$d=new myDb('simpleDB','plugin',ROOT.'plugin/');$d->create([['order',2],['active',1],['idx',40]]);$d->insert(['order'=>1,'active'=>1,'idx'=>'manager'],true);$d->close();"
   subprocess.run([php,'-r',setup],check=True,capture_output=True)
@@ -144,6 +145,54 @@ myStep::init();
   def real_login():
    for site in ['online','offline','latest']:tokens[site]=login(site)
   check('real framework boot and administrator login for all clients',real_login)
+  def manager_settings_location():
+   root=roots['latest'];file=root/'plugin/manager/config.php';before=file.read_bytes()
+   global_before=(root/'config/config.php').read_bytes()
+   try:
+    for route in ['Admin/setting','console/setting/']:
+     body,_=request('latest',route);require('setting[web][update]' not in body,'Global settings still contain plugin update URL')
+    for route in ['Admin/function/plugin/setting/?idx=manager','console/function/plugin/setting/?idx=manager']:
+     body,_=request('latest',route);require('name="setting[update_url]"' in body and remote in body,'Plugin settings do not display update source: '+route)
+    body,_=request('latest','Admin/function/plugin/setting/?idx=manager')
+    values={name:re.search('name="'+name+'" value="([^"]*)"',body).group(1) for name in ['version','registry_version']}
+    values.update({'_action':'save','_ms_csrf':tokens['latest'],'idx':'manager','apps[]':'myStep','setting[update_url]':remote+'/','setting[update]':'true','setting[pack]':'true'})
+    request('latest','Admin/function/plugin/setting/?idx=manager',method='POST',data=values,status=303)
+    require(remote+'/' in file.read_text(),'Admin did not save the plugin source')
+    require(post('latest','manager/check/version',tokens['latest'])['version']=='','Saved plugin source was not used')
+    request('latest','console/function/plugin/setting/?idx=manager',method='POST',data={'_ms_csrf':tokens['latest'],'setting[update_url]':remote,'setting[update]':'true','setting[pack]':'true','apps[]':'myStep'},status=302)
+    require(post('latest','manager/check/version',tokens['latest'])['version']=='','Legacy console did not save the plugin source')
+    require((root/'config/config.php').read_bytes()==global_before,'Saving manager settings modified global settings')
+   finally:file.write_bytes(before)
+  check('new and legacy backends expose and save manager-owned update source without global changes',manager_settings_location)
+  def component_version_refresh():
+   root=roots['latest'];metadata=root/'plugin/myBackup/info.php';metadata.parent.mkdir(parents=True,exist_ok=True)
+   metadata.write_text("<?php return ['idx'=>'myBackup','ver'=>'0.9','name'=>'MySQL备份','intro'=>'fixture'];")
+   remote_metadata=roots['master']/'plugin/myBackup/info.php';remote_metadata.parent.mkdir(parents=True,exist_ok=True)
+   remote_metadata.write_text("<?php return ['idx'=>'myBackup','ver'=>'1.0','name'=>'MySQL备份','intro'=>'fixture'];")
+   for name in ['check_app.php','check_plugin.php']:(root/'plugin/manager'/name).write_text('<?php return [];')
+   body,_=request('latest','Admin/manager/')
+   require('data-manager-kind="app" data-manager-id="Admin"' in body and 'data-manager-kind="plugin" data-manager-id="myBackup"' in body,'Stable component row identifiers are missing')
+   require('待检查' in body,'Uncached component is displayed as blank')
+   reply=post('latest','manager/check/version',tokens['latest'])
+   require(reply['app']['Admin']==admin_version and reply['plugin']['myBackup']=='1.0','Live version response omitted uncached components')
+   require(reply['updates']['app']['Admin'] is False and reply['updates']['plugin']['myBackup'] is True,'Server update qualification is incorrect')
+   for file,key in [('check_app.php','Admin'),('check_plugin.php','myBackup')]:
+    cached=json.loads(subprocess.check_output([php,'-r','echo json_encode(require $argv[1]);',str(root/'plugin/manager'/file)],text=True));require(cached[key]==(admin_version if key=='Admin' else '1.0'),'Live component version was not cached')
+   remote_metadata.unlink();reply=post('latest','manager/check/version',tokens['latest']);require('myBackup' not in reply['plugin'],'A removed server component leaked through an old cache')
+   metadata.unlink();metadata.parent.rmdir();remote_metadata.parent.rmdir()
+  check('version check returns live Admin and myBackup versions with update states and replaces stale caches',component_version_refresh)
+  def integrated_security_transport():
+   target=base+'/latest/manager/check/version'
+   cookie='; '.join(item.name+'='+item.value for item in next(handler.cookiejar for handler in clients['latest'].handlers if isinstance(handler,urllib.request.HTTPCookieProcessor)))
+   helper=source/'tests/security/security_transport.js'
+   for mode,status,copies in [('valid',200,1),('invalid',403,1),('duplicate',403,2)]:
+    reply=json.loads(subprocess.check_output(['node',str(helper),target,tokens['latest'],cookie,mode],text=True))
+    requests.append({'site':'latest','path':'manager/check/version (security transport)','method':reply['method'],'status':reply['status']})
+    require(reply['status']==status and reply['method']=='POST' and reply['tokenCopies']==copies,reply)
+    if mode=='valid':
+     require(reply['result']['server_version']==current and reply['result']['server_compare']==0 and reply['result']['version']=='','Same-release check did not report the real server version')
+     require(reply['result']['app']['Admin']==admin_version,'Integrated transport lost component versions')
+  check('real security prefilter and XHR header merging accepts one token rejects invalid and duplicate tokens and reports equal server version',integrated_security_transport)
   def auth_csrf():
    body,_=request('online','manager/download?m=1',status=405);require('POST required' in body,'GET did not hit real method guard')
    body,_=request('online','manager/download?m=1',method='POST',data=b'',status=403);require('CSRF' in body,'Missing CSRF was not rejected')
@@ -244,7 +293,8 @@ myStep::init();
   if system_package:
    package={}
    def system_archive():
-    root=roots['latest'];write(root,'app/allow',(source/'app/allow').read_text());secrets=['system-pack-password-fixture','system-pack-cache-fixture','system-pack-upload-fixture','system-pack-api-key-fixture']
+    root=roots['latest'];write(root,'app/allow',(source/'app/allow').read_text());secrets=['system-pack-password-fixture','system-pack-cache-fixture','system-pack-upload-fixture','system-pack-api-key-fixture','https://system-pack-api-policy-fixture.invalid']
+    write(root,'config/api.php',"<?php return ['cors_origins'=>['"+secrets[4]+"']];")
     write(root,'plugin/privateDemo/info.php',"<?php return ['idx'=>'privateDemo','ver'=>'1'];")
     write(root,'plugin/privateDemo/config.php',"<?php return ['password'=>'"+secrets[0]+"','visible'=>'keep','nested'=>['api_key'=>'"+secrets[3]+"']];")
     write(root,'plugin/privateDemo/config/construction.php',"<?php return ['password'=>['missing.value','password']];")
@@ -265,7 +315,7 @@ myStep::init();
     require(entries.get('plugin/privateDemo/asset/files/public.txt')==b'public-asset','Public asset files directory was mistaken for uploads')
     require('app/Admin/config.php' in entries and 'app/myStep/config.php' in entries,'Missing application defaults')
     require('app/Admin/config/construction.php' in entries,'Missing settings schema')
-    require('config/config.php' not in entries and 'plugin/plugin.db' not in entries,'Live state exported')
+    require('config/config.php' not in entries and 'config/api.php' not in entries and 'plugin/plugin.db' not in entries,'Live state exported')
     require(all(secret.encode() not in raw for secret in secrets),'Private configuration/cache/upload leaked')
     require(b'keep' in entries.get('plugin/privateDemo/config.php',b''),'Public configuration was lost')
     require((root/'plugin/privateDemo/config.php').read_bytes()==original,'Packaging changed live plugin config')
@@ -355,7 +405,7 @@ myStep::init();
    check('standalone installer enforces token extracts package and boots initial settings',standalone_install)
    def configure_installed():
     config=json.loads(subprocess.check_output([php,'-r','echo json_encode(require $argv[1]);',str(roots['fresh']/'config/config_default.php')],text=True))
-    config['gen'].update(s_usr='release-fixture',s_pwd='release-fixture-pass',language='chs');config['db']['auto']=False;config['db']['password']='';config['cookie']['prefix']='fresh_';config['router']['mode']='rewrite';config['web']['update']=remote
+    config['gen'].update(s_usr='release-fixture',s_pwd='release-fixture-pass',language='chs');config['db']['auto']=False;config['db']['password']='';config['cookie']['prefix']='fresh_';config['router']['mode']='rewrite'
     fields={}
     def flatten(data,prefix):
      for key,value in data.items():
@@ -366,7 +416,7 @@ myStep::init();
     tokens['fresh']=login('fresh')
     body,_=request('fresh','Admin/function/plugin/view?idx=manager')
     values={name:re.search('name="'+name+'" value="([^"]*)"',body).group(1) for name in ['version','registry_version']}
-    values.update({'_action':'install','_ms_csrf':tokens['fresh'],'idx':'manager','apps[]':'myStep'})
+    values.update({'_action':'install','_ms_csrf':tokens['fresh'],'idx':'manager','apps[]':'myStep','setting[update_url]':remote,'setting[update]':'true','setting[pack]':'true'})
     request('fresh','Admin/function/plugin/view?idx=manager',method='POST',data=values,status=303)
     require(post('fresh','manager/check/version',tokens['fresh'])['version']=='','Freshly installed current release offers update')
    check('fresh package saves initial settings logs in and installs manager through Admin',configure_installed)

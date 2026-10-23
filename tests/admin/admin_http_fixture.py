@@ -28,6 +28,14 @@ spl_autoload_register(function($name){foreach([STAGE.'/lib/'.$name.'.class.php',
 require ROOT.'fixture.php';require LIB.'myStep.class.php';myStep::init();
 '''
  (root/'index.php').write_text(script.replace('SOURCE',literal(source)).replace('STAGE',literal(stage)))
+ # API管理专项夹具：不读取业务数据，不向正式配置写入。
+ (root/'app/FixtureApi').mkdir()
+ (root/'app/FixtureApi/info.php').write_text('<?php return ["app"=>"FixtureApi","name"=>"API Fixture"];')
+ (root/'app/FixtureApi/FixtureApi.class.php').write_text('<?php file_put_contents(__DIR__."/loaded","loaded"); class FixtureApi extends myStep {}')
+ (root/'app/FixtureApi/route.php').write_text('<?php $api=["echo"=>"app\\FixtureApi\\capture", "other"=>"app\\FixtureApi\\capture"];')
+ (root/'app/FixtureApi/lib.php').write_text('<?php namespace app\\FixtureApi; function capture(...$args){return ["args"=>$args,"host"=>$GLOBALS["info_app"]["app"],"raw"=>file_get_contents("php://input")];}')
+ (root/'config/domain.php').write_text('<?php return ["api.fixture"=>"/api/(.*)"];')
+
  subprocess.run([php,'-r',"$db=new SQLite3($argv[1]);$db->exec('CREATE TABLE example(id INTEGER,title TEXT)');$db->exec(\"INSERT INTO example VALUES(1,'row')\");",str(root/'fixture.db')],check=True)
  sock=socket.socket();sock.bind(('127.0.0.1',0));port=sock.getsockname()[1];sock.close()
  class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -36,9 +44,9 @@ require ROOT.'fixture.php';require LIB.'myStep.class.php';myStep::init();
  jar=http.cookiejar.CookieJar();client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar),NoRedirect())
  with tempfile.TemporaryFile(mode='w+') as log:
   proc=subprocess.Popen([php,'-S',f'127.0.0.1:{port}','-t',str(outer),str(root/'index.php')],stdout=log,stderr=log)
-  def request(path,status=200,data=None,headers=None,binary=False,anonymous=False):
-   payload=data if isinstance(data,bytes) else (None if data is None else urllib.parse.urlencode(data,doseq=True).encode())
-   req=urllib.request.Request(f'http://127.0.0.1:{port}/sub/'+path,data=payload,headers=headers or {})
+  def request(path,status=200,data=None,headers=None,binary=False,anonymous=False,method=None):
+   payload=urllib.parse.urlencode(data,doseq=True).encode() if isinstance(data,dict) else data
+   req=urllib.request.Request(f'http://127.0.0.1:{port}/sub/'+path,data=payload,headers=headers or {},method=method)
    try:r=(public_client if anonymous else client).open(req,timeout=15)
    except urllib.error.HTTPError as e:r=e
    with r:body=r.read();results.append({'path':path,'method':req.get_method(),'status':r.status});assert r.status==status,(results[-1],re.sub(b'<[^>]+>',b' ',re.sub(b'<(?:script|style)[^>]*>.*?</(?:script|style)>',b'',body,flags=re.S))[-1400:]);return (body if binary else body.decode('utf-8','replace')),r.headers
@@ -59,7 +67,7 @@ require ROOT.'fixture.php';require LIB.'myStep.class.php';myStep::init();
    request('Admin/',403,{'username':'fixture','password':'fixture-pass','captcha':'ABCD'})
    request('_fixture_captcha');body,h=request('Admin/',303,{'username':'fixture','password':'fixture-pass','captcha':'ABCD','_ms_csrf':csrf});assert '/Admin/' in h['Location']
    body,h=request('Admin/');assert '运行概览' in body and '管理员登录' not in body;csrf=token(body)
-   pages=['db','db?table=example','php','phpinfo','error','setting','setting?target=myStep','setting?target=Admin','setting/class','setting/domain','setting/alias','setting/detail?class=myStep','setting/execute','function/app','function/cache','function/plugin','function/attachment','function/language','guide','samples','samples?sample=form','references']
+   pages=['db','db?table=example','php','phpinfo','error','setting','setting?target=myStep','setting?target=Admin','function/api','setting/class','setting/domain','setting/alias','setting/detail?class=myStep','setting/execute','function/app','function/cache','function/plugin','function/attachment','function/language','guide','samples','samples?sample=form','references']
    for page in pages:
     body,h=request('Admin/'+page);assert '操作未完成' not in body and '管理员登录' not in body, page
     if page=='phpinfo':
@@ -69,19 +77,116 @@ require ROOT.'fixture.php';require LIB.'myStep.class.php';myStep::init();
      css='\n'.join(p.read_text() for p in css_files)
      for selector in ['#adm-phpinfo .e','#adm-phpinfo .h','#adm-phpinfo .v','#adm-phpinfo td,#adm-phpinfo th']:
       assert selector in css,selector
+   # API参数仍使用统一框架设置，接口在各自行下展开并通过AJAX保存四项设置。
+   body,h=request('Admin/setting/api',302);assert 'Admin/setting#api' in h['Location']
+   body,h=request('console/setting/api',302);assert 'console/setting/' in h['Location']
+   body,h=request('api/FixtureApi/echo/json',204,anonymous=True,method='OPTIONS');assert body=='' and not h.get('Set-Cookie') and not (root/'app/FixtureApi/loaded').exists()
+   body,h=request('FixtureApi/echo/json?b=B%26x&a=A',headers={'Host':'api.fixture'});assert json.loads(body)['args']==['B&amp;x','A','json']
+   body,h=request('Admin/setting');api_v=version(body)
+   for field in ['enabled','default_format','body_bytes','domain']:assert 'name="setting[api]['+field+']"' in body
+   assert 'setting[api][json_depth]' not in body and 'setting[api][cors_origins]' not in body and 'id="api"' in body
+   globals_data={'target':'','setting[api][enabled]':'true','setting[api][default_format]':'json','setting[api][body_bytes]':'64','setting[api][domain]':''}
+   request('Admin/setting',403,{'_action':'save','version':api_v,**globals_data})
+   request('Admin/setting',303,{'_action':'save','version':api_v,'_ms_csrf':csrf,**globals_data})
+   request('Admin/setting',409,{'_action':'save','version':api_v,'_ms_csrf':csrf,**globals_data})
+   before=(root/'config/config.php').read_bytes();body,h=request('Admin/setting')
+   request('Admin/setting',422,{'_action':'save','version':version(body),'_ms_csrf':csrf,**{**globals_data,'setting[api][domain]':'https://bad.example/path'}});assert (root/'config/config.php').read_bytes()==before
+   body,h=request('Admin/setting');request('Admin/setting',422,{'_action':'save','version':version(body),'_ms_csrf':csrf,**globals_data,'setting[api][cors_origins]':'http://caller.fixture'})
+   body,h=request('api/FixtureApi/echo/json',403,headers={'Origin':'http://caller.fixture'},anonymous=True,method='OPTIONS');assert json.loads(body)['error']=='origin_denied'
+   api_endpoint='Admin/function/api'
+   ajax={'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
+   body,h=request(api_endpoint)
+   assert 'app\\FixtureApi\\capture' in body and '<code>/sub/api/FixtureApi/echo</code>' in body
+   assert body.count('data-api-toggle')>=2 and 'class="ms-api-detail" hidden' in body and 'data-ms-api-form="true"' in body
+   for removed in ['policy[mode]','policy[formats]','policy[cors_origins]','参数模式','保存策略','API 功能管理']:assert removed not in body
+   assert 'href="/sub/api/FixtureApi/echo' not in body
+   assert body.index('>插件管理<')<body.index('>API 管理<')<body.index('>附件管理<')
+   policy_v=version(body)
+   policy_data={'scope':'FixtureApi','name':'echo','policy[enabled]':'1','policy[methods]':'GET,POST','policy[cors]':'1','policy[admin]':'0'}
+   body,h=request(api_endpoint,403,{'_action':'save','version':policy_v,**policy_data},headers=ajax);assert 'CSRF' in json.loads(body)['error']
+   body,h=request(api_endpoint,403,{'_action':'save','version':policy_v,'_ms_csrf':csrf,**policy_data},headers=ajax,anonymous=True)
+   # 匿名CSRF会在鉴权前拒绝；无会话不能用别人的令牌。
+   body,h=request(api_endpoint,200,{'_action':'save','version':policy_v,'_ms_csrf':csrf,**policy_data},headers=ajax);saved=json.loads(body);assert saved['ok'] and saved['entry']['policy']=={'enabled':True,'methods':['GET','POST'],'cors':True,'admin':False} and not h.get('Location') and 'application/json' in h['Content-Type'];api_version=saved['version']
+   stored=subprocess.check_output([php,'-r','echo json_encode(require $argv[1]);',str(root/'config/api.php')],text=True);assert list(json.loads(stored))==['endpoints'] and list(json.loads(stored)['endpoints']['FixtureApi']['echo'])==['enabled','methods','cors','admin']
+   body,h=request(api_endpoint,409,{'_action':'save','version':policy_v,'_ms_csrf':csrf,**policy_data},headers=ajax);assert json.loads(body)['ok'] is False
+   before=(root/'config/api.php').read_bytes();body,h=request(api_endpoint,422,{'_action':'save','version':api_version,'_ms_csrf':csrf,**{**policy_data,'policy[methods]':'GET,TRACE'}},headers=ajax);assert json.loads(body)['ok'] is False and (root/'config/api.php').read_bytes()==before
+   for origin in ['http://caller.fixture','https://another.example:8443']:
+    body,h=request('api/FixtureApi/echo/json',204,headers={'Origin':origin},anonymous=True,method='OPTIONS');assert h.get('Access-Control-Allow-Origin')==origin and not h.get('Set-Cookie')
+   for origin in ['null','https://caller.fixture/path','https://user:pass@caller.fixture']:
+    request('api/FixtureApi/echo/json',403,headers={'Origin':origin},anonymous=True,method='OPTIONS')
+   body,h=request('api/FixtureApi/other/json',403,headers={'Origin':'http://caller.fixture'},anonymous=True,method='OPTIONS');assert json.loads(body)['error']=='origin_denied'
+   body,h=request('api/FixtureApi/echo/json?b=B%26x&a=A&core=FixtureApi');assert json.loads(body)['args']==['B&amp;x','A','json']
+   data=b'{"title":"A&B"}'
+   body,h=request('api/FixtureApi/echo/value/json',data=data,headers={'Content-Type':'application/json','X-CSRF-Token':csrf,'Origin':'http://caller.fixture'});assert json.loads(body)['args']==['value','json'] and json.loads(body)['raw']==data.decode() and h.get('Access-Control-Allow-Origin')=='http://caller.fixture'
+   body,h=request('api/FixtureApi/echo/json',403,data=b'{}',headers={'Content-Type':'application/json','Origin':'http://caller.fixture'});assert 'CSRF' in json.loads(body)['error']
+   body,h=request('api/FixtureApi/echo/json',data=b'{',headers={'Content-Type':'application/json','X-CSRF-Token':csrf});assert json.loads(body)['raw']=='{'
+   for content,data in [('application/json',b' '*65),('application/xml',b'<x>'+b'a'*58+b'</x>'),('application/octet-stream',b'x'*65),('application/x-www-form-urlencoded',b'x='+b'a'*63)]:
+    for endpoint in ['echo','other']:
+     body,h=request('api/FixtureApi/'+endpoint+'/json',413,data=data,headers={'Content-Type':content,'X-CSRF-Token':csrf});assert json.loads(body)['error']=='body_limit'
+   boundary='SmallApiFixture';multipart=('--'+boundary+'\r\nContent-Disposition: form-data; name="x"\r\n\r\nvalue\r\n--'+boundary+'--\r\n').encode()
+   body,h=request('api/FixtureApi/echo/json',413,data=multipart,headers={'Content-Type':'multipart/form-data; boundary='+boundary,'X-CSRF-Token':csrf});assert json.loads(body)['error']=='body_limit'
+   body,h=request('api/FixtureApi/echo/xml');assert '<mystep>' in body
+   body,h=request('api/FixtureApi/echo/json',405,data=b'{}',headers={'Content-Type':'application/json','X-CSRF-Token':csrf},method='PUT');assert 'GET' in h['Allow']
+   body,h=request(api_endpoint,200,{'_action':'save','version':api_version,'_ms_csrf':csrf,**{**policy_data,'policy[admin]':'1'}},headers=ajax);api_version=json.loads(body)['version']
+   body,h=request('api/FixtureApi/echo/json',403,anonymous=True);assert json.loads(body)['error']=='admin_required'
+   body,h=request('api/FixtureApi/echo/json');assert json.loads(body)['host']=='FixtureApi'
+   # 域名设置自动提供入口，列表不附加格式，也不把地址渲染为超链接。
+   domain_before=(root/'config/domain.php').read_bytes();body,h=request('Admin/setting')
+   request('Admin/setting',303,{'_action':'save','version':version(body),'_ms_csrf':csrf,**{**globals_data,'setting[api][domain]':'exclusive.fixture'}})
+   body,h=request(api_endpoint);assert '<code>http://exclusive.fixture/sub/FixtureApi/echo</code>' in body and 'href="http://exclusive.fixture/sub/FixtureApi/echo' not in body
+   body,h=request('FixtureApi/echo/json',headers={'Host':'exclusive.fixture'});assert json.loads(body)['host']=='FixtureApi'
+   assert (root/'config/domain.php').read_bytes()==domain_before
+   body,h=request('Admin/setting');request('Admin/setting',303,{'_action':'save','version':version(body),'_ms_csrf':csrf,**globals_data})
+   body,h=request(api_endpoint,200,{'_action':'save','version':api_version,'_ms_csrf':csrf,**{**policy_data,'policy[enabled]':'0'}},headers=ajax);saved=json.loads(body);api_version=saved['version'];assert saved['entry']['status']=='已停用'
+   body,h=request('api/FixtureApi/echo/json',404);assert json.loads(body)['error']=='api_disabled'
+   body,h=request(api_endpoint,200,{'_action':'reset','version':api_version,'scope':'FixtureApi','name':'echo','_ms_csrf':csrf},headers=ajax);saved=json.loads(body);assert saved['entry']['policy']['cors'] is False
+   body,h=request('api/FixtureApi/echo/json?b=B%26x');assert json.loads(body)['args']==['B&amp;x','json']
+   body,h=request('api/FixtureApi/echo/json',403,headers={'Origin':'http://caller.fixture'},method='OPTIONS',anonymous=True)
+   body,h=request('console/setting/');assert 'name="setting[api][body_bytes]"' in body
+   old_setting={'_ms_csrf':csrf,**{k:v for k,v in globals_data.items() if k!='target'}};request('console/setting/',200,old_setting)
+   body,h=request('console/function/api');assert 'name="policy[cors]"' in body and 'data-api-toggle' in body and '<code>/sub/api/FixtureApi/echo</code>' in body and 'policy[mode]' not in body
+   body,h=request('console/function/api',200,{'_action':'save','version':version(body),'_ms_csrf':csrf,**{**policy_data,'policy[enabled]':'0'}},headers=ajax);saved=json.loads(body);assert saved['ok'] and saved['entry']['status']=='已停用'
+   request('api/FixtureApi/echo/json',404)
+   body,h=request('console/function/api',200,{'_action':'reset','version':saved['version'],'scope':'FixtureApi','name':'echo','_ms_csrf':csrf},headers=ajax);saved=json.loads(body);assert saved['ok'] and saved['entry']['status']=='已启用'
+   # 无JS的正常POST保持可用；新后台仍按原303流程处理。
+   request(api_endpoint,303,{'_action':'save','version':saved['version'],'_ms_csrf':csrf,**policy_data})
+   body,h=request('console/function/api');request('console/function/api',200,{'_action':'reset','version':version(body),'scope':'FixtureApi','name':'echo','_ms_csrf':csrf})
+   body,h=request('Admin/setting');request('Admin/setting',303,{'_action':'save','version':version(body),'_ms_csrf':csrf,**{**globals_data,'setting[api][enabled]':'false'}})
+   body,h=request('api/FixtureApi/echo/json',503);assert json.loads(body)['error']=='api_disabled'
+   body,h=request('Admin/setting');request('Admin/setting',303,{'_action':'save','version':version(body),'_ms_csrf':csrf,**globals_data})
    def verify_guides(prefix):
     separator='&' if '?' in prefix else '?'
-    body,h=request(prefix+'guide');assert '文档总览' in body and '应用与插件开发' in body and '应用、插件与站点资料' in body
+    body,h=request(prefix+'guide');assert '文档总览' in body and '应用开发' in body and '插件开发' in body and '浏览器前端' in body and '现有应用介绍' in body and '更新历史' in body
     assert body.count('aria-current="page"')>=1
-    for doc,heading in [('execution','框架执行流程'),('app-rules','应用编写规范'),('plugin-rules','插件编写规范'),('first-app','开发第一个应用'),('first-plugin','开发第一个插件'),('frontend-forms','表单校验与need规则'),('tests','测试目录与运行说明')]:
+    assert '维护与发布' not in body and '本地与同步' not in body and 'JavaScript前端' not in body
+    history_body,_=request(prefix+'guide'+separator+'doc=history-2023');assert '<ol>' in history_body and '修正在线访客列表' in history_body and 'Fixed a bug' not in history_body
+    for doc,heading in [('guide-basics', '整体介绍与框架组成'), ('guide-functions', '主要变量与请求上下文'), ('guide-core', '请求总流程与分支'), ('app-rules', '应用文件、目录和脚本规范'), ('plugin-rules', '插件文件、目录和生命周期规范'), ('first-app', '完整实例：第一个应用'), ('first-plugin', '完整实例：第一个插件'), ('frontend-forms', 'checkForm整体流程'), ('js-ref-global', 'global.js函数详解'), ('api-settings', 'API全局参数与逐接口行内管理'), ('history-index', '更新历史'), ('app-info-admin', 'Admin · 新管理后台'), ('plugin-info-manager', 'manager · 系统打包与更新'), ('frontend-index', '浏览器前端')]:
      body,h=request(prefix+'guide'+separator+'doc='+doc);assert '<div class="guide-document">' in body and '<h2>'+heading+'</h2>' in body,(prefix,doc)
      assert 'href="'+('/sub/'+prefix+'guide'+separator+'doc=') in body.replace('&amp;','&'),(prefix,doc)
      assert 'class="guide-outline"' in body and 'id="' in body
-    body,h=request(prefix+'guide'+separator+'doc=frontend');assert 'doc=frontend-forms' in body and 'static/docs/forms.md' not in re.findall(r'href="([^"]+)"',body)
-    for invalid in ['../config/config.php','config/config.php','unknown','/etc/passwd']:
+    body,h=request(prefix+'guide'+separator+'doc=frontend');assert 'doc=frontend-runtime' in body and 'static/docs/forms.md' not in re.findall(r'href="([^"]+)"',body)
+    ajax={'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
+    body,h=request(prefix+'guide'+separator+'_guide=page&doc=api',headers=ajax);part=json.loads(body)
+    assert part['ok'] and part['type']=='document' and part['id']=='api' and 'guide-document' in part['article']
+    assert 'guide-nav' not in part['article'] and 'guide-layout' not in part['article'] and '<html' not in part['article']
+    assert '/sub/'+prefix+'guide'+separator+'doc=api'==part['url'] and 'no-store' in h.get('Cache-Control','')
+    body,h=request(prefix+'guide'+separator+'_guide=search&q=myAuth',headers=ajax);found=json.loads(body)
+    assert found['ok'] and found['total']>0 and found['items'][0]['id']=='ref-myauth'
+    assert all(item['url'].startswith('/sub/'+prefix+'guide'+separator+'doc=') for item in found['items'])
+    body,h=request(prefix+'guide'+separator+'_guide=page&doc=../config/config.php',404,headers=ajax);assert json.loads(body)['ok']==False
+    for suffix in ['_guide=other','_guide=search&q[]=bad','_guide=search&q='+urllib.parse.quote('中'*81)]:
+     body,h=request(prefix+'guide'+separator+suffix,400,headers=ajax);assert json.loads(body)['ok']==False
+    body,h=request(prefix+'guide'+separator+'_guide=page&doc=api',headers=ajax,method='HEAD');assert body=='' and 'application/json' in h.get('Content-Type','')
+    body,h=request(prefix+'guide'+separator+'_guide=search&q=myAuth',headers=ajax,anonymous=True);assert 'application/json' not in h.get('Content-Type','') and 'snippet' not in body
+    for invalid in ['../config/config.php','config/config.php','unknown','docs/backup/20261023/docs/framework/api.md','backup','/etc/passwd']:
      body,h=request(prefix+'guide'+separator+'doc='+urllib.parse.quote(invalid),404);assert '文档不存在' in body and 'fixture-pass' not in body
     body,h=request(prefix+'guide'+separator+'doc%5B%5D=execution',404);assert '文档不存在' in body
    verify_guides('Admin/');verify_guides('console/')
+   # 设置此环境变量可短暂保留已隔离的真实站点供浏览器测试；删除ready文件后继续。
+   if os.environ.get('MYSTEP_ADMIN_BROWSER_READY'):
+    ready=Path(os.environ['MYSTEP_ADMIN_BROWSER_READY']);ready.write_text(json.dumps({'url':f'http://127.0.0.1:{port}/sub/Admin/guide','root':str(root)}));deadline=time.monotonic()+300
+    while ready.exists() and time.monotonic()<deadline:time.sleep(.1)
+    if ready.exists():ready.unlink()
    def verify_images(prefix,legacy=False):
     for sample in ['image','image_load']:
      suffix=('samples/'+sample) if legacy else ('samples'+('&' if '?' in prefix else '?')+'sample='+sample)

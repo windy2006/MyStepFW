@@ -10,12 +10,12 @@ if(!isset($argv[1])){
 }
 $source=dirname(__DIR__, 2).'/';$scratch=sys_get_temp_dir().'/mystep-plugin-modules-'.bin2hex(random_bytes(6));mkdir($scratch,0700);
 define('ROOT',$scratch.'/');define('APP',ROOT.'app/');define('PLUGIN',ROOT.'plugin/');define('CACHE',ROOT.'cache/');define('CONFIG',ROOT.'config/');define('LIB',$source.'lib/');define('ROOT_WEB','/');
-foreach([APP.'myStep',APP.'Document',PLUGIN.'myBackup/module',PLUGIN.'badReq/module',PLUGIN.'frontend/module',CACHE,CONFIG] as $path)mkdir($path,0700,true);
+foreach([APP.'myStep',APP.'Document',PLUGIN.'myBackup/module',PLUGIN.'badReq/module',PLUGIN.'frontend/module',PLUGIN.'manager',CACHE,CONFIG] as $path)mkdir($path,0700,true);
 spl_autoload_register(function($name){foreach([LIB.$name.'.class.php',LIB.'database/'.$name.'.class.php',LIB.'cache/'.$name.'.class.php'] as $file)if(is_file($file)){require_once $file;return;}});
 require_once LIB.'function.php';class_alias('myReq','r');class_alias('myFile','f');
 require_once $source.'plugin/interface_plugin.class.php';
-foreach(['myBackup/module/myBackup.php','badReq/module/badReq.php','badReq/class.php','frontend/module/frontend.php','frontend/config.php'] as $file)copy($source.'plugin/'.$file,PLUGIN.$file);
-require_once PLUGIN.'badReq/class.php';require_once $source.'plugin/frontend/class.php';require_once $source.'plugin/myBackup/class.php';require_once $source.'plugin/manager/class.php';
+foreach(['myBackup/module/myBackup.php','badReq/module/badReq.php','badReq/class.php','frontend/module/frontend.php','frontend/config.php','manager/class.php'] as $file)copy($source.'plugin/'.$file,PLUGIN.$file);
+require_once PLUGIN.'badReq/class.php';require_once $source.'plugin/frontend/class.php';require_once $source.'plugin/myBackup/class.php';require_once PLUGIN.'manager/class.php';
 class ModuleExit extends \RuntimeException {}
 class myStep {public static function info($value,$url=''){throw new ModuleExit($value);}public static function redirect($url=''){throw new ModuleExit('redirect');}public static function header($status){throw new ModuleExit($status);}public static function file($file){$GLOBALS['downloaded_file']=$file;throw new ModuleExit('download');}public static function setURL($path=''){return '/'.ltrim($path,'/');}}
 class TemplateSpy {public $rows=[],$values=[];public function setLoop($key,$value){$this->rows[$key][]=$value;}public function assign($key,$value=null){if(is_array($key))$this->values=array_replace($this->values,$key);else $this->values[$key]=$value;}}
@@ -28,7 +28,9 @@ try {
     $case=$argv[1];
     if($case==='auth') {showPluginPage('myBackup');ensure($mystep->renders===0,'Unauthenticated plugin page must stop');}
     elseif(strpos($case,'backup-')===0){
-        include $source.'config/config.php';$o=$setting['db'];$schema='mystep_plugin_'.bin2hex(random_bytes(5));
+        $config_file=getenv('MYSTEP_TEST_CONFIG') ?: $source.'config/config.php';
+        if(!is_file($config_file))throw new RuntimeException('MySQL fixture requires a configured site or MYSTEP_TEST_CONFIG');
+        $config=include $config_file;$o=$config['db'];$schema='mystep_plugin_'.bin2hex(random_bytes(5));
         $db=new myDb('MySQL',$o['host'],$o['user'],$o['password'],$o['charset']);$db->connect(false,$o['name']);$db->query('CREATE DATABASE '.$db->quoteIdentifier($schema));$db->selectDB($schema);$original=$db;
         $S=(object)['db'=>(object)array_replace($o,['name'=>$schema]),'upload'=>(object)['ban_ext'=>'php']];
         file_put_contents(PLUGIN.'myBackup/config.php','<?php return '.var_export(['host'=>$o['host'],'user'=>$o['user'],'password'=>$o['password'],'db'=>$schema,'charset'=>$o['charset']],true).';');
@@ -60,23 +62,28 @@ try {
         $exit='';try{plugin_manager::remote();}catch(ModuleExit $e){$exit=$e->getMessage();}ensure($exit==='download' && $GLOBALS['downloaded_file']===$file,'Public published artifact uses a valid capability');
         $_GET['token']=str_repeat('0',48);$exit='';try{plugin_manager::remote();}catch(ModuleExit $e){$exit=$e->getMessage();}ensure($exit==='404','Invalid public capability is refused');
     } elseif($case==='manager-links') {
-        mkdir(PLUGIN.'manager');
+
         file_put_contents(CONFIG.'version.php','<?php return "1.0";');
         file_put_contents(APP.'myStep/info.php','<?php return ["app"=>"myStep","name"=>"Core","ver"=>"1.0","intro"=>"Core app"];');
         file_put_contents(PLUGIN.'frontend/info.php','<?php return ["idx"=>"frontend","name"=>"Frontend","ver"=>"1.0","intro"=>"Resources"];');
         file_put_contents(PLUGIN.'manager/check_app.php','<?php return ["myStep"=>"1.1"];');
         file_put_contents(PLUGIN.'manager/check_plugin.php','<?php return ["frontend"=>"1.0"];');
         $ms_setting=$S=(object)['gen'=>(object)['path_admin'=>'manage'],'web'=>(object)['update'=>'updates.example.test']];$mystep->setting=$S;
+        file_put_contents(PLUGIN.'manager/config.php',"<?php return ['update_url'=>'plugin-updates.example.test'];");
         include $source.'plugin/manager/module/manager.php';
+        ensure($tpl_sub->values['link']==='plugin-updates.example.test','Plugin source wins over old global setting');
         ensure($tpl_sub->rows['app'][0]['setting_url']==='/manage/setting/myStep','Application settings URL');
         ensure($tpl_sub->rows['plugin'][0]['setting_url']==='/manage/function/plugin/setting/?idx=frontend','Plugin settings URL');
         ensure($tpl_sub->rows['app'][0]['update_class']==='' && $tpl_sub->rows['plugin'][0]['update_class']==='d-none','Update state is explicit data');
-        ensure($tpl_sub->rows['plugin'][0]['link']==='#','No fabricated attributes in href');
+        ensure($tpl_sub->rows['plugin'][0]['link']==='/manager/plugin/frontend','Hidden update action retains its canonical route');
         $template=new myTemplate(['path'=>$source.'plugin/manager/template','style'=>'','name'=>'manager','path_compile'=>CACHE.'compiled']);
         foreach($tpl_sub->rows as $key=>$rows)foreach($rows as $row)$template->setLoop($key,$row);
         $template->assign('plugin_setting_url','#manager-settings');$html=$template->render('',false);
         ensure(strpos($html,'href="/manage/function/plugin/setting/?idx=frontend"')!==false,'Rendered loop URL retains its own plugin');
         ensure(strpos($html,'href="#manager-settings"')!==false,'Header settings URL remains independent');
+        file_put_contents(PLUGIN.'manager/config.php',"<?php return ['update_url'=>''];");
+        include $source.'plugin/manager/module/manager.php';
+        ensure($tpl_sub->values['update_url']==='' && strpos($tpl_sub->values['link'],'未设置')!==false,'Offline-only management page remains available');
     } else {
         $_SERVER['REQUEST_METHOD']='POST';$_POST=['detail'=>$case==='frontend-invalid'?'not json':'{"Document":{"jq":"jquery-3.6.1.js","bs":"5.2.2"}}'];$before=file_get_contents(PLUGIN.'frontend/config.php');$exit='';
         try {include PLUGIN.'frontend/module/frontend.php';}catch(ModuleExit $e){$exit=$e->getMessage();}

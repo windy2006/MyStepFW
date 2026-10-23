@@ -40,6 +40,9 @@ return [
             'save' => $action('saveSettings', ['target' => 'string', 'version' => $required, 'setting' => $array]),
         ],
     ],
+    'setting/api' => [
+        'title' => 'API 参数设置', 'module' => 'setting/api', 'view' => 'apiSettings',
+    ],
     'setting/class' => [
         'title' => '类加载设置', 'group' => '设置', 'module' => 'setting/class', 'view' => 'classes',
         'actions' => [
@@ -93,6 +96,13 @@ return [
             'pack' => $action('packPlugin', ['idx' => $required]),
             'order' => $action('orderPlugins', ['order' => $array]),
             'upload' => $action('uploadPlugin'),
+        ],
+    ],
+    'function/api' => [
+        'title' => 'API 管理', 'group' => '功能', 'module' => 'function/api', 'view' => 'apiEndpoints',
+        'actions' => [
+            'save' => $action('saveApiEndpoint', ['scope'=>$required,'name'=>$required,'policy'=>$array,'version'=>$required]),
+            'reset' => $action('resetApiEndpoint', ['scope'=>$required,'name'=>$required,'version'=>$required]),
         ],
     ],
     'function/plugin/view' => [

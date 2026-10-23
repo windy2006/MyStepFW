@@ -66,7 +66,44 @@ try {
         $GLOBALS['info_app']=['app'=>'myStep'];
     });
     test('jQuery migrations match major versions',function(){check(strpos(plugin_frontend::migrate('jquery-3.6.1.js'),'3.4.0')!==false);check(strpos(plugin_frontend::migrate('jquery-2.2.4.js'),'1.4.1')!==false);same('',plugin_frontend::migrate('jquery-1.8.3.js'));});
-    test('update server enforces authenticated HTTPS transport',function(){same('https://updates.test',plugin_manager::updateBase('updates.test'));same('https://updates.test/base',plugin_manager::updateBase('https://updates.test/base/'));foreach(['http://updates.test','https://u:p@updates.test','https://updates.test?q=x',"updates.test\n"] as $bad)rejects(function()use($bad){plugin_manager::updateBase($bad);});});
+    test('update source supports explicit HTTP and HTTPS while bare domains default to HTTPS',function(){
+        foreach([
+            'updates.test'=>'https://updates.test',
+            'updates.test:8443/base/'=>'https://updates.test:8443/base',
+            'https://updates.test/base/'=>'https://updates.test/base',
+            'http://updates.test'=>'http://updates.test',
+            'http://updates.test:8080/base/'=>'http://updates.test:8080/base',
+            'HTTP://updates.test/base/'=>'http://updates.test/base',
+            'HTTPS://updates.test/base/'=>'https://updates.test/base',
+        ] as $source=>$expected) same($expected,plugin_manager::updateBase($source));
+    });
+    test('update source rejects credentials unsupported schemes query fragments and control characters',function(){
+        foreach(['ftp://updates.test','file:///tmp/update','https://u:p@updates.test','http://u@updates.test','http://updates.test?q=x','https://updates.test#x',"updates.test\n",'//updates.test',''] as $bad)
+            rejects(function()use($bad){plugin_manager::updateBase($bad);});
+    });
+    test('manager source prefers plugin config without mutating either file',function(){
+        file_put_contents(CONFIG.'config.php',"<?php return ['web'=>['update'=>'legacy.example.test']];");
+        file_put_contents(PLUGIN.'manager/config.php',"<?php return ['update_url'=>'plugin.example.test'];");
+        $before=[file_get_contents(CONFIG.'config.php'),file_get_contents(PLUGIN.'manager/config.php')];
+        same('plugin.example.test',plugin_manager::updateServer());
+        same($before,[file_get_contents(CONFIG.'config.php'),file_get_contents(PLUGIN.'manager/config.php')]);
+    });
+    test('manager legacy compatibility applies only when the new key is absent',function(){
+        file_put_contents(PLUGIN.'manager/config.php',"<?php return ['pack'=>true,'update'=>true];");
+        same('legacy.example.test',plugin_manager::updateServer());
+        file_put_contents(PLUGIN.'manager/config.php',"<?php return ['update_url'=>''];");
+        same('',plugin_manager::updateServer());
+        rejects(function(){plugin_manager::updateBase(plugin_manager::updateServer());});
+    });
+    test('manager rejects non-string source and leaves unconfigured sites offline',function(){
+        foreach([null,[],true,123] as $value) {
+            file_put_contents(PLUGIN.'manager/config.php','<?php return '.var_export(['update_url'=>$value],true).';');
+            rejects(function(){plugin_manager::updateServer();});
+        }
+        file_put_contents(CONFIG.'config.php',"<?php return ['gen'=>['path_admin'=>'manage'],'router'=>['mode'=>'rewrite','default_app'=>'myStep']];");
+        file_put_contents(PLUGIN.'manager/config.php',"<?php return ['pack'=>true,'update'=>true];");
+        same('',plugin_manager::updateServer());
+    });
     test('manager presentation resolves three route modes without changing the active request',function(){
         mkdir(APP.'Admin/module',0700,true);file_put_contents(APP.'Admin/info.php','<?php return [];');file_put_contents(APP.'Admin/plugin_layout.php','<?php return [];');$_SERVER['SCRIPT_NAME']='/sub/index.php';
         $before=[$_GET,$_REQUEST,$GLOBALS['info_app']];
@@ -81,7 +118,7 @@ try {
         try {same('Admin',plugin_manager::pageApplication('http://admin.example.test/sub/setting'));same('Admin',plugin_manager::pageApplication('http://admin.example.test/'));same('myStep',plugin_manager::pageApplication('http://admin.example.test/sub/manage/error'));mkdir(APP.'Custom/module',0700,true);file_put_contents(APP.'Custom/info.php','<?php return [];');file_put_contents(APP.'Custom/plugin_layout.php','<?php return [];');same('Custom',plugin_manager::pageApplication('http://example.test/sub/Custom/tools'));unlink(APP.'Custom/plugin_layout.php');same('myStep',plugin_manager::pageApplication('http://example.test/sub/Custom/tools'));}
         finally {unset($GLOBALS['domain']);}
     });
-    foreach(['../escape','/../escape','a/../../escape','a//file','C:/file','a\\file','config/config.php','cache/a','a/.env'] as $bad)test('manager path rejects '.json_encode($bad),function()use($bad){rejects(function()use($bad){plugin_manager::relativePath($bad);});});
+    foreach(['../escape','/../escape','a/../../escape','a//file','C:/file','a\\file','config/config.php','config/api.php','cache/a','a/.env'] as $bad)test('manager path rejects '.json_encode($bad),function()use($bad){rejects(function()use($bad){plugin_manager::relativePath($bad);});});
     test('update paths allow library cache/session code while preserving runtime boundaries',function(){
         foreach(['lib/cache/myCacheCodec.class.php','lib/session/sess_file.class.php'] as $name) same($name,plugin_manager::relativePath('/'.$name));
         foreach(['cache/file','session/file','app/test/cache/file','app/test/session/file','lib/cache/cache/file','lib/session/session/file','lib/cache/config.php','lib/cache/data.db'] as $name) rejects(function()use($name){plugin_manager::relativePath($name);});

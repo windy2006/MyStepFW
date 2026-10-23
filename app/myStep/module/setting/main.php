@@ -9,14 +9,18 @@ if(!empty($app)) {
     $file = CONFIG.'config.php';
     $builder = CONFIG.'construction/'.$ms_setting->gen->language.'.php';
 }
+require_once APP.'myStep/MyStepApiManager.class.php';
 $config = new myConfig($file);
+if($app==='')MyStepApiManager::frameworkSettings($config);
 $config->merge(myPath::settings($config->get(true), $app?:'myStep'));
 if(myReq::check('post')) {
     $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
     if(!empty($app) && file_exists(APP.$app.'/setting_expand.php')) include(APP.$app.'/setting_expand.php');
     $config->set($_POST['setting']);
+    if($app==='')MyStepApiManager::frameworkSettings($config);
     $config->merge(myPath::settings($config->get(true), $app?:'myStep'));
     $config->save('php');
+    if($app==='')(new MyStepApiManager())->normalizeStorage();
 }
 
 $dirs = myFile::find('', APP, false, myFile::DIR);

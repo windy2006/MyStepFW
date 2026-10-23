@@ -1,6 +1,7 @@
 /* Session CSRF integration for forms, legacy links, jQuery, XHR and fetch.
  * 受控退出表单：POST + data-ms-logout + data-ms-csrf（同源目标会话令牌接口）。
  * 退出前用same-origin/no-store读取当前令牌；刷新失败不提交，防止旧页面继续使用失效令牌。
+ * jQuery 与原生 XHR 共用时只补充一次 CSRF 头，避免浏览器合并成重复令牌。
  */
 (function () {
     'use strict';
@@ -70,9 +71,14 @@
         if (link.target) form.target = link.target;
         document.body.appendChild(form); field(form); form.submit();
     });
-    var open = XMLHttpRequest.prototype.open, send = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.open = function (method, url) { this._msUnsafe = !/^(GET|HEAD|OPTIONS)$/i.test(method) && allowed(url); return open.apply(this, arguments); };
-    XMLHttpRequest.prototype.send = function () { if (this._msUnsafe) this.setRequestHeader('X-CSRF-Token', config.token); return send.apply(this, arguments); };
+    var open = XMLHttpRequest.prototype.open, send = XMLHttpRequest.prototype.send, setHeader = XMLHttpRequest.prototype.setRequestHeader;
+    XMLHttpRequest.prototype.open = function (method, url) { this._msUnsafe = !/^(GET|HEAD|OPTIONS)$/i.test(method) && allowed(url); this._msCsrfHeader = false; return open.apply(this, arguments); };
+    XMLHttpRequest.prototype.setRequestHeader = function (name, value) {
+        var result = setHeader.apply(this, arguments);
+        if (String(name).toLowerCase() === 'x-csrf-token') this._msCsrfHeader = true;
+        return result;
+    };
+    XMLHttpRequest.prototype.send = function () { if (this._msUnsafe && !this._msCsrfHeader) this.setRequestHeader('X-CSRF-Token', config.token); return send.apply(this, arguments); };
     if (window.fetch) {
         var fetch = window.fetch;
         window.fetch = function (input, options) {

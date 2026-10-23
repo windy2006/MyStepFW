@@ -257,3 +257,5 @@
 #adm-phpinfo .v i { color: #999; }
 #adm-phpinfo img { float: right; border: 0; }
 #adm-phpinfo hr { width: 934px; max-width: 100%; background-color: #ccc; border: 0; height: 1px; }
+
+.adm-api-settings form>.adm-field{padding:14px 16px;border-bottom:1px solid var(--line,#dfe5ee)}.adm-api-settings form>.adm-field:nth-of-type(even){background:#f3f6fa}.adm-api-settings h2{margin-bottom:14px}

@@ -5,6 +5,8 @@ define('ROOT',$scratch.'/');define('APP',ROOT.'app/');define('CONFIG',ROOT.'conf
 mkdir(APP);mkdir(CONFIG);$lib=dirname(__DIR__, 2).'/lib/';$_SERVER['DOCUMENT_ROOT']='/';$_SERVER['SCRIPT_NAME']='/index.php';$_SERVER['REQUEST_TIME']=time();
 require_once $lib.'myBase.class.php';require_once $lib.'myTrait.class.php';require_once $lib.'myReq.class.php';require_once $lib.'myFile.class.php';require_once $lib.'myRouter.class.php';
 foreach(['myStep','Sample','CMS','test'] as $app){mkdir(APP.$app);file_put_contents(APP.$app.'/info.php','<?php return ["app"=>'.var_export($app,true).', "name"=>'.var_export($app,true).'];');}
+// 路由单元用HTTP准备替身；真实CORS/会话顺序由admin_http_fixture覆盖。
+class myApi {public static $prepared=0;public static function httpCors(){self::$prepared++;}}
 class RouteSettings {public function merge($path){return $this;}}
 class myStep {public static $started=0,$core='myStep';public static function getCore(){return self::$core;}public static function setPara(){self::$started++;}public static function checkBind($rule){}public static function info($message){throw new RuntimeException($message);} }
 $ms_setting=new RouteSettings();$passed=$failed=0;
@@ -24,7 +26,7 @@ test('callable arrays are route handlers rather than middleware lists',function(
 test('custom format preserves escaped and character-class parentheses',function(){$r=router('/literal/(');$r->format('paren','[(]');$value=null;$r->rule('/literal/[paren]',function($match)use(&$value){$value=$match;},'myStep');$r->check();same('(',$value);});
 test('escaped literal parenthesis remains literal',function(){$r=router('/escaped/(');$r->format('open','\\(');$called=null;$r->rule('/escaped/[open]',function($value)use(&$called){$called=$value;},'myStep');same(true,$r->check());same('(',$called);});
 test('explicit check path updates request context',function(){$r=router('/');$r->rule('/next/[int]',function(){},'myStep');same(true,$r->check('/next/9?x=1'));same('/next/9/',$r->route['p']);same('1',$r->info['para']['x']);});
-test('shared API initializes selected core before dispatch',function(){myStep::$core='CMS';try{$r=router('/api/upload/json?core=CMS','core=CMS');$captured=null;$r->rule('/api/[str]/[any]',function($path)use(&$captured){$captured=$path;},'myStep');same(true,$r->check());same('CMS',$GLOBALS['info_app']['app']);same('myStep/upload/json/',$captured);}finally{myStep::$core='myStep';}});
+test('shared API initializes selected core before dispatch',function(){myStep::$core='CMS';try{$r=router('/api/upload/json?core=CMS','core=CMS');$captured=null;$r->rule('/api/[str]/[any]',function($path)use(&$captured){$captured=$path;},'myStep');same(true,$r->check());same('CMS',$GLOBALS['info_app']['app']);same('myStep/upload/json/',$captured);same(true,myApi::$prepared>0);}finally{myStep::$core='myStep';}});
 test('named pipeline substitutions preserve legacy argument contract',function(){$r=router('/pipe/Alpha/rest');$GLOBALS['pipeline']=[];$r->format('camel','([A-Z][a-z]+)+');$r->rule('/pipe/[camel]/[any]',['pipelineGuard,$1','pipelineEnd'],'myStep');same(true,$r->check());same(['Alpha',true],$GLOBALS['pipeline'][0]);same(['Alpha/rest/',['ok']],$GLOBALS['pipeline'][1]);});
 function pipelineGuard($capture,$previous){$GLOBALS['pipeline'][]=[$capture,$previous];return 'ok';}
 function pipelineEnd($path,$results){$GLOBALS['pipeline'][]=[$path,$results];}

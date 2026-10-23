@@ -31,12 +31,18 @@ test('remote difference links retain exactly one deployment prefix',()=>{
 });
 
 // Run the real manager template with controlled Ajax responses; no update request leaves this process.
-function managerFixture(version,download,difference){
-    const events={text:{},alerts:[],loading:[],posts:0,reloads:0,dialogs:[]},handlers={},ready=[];
+function managerFixture(version,download,difference,server='https://updates.test/sub',rows=[]){
+    const events={text:{},alerts:[],loading:[],posts:0,reloads:0,dialogs:[],gets:[]},handlers={},ready=[];
     let $;
     const escape=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     $=selector=>{
         if(typeof selector==='function'){ready.push(selector);return;}
+        if(selector==='[data-manager-kind]') return {each(fn){rows.forEach(row=>fn.call(row));return this;}};
+        if(selector && typeof selector==='object' && selector.managerKind) return {
+            attr(name){return name==='data-manager-kind'?selector.managerKind:selector.id;},
+            find(){return {text(value){selector.remote=value;return this;},toggleClass(name,hidden){selector.hidden=hidden;return this;}};}
+        };
+
         let value='';return {
             click(fn){handlers[selector]=fn;return this;},
             text(text){value=text;events.text[selector]=text;return this;},
@@ -45,6 +51,7 @@ function managerFixture(version,download,difference){
     };
     $.vendor=()=>{};
     $.get=(url,callback)=>{
+        events.gets.push(url);
         const result=url.includes('/check/version')?version:(url.includes('/download?')?download:difference);
         if(result!==undefined && result!==null)callback(result);
         return {fail(fn){if(result===null)fn({status:503});return this;}};
@@ -53,12 +60,32 @@ function managerFixture(version,download,difference){
     const location={href:'',replace(url){this.href=url;}};const top={location:{reload(){events.reloads++;}}};
     const context=vm.createContext({$,jQuery:$,URL,location,window:{top,location},console:{log(){}},loadingShow(value){events.loading.push(value);},alert(value){events.alerts.push(value);},alert_org(value){events.alerts.push(value);},confirm(...args){events.dialogs.push(args);}});
     const template=fs.readFileSync(path.join(root,'plugin/manager/template/manager.tpl'),'utf8');
-    const code=template.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1].replaceAll('<!--url_prefix-->','/sub/').replaceAll('<!--update_url-->','https://updates.test/sub');
+    const code=template.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1].replaceAll('<!--url_prefix-->','/sub/').replaceAll('<!--update_url-->',server);
     vm.runInContext(code,context);ready.forEach(fn=>fn());return {events,context,location,handlers};
 }
 test('manager distinguishes latest version from failed version response',()=>{
     const latest=managerFixture({version:'',detail:[]});assert.equal(latest.events.text['#info'],'已是最新版本');
     const failed=managerFixture({error:1,version:''});assert.match(failed.events.text['#info'],/检查失败/);
+});
+test('manager empty update source keeps offline mode and blocks online requests',()=>{const f=managerFixture(null,null,null,'');assert.match(f.events.text['#info'],/仅支持离线更新/);f.context.applyUpdate(1);f.handlers['#link_6']();assert.deepEqual(f.events.gets,[]);assert.equal(f.events.posts,0);assert.match(f.events.text['#manager-feedback'],/插件设置/);});
+test('manager refreshes uncached Admin and myBackup versions and update buttons immediately',()=>{
+    const rows=[{managerKind:'app',id:'Admin',hidden:true},{managerKind:'plugin',id:'myBackup',hidden:true},{managerKind:'plugin',id:'sample',hidden:true}];
+    const reply={version:'',detail:[],app:{Admin:'1.0'},plugin:{myBackup:'1.0',sample:'1.10'},updates:{app:{Admin:false},plugin:{myBackup:false,sample:true}}};
+    managerFixture(reply,undefined,undefined,'https://updates.test',rows);
+    assert.deepEqual(rows.map(row=>row.remote),['1.0','1.0','1.10']);
+    assert.deepEqual(rows.map(row=>row.hidden),[true,true,false]);
+});
+test('manager hides obsolete update actions for missing versions and failed checks',()=>{
+    const missing=[{managerKind:'app',id:'Admin',hidden:false}];
+    managerFixture({version:'',app:{},plugin:{},updates:{app:{Admin:true}}},undefined,undefined,'https://updates.test',missing);
+    assert.equal(missing[0].remote,'未提供');assert.equal(missing[0].hidden,true);
+    const failed=[{managerKind:'plugin',id:'myBackup',hidden:false}];
+    managerFixture(null,undefined,undefined,'https://updates.test',failed);
+    assert.equal(failed[0].remote,'检查失败');assert.equal(failed[0].hidden,true);
+});
+test('manager displays actual equal server version independently of available releases',()=>{
+    const f=managerFixture({version:'',server_version:'2.0.4',server_compare:0,detail:[]});assert.equal(f.events.text['#info'],'已是最新版本（服务器 v2.0.4）');
+    const newer=managerFixture({version:'',server_version:'2.1.0',server_compare:1,detail:[]});assert.match(newer.events.text['#info'],/尚无可用升级包/);
 });
 test('manager reports network failure during version check',()=>{const f=managerFixture(null);assert.match(f.events.text['#info'],/检查失败/);});
 test('manager update label uses text insertion for server version',()=>{const f=managerFixture({version:'2.0<img>',detail:{}});assert.equal(f.events.text['#info'],'点击更新（v2.0<img>）');});

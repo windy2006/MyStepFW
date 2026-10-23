@@ -12,6 +12,10 @@
  * @method string errors() 对应module中的已登记功能回调
  * @method array clearErrors($p) 对应module中的已登记功能回调
  * @method array downloadErrors($p) 对应module中的已登记功能回调
+ * @method string apiSettings() 兼容旧入口并跳转统一参数设置
+ * @method string apiEndpoints() API接口功能目录
+ * @method array saveApiEndpoint($p) 保存API接口策略
+ * @method array resetApiEndpoint($p) 恢复API接口默认策略
  * @method string settings() 对应module中的已登记功能回调
  * @method array saveSettings($p) 对应module中的已登记功能回调
  * @method string classes() 对应module中的已登记功能回调
@@ -198,7 +202,7 @@ class AdminService {
             $groups[count($groups)-1]['rows'][] = ['content' => $this->ui->view('config_item', ['name' => $field['name'], 'control' => $field['html']??'', 'description' => $field['describe']??''])];
         }
         $fields = [];
-        foreach($groups as $group)$fields[] = ['content' => $this->ui->view('config_section', ['name' => $group['name'], 'parent' => $group['parent']], ['fields' => $group['rows']], ['nested' => $group['parent'] !== '', 'has_fields' => (bool)$group['rows']])];
+        foreach($groups as $group)$fields[] = ['content' => $this->ui->view('config_section', ['name' => $group['name'], 'parent' => $group['parent'], 'section_id'=>$group['idx']], ['fields' => $group['rows']], ['nested' => $group['parent'] !== '', 'has_fields' => (bool)$group['rows']])];
         return $this->ui->view('config_fields', [], ['fields' => $fields]);
     }
     /**

@@ -27,7 +27,8 @@
  *   public static plugin_manager::applyUpdate(array $detail) — 锁内预检、备份与发布更新，最后提交版本。
  *   protected static plugin_manager::assertUpdateAccess($path, $operation='write', $backup=false) — 按写入、建目录或删除操作预检权限，以网站相对路径报告失败。
  *   public static plugin_manager::identifier($idx) — 校验应用或插件标识，防止目录穿越/任意PHP包含。
- *   public static plugin_manager::updateBase($server) — 生成更新服务基址，缺省使用HTTPS，禁止HTTP降级、凭据、查询串及片段。
+ *   public static plugin_manager::updateServer() — 读取插件更新网址，缺少新字段时兼容旧框架配置。
+ *   public static plugin_manager::updateBase($server) — 生成更新服务基址，支持显式HTTP/HTTPS，缺省HTTPS且不自动降级；禁止凭据、查询串及片段。
  *   public static plugin_manager::relativePath($name) — 校验更新文件相对路径，兼容清单中的单个前导斜线；排除私有配置和运行时数据。
  *   public static plugin_manager::sourcePath($name) — 将成员解析到框架根目录，禁止任何符号链接穿越；允许尚不存在的更新目标。
  *   public static plugin_manager::decodeUpdate($compressed) — 有界解压/解码更新包，不实例化序列化对象；所有成员在首次落盘前校验。
@@ -127,6 +128,7 @@ class plugin_manager implements interface_plugin {
     /**
      * 功能说明：在后台登录检查后分派更新检查、上传、安装、归档下载及管理页面。
      *
+     * 版本检查返回更新源实际框架版本、可用升级版本、实时应用／插件清单及由 PHP version_compare 计算的更新状态，供页面无刷新同步表格。
      * 先检查框架后台身份；manager/file 只读取限定名称的归档，无需连接远端更新源。
      * 写操作的方法和 CSRF 保护由框架入口执行；不同分支可能直接发送文件或结束请求。
      *
@@ -161,22 +163,35 @@ class plugin_manager implements interface_plugin {
                 }
                 break;
             case 'check':
-                $url = self::updateBase($ms_setting->web->update).'/api/plugin_manager/';
+                $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
                 $ver = require(CONFIG.'version.php');
                 $ver_remote = myString::fromJson(myFile::getRemote($url.'check/version?v='.$ver, $header));
                 if(!is_array($ver_remote) || !isset($ver_remote['version']) || !is_string($ver_remote['version']) || !is_array($ver_remote['info'] ?? null) || !is_array($ver_remote['app'] ?? null) || !is_array($ver_remote['plugin'] ?? null)) {
                     echo json_encode(['error'=>1,'version'=>'','message'=>'Cannot read update server version']);
                     break;
                 }
+                $component_versions = [];
+                $component_updates = [];
                 foreach(['app','plugin'] as $type) {
                     $versions=[];
                     foreach($ver_remote[$type] as $idx=>$version) {
                         if(!is_string($idx) || !preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$idx) || !is_string($version)) continue;
                         $versions[$idx]=$version;
                     }
+                    $component_versions[$type] = $versions;
+                    $component_updates[$type] = [];
+                    foreach($versions as $idx => $remote_version) {
+                        $local_file = ($type === 'app' ? APP : PLUGIN).$idx.'/info.php';
+                        if(!is_file($local_file)) continue;
+                        $local_info = include $local_file;
+                        if(!is_array($local_info) || !is_string($local_info['ver'] ?? null)) continue;
+                        $component_updates[$type][$idx] = version_compare($remote_version, $local_info['ver'], '>');
+                    }
                     $script='<?php return '.var_export($versions,true).';';
                     if(myFile::saveFile(__DIR__.'/check_'.$type.'.php',$script)!==strlen($script)) throw new RuntimeException('Cannot save remote version list');
                 }
+                $server_version = is_string($ver_remote['server_version'] ?? null) ? $ver_remote['server_version'] : '';
+                $server_compare = $server_version === '' ? null : version_compare($server_version, $ver);
                 $latest=$ver_remote['version'];
                 if($latest!=='' && version_compare($latest,$ver)<=0) $latest='';
                 $detail=[];
@@ -185,14 +200,15 @@ class plugin_manager implements interface_plugin {
                     $detail[$version]=trim((string)$description);
                 }
                 uksort($detail,'version_compare');
-                echo myString::toJson(['version'=>$latest,'detail'=>$detail],$ms_setting->gen->charset);
+                header('Cache-Control: private, no-store');
+                echo myString::toJson(['version'=>$latest,'server_version'=>$server_version,'server_compare'=>$server_compare,'detail'=>$detail,'app'=>$component_versions['app'],'plugin'=>$component_versions['plugin'],'updates'=>$component_updates],$ms_setting->gen->charset);
                 break;
             case 'check_local':
                 $result = self::checkFile();
                 echo myString::toJson($result, $ms_setting->gen->charset);
                 break;
             case 'check_server':
-                $url = self::updateBase($ms_setting->web->update).'/api/plugin_manager/';
+                $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
                 $check_info=json_decode(myFile::getRemote($url.'check',$header),true);
                 if(!is_array($check_info) || !isset($check_info['list_file'],$check_info['list_file_md5']) || !is_array($check_info['list_file']) || !is_array($check_info['list_file_md5'])) {
                     echo json_encode(['code'=>1,'error'=>'Cannot parse update manifest']);
@@ -247,7 +263,7 @@ class plugin_manager implements interface_plugin {
                 try {
                     $mode = $info_app['para']['m'] ?? '0';
                     if(!in_array($mode, [0,1,'0','1'],true)) throw new InvalidArgumentException('Invalid update mode');
-                    $url = self::updateBase($ms_setting->web->update).'/api/plugin_manager/';
+                    $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
                     $ver = require(CONFIG.'version.php');
                     $detail = self::decodeUpdate(myFile::getRemote($url.'download?v='.rawurlencode($ver), $header));
                     if((int)$mode===1) {
@@ -267,7 +283,7 @@ class plugin_manager implements interface_plugin {
                 break;
             case 'plugin':
             case 'app':
-                $url = self::updateBase($ms_setting->web->update).'/api/plugin_manager/';
+                $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
                 $type = $info_app['path'][1];
                 $idx = self::identifier(end($info_app['path']));
                 $base = $type === 'app' ? APP : PLUGIN;
@@ -348,6 +364,7 @@ class plugin_manager implements interface_plugin {
      *
      * 这是更新服务入口，不是普通后台页面；开关关闭且非调试模式时返回404。
      * 公开差异包下载仅凭有效、未过期且与文件绑定的随机凭据授权；不开放任意临时文件。
+     * version 分支的 server_version 为 config/version.php 实际版本，version 为发布清单中可提供的升级版本，两者分别返回。
      * 大部分分支直接输出 JSON 或二进制内容，文件响应可能直接结束请求。
      *
      * 参数说明：无显式参数。
@@ -372,7 +389,7 @@ class plugin_manager implements interface_plugin {
                 $ver = $info_app['para']['v'] ?? '0';
                 $detail = require(__DIR__.'/version.php');
                 uksort($detail, 'version_compare');
-                $result = ['version'=>'', 'info'=>[]];
+                $result = ['version'=>'', 'server_version'=>(string)require(CONFIG.'version.php'), 'info'=>[]];
                 foreach($detail as $k => $v) {
                     if(version_compare($k, $ver)>0) {
                         $result['info'][$k] = $v['info'];
@@ -657,7 +674,7 @@ class plugin_manager implements interface_plugin {
                     $defaults=array_diff(self::IGNORE,['cache/','config.php','construction.php']);
                     if(in_array($name,$defaults,true) || in_array($name.'/',$defaults,true) || preg_match('/(?:\.db(?:-wal|-shm|-journal)?|\.sqlite3?|\.lock|\.log|\.bak)$/i',$name) || strpos($name,'_bak')!==false) continue;
                     if($member==='files' || (in_array($name,['cache','session'],true) && !in_array($member,['lib/cache','lib/session'],true))) continue;
-                    if(in_array($member,['config/config.php','config/domain.php','config/route.php','config/route.php.sources.json','config/priority'],true)) continue;
+                    if(in_array($member,['config/config.php','config/api.php','config/domain.php','config/route.php','config/route.php.sources.json','config/priority'],true)) continue;
                     if($name==='config.php' && !preg_match('#\A(?:app|plugin)/[A-Za-z][A-Za-z0-9_]*/config\.php\z#D',$member)) continue;
                     if(++$count>10000) throw new RuntimeException('System package member budget exceeded');
                     if($entry->isDir()) {$scan($member.'/');continue;}
@@ -1245,22 +1262,49 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
         return $idx;
     }
     /**
-     * 功能说明：生成更新服务基址，缺省使用HTTPS，禁止HTTP降级、凭据、查询串及片段。
+     * 功能说明：读取 manager 自有更新网址，兼容尚未迁移的旧框架配置。
      *
-     * @param string $server 主机[:端口]或完整HTTPS基址
-     * @return string 不带末尾斜线的HTTPS地址
+     * 优先读取 plugin/manager/config.php 的 update_url；仅当字段不存在时读取
+     * config/config.php 的 web.update。显式空字符串不回退旧值，表示仅使用离线更新。
+     * 不在读取时改写配置；实际联网前须交由 updateBase 校验 HTTP/HTTPS 地址。
+     *
+     * 参数说明：无显式参数。
+     *
+     * 调用示例：
+     *     $url = plugin_manager::updateBase(plugin_manager::updateServer()).'/api/plugin_manager/';
+     *
+     * @return string 更新源原始域名或 HTTP/HTTPS 基址；未设置时为空字符串
+     * @throws InvalidArgumentException 更新网址不是字符串
+     * @throws Throwable 配置读取异常继续传递
+     */
+    public static function updateServer() {
+        $config = new myConfig(__DIR__.'/config.php');
+        $data = $config->get(true);
+        if(array_key_exists('update_url', $data)) $server = $data['update_url'];
+        else $server = (new myConfig(CONFIG.'config.php'))->value('web.update', '');
+        if(!is_string($server)) throw new InvalidArgumentException('Invalid update server');
+        return $server;
+    }
+    /**
+     * 功能说明：生成更新服务基址，支持显式HTTP/HTTPS，缺省HTTPS且不自动降级；禁止凭据、查询串及片段。
+     *
+     * @param string $server 主机[:端口][/子目录]或完整HTTP/HTTPS基址；省略协议时使用HTTPS
+     * @return string 不带末尾斜线的HTTP/HTTPS地址；不会探测或静默切换协议
      * @throws InvalidArgumentException 不可信地址格式
      */
     public static function updateBase($server) {
         if(!is_string($server) || preg_match('/[\x00-\x20\x7f\\\\]/',$server)) throw new InvalidArgumentException('Invalid update server');
+        if($server==='') throw new InvalidArgumentException('请先在 manager 插件设置中填写更新网址。');
         $url=strpos($server,'://')===false ? 'https://'.$server : $server;$p=parse_url($url);
-        if(!$p || ($p['scheme'] ?? '')!=='https' || empty($p['host']) || isset($p['user'],$p['pass']) || isset($p['user']) || isset($p['query']) || isset($p['fragment'])) throw new InvalidArgumentException('Update server requires HTTPS');
+        if(!$p || !in_array(strtolower($p['scheme'] ?? ''), ['http','https'], true) || empty($p['host']) || isset($p['user']) || isset($p['pass']) || isset($p['query']) || isset($p['fragment'])) throw new InvalidArgumentException('Update server requires an HTTP or HTTPS base URL without credentials, query or fragment');
+        $url = strtolower($p['scheme']).substr($url, strlen($p['scheme']));
         return rtrim($url,'/');
     }
     /**
      * 功能说明：校验更新文件相对路径，兼容清单中的单个前导斜线；排除私有配置和运行时数据。
      *
      * lib/cache与lib/session仅作为固定的框架源码目录放行；其他cache/session目录仍受保护。
+     * config/api.php保存站点API策略，不进入升级替换成员。
      *
      * @param string $name 清单成员路径
      * @return string 不带前导斜线的路径
@@ -1269,6 +1313,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
     public static function relativePath($name) {
         if(!is_string($name) || $name==='' || strlen($name)>4096 || preg_match('/[\x00-\x1f\x7f\\\\:]/',$name) || strpos($name,'//')!==false) throw new InvalidArgumentException('Invalid update path');
         $name=ltrim($name,'/');$parts=explode('/',rtrim($name,'/'));
+        if($name==='config/api.php')throw new InvalidArgumentException('API policy is a private site configuration');
         if(($parts[0] ?? '')==='files') throw new InvalidArgumentException('Upload data is not an update member');
         foreach($parts as $position=>$part) {
             $libraryDirectory=$position===1 && $parts[0]==='lib' && in_array($part,['cache','session'],true);

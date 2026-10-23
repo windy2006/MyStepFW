@@ -7,7 +7,7 @@ function form(action='http://mystep.com/console/login', method='post', attrs={})
     return {action, method, input:null, hasAttribute(name){return Object.hasOwn(attrs,name);},getAttribute(name){return attrs[name]??null;}, querySelector(){return this.input;}, appendChild(input){this.input=input;}, submit(){sent.push(this);}};
 }
 const login=form(), external=form('https://evil.test/receive'); forms.push(login, external);
-class XHR {open(method,url){this.method=method;this.url=url;} setRequestHeader(name,value){this.header=[name,value];} send(){sent.push(this);}}
+class XHR {open(method,url){this.method=method;this.url=url;this.headers={};this.header=undefined;} setRequestHeader(name,value){this.header=[name,value];this.headers=this.headers||{};const key=name.toLowerCase();this.headers[key]=this.headers[key]?this.headers[key]+', '+value:value;} send(){sent.push(this);}}
 let prefilter;
 const window={msSecurity:{token:'fixture-token',origins:['http://mystep.com','http://api.mystep.com'],admin:['console','admin_cms'],adminContext:false},jQuery:{ajaxPrefilter(callback){prefilter=callback;}},fetch(input,options){requests.push({input,options});return Promise.resolve();}};
 const document={baseURI:'http://mystep.com/console/',forms,body:{appendChild(value){forms.push(value);}},createElement(type){return type==='form'?form():{};},addEventListener(name,callback){events[name]=callback;}};
@@ -22,6 +22,14 @@ test('GET Ajax stays GET',()=>{const o={url:'/console/list',type:'GET'};prefilte
 test('legacy destructive Ajax switches to POST with token',()=>{const o={url:'/console/function/plugin/delete/?idx=sample',type:'GET'};prefilter(o);assert.equal(o.type,'POST');assert.equal(o.headers['X-CSRF-Token'],'fixture-token');});
 test('external Ajax never receives a token',()=>{const o={url:'https://evil.test/console/delete',type:'POST'};prefilter(o);assert.equal(o.headers,undefined);});
 test('bound-domain POST XHR gets token',()=>{const x=new XHR();x.open('POST','http://api.mystep.com/upload');x.send();assert.deepEqual(x.header,['X-CSRF-Token','fixture-token']);});
+test('jQuery prefilter and XHR wrapper send exactly one CSRF header for manager checks',()=>{
+    const options={url:'/manager/check/version',type:'GET'};prefilter(options);
+    const x=new XHR();x.open(options.type,options.url);
+    for(const [name,value] of Object.entries(options.headers))x.setRequestHeader(name,value);
+    x.send();assert.equal(x.headers['x-csrf-token'],'fixture-token');
+});
+test('explicit lowercase CSRF headers are preserved once',()=>{const x=new XHR();x.open('POST','/manager/check/version');x.setRequestHeader('x-csrf-token','explicit-token');x.send();assert.equal(x.headers['x-csrf-token'],'explicit-token');});
+test('reused XHR clears explicit-header state before the next request',()=>{const x=new XHR();x.open('POST','/manager/check/version');x.setRequestHeader('x-csrf-token','explicit-token');x.send();x.open('POST','/manager/check/version');x.send();assert.equal(x.headers['x-csrf-token'],'fixture-token');});
 test('external XHR never receives a token',()=>{const x=new XHR();x.open('POST','https://evil.test/receive');x.send();assert.equal(x.header,undefined);});
 test('fetch POST gets token',()=>{window.fetch('/api/upload',{method:'POST'});assert.equal(requests.at(-1).options.headers.get('X-CSRF-Token'),'fixture-token');});
 test('external fetch never receives a token',()=>{window.fetch('https://evil.test/receive',{method:'POST'});assert.equal(requests.at(-1).options.headers,undefined);});

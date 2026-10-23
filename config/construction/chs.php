@@ -111,11 +111,16 @@ $setting_detail['web'] = array(
             'describe' => '以半角单引号分割，依次加载static目录下的对应文件，所有页面都将自动加载',
             'type' => array('text', '', '150')
         ),
-        'update' => array(
-            'name' => '更新网址',
-            'describe' => '获取内容系统程序更新的网址',
-            'type' => array('text', '_', '200')
-        ),
+    ]
+);
+
+$setting_detail['api'] = array(
+    'name' => 'API 设置',
+    'list' => [
+        'enabled' => ['name'=>'启用','describe'=>'启用框架API服务，关闭后后台参数设置仍可访问。','type'=>['radio',['启用'=>'true','关闭'=>'false']]],
+        'default_format' => ['name'=>'默认格式','describe'=>'未明确指定返回格式时使用。','type'=>['select',['JSON'=>'json','XML'=>'xml','纯文本'=>'string','十六进制'=>'hex','代码文本'=>'code']]],
+        'body_bytes' => ['name'=>'正文上限','describe'=>'单位字节，1至33554432；适用于所有请求格式及参数模式，更小的服务器或PHP限制优先。','type'=>['text','digital','10']],
+        'domain' => ['name'=>'专属域名','describe'=>'例如api.mystep.com，可带端口；不含协议或路径，留空按普通API路径生成地址。','type'=>['text',false,'260']],
     ]
 );
 

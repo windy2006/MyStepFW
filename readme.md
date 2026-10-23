@@ -53,10 +53,10 @@
 准备 PHP 7.4 运行环境，并按使用的数据库、图片、归档等功能启用相应扩展。配置网站根目录及统一入口；地址重写不可用时，可选择另外两种路由模式。首次访问按安装初始化流程生成配置，再通过后台管理应用、插件和运行参数。
 
 - [文档总览](docs/README.md)：按主题查阅框架机制、教程和维护资料。
-- [框架执行流程](docs/framework/execution.md)：了解请求、路由、认证、模块和响应之间的关系。
-- [应用编写规范](app/README.md)与[第一个应用](docs/guides/first-application.md)：按统一结构开始开发。
-- [插件编写规范](plugin/README.md)与[第一个插件](docs/guides/first-plugin.md)：扩展框架与应用功能。
-- [前端开发文档](static/README.md)：主要变量、公共函数、表单规则与示例。
-- [测试与验证说明](tests/README.md)：各类测试的入口、依赖及运行范围。
+- [框架执行流程](docs/backend/runtime/execution.md)：了解请求、路由、认证、模块和响应之间的关系。
+- [应用编写规范](app/README.md)与[第一个应用](docs/development/app/first-app.md)：按统一结构开始开发。
+- [插件编写规范](plugin/README.md)与[第一个插件](docs/development/plugins/first-plugin.md)：扩展框架与应用功能。
+- [前端开发文档](docs/frontend/README.md)：主要变量、公共函数、表单规则与示例。
+- `tests/README.md`：各类测试的入口、依赖及运行范围。
 
 后台的“框架指南”可直接阅读上述文档，原文更新后重新打开即可。框架采用[阿帕奇许可证第二版](LICENSE.txt)。

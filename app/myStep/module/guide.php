@@ -8,18 +8,26 @@
  */
 require_once APP.'myStep/MyStepGuide.class.php';
 $mystep->addCSS(APP.'myStep/asset/guide.css');
+$mystep->addJS(STATICS.'js/checkForm.js');$mystep->addJS(APP.'myStep/asset/guide.js');
 $guideHome=myStep::setURL(trim($ms_setting->gen->path_admin,'/').'/guide');
 $reader=new MyStepGuide($guideHome);
+// 沿用旧后台登录拦截，不为搜索另设公开接口。
+$article=function($data)use($tpl_setting,$mystep){
+    $setting=$tpl_setting;$setting['name']='guide_article';$part=new myTemplate($setting,false);
+    $part->assign(['guide_title'=>$data['title'],'guide_path'=>$data['path'],'guide_html'=>$data['html']])->setLoop('outline',$data['outline'],true);
+    return $mystep->render($part);
+};
+if(isset($_GET['_guide']))$reader->ajax($_GET['_guide'],$_GET['doc']??null,$_GET['q']??null,$article);
 $setting=$tpl_setting;$setting['name']='guide';
 $t=new myTemplate($setting,false);
 try {
     $data=$reader->page(myReq::get('doc','!'));
-    $t->assign(['guide_title'=>$data['title'],'guide_path'=>$data['path'],'guide_html'=>$data['html']]);
+    $t->assign(['guide_title'=>$data['title'],'guide_path'=>$data['path'],'guide_html'=>$data['html'],'guide_id'=>$data['id'],'guide_home'=>$guideHome,'guide_query'=>is_string($_GET['q']??null)?mb_substr($_GET['q'],0,80,'UTF-8'):'','guide_article'=>$article($data)]);
     $t->setLoop('outline',$data['outline'],true);
     foreach($data['groups'] as $group) {
         $groupSetting=$tpl_setting;$groupSetting['name']='guide_group';
         $groupTemplate=new myTemplate($groupSetting,false);
-        $groupTemplate->assign('title',$group['title'])->setLoop('links',$group['links'],true);
+        $groupTemplate->assign('title',$group['title'])->setIf('open',$group['open'])->setLoop('links',$group['links'],true);
         $t->setLoop('groups',['content'=>$mystep->render($groupTemplate)]);
     }
 } catch(OutOfBoundsException $error) {

@@ -424,6 +424,8 @@ class myRouter extends myBase {
                 $ms_setting->merge(APP.$core.'/config.php');
             }
             myStep::checkBind($rule['pattern']);
+            // 在应用/会话启动前处理API来源与预检；实际调用仍执行CSRF及业务权限。
+            if(strpos($rule['pattern'],'/api/')===0)myApi::httpCors(null,$match[0]??'',$this->apis);
             myStep::setPara();
             $result = [];
             if(is_array($rule['method']) && !is_callable($rule['method'])) {

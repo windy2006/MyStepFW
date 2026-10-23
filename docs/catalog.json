@@ -1,0 +1,1115 @@
+{
+    "version": 1,
+    "entries": [
+        {
+            "id": "index",
+            "title": "文档总览",
+            "path": "docs/README.md",
+            "group": "阅读入口"
+        },
+        {
+            "id": "basics-index",
+            "title": "基础说明",
+            "path": "docs/basics/README.md",
+            "group": "基础说明"
+        },
+        {
+            "id": "guide-basics",
+            "title": "整体介绍与框架组成",
+            "path": "docs/basics/01-guide-basics.md",
+            "group": "基础说明"
+        },
+        {
+            "id": "installation",
+            "title": "安装环境与基础配置",
+            "path": "docs/basics/02-installation.md",
+            "group": "基础说明"
+        },
+        {
+            "id": "management",
+            "title": "功能设置与管理入口",
+            "path": "docs/basics/03-management.md",
+            "group": "基础说明"
+        },
+        {
+            "id": "architecture",
+            "title": "框架概要与执行主线",
+            "path": "docs/basics/04-architecture.md",
+            "group": "基础说明"
+        },
+        {
+            "id": "standards",
+            "title": "开发规范与目录归属",
+            "path": "docs/basics/05-standards.md",
+            "group": "基础说明"
+        },
+        {
+            "id": "backend-index",
+            "title": "框架功能总览",
+            "path": "docs/backend/README.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "constants",
+            "title": "目录常量与路径",
+            "path": "docs/backend/runtime/constants.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "guide-functions",
+            "title": "主要变量与请求上下文",
+            "path": "docs/backend/runtime/variables.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "php-functions",
+            "title": "公共函数逐项用法",
+            "path": "docs/backend/runtime/functions.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "execution",
+            "title": "请求总流程与分支",
+            "path": "docs/backend/runtime/execution.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "bootstrap",
+            "title": "init：类加载、预算与安装",
+            "path": "docs/backend/runtime/bootstrap.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "dispatch",
+            "title": "go：前置脚本、域名与资源",
+            "path": "docs/backend/runtime/dispatch.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "application-start",
+            "title": "setPara与start：服务、会话和认证",
+            "path": "docs/backend/runtime/application-start.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "response-lifecycle",
+            "title": "show、end与提前退出",
+            "path": "docs/backend/runtime/response-lifecycle.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "errors",
+            "title": "错误、异常与日志生命周期",
+            "path": "docs/backend/runtime/errors.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "class-loading",
+            "title": "类加载目录、索引与特别指定",
+            "path": "docs/backend/runtime/class-loading.md",
+            "group": "变量与执行"
+        },
+        {
+            "id": "config",
+            "title": "myConfig装载、读取与分组合并",
+            "path": "docs/backend/config/config.md",
+            "group": "设置管理"
+        },
+        {
+            "id": "config-forms",
+            "title": "配置表单结构、多语种与字段转换",
+            "path": "docs/backend/config/config-forms.md",
+            "group": "设置管理"
+        },
+        {
+            "id": "config-save",
+            "title": "配置原子保存、版本比较与冲突",
+            "path": "docs/backend/config/config-save.md",
+            "group": "设置管理"
+        },
+        {
+            "id": "routing",
+            "title": "路由声明、编译及匹配优先级",
+            "path": "docs/backend/routing/routing.md",
+            "group": "路由与入口"
+        },
+        {
+            "id": "route-formats",
+            "title": "命名格式、捕获参数与字面路径",
+            "path": "docs/backend/routing/route-formats.md",
+            "group": "路由与入口"
+        },
+        {
+            "id": "route-modules",
+            "title": "注册模块、页面模块与专项入口",
+            "path": "docs/backend/routing/route-modules.md",
+            "group": "路由与入口"
+        },
+        {
+            "id": "links",
+            "title": "三种URL模式、查询参数与子目录",
+            "path": "docs/backend/routing/links.md",
+            "group": "路由与入口"
+        },
+        {
+            "id": "domains",
+            "title": "域名绑定、虚拟前缀与核心选择",
+            "path": "docs/backend/routing/domains.md",
+            "group": "路由与入口"
+        },
+        {
+            "id": "database",
+            "title": "数据库代理、驱动与能力接口",
+            "path": "docs/backend/database/database.md",
+            "group": "数据库"
+        },
+        {
+            "id": "db-prepared",
+            "title": "参数化查询、读取方式与返回值",
+            "path": "docs/backend/database/db-prepared.md",
+            "group": "数据库"
+        },
+        {
+            "id": "db-transactions",
+            "title": "事务、回调、保存点与失败",
+            "path": "docs/backend/database/db-transactions.md",
+            "group": "数据库"
+        },
+        {
+            "id": "db-builder",
+            "title": "SQLBuilder条件、字段和分页",
+            "path": "docs/backend/database/db-builder.md",
+            "group": "数据库"
+        },
+        {
+            "id": "db-cache",
+            "title": "SQL查询缓存与写后失效",
+            "path": "docs/backend/database/db-cache.md",
+            "group": "数据库"
+        },
+        {
+            "id": "db-drivers",
+            "title": "数据库驱动差异与真实环境边界",
+            "path": "docs/backend/database/db-drivers.md",
+            "group": "数据库"
+        },
+        {
+            "id": "cache",
+            "title": "缓存协议、实例与命中状态",
+            "path": "docs/backend/cache/cache.md",
+            "group": "缓存"
+        },
+        {
+            "id": "cache-locks",
+            "title": "计算锁、防击穿与锁超时",
+            "path": "docs/backend/cache/cache-locks.md",
+            "group": "缓存"
+        },
+        {
+            "id": "cache-serialization",
+            "title": "序列化预算、对象与命名空间",
+            "path": "docs/backend/cache/cache-serialization.md",
+            "group": "缓存"
+        },
+        {
+            "id": "cache-drivers",
+            "title": "File、MySQL和MSSQL缓存驱动",
+            "path": "docs/backend/cache/cache-drivers.md",
+            "group": "缓存"
+        },
+        {
+            "id": "cache-cleanup",
+            "title": "过期回收、全量清理与引用保留",
+            "path": "docs/backend/cache/cache-cleanup.md",
+            "group": "缓存"
+        },
+        {
+            "id": "session",
+            "title": "Session生命周期、锁和并发",
+            "path": "docs/backend/session/session.md",
+            "group": "会话与安全"
+        },
+        {
+            "id": "session-drivers",
+            "title": "Session驱动、表结构与兼容",
+            "path": "docs/backend/session/session-drivers.md",
+            "group": "会话与安全"
+        },
+        {
+            "id": "auth",
+            "title": "密码、旧散列迁移与记住登录",
+            "path": "docs/backend/security/auth.md",
+            "group": "会话与安全"
+        },
+        {
+            "id": "security",
+            "title": "会话CSRF、来源、方法与后台判定",
+            "path": "docs/backend/security/security.md",
+            "group": "会话与安全"
+        },
+        {
+            "id": "input-budget",
+            "title": "输入预算、请求体积与启动保护",
+            "path": "docs/backend/security/input-budget.md",
+            "group": "会话与安全"
+        },
+        {
+            "id": "attachments",
+            "title": "附件落盘索引、下载与删除",
+            "path": "docs/backend/security/attachments.md",
+            "group": "会话与安全"
+        },
+        {
+            "id": "api",
+            "title": "HTTP API登记与对象接口",
+            "path": "docs/backend/api/api.md",
+            "group": "应用接口"
+        },
+        {
+            "id": "api-arguments",
+            "title": "API参数位置、保留字段与格式",
+            "path": "docs/backend/api/api-arguments.md",
+            "group": "应用接口"
+        },
+        {
+            "id": "api-settings",
+            "title": "API全局参数与逐接口行内管理",
+            "path": "docs/backend/api/api-settings.md",
+            "group": "应用接口"
+        },
+        {
+            "id": "api-domains",
+            "title": "API专属域名与地址生成",
+            "path": "docs/backend/api/api-domains.md",
+            "group": "应用接口"
+        },
+        {
+            "id": "api-cors",
+            "title": "API跨域开关、预检和CSRF边界",
+            "path": "docs/backend/api/api-cors.md",
+            "group": "应用接口"
+        },
+        {
+            "id": "api-body",
+            "title": "API全部正文类型的统一上限",
+            "path": "docs/backend/api/api-body.md",
+            "group": "应用接口"
+        },
+        {
+            "id": "templates",
+            "title": "模板实例、风格和模块对应",
+            "path": "docs/backend/templates/templates.md",
+            "group": "页面模板"
+        },
+        {
+            "id": "template-values",
+            "title": "模板变量、HTML与URL转义",
+            "path": "docs/backend/templates/template-values.md",
+            "group": "页面模板"
+        },
+        {
+            "id": "template-blocks",
+            "title": "条件、循环、switch和随机块",
+            "path": "docs/backend/templates/template-blocks.md",
+            "group": "页面模板"
+        },
+        {
+            "id": "template-tags",
+            "title": "扩展标签、子模板和依赖",
+            "path": "docs/backend/templates/template-tags.md",
+            "group": "页面模板"
+        },
+        {
+            "id": "template-render",
+            "title": "页面渲染、缓冲与输出",
+            "path": "docs/backend/templates/template-render.md",
+            "group": "页面模板"
+        },
+        {
+            "id": "template-cache",
+            "title": "模板编译、页面缓存和vary",
+            "path": "docs/backend/templates/template-cache.md",
+            "group": "页面模板"
+        },
+        {
+            "id": "files",
+            "title": "文件路径、读写和流式响应",
+            "path": "docs/backend/tools/files.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "upload",
+            "title": "真实上传、容量和结果检查",
+            "path": "docs/backend/tools/upload.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "strings",
+            "title": "字符集、JSON、XML和文本处理",
+            "path": "docs/backend/tools/strings.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "images",
+            "title": "图片解码预算、缩略图和绘图",
+            "path": "docs/backend/tools/images.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "archives",
+            "title": "打包、暂存、解包和失败处理",
+            "path": "docs/backend/tools/archives.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "zip",
+            "title": "ZIP创建与受控解包",
+            "path": "docs/backend/tools/zip.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "email",
+            "title": "邮件组装、附件和SMTP",
+            "path": "docs/backend/tools/email.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "encrypt",
+            "title": "认证加密与旧格式兼容",
+            "path": "docs/backend/tools/encrypt.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "excel",
+            "title": "XML Excel工作簿与流式导出",
+            "path": "docs/backend/tools/excel.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "minify",
+            "title": "资源整合、压缩与依赖指纹",
+            "path": "docs/backend/tools/minify.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "reflection",
+            "title": "类、方法及注释反射",
+            "path": "docs/backend/tools/reflection.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "proxy",
+            "title": "对象代理、别名和引用属性",
+            "path": "docs/backend/tools/proxy.md",
+            "group": "文件与通用工具"
+        },
+        {
+            "id": "ref-chs2cht-dic",
+            "title": "chs2cht.dic · PHP简繁字典",
+            "path": "docs/backend/reference/chs2cht-dic.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-function",
+            "title": "function · PHP公共函数",
+            "path": "docs/backend/reference/function.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myapi",
+            "title": "myApi · 注册接口与HTTP协议",
+            "path": "docs/backend/reference/myapi.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myarchive",
+            "title": "myArchive · 解包暂存与发布",
+            "path": "docs/backend/reference/myarchive.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myattachment",
+            "title": "myAttachment · 附件索引和定位",
+            "path": "docs/backend/reference/myattachment.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myauth",
+            "title": "myAuth · 密码和登录凭据",
+            "path": "docs/backend/reference/myauth.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mybase",
+            "title": "myBase · 基础抽象类",
+            "path": "docs/backend/reference/mybase.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mycache",
+            "title": "myCache · 缓存代理与能力",
+            "path": "docs/backend/reference/mycache.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myclassloader",
+            "title": "myClassLoader · 类加载声明",
+            "path": "docs/backend/reference/myclassloader.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myconfig",
+            "title": "myConfig · 配置读取、合并和保存",
+            "path": "docs/backend/reference/myconfig.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mycontroller",
+            "title": "myController · 控制器基础资源",
+            "path": "docs/backend/reference/mycontroller.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mydb",
+            "title": "myDb · 数据库代理与SQL构建",
+            "path": "docs/backend/reference/mydb.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myemail",
+            "title": "myEmail · 邮件组装和发送",
+            "path": "docs/backend/reference/myemail.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myencrypt",
+            "title": "myEncrypt · 加密与兼容数据",
+            "path": "docs/backend/reference/myencrypt.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myexcel",
+            "title": "myExcel · XML Spreadsheet导出",
+            "path": "docs/backend/reference/myexcel.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myexception",
+            "title": "myException · 错误处理与日志",
+            "path": "docs/backend/reference/myexception.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myfile",
+            "title": "myFile · 本地文件、路径和远程读取",
+            "path": "docs/backend/reference/myfile.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myimg",
+            "title": "myImg · 图片处理与绘图",
+            "path": "docs/backend/reference/myimg.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myminify",
+            "title": "myMinify · JS/CSS整合",
+            "path": "docs/backend/reference/myminify.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mypacker",
+            "title": "myPacker · 框架包打包与安装",
+            "path": "docs/backend/reference/mypacker.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mypath",
+            "title": "myPath · 路径规范化",
+            "path": "docs/backend/reference/mypath.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myproxy",
+            "title": "myProxy · 代理对象与别名",
+            "path": "docs/backend/reference/myproxy.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myreflection",
+            "title": "myReflection · 声明和注释反射",
+            "path": "docs/backend/reference/myreflection.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myreq",
+            "title": "myReq · 请求、Cookie和Session",
+            "path": "docs/backend/reference/myreq.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myrouter",
+            "title": "myRouter · 规则、格式与匹配",
+            "path": "docs/backend/reference/myrouter.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mysecurity",
+            "title": "mySecurity · 输入预算和CSRF",
+            "path": "docs/backend/reference/mysecurity.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mystep",
+            "title": "myStep · 框架请求控制",
+            "path": "docs/backend/reference/mystep.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mystring",
+            "title": "myString · 字符串与字符集",
+            "path": "docs/backend/reference/mystring.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mytemplate",
+            "title": "myTemplate · 模板实例和编译",
+            "path": "docs/backend/reference/mytemplate.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-mytrait",
+            "title": "myTrait · 类的通用扩展",
+            "path": "docs/backend/reference/mytrait.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myuploader",
+            "title": "myUploader · HTTP上传",
+            "path": "docs/backend/reference/myuploader.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-myzip",
+            "title": "myZip · ZIP归档",
+            "path": "docs/backend/reference/myzip.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-pinyin",
+            "title": "pinyin · 拼音和缩写",
+            "path": "docs/backend/reference/pinyin.md",
+            "group": "公共类与函数"
+        },
+        {
+            "id": "ref-interface-db-database",
+            "title": "interface_db · interface_db 数据库驱动／协议",
+            "path": "docs/backend/reference/database/interface-db.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-interface-db-prepared-database",
+            "title": "interface_db_prepared · interface_db_prepared 数据库驱动／协议",
+            "path": "docs/backend/reference/database/interface-db-prepared.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-interface-db-transaction-database",
+            "title": "interface_db_transaction · interface_db_transaction 数据库驱动／协议",
+            "path": "docs/backend/reference/database/interface-db-transaction.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-interface-sql-database",
+            "title": "interface_sql · interface_sql 数据库驱动／协议",
+            "path": "docs/backend/reference/database/interface-sql.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-mssql-database",
+            "title": "MSSQL · mssql 数据库驱动／协议",
+            "path": "docs/backend/reference/database/mssql.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-mysql-database",
+            "title": "MySQL · mysql 数据库驱动／协议",
+            "path": "docs/backend/reference/database/mysql.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-simpledb-database",
+            "title": "simpleDB · simpleDB 数据库驱动／协议",
+            "path": "docs/backend/reference/database/simpledb.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-sqlite-database",
+            "title": "SQLite · sqlite 数据库驱动／协议",
+            "path": "docs/backend/reference/database/sqlite.md",
+            "group": "数据库驱动"
+        },
+        {
+            "id": "ref-interface-cache-cache",
+            "title": "interface_cache · interface_cache 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/interface-cache.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-interface-cache-lock-cache",
+            "title": "interface_cache_lock · interface_cache_lock 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/interface-cache-lock.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-interface-cache-lookup-cache",
+            "title": "interface_cache_lookup · interface_cache_lookup 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/interface-cache-lookup.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-mycachecodec-cache",
+            "title": "myCacheCodec · myCacheCodec 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/mycachecodec.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-mycache-file-cache",
+            "title": "myCache_File · myCache_File 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/mycache-file.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-mycache-mssql-cache",
+            "title": "myCache_MSSQL · myCache_MSSQL 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/mycache-mssql.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-mycache-mysql-cache",
+            "title": "myCache_MySQL · myCache_MySQL 缓存驱动／协议",
+            "path": "docs/backend/reference/cache/mycache-mysql.md",
+            "group": "缓存驱动"
+        },
+        {
+            "id": "ref-interface-session-session",
+            "title": "interface_session · interface_session 会话处理器",
+            "path": "docs/backend/reference/session/interface-session.md",
+            "group": "Session处理器"
+        },
+        {
+            "id": "ref-sess-file-session",
+            "title": "sess_file · sess_file 会话处理器",
+            "path": "docs/backend/reference/session/sess-file.md",
+            "group": "Session处理器"
+        },
+        {
+            "id": "ref-sess-mysql-session",
+            "title": "sess_mysql · sess_mysql 会话处理器",
+            "path": "docs/backend/reference/session/sess-mysql.md",
+            "group": "Session处理器"
+        },
+        {
+            "id": "ref-sess-mystep-session",
+            "title": "sess_mystep · sess_mystep 会话处理器",
+            "path": "docs/backend/reference/session/sess-mystep.md",
+            "group": "Session处理器"
+        },
+        {
+            "id": "frontend-index",
+            "title": "浏览器前端",
+            "path": "docs/frontend/README.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "frontend",
+            "title": "脚本加载、依赖与就绪",
+            "path": "docs/frontend/javascript/frontend.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "frontend-runtime",
+            "title": "主要变量与公开设置",
+            "path": "docs/frontend/javascript/frontend-runtime.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-dom",
+            "title": "DOM查找与类型判断",
+            "path": "docs/frontend/javascript/js-dom.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-types",
+            "title": "字符串、日期、数组和金额扩展",
+            "path": "docs/frontend/javascript/js-types.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-ready",
+            "title": "异步就绪、初始化队列与重试",
+            "path": "docs/frontend/javascript/js-ready.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-urls",
+            "title": "路由地址、参数和批量链接",
+            "path": "docs/frontend/javascript/js-urls.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-ui",
+            "title": "加载提示、窗口、滚动与复制",
+            "path": "docs/frontend/javascript/js-ui.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-data",
+            "title": "随机值、编码、水印和调试",
+            "path": "docs/frontend/javascript/js-data.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "frontend-forms",
+            "title": "checkForm整体流程",
+            "path": "docs/frontend/javascript/frontend-forms.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-need",
+            "title": "need规则、len与字段示例",
+            "path": "docs/frontend/javascript/js-need.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-addons",
+            "title": "jquery.addon插件与资源加载",
+            "path": "docs/frontend/javascript/js-addons.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-text-calendar",
+            "title": "简繁转换与日期辅助",
+            "path": "docs/frontend/javascript/js-text-calendar.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-security",
+            "title": "security.js与AJAX CSRF",
+            "path": "docs/frontend/javascript/security.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-editor",
+            "title": "编辑器初始化与插件按钮",
+            "path": "docs/frontend/javascript/js-editor.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-ref-global",
+            "title": "global.js函数详解",
+            "path": "docs/frontend/javascript/global-reference.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "js-ref-checkform",
+            "title": "checkForm.js函数详解",
+            "path": "docs/frontend/javascript/checkform-reference.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "app-development",
+            "title": "应用开发目录",
+            "path": "docs/development/app/README.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-01",
+            "title": "建立应用",
+            "path": "docs/development/app/app-01.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-02",
+            "title": "应用设置",
+            "path": "docs/development/app/app-02.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-03",
+            "title": "应用设置补充",
+            "path": "docs/development/app/app-03.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-04",
+            "title": "核心扩展",
+            "path": "docs/development/app/app-04.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-05",
+            "title": "功能脚本与模板对应",
+            "path": "docs/development/app/app-05.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-06",
+            "title": "框架路由与API",
+            "path": "docs/development/app/app-06.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-07",
+            "title": "执行顺序",
+            "path": "docs/development/app/app-07.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-08",
+            "title": "脚本加载",
+            "path": "docs/development/app/app-08.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-09",
+            "title": "模板体系",
+            "path": "docs/development/app/app-09.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-10",
+            "title": "缓存系统",
+            "path": "docs/development/app/app-10.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-11",
+            "title": "框架钩子",
+            "path": "docs/development/app/app-11.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-12",
+            "title": "链接设定",
+            "path": "docs/development/app/app-12.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-13",
+            "title": "域名绑定",
+            "path": "docs/development/app/app-13.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "app-rules",
+            "title": "应用文件、目录和脚本规范",
+            "path": "app/README.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "first-app",
+            "title": "完整实例：第一个应用",
+            "path": "docs/development/app/first-app.md",
+            "group": "应用开发"
+        },
+        {
+            "id": "plugin-development",
+            "title": "插件开发目录",
+            "path": "docs/development/plugins/README.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-01",
+            "title": "基础说明与生效条件",
+            "path": "docs/development/plugins/plugin-01.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-02",
+            "title": "组成结构和命名",
+            "path": "docs/development/plugins/plugin-02.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-03",
+            "title": "安装检查与卸载",
+            "path": "docs/development/plugins/plugin-03.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-04",
+            "title": "前台交互和资源",
+            "path": "docs/development/plugins/plugin-04.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-05",
+            "title": "API与模板模块",
+            "path": "docs/development/plugins/plugin-05.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-06",
+            "title": "钩子调用",
+            "path": "docs/development/plugins/plugin-06.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-07",
+            "title": "顺序、优先脚本、宿主布局与升级",
+            "path": "docs/development/plugins/plugin-07.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-08",
+            "title": "编辑器扩展",
+            "path": "docs/development/plugins/plugin-08.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "plugin-rules",
+            "title": "插件文件、目录和生命周期规范",
+            "path": "plugin/README.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "first-plugin",
+            "title": "完整实例：第一个插件",
+            "path": "docs/development/plugins/first-plugin.md",
+            "group": "插件开发"
+        },
+        {
+            "id": "ref-interface-plugin",
+            "title": "interface_plugin · 插件公共生命周期和辅助函数",
+            "path": "docs/development/plugins/reference/interface-plugin.md",
+            "group": "插件接口"
+        },
+        {
+            "id": "applications",
+            "title": "现有应用介绍目录",
+            "path": "docs/showcase/applications/README.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "app-info-mystep",
+            "title": "myStep · 框架原管理应用",
+            "path": "docs/showcase/applications/mystep.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "app-info-admin",
+            "title": "Admin · 新管理后台",
+            "path": "docs/showcase/applications/admin.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "app-info-cms",
+            "title": "CMS · 内容管理系统",
+            "path": "docs/showcase/applications/cms.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "app-info-document",
+            "title": "Document · 公共类演示与声明说明",
+            "path": "docs/showcase/applications/document.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "app-info-sample",
+            "title": "Sample · 路由与模板组合示例",
+            "path": "docs/showcase/applications/sample.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "app-info-test",
+            "title": "test · 执行流程观察应用",
+            "path": "docs/showcase/applications/test.md",
+            "group": "现有应用介绍"
+        },
+        {
+            "id": "plugins",
+            "title": "现有插件介绍目录",
+            "path": "docs/showcase/plugins/README.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "plugin-info-manager",
+            "title": "manager · 系统打包与更新",
+            "path": "docs/showcase/plugins/manager.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "plugin-info-badreq",
+            "title": "badReq · 前置请求过滤",
+            "path": "docs/showcase/plugins/badreq.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "plugin-info-mybackup",
+            "title": "myBackup · 数据库备份与维护",
+            "path": "docs/showcase/plugins/mybackup.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "plugin-info-frontend",
+            "title": "frontend · 前端组件版本选择",
+            "path": "docs/showcase/plugins/frontend.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "plugin-info-memcached",
+            "title": "memcached · 应用缓存后端替换",
+            "path": "docs/showcase/plugins/memcached.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "plugin-info-sample",
+            "title": "sample · 插件机制演示",
+            "path": "docs/showcase/plugins/sample.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "history-index",
+            "title": "更新历史",
+            "path": "docs/history/README.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2026",
+            "title": "2026年更新历史",
+            "path": "docs/history/2026.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2023",
+            "title": "2023年更新历史",
+            "path": "docs/history/2023.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2022",
+            "title": "2022年更新历史",
+            "path": "docs/history/2022.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2021",
+            "title": "2021年更新历史",
+            "path": "docs/history/2021.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2020",
+            "title": "2020年更新历史",
+            "path": "docs/history/2020.md",
+            "group": "更新历史"
+        },
+        {
+            "id": "history-2019",
+            "title": "2019年更新历史",
+            "path": "docs/history/2019.md",
+            "group": "更新历史"
+        }
+    ]
+}

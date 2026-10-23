@@ -1,4 +1,4 @@
-"""真实 PHP 7.4 + 本地受信 HTTPS 主服务器；所有升级均在临时目录。"""
+"""真实 PHP 7.4 + 本地 HTTP／受信 HTTPS 主服务器；所有升级均在临时目录。"""
 from pathlib import Path
 import os,tempfile,subprocess,socket,time,urllib.request,urllib.error,ssl,http.server,threading,json,zipfile,io,hashlib,shutil
 source=Path(os.environ.get('MYSTEP_UPDATE_SOURCE',str(Path(__file__).resolve().parents[2])))
@@ -17,9 +17,9 @@ with tempfile.TemporaryDirectory(prefix='mystep-manager-upgrade-') as tmp:
   root=outer/name
   for path in ['plugin/manager','config','cache','app','lib']:(root/path).mkdir(parents=True,exist_ok=True)
   shutil.copy2(source/'plugin/manager/class.php',root/'plugin/manager/class.php')
-  write(root,'plugin/manager/config.php',"<?php return ['update'=>true,'pack'=>true];")
+  write(root,'plugin/manager/config.php',"<?php return ['update'=>true,'pack'=>true,'update_url'=>"+lit(remote)+"];")
   write(root,'config/version.php',"<?php return '1.0';")
-  write(root,'config/config.php',"<?php return ['web'=>['update'=>"+lit(remote)+",'etag'=>'before'],'gen'=>['charset'=>'UTF-8','debug'=>false],'keep'=>'original'];")
+  write(root,'config/config.php',"<?php return ['web'=>['etag'=>'before'],'gen'=>['charset'=>'UTF-8','debug'=>false],'keep'=>'original'];")
   write(root,'lib/old.txt','old');write(root,'lib/remove.txt','remove');write(root,'cache/script/stale','stale');return root
  master=fixture('master');write(master,'config/version.php',"<?php return '2.0';")
  write(master,'lib/old.txt','new');write(master,'lib/nested/zero.txt','0');write(master,'lib/empty.txt','');write(master,'lib/dot.txt','.');write(master,'lib/binary.dat','binary\0payload');(master/'lib/emptydir').mkdir();(master/'lib/remove.txt').unlink()
@@ -96,6 +96,21 @@ ob_start();try {if($site==='master')plugin_manager::remote();else plugin_manager
   def check_version():
    new('check');status,body=request('/check/manager/check/version');ensure(status==200,body);ensure(body['version']=='2.0',body);ensure(list(body['detail'])==['1.5','2.0'],body)
   case('master version chooses highest release independently of declaration order',check_version)
+  def explicit_http_update():
+   root=new('httpupdate');address=f'http://127.0.0.1:{masterport}'
+   write(root,'plugin/manager/config.php',"<?php return ['update'=>true,'pack'=>true,'update_url'=>"+lit(address)+"];")
+   status,body=request('/httpupdate/manager/check/version');ensure(status==200 and body.get('version')=='2.0',body)
+   status,body=request('/httpupdate/manager/download?m=1');ensure(status==200 and body.get('error')==0,body)
+   ensure((root/'lib/old.txt').read_text()=='new','HTTP update did not publish source')
+   ensure('2.0' in (root/'config/version.php').read_text(),'HTTP update did not commit version')
+   ensure(address in (root/'plugin/manager/config.php').read_text(),'HTTP source was rewritten')
+  case('explicit HTTP source supports real version checks and online upgrades',explicit_http_update)
+  def implicit_https_source():
+   root=new('implicithttps');address=f'127.0.0.1:{tlsport}'
+   write(root,'plugin/manager/config.php',"<?php return ['update'=>true,'pack'=>true,'update_url'=>"+lit(address)+"];")
+   status,body=request('/implicithttps/manager/check/version');ensure(status==200 and body.get('version')=='2.0',body)
+   ensure(address in (root/'plugin/manager/config.php').read_text(),'Bare source was rewritten')
+  case('source without a scheme uses verified HTTPS without changing its saved value',implicit_https_source)
   def offline_package():
    root=new('offline');status,body=request('/offline/manager/download?m=0');ensure(status==200 and body.get('link'),body)
    ensure((root/'lib/old.txt').read_text()=='old');ensure(not (root/'cache-cleared').exists(),'download-only clears cache');ensure((root/'cache/script/stale').exists(),'download-only deletes script cache')
@@ -161,7 +176,7 @@ ob_start();try {if($site==='master')plugin_manager::remote();else plugin_manager
    status,body=upload('legacyempty',buf.getvalue());ensure(status==200 and body.get('error')==0,body);ensure((root/'lib/empty.txt').read_bytes()==b'');ensure((root/'lib/dot.txt').read_text()=='.')
   case('legacy ZIP preserves empty and single-dot file contents',legacy_empty)
   def offline_without_server():
-   root=new('noorigin');write(root,'config/config.php',"<?php return ['web'=>['update'=>'http://invalid','etag'=>'before'],'gen'=>['charset'=>'UTF-8']];")
+   root=new('noorigin');write(root,'plugin/manager/config.php',"<?php return ['update_url'=>'','update'=>true,'pack'=>true];");write(root,'config/config.php',"<?php return ['web'=>['update'=>'http://invalid','etag'=>'before'],'gen'=>['charset'=>'UTF-8']];")
    buf=io.BytesIO()
    with zipfile.ZipFile(buf,'w') as z:z.writestr('lib/local.txt','offline')
    status,body=upload('noorigin',buf.getvalue());ensure(status==200 and body.get('error')==0,body);ensure((root/'lib/local.txt').read_text()=='offline')

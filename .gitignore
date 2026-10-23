@@ -10,6 +10,7 @@ __pycache__/
 /cache/
 /files/
 /config/config.php
+/config/api.php
 /config/class.php
 /config/domain.php
 /config/route.php
@@ -37,3 +38,6 @@ __pycache__/
 # 请求过滤插件的运行状态
 /plugin/badReq/ban_ip.php
 /plugin/badReq/data.db
+
+# 本机文档历史备份，不纳入GitHub发布
+/docs/backup/

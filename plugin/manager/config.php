@@ -1,6 +1,2 @@
-<?PHP
-$setting = array (
-  'pack' => true,
-  'update' => true,
-);
-return $setting;
+<?php
+return ['pack'=>true,'update'=>true,'update_url'=>''];

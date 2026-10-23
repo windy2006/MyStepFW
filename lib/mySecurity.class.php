@@ -177,7 +177,7 @@ class mySecurity {
      *
      * 来源由当前请求的协议和 Host、绑定域名、Cookie 域名及 web.cors_origins 组成。
      * 绑定域名和 Cookie 域名沿用当前请求的协议、显式端口；额外来源按配置原值加入，
-     * 支持数组、配置对象或逗号分隔字符串。本方法仅汇总配置，不执行身份授权。
+     * 支持数组、配置对象或逗号分隔字符串。API上下文由逐接口跨域开关决定是否接纳当前合法Origin；普通页面继续使用原名单。本方法不执行身份授权。
      *
      * 参数说明：无显式参数。
      *
@@ -197,6 +197,9 @@ class mySecurity {
         $extra = $ms_setting->web->cors_origins ?? [];
         if(is_object($extra)) $extra = (array)$extra;
         if(is_string($extra)) $extra = array_filter(array_map('trim', explode(',', $extra)));
+        $route=$GLOBALS['info_app']['route']??'';
+        // API关闭跨域时只接受同源；开启时仅为当前已登记接口加入本次合法Origin。
+        if(strpos($route,'/api/')===0)return array_values(array_unique(array_merge([$current],myApi::httpOrigins(substr($route,5)))));
         return array_values(array_unique(array_merge($origins, is_array($extra) ? $extra : [])));
     }
 

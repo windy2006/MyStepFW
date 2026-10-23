@@ -7,6 +7,7 @@
  * 使用说明：由AdminService按pages.php中的固定模块映射加载；$this为应用服务，ui为当前Admin。
  * 返回说明：视图回调返回模板HTML，动作返回反馈或下载描述；HTTP鉴权及参数校验由Admin统一完成。
  */
+require_once APP.'myStep/MyStepApiManager.class.php';
 return [
     /**
      * 功能说明：全局/应用配置表单。
@@ -21,6 +22,7 @@ return [
         list($file, $builder) = $this->configTarget($target);
         $version = AdminStore::version($file);
         $config = new myConfig($file);
+        if($target==='')MyStepApiManager::frameworkSettings($config);
         $config->merge(myPath::settings($config->get(true), $target?:'myStep'));
         return $this->ui->view('setting_main', ['target' => $target, 'version' => $version, 'config_fields' => $this->configFields($config, $builder)], ['apps' => $apps]);
     },
@@ -33,9 +35,11 @@ return [
         $target = $p['target']??'';
         list($file, $builder) = $this->configTarget($target);
         $config = new myConfig($file);
+        if($target==='')MyStepApiManager::frameworkSettings($config);
         $before = $config->get(true);
         $this->passwords($p['setting']);
         $config->set($p['setting']);
+        if($target==='')MyStepApiManager::frameworkSettings($config);
         $data = myPath::settings($config->get(true), $target?:'myStep');
         if(isset($data['gen']['path_admin']) && !preg_match('#\A[a-zA-Z][a-zA-Z0-9_/-]*\z#D', $data['gen']['path_admin']))throw new InvalidArgumentException('后台路径无效。');
         $prepare = include dirname(__DIR__, 2).'/setting_expand.php';
@@ -45,6 +49,7 @@ return [
         AdminStore::saveData($file, $data, $p['version']);
         try {
             $apply();
+            if($target==='')(new MyStepApiManager())->normalizeStorage();
         } catch(Throwable $error) {
             // 关联处理失败时仅回退本次发布的配置，不覆盖其他请求的新版本。
             if(hash_equals(AdminStore::version($file), $published))AdminStore::save($file, $original, $published);

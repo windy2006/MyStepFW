@@ -25,7 +25,8 @@ $setting['web']['minify'] = false;
 $setting['web']['etag'] = 'etag_20220101';
 $setting['web']['css'] = 'bootstrap,font-awesome,glyphicons';
 $setting['web']['js'] = 'jquery,jquery.addon,bootstrap.bundle';
-$setting['web']['update'] = 'mysteps.com.cn';
+
+$setting['api'] = ['enabled'=>true,'default_format'=>'json','body_bytes'=>33554432,'domain'=>''];
 
 $setting['upload'] = array();
 $setting['upload']['path_mode'] = 'Y/m/';
