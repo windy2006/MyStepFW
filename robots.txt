@@ -51,6 +51,14 @@ Disallow: /index.php?/api$
 Disallow: /index.php?/api/
 Disallow: /index.php?api$
 Disallow: /index.php?api/
+Disallow: /admin_cms
+Disallow: /index.php/admin_cms
+Disallow: /index.php?/admin_cms
+Disallow: /index.php?admin_cms
+Disallow: /CMS/admin_cms
+Disallow: /index.php/CMS/admin_cms
+Disallow: /index.php?/CMS/admin_cms
+Disallow: /index.php?CMS/admin_cms
 Disallow: /CMS/admin
 Disallow: /index.php/CMS/admin
 Disallow: /index.php?/CMS/admin
