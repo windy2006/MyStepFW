@@ -22,7 +22,7 @@ if(empty($module)) {
     foreach ($list as $file) {
         $name = pathinfo($file, PATHINFO_FILENAME);
         $doc = '';
-        if (class_exists($name)) {
+        if (class_exists($name) || interface_exists($name) || trait_exists($name)) {
             $t->init($name);
             $doc = $t->doc;
         }
@@ -30,7 +30,8 @@ if(empty($module)) {
     }
     $tpl->assign('main', $tpl_sub->render('', false));
 } else {
-    if (!class_exists($module)) myStep::header('404');
+    // 类、抽象类、接口及trait共用说明入口；仍必须先通过上方样例白名单。
+    if (!class_exists($module) && !interface_exists($module) && !trait_exists($module)) myStep::header('404');
     switch ($mode) {
         case 'show':
             if (array_search($module, $sp_module) !== false) {
@@ -72,3 +73,7 @@ if(empty($module)) {
     }
     $tpl->assign('main', $content);
 }
+
+// 普通说明页始终输出 HTML；示例内部的 API 调用可能把响应类型改成纯文本。
+// 图片、Excel 等直接响应已在前面的分支终止，不经过此处。
+if(!headers_sent()) header('Content-Type: text/html; charset='.$mystep->setting->gen->charset);

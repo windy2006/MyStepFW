@@ -1,5 +1,11 @@
+/**
+ * 初始化本地代码高亮库；配置未就绪时由框架安排有限时重试，保留引擎和主题参数。
+ * @param {number} [mode=1] 1 为 highlight.js，其他值为 SyntaxHighlighter。
+ * @param {string} [style='default'] 对应本地高亮库的主题名称。
+ * @returns {void} 配置就绪后异步加载依赖并处理代码块。
+ */
 function highlight(mode=1, style = 'default') {
-    if(!checkSetting()) return;
+    if(!checkSetting(100, highlight, [mode, style])) return;
     if(mode===1) {
         $.setJS([
             global.root+'vendor/highlight/highlightjs/highlight.pack.js',

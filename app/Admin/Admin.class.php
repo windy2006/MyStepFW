@@ -48,7 +48,7 @@ class Admin extends myStep {
     /**
      * 功能说明：声明页面、菜单、视图和动作。
      * 参数说明：无显式参数。
-     * @return array 页面路径到title/group/view/actions定义
+     * @return array 页面路径到title/group/menu_links/module/view/actions定义
      */
     protected function definition() {
         return include __DIR__.'/pages.php';
@@ -361,6 +361,7 @@ class Admin extends myStep {
     }
     /**
      * 功能说明：准备导航、账号及主体，返回应用配置指定的外层模板。
+     * 导航中的menu_links按受信页面声明展开，使用框架setURL生成应用直达链接。
      * @param string $title 页面标题
      * @param string $body 已渲染的可信主体HTML
      * @param string $notice 普通提示文字（默认：''）
@@ -376,6 +377,10 @@ class Admin extends myStep {
         if($this->authorized()) {
             foreach($this->adminPages as $path => $entry) {
                 if(empty($entry['group'])) continue;
+                if(!empty($entry['menu_links'])) {
+                    foreach($entry['menu_links'] as $link) $groups[$entry['group']][] = ['url' => self::setURL($link['path']), 'label' => $link['title'], 'current' => 'false'];
+                    continue;
+                }
                 $groups[$entry['group']][] = ['url' => $this->url($path), 'label' => $entry['title'], 'current' => $path === $active?'page':'false'];
             }
             $menu = json_decode(myFile::getLocal(APP . 'myStep/menu.json'), true);

@@ -6,6 +6,8 @@ if(is_file($tpl_setting['path'].$tpl_setting['name'].'.tpl')) {
     $t = new myTemplate($tpl_setting);
     $t->assign('sample_assets', myStep::setURL('myStep/asset/samples/'));
     $t->assign('sample_loading', myStep::setURL('static/images/loading_img.gif'));
+    // 同一地址供首次加载及查询刷新使用，兼容三种路由；按JSON字符串嵌入脚本。
+    $t->assign('sample_table_url', json_encode(myStep::setURL('api/myStep/data/?tbl=mystep_cms.cms_admin_cat'), JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT));
     myReq::session('sign_upload', 'y');
     $content = $mystep->render($t);
     unset($t);

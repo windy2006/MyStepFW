@@ -1,6 +1,6 @@
 # tests 文件汇总与运行说明
 
-整理日期：2026-10-23。按实际脚本核对用途、入口、依赖和数据影响。当前共 55 个测试／夹具文件：35 个 PHP、11 个 Python、8 个 JavaScript、1 个 HTML；另有本说明。文件名含 browser 不一定需要浏览器，fixture 也不一定是独立测试入口，见下表。
+整理日期：2026-10-23。按实际脚本核对用途、入口、依赖和数据影响。当前共 60 个测试／夹具文件：37 个 PHP、11 个 Python、11 个 JavaScript、1 个 HTML；另有本说明。文件名含 browser 不一定需要浏览器，fixture 也不一定是独立测试入口，见下表。
 
 ## 1. 先区分两个目录
 
@@ -16,7 +16,7 @@
 | 目录 | 用途 | 文件数 |
 | --- | --- | ---: |
 | [core/](core/) | 核心流程、路由、启动与路径 | 6 |
-| [security/](security/) | 输入预算、认证、账户与安全桥接 | 6 |
+| [security/](security/) | 输入预算、认证、账户与安全桥接 | 7 |
 | [utilities/](utilities/) | 公共工具、编码与资源 | 4 |
 | [extensions/](extensions/) | API管理、通用扩展和XML Excel | 3 |
 | [templates/](templates/) | 模板与缓存兼容 | 1 |
@@ -25,10 +25,10 @@
 | [session/](session/) | Session处理器及HTTP协议 | 2 |
 | [integration/](integration/) | 机制与跨调用联动 | 2 |
 | [dependencies/](dependencies/) | Composer和压缩语义 | 2 |
-| [javascript/](javascript/) | 公共JS与真实浏览器夹具 | 4 |
-| [applications/](applications/) | 应用逻辑、CMS链接及模块 | 4 |
+| [javascript/](javascript/) | 公共JS与真实浏览器夹具 | 5 |
+| [applications/](applications/) | 应用逻辑、CMS链接、模块及功能类示例 | 5 |
 | [plugins/](plugins/) | 插件运行链路、生命周期、接口、模块、升级、缓存后端及解包器 | 11 |
-| [admin/](admin/) | 新旧后台集成、框架指南与Admin界面 | 5 |
+| [admin/](admin/) | 新旧后台集成、框架指南与Admin界面 | 7 |
 | [site/](site/) | 实际部署站点的HTTP冒烟 | 1 |
 
 各目录的关联夹具随功能存放；跨功能调用通过明确路径定位。根目录只保留此说明及系统目录元数据。
@@ -93,6 +93,7 @@ SQLite、Memcached 和 SQLSRV 替身检查不代表相应真实服务器均已�
 | --- | --- | --- | --- |
 | [cms_link_regression.php](applications/cms_link_regression.php) | 真实 CMS 模板与链接辅助函数、筛选／分页、域名绑定和三种路由 | `php tests/applications/cms_link_regression.php` | 不连接数据库；CMS_LINK_* 选择组合；--fixtures 输出供 Node 使用的夹具 |
 | [app_regression.php](applications/app_regression.php) | CMS 栏目／标签／公共 SQL 逻辑，Sample 公开配置及 test 分发 | `php tests/applications/app_regression.php` | 临时文件和替身，不连接业务数据库 |
+| [document_regression.php](applications/document_regression.php) | Document顶层功能类覆盖、11项新增样例及方法反射、演示数据隔离 | `php tests/applications/document_regression.php` | 随机临时项目、独立SQLite内存库；不连接业务数据库、不发网络请求 |
 | [app_database_regression.php](applications/app_database_regression.php) | CMS 查询、栏目、标签、统计、验证码、密码及锁定模块 | `php tests/applications/app_database_regression.php` | 直接使用已配置 MySQL 连接和随机 TEMPORARY 表；由父进程运行各场景 |
 | [plugin_runtime.php](plugins/plugin_runtime.php) | 真实核心的活动顺序、绑定去重、前置脚本和停用路由/API | `php tests/plugins/plugin_runtime.php` | 临时注册表、应用及脚本，不修改网站插件状态 |
 | [plugin_regression.php](plugins/plugin_regression.php) | 六个插件的公共逻辑、路径／配置、封禁、资源和状态边界 | `php tests/plugins/plugin_regression.php` | 临时插件目录／SQLite／替身，不执行正式插件升级或安装 |
@@ -128,6 +129,7 @@ SQLite、Memcached 和 SQLSRV 替身检查不代表相应真实服务器均已�
 
 | 文件 | 类型及运行方式 | 覆盖范围 |
 | --- | --- | --- |
+| [highlight_regression.js](javascript/highlight_regression.js) | Node：`node tests/javascript/highlight_regression.js` | 开发环境linkedom，真实配置就绪函数、适配器、SyntaxHighlighter与highlight.js渲染器；3项验证异步配置后的PHP着色、子目录资源前缀及等待超时；无网络或生产依赖 |
 | [javascript_regression.js](javascript/javascript_regression.js) | Node：`node tests/javascript/javascript_regression.js`；追加 --minified 验证压缩后执行 | 实际 global.js／checkForm.js、严格作用域、编码／哈希、配置等待、参数、事件及表单；默认不请求网络。压缩模式另调用 PHP |
 | [security_transport.js](security/security_transport.js) | 由manager HTTP夹具调用 | 只允许环回HTTP，执行真实security.js预处理与XHR头合并，验证正确／错误／重复令牌的实际响应；不向正式站点发送测试令牌 |
 | [security_browser.js](security/security_browser.js) | Node：`node tests/security/security_browser.js` | 实际 security.js 在 DOM／网络替身中的表单、jQuery与XHR叠加的请求头去重、XHR复用、fetch、旧链接及异步退出令牌行为；不需要真实浏览器 |

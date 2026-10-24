@@ -1,7 +1,7 @@
 <?php
 /**
  * 功能说明：后台页面、菜单、视图和动作的统一声明；不在此执行业务代码。
- * 使用说明：路径精确匹配，group控制菜单分组，module指定应用内功能脚本，view和handler指定该脚本的回调。
+ * 使用说明：路径精确匹配，group控制菜单分组，menu_links按title/path展开直达其他应用的菜单，module指定应用内功能脚本，view和handler指定该脚本的回调。
  * actions只允许POST；fields只提取声明字段；mutex串行化同类多文件操作。
  */
 $required = ['type' => 'string', 'required' => true];
@@ -133,9 +133,13 @@ return [
         'title' => '框架指南', 'group' => '文档', 'module' => 'guide', 'view' => 'guide',
     ],
     'samples' => [
-        'title' => '功能示例', 'group' => '文档', 'module' => 'samples', 'view' => 'samples',
+        'title' => '前端示例', 'group' => '文档', 'module' => 'samples', 'view' => 'samples',
     ],
     'references' => [
         'title' => '应用与类说明', 'group' => '文档', 'module' => 'references', 'view' => 'references',
+        'menu_links' => [
+            ['title' => '应用示例', 'path' => 'Sample/'],
+            ['title' => '功能类说明', 'path' => 'Document/'],
+        ],
     ],
 ];

@@ -26,6 +26,8 @@ return [
             $t->assign('path_admin', $this->ui->url());
             $t->assign('sample_assets', myStep::setURL('myStep/asset/samples/'));
             $t->assign('sample_loading', myStep::setURL('static/images/loading_img.gif'));
+            // 与原后台共用表格模板及路由地址，JSON编码适用于脚本字符串。
+            $t->assign('sample_table_url', json_encode(myStep::setURL('api/myStep/data/?tbl=mystep_cms.cms_admin_cat'), JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT));
             $body = $this->ui->render($t);
         }
         return $this->ui->view('samples', ['sample_title'=>$index[$name]??'预览','sample_content'=>$body], ['samples'=>$links], ['selected'=>$body !== '']);

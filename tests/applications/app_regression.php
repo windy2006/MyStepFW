@@ -63,7 +63,7 @@ try {
     test('autocomplete rejects traversal mode',function() { same([],app\myStep\autoComplete('../config','abc')['suggestions']); });
     test('data viewer checks identity table names and qualified database',function()use($ms_setting) {
         global $db;
-        myReq::removeSession('ms_user');same([],app\myStep\getData('rows'));
+        myReq::removeSession('ms_user');same([],app\myStep\getData('rows'));same([],app\myStep\getData());
         myReq::session('ms_user','fixture');$ms_setting->db->name='primary';
         $db=new class {
             public $table='';public $database='';public $paging=[];
@@ -76,10 +76,38 @@ try {
             public function count($sql){return 30;}
             public function records($sql){return [['title'=>'fixture']];}
         };
+        same(['total'=>0,'rows'=>[]],app\myStep\getData());
+        $api=new myApi();$api->regMethod('data','app\\myStep\\getData');
+        same(['total'=>0,'rows'=>[]],$api->invoke('data'));
         same(['total'=>0,'rows'=>[]],app\myStep\getData('../bad'));
         same(['total'=>0,'rows'=>[]],app\myStep\getData('absent'));
         same(['total'=>30,'rows'=>[['title'=>'fixture']]],app\myStep\getData('report.rows'));
         same('report',$db->database);same('report.rows',$db->table);same([0,20],$db->paging);
+    });
+    test('MSSQL example previews real SQL without a connection and preserves global DB',function() {
+        global $db;
+        $before=$db;ob_start();
+        try {include APP.'Document/module/mssql.php';$html=ob_get_contents();}finally{ob_end_clean();}
+        same($before,$db);same(true,strpos($html,'sqlsrv')!==false);
+        same(true,stripos($html,'create table')!==false);same(true,stripos($html,'select')!==false);
+        same(false,strpos($html,'Fatal')!==false);
+    });
+    test('legacy table sample uses the same valid URL for initial load and refresh',function()use($scratch) {
+        global $ms_setting;
+        if(!defined('PATH'))define('PATH',APP.'myStep/');
+        if(!defined('VENDOR'))define('VENDOR',ROOT.'vendor/');
+        $mode=$ms_setting->router->mode??'rewrite';
+        try {foreach(['rewrite','path_info','query_string'] as $routing) {
+            $ms_setting->router->mode=$routing;
+            $info_app=['path'=>['console','samples','table']];$app_root='/sub/console';
+            $tpl_setting=['path'=>PATH.'sample/','name'=>'table','style'=>'','path_compile'=>$scratch.'/legacy-'.$routing];
+            $mystep=new class {public function render($template){return $template->render('',false);}};
+            $tpl=new class {public function assign($name,$value){}};
+            include APP.'myStep/module/samples.php';
+            preg_match_all('/url\s*:\s*("(?:[^"\\\\]|\\\\.)*")/',$content,$matches);
+            same(2,count($matches[1]));
+            foreach($matches[1] as $url)same(myStep::setURL('api/myStep/data/?tbl=mystep_cms.cms_admin_cat'),json_decode($url,true));
+        }}finally{$ms_setting->router->mode=$mode;}
     });
     test('sample template escapes URL diagnostics',function()use($scratch) {
         $tpl=new myTemplate(['name'=>'sample','path'=>APP.'Sample/template','style'=>'','path_compile'=>$scratch.'/compiled'],false,true);

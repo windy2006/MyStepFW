@@ -107,6 +107,16 @@ try{
    else ensure(strpos($html,myStep::setURL('static/images/loading_img.gif'))!==false);
   }}finally{$_GET=$_POST=[];$ms_setting->router->mode=$mode;}
  });
+ test('table sample uses valid identical API URLs in all routing modes',function()use($service){
+  global $ms_setting;$mode=$ms_setting->router->mode;
+  try{foreach(['rewrite','path_info','query_string'] as $routing){
+   $ms_setting->router->mode=$routing;$_GET=['sample'=>'table'];$_POST=[];$html=$service->samples();
+   preg_match_all('/url\s*:\s*("(?:[^"\\\\]|\\\\.)*")/',$html,$matches);
+   same(2,count($matches[1]));$expected=myStep::setURL('api/myStep/data/?tbl=mystep_cms.cms_admin_cat');
+   foreach($matches[1] as $url)same($expected,json_decode($url,true));
+   ensure(strpos($html,'<!--sample_table_url-->')===false);
+  }}finally{$_GET=$_POST=[];$ms_setting->router->mode=$mode;}
+ });
  test('sample array input is rejected without template lookup',function()use($service){$_GET=['sample'=>[]];raises('InvalidArgumentException',function()use($service){$service->samples();});$_GET=[];});
  test('class index requires scalar array text input',function()use($service){raises('InvalidArgumentException',function()use($service){$service->saveClasses(['version'=>AdminStore::version(CONFIG.'class.php'),'rows'=>[['path'=>LIB,'ext'=>'.php','idx'=>[]]]]);});});
  test('responsive stylesheet preserves media conditions through framework minification',function(){ $css=myMinify::minify(file_get_contents(PATH.'asset/style.css'),'css');ensure(preg_match('/@media\s*\(max-width:850px\)/',$css)===1);ensure(preg_match('/@media\s*\(max-width:600px\)/',$css)===1);});
