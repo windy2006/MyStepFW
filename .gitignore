@@ -41,3 +41,20 @@ __pycache__/
 
 # 本机文档历史备份，不纳入GitHub发布
 /docs/backup/
+
+# 仅在本机开发使用，不随框架源码发布
+/test/
+/tests/
+/maintenance/
+/AGENTS.md
+
+# 临时配置、编辑器与安装/打包残留
+.env
+.env.*
+!.env.example
+.aws/
+*.swp
+*.swo
+*~
+/config/*.tmp
+/plugin/manager/system-work_*/

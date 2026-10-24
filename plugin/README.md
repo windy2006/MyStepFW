@@ -434,3 +434,10 @@ return ['Hello', 'pluginLayout'];
 Admin实现位于 `app/Admin/plugin_layout.php` 和 `Admin::pluginLayout()`，通用功能模板为 `template/default/plugin.tpl`。自定义风格可提供 `main.tpl` 和 `plugin.tpl`，未提供时遵循原框架default回退；通用内容样式限定在 `.adm-plugin-page`。CSS/JS缓存按插件及布局配置隔离，页面和内容均不缓存。CMS等其他后台若要采用自身布局，需要按同一协议提供一次适配器。
 
 已有 `/Admin/manager/`、`plugin_manager::pageApplication()` 和 `pageContent()` 保留为兼容入口，内部委托公共逻辑；新插件不复制manager的专用模块。页面鉴权、GET写入拒绝及POST CSRF验证仍由原框架和插件入口负责，展示适配不绕过这些流程。
+
+
+### 本机开发资料与发布规则（manager 1.1.5）
+
+`test/`、`tests/`、`maintenance/` 和 `AGENTS.md` 仅在开发者本机保留，不纳入 GitHub 当前版本或整站安装包。上文测试命令是本机回归说明。manager 的独立安装模板最低要求 PHP 7.4.0，与统一入口和 Composer 一致。
+
+myPacker、整站打包与文件校验共用 allow/ignore 解析：按当前目录精确名称匹配，支持整行 `#` 注释和首尾空白；带 `/` 仅匹配目录，空规则文件仍跳过整个目录，排除优先于白名单。配置方法和示例见 [归档指南](../docs/backend/tools/archives.md)。

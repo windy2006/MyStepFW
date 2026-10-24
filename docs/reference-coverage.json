@@ -787,12 +787,14 @@
     ]
   },
   "lib/myPacker.class.php": {
-    "sha256": "ec2b518e24bca88ca5462defa28c6f3c8c61d24027b1ebf8ab8f4d5140bf3c71",
+    "sha256": "f532fb3c1f2aff3177609db0c9d491c6218f8b1776dce181221b071f821281ed",
     "document": "docs/backend/reference/mypacker.md",
     "methods": [
       "myPacker::setLimits",
       "myPacker::init",
       "myPacker::addIgnore",
+      "myPacker::directoryRules",
+      "myPacker::allowsEntry",
       "myPacker::setCharset",
       "myPacker::addFile",
       "myPacker::packFileList",

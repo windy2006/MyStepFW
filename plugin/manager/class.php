@@ -16,6 +16,7 @@
  *   public static plugin_manager::createSystemArchive() — 用独立副本生成完整安装ZIP，保留驱动和组件默认配置并过滤运行数据。
  *   protected static plugin_manager::systemPackageSettings($file) — 清空组件副本配置的声明密码及常用敏感字段。
  *   public static plugin_manager::checkFile($dir='', $build=false, $layer=0, $manifest=null) — 构建或比较文件校验清单，忽略运行时/私有目录与符号链接。
+ *   protected static plugin_manager::checksumRules($directory) — 合并扫描与旧清单缺失检查的排除规则
  *   public static plugin_manager::checkConfig($path, $name_fix='_new') — 导出打包用配置副本，逐个清空结构声明的密码，不改写原配置。
  *   public static plugin_manager::replacePackedFile($package,$member,$content) — 流式替换生成归档中的一个文件，供发布包写入默认菜单；不改动在线源文件。
  *   public static plugin_manager::artifactPath($name) — 限定更新/差异/系统下载的 ZIP 文件名和临时目录，拒绝目录穿越及符号链接。
@@ -659,17 +660,13 @@ class plugin_manager implements interface_plugin {
              * @throws InvalidArgumentException allow／ignore成员包含非法路径
              */
             function($relative) use (&$scan,&$configs,&$count,&$bytes,$tree) {
-                $source=ROOT.$relative;$ignore=[];$allow=[];
-                foreach(['ignore','allow'] as $rule) if(is_file($source.$rule)) {
-                    $raw=file_get_contents($source.$rule);
-                    if($raw===false) throw new RuntimeException('Cannot read package rules');
-                    if($raw==='') return;
-                    $$rule=array_values(array_filter(array_map('trim',explode("\n",str_replace("\r",'',$raw))),'strlen'));
-                }
+                $source=ROOT.$relative;$rules=myPacker::directoryRules($source);
+                if($rules['closed']) return;
                 foreach(new DirectoryIterator($source) as $entry) {
                     if($entry->isDot() || $entry->isLink()) continue;
                     $name=$entry->getFilename();$member=$relative.$name;
-                    if(($allow && !in_array($name,$allow,true)) || in_array($name,$ignore,true) || in_array($name.'/',$ignore,true)) continue;
+                    if(!myPacker::allowsEntry($name,$entry->isDir(),$rules)) continue;
+                    if($relative==='' && in_array($name,['test','tests','maintenance','AGENTS.md'],true)) continue;
                     if(in_array($name,['ignore','allow','config_new.php'],true) || ($name[0]==='.' && $name!=='.htaccess')) continue;
                     $defaults=array_diff(self::IGNORE,['cache/','config.php','construction.php']);
                     if(in_array($name,$defaults,true) || in_array($name.'/',$defaults,true) || preg_match('/(?:\.db(?:-wal|-shm|-journal)?|\.sqlite3?|\.lock|\.log|\.bak)$/i',$name) || strpos($name,'_bak')!==false) continue;
@@ -780,31 +777,14 @@ class plugin_manager implements interface_plugin {
         if(empty($dir)) $dir = ROOT;
         $dir = myFile::realPath($dir);
         if(($handle = opendir($dir))===false) return false;
-        $ignore = array();
-        if(is_file($dir.'/ignore')) {
-            $ignore = file_get_contents($dir.'/ignore');
-            if(strlen($ignore)==0) {closedir($handle);return;}
-            $ignore = str_replace(chr(13), '', $ignore);
-            $ignore = explode(chr(10), $ignore);
-        }
-        // lib/cache是驱动源码目录，不能按运行缓存过滤；当前目录自己的ignore仍然有效。
-        $defaults=self::IGNORE;
-        if(rtrim($dir,'/')===rtrim(myFile::realPath(ROOT.'lib/'),'/')) $defaults=array_values(array_diff($defaults,['cache/']));
-        $ignore = array_merge($ignore, $defaults);
-        $allow = array();
-        if(is_file($dir.'/allow')) {
-            $allow = file_get_contents($dir.'/allow');
-            if(strlen($allow)==0) {closedir($handle);return;}
-            $allow = str_replace(chr(13), '', $allow);
-            $allow = explode(chr(10), $allow);
-        }
+        $rules = self::checksumRules($dir);
+        if($rules['closed']) {closedir($handle);return;}
         if($build) {
             while (false !== ($file = readdir($handle))) {
                 if(trim($file, '.') == '') continue;
                 if(basename($file) == 'menu.json' || ($layer===0 && $file==='files')) continue;
-                if(!empty($allow) && !in_array($file, $allow)) continue;
+                if(!myPacker::allowsEntry($file,is_dir($dir.$file),$rules)) continue;
                 if(is_link($dir.$file)) continue;
-                if(in_array($file,$ignore,true) || in_array($file.'/',$ignore,true)) continue;
                 if(strpos($file, '.bak')!==false || strpos($file, '_bak')!==false) continue;
                 $the_name = $dir.$file;
                 try {self::relativePath('/'.ltrim(substr($the_name,strlen(rtrim(realpath(ROOT),'/'))),'/'));} catch(InvalidArgumentException $error) {continue;}
@@ -840,9 +820,8 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
             while (false !== ($file = readdir($handle))) {
                 if(trim($file, '.') == '') continue;
                 if(basename($file) == 'menu.json' || ($layer===0 && $file==='files')) continue;
-                if(!empty($allow) && !in_array($file, $allow)) continue;
+                if(!myPacker::allowsEntry($file,is_dir($dir.$file),$rules)) continue;
                 if(is_link($dir.$file)) continue;
-                if(in_array($file,$ignore,true) || in_array($file.'/',$ignore,true)) continue;
                 if(strpos($file, '.bak')!==false || strpos($file, '_bak')!==false) continue;
                 $the_name = $dir.$file;
                 try {self::relativePath('/'.ltrim(substr($the_name,strlen(rtrim(realpath(ROOT),'/'))),'/'));} catch(InvalidArgumentException $error) {continue;}
@@ -867,15 +846,42 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 }
             }
             if($layer==0) {
+                $ruleCache=[];
                 foreach($list_file as $the_name) {
                     try {self::relativePath($the_name);} catch(InvalidArgumentException $error) {continue;}
                     if(strpos($the_name, '/config.php')!==false) continue;
-                    $result['miss'][] = $the_name;
+                    $parts=explode('/',ltrim($the_name,'/'));$path=ROOT;$include=true;
+                    foreach($parts as $i=>$part) {
+                        if(!isset($ruleCache[$path])) $ruleCache[$path]=self::checksumRules($path);
+                        if(!myPacker::allowsEntry($part,$i<count($parts)-1,$ruleCache[$path]) || $part==='menu.json' || strpos($part,'.bak')!==false || strpos($part,'_bak')!==false) {$include=false;break;}
+                        $path.=$part.'/';
+                    }
+                    if($include) $result['miss'][] = $the_name;
                 }
             }
         }
         closedir($handle);
         return $result;
+    }
+
+    /**
+     * 功能说明：合并文件校验的目录规则与默认排除，供扫描和旧清单缺失检查共用
+     *
+     * lib/cache 保留为驱动源码；网站根目录的开发工具不参加运行文件校验。
+     *
+     * @param string $directory 当前目录绝对路径，由受信递归扫描提供
+     * @return array myPacker 使用的 closed/allow/ignore 索引表
+     * @throws RuntimeException 目录规则读取失败
+     * @throws InvalidArgumentException 目录规则包含跨级成员
+     */
+    protected static function checksumRules($directory) {
+        $directory=rtrim(myFile::realPath($directory),'/');
+        $rules=myPacker::directoryRules($directory);$defaults=self::IGNORE;
+        $root=rtrim(myFile::realPath(ROOT),'/');
+        if($directory===$root.'/lib') $defaults=array_diff($defaults,['cache/']);
+        if($directory===$root) $defaults=array_merge($defaults,['test/','tests/','maintenance/','AGENTS.md']);
+        $rules['ignore']+=array_fill_keys($defaults,true);
+        return $rules;
     }
 
     /**

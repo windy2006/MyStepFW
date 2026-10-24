@@ -28,8 +28,8 @@
 
 // 源码中的安装模板不得在已运行网站上直接执行。
 if(is_file(__DIR__.'/config/config.php') || (is_file(__DIR__.'/class.php') && is_file(__DIR__.'/../../config/config.php'))) {http_response_code(404);exit;}
-if(version_compare(PHP_VERSION, '7.0.0', '<'))
-    die('MyStep Framework can only run under PHP 7.0 or upper version!');
+if(version_compare(PHP_VERSION, '7.4.0', '<'))
+    die('MyStep Framework can only run under PHP 7.4 or upper version!');
 
 chdir(__DIR__);
 set_time_limit(60*10);

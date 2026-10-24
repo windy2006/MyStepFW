@@ -1,6 +1,6 @@
 # myPacker：框架包打包与安装
 
-修订日期：2026-10-23。功能详解。
+修订日期：2026-10-24。功能详解。
 
 ## 职责与调用位置
 
@@ -61,6 +61,8 @@ protected $max_bytes = 268435456, $max_entries = 10000, $raw_bytes = 0, $entry_c
 | `myPacker::setLimits` | 设置自定义归档的未压缩字节及成员数量上限 |
 | `myPacker::init` | 初始化类变量 |
 | `myPacker::addIgnore` | 添加排除文件 |
+| `myPacker::directoryRules` | 统一读取目录的 allow/ignore 并建立精确名称索引 |
+| `myPacker::allowsEntry` | 判断目录成员是否同时通过白名单和排除规则 |
 | `myPacker::setCharset` | 设定字符集相关变量 |
 | `myPacker::addFile` | 添加需打包文件（如设置则只处理已添加文件，否则为目录下全部文件） |
 | `myPacker::packFileList` | 打包已添加文件 |
@@ -343,3 +345,33 @@ $result = $instance->result($mode);
 ```
 
 定位：`lib/myPacker.class.php:375`。
+
+### myPacker::directoryRules
+
+读取当前目录的规则，不递归加载子目录。去除 BOM 和空白、跳过整行注释，以索引表避免每个文件重复线性查找。空文件语义及完整配置见 [发布排除规则](../tools/archives.md)。
+
+```php
+$rules = myPacker::directoryRules(ROOT . 'plugin/example/');
+```
+
+| 参数 | 类型与说明 |
+| --- | --- |
+| `$directory` | string：需要扫描的目录，可以带末尾分隔符。 |
+
+返回 array：`closed` 表示整目录跳过，`allow` 和 `ignore` 是名称到 true 的索引表。不可读或符号链接规则抛 RuntimeException；跨级成员或控制字符抛 InvalidArgumentException。
+
+### myPacker::allowsEntry
+
+用已解析的规则判断当前目录成员。allow 非空时必须命中，ignore 始终优先；末尾 `/` 只匹配目录。
+
+```php
+$allowed = myPacker::allowsEntry('asset', true, $rules);
+```
+
+| 参数 | 类型与说明 |
+| --- | --- |
+| `$name` | string：当前目录直接成员名，不是完整路径。 |
+| `$directory` | bool：成员是否为目录。 |
+| `$rules` | array：directoryRules() 的返回值，不应来自客户端。 |
+
+返回 bool：true 可继续扫描；false 排除。不执行 I/O，不替代调用方的路径边界和符号链接检查。

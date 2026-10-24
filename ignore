@@ -1,6 +1,19 @@
-.svn
-.idea
-aspnet_client
+# 框架发布排除：每行一个当前目录成员；目录可加 /，支持 # 注释。
+# 这是 myPacker/manager 的规则，不是 .gitignore，也不控制网页访问。
+.git/
+.svn/
+.idea/
+.codex/
+.agents/
+.aws/
+.DS_Store
+.gitignore
+.env
+AGENTS.md
+aspnet_client/
 error.log
-cache
-files
+cache/
+files/
+test/
+tests/
+maintenance/

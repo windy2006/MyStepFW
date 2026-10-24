@@ -116,3 +116,34 @@ $report = $packer->result();
 示例中的文件、数据库和变量按本篇前提准备；涉及写入时使用独占临时目录或隔离库，按明确返回值和异常验证。源码中的public/protected/private、引用参数和可选接口是实际契约，不能只按方法名猜测返回或能力。
 
 [返回文档总览](../../README.md)
+
+## 发布排除规则（2.3.1）
+
+GitHub 的 `.gitignore` 与框架目录中的 `ignore/allow` 作用不同。前者防止本机文件进入 Git；后者控制 `myPacker` 打包、manager 整站安装包和文件校验清单。两套规则都要维护，robots.txt 不参与文件发布。
+
+`ignore/allow` 每行写一个**当前目录直接成员**，支持首尾空白、UTF-8 BOM、空行和整行 `#` 注释。名称精确匹配，不支持 Git 的通配符或 `!` 取反，也不接受跨目录路径。`assets` 匹配同名文件或目录；`assets/` 只匹配目录，不能用它排除一个叫 `assets` 的文件。需要过滤子目录时，在子目录自己的 `ignore` 中列出成员。
+
+```text
+# 当前目录的 ignore 示例
+private/
+secret.php
+```
+
+```text
+# 同目录 allow 示例；非空时只收录以下成员
+info.php
+config.php
+config/
+asset/
+```
+
+白名单和排除表同时存在时，成员先通过 allow，再接受 ignore；排除优先。规则文件恰好为零字节时，沿用旧约定：整目录不扫描。只含注释或空白表示没有该类约束。不要用空 allow 表示“全部允许”，应删除该文件或写一行注释。规则文件不能是符号链接。
+
+```php
+// 以下规则解析和判断已由打包器与 manager 共用，普通应用通常无需直接调用。
+$rules = myPacker::directoryRules(ROOT . 'plugin/example/');
+$include = myPacker::allowsEntry('asset', true, $rules);
+// true 表示该成员是目录；路径边界、符号链接及发布脱敏仍由扫描器检查。
+```
+
+网站根 `ignore` 排除上传、缓存、本机工具、测试及维护脚本；`docs/ignore` 排除文档备份。manager 另有系统默认保护，保留 `lib/cache`、`lib/session` 的源码，以及应用目录内的公开 `asset/files`。`app/test` 属于演示应用，不按根目录测试目录处理；是否打包由 `app/allow` 决定。旧远端清单里已排除的开发文件，也不会被误报为待恢复的缺失文件。

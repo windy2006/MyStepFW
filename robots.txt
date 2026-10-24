@@ -1,8 +1,63 @@
-#
-# robots.txt
-# MyStep Framework
-#
+# MyStep Framework: public pages and their assets may be crawled.
+# Crawling rules do not replace authentication or server access controls.
 User-agent: *
-Disallow: /cache
-Allow: 
-Sitemap: /sitemap
+Disallow: /config/
+Disallow: /lib/
+Disallow: /docs/
+Disallow: /test/
+Disallow: /tests/
+Disallow: /maintenance/
+Disallow: /cache/
+Allow: /cache/script/
+
+# Administrative, API and installation endpoints in all three routing modes.
+Disallow: /Admin$
+Disallow: /Admin/
+Disallow: /index.php/Admin$
+Disallow: /index.php/Admin/
+Disallow: /index.php?/Admin$
+Disallow: /index.php?/Admin/
+Disallow: /index.php?Admin$
+Disallow: /index.php?Admin/
+Disallow: /console$
+Disallow: /console/
+Disallow: /index.php/console$
+Disallow: /index.php/console/
+Disallow: /index.php?/console$
+Disallow: /index.php?/console/
+Disallow: /index.php?console$
+Disallow: /index.php?console/
+Disallow: /manager$
+Disallow: /manager/
+Disallow: /index.php/manager$
+Disallow: /index.php/manager/
+Disallow: /index.php?/manager$
+Disallow: /index.php?/manager/
+Disallow: /index.php?manager$
+Disallow: /index.php?manager/
+Disallow: /myBackup$
+Disallow: /myBackup/
+Disallow: /index.php/myBackup$
+Disallow: /index.php/myBackup/
+Disallow: /index.php?/myBackup$
+Disallow: /index.php?/myBackup/
+Disallow: /index.php?myBackup$
+Disallow: /index.php?myBackup/
+Disallow: /api$
+Disallow: /api/
+Disallow: /index.php/api$
+Disallow: /index.php/api/
+Disallow: /index.php?/api$
+Disallow: /index.php?/api/
+Disallow: /index.php?api$
+Disallow: /index.php?api/
+Disallow: /CMS/admin
+Disallow: /index.php/CMS/admin
+Disallow: /index.php?/CMS/admin
+Disallow: /index.php?CMS/admin
+Disallow: /app/CMS/install/
+Disallow: /plugin/manager/
+Disallow: /plugin/myBackup/
+
+# After enabling a real sitemap, add its absolute URL for this deployment:
+# Sitemap: https://www.example.com/sitemap.xml

@@ -19,6 +19,8 @@
  *   public myPacker::setLimits($bytes = 268435456, $entries = 10000) — 设置自定义归档的未压缩字节及成员数量上限
  *   public myPacker::init($pack_dir = './', $pack_file = 'mypack.pkg', $separator = '|') — 初始化类变量
  *   public myPacker::addIgnore() — 添加排除文件
+ *   public static myPacker::directoryRules($directory) — 统一读取当前目录的 allow/ignore 规则
+ *   public static myPacker::allowsEntry($name, $directory, array $rules) — 以精确成员索引判断是否允许扫描
  *   public myPacker::setCharset($charset, $lng_type='', $file_ext='') — 设定字符集相关变量
  *   public myPacker::addFile() — 添加需打包文件（如设置则只处理已添加文件，否则为目录下全部文件）
  *   protected myPacker::packFileList() — 打包已添加文件
@@ -109,6 +111,57 @@ class myPacker extends myBase {
     }
 
     /**
+     * 功能说明：读取当前目录的 allow/ignore，统一打包与文件校验的成员规则
+     *
+     * 每行一个当前目录成员，去除 UTF-8 BOM、首尾空白与空行，支持整行 # 注释。
+     * 名称精确匹配；末尾 / 只匹配目录，不支持通配符、跨级路径或 Git 的 ! 取反。
+     * 历史约定：任一规则文件为零字节时跳过整个目录；只有注释或空白则无约束。
+     *
+     * @param string $directory 需要扫描的目录；不递归读取子目录规则
+     * @return array closed 为整目录跳过标记，allow/ignore 为名称到 true 的索引表
+     * @throws RuntimeException 规则不可读或规则文件是符号链接
+     * @throws InvalidArgumentException 成员名包含跨级路径或控制字符
+     */
+    public static function directoryRules($directory) {
+        $rules = ['closed'=>false, 'allow'=>[], 'ignore'=>[]];
+        foreach(['allow', 'ignore'] as $kind) {
+            $file = rtrim($directory, '/\\').'/'.$kind;
+            if(is_link($file)) throw new RuntimeException('Package rules cannot be symlinks');
+            if(!is_file($file)) continue;
+            $raw = file_get_contents($file);
+            if($raw === false) throw new RuntimeException('Cannot read package rules');
+            if($raw === '') { $rules['closed'] = true; continue; }
+            $raw = preg_replace('/\A\xEF\xBB\xBF/', '', $raw);
+            foreach(preg_split('/\r\n|\r|\n/', $raw) as $name) {
+                $name = trim($name);
+                if($name === '' || $name[0] === '#') continue;
+                $member = substr($name, -1) === '/' ? substr($name, 0, -1) : $name;
+                if($member === '' || $member === '.' || $member === '..' || strpbrk($member, '/\\') !== false || preg_match('/[\x00-\x1f\x7f]/', $member)) throw new InvalidArgumentException('Package rules require a direct member name');
+                $rules[$kind][$name] = true;
+            }
+        }
+        return $rules;
+    }
+
+    /**
+     * 功能说明：按已解析规则判断当前目录的一个成员是否可进入包或校验清单
+     *
+     * allow 非空时须先命中白名单，ignore 始终优先；名称本身匹配文件或目录，
+     * 带末尾 / 的规则只匹配目录。规则只解析一次，可供当前目录全部成员复用。
+     *
+     * @param string $name 当前目录下的单个文件或目录名，不是完整路径
+     * @param bool $directory 当前成员是否为目录
+     * @param array $rules directoryRules() 返回的索引表
+     * @return bool true 允许扫描，false 排除；不替代路径边界及符号链接检查
+     */
+    public static function allowsEntry($name, $directory, array $rules) {
+        if($rules['closed']) return false;
+        $suffix = $directory ? $name.'/' : $name;
+        return (!$rules['allow'] || isset($rules['allow'][$name]) || isset($rules['allow'][$suffix]))
+            && !isset($rules['ignore'][$name]) && !isset($rules['ignore'][$suffix]);
+    }
+
+    /**
      * 功能说明：设定字符集相关变量
      *
      * @param string $charset 字符编码名称，例如UTF-8；是否自动检测由具体入口决定
@@ -168,20 +221,8 @@ class myPacker extends myBase {
         }
         if(++$this->entry_count > $this->max_entries) throw new RuntimeException('Too many archive entries');
         if(is_dir($dir)) {
-            $ignore = array();
-            if(is_file($dir.'/ignore')) {
-                $ignore = file_get_contents($dir.'/ignore');
-                if(strlen($ignore)==0) return;
-                $ignore = str_replace(chr(13), '', $ignore);
-                $ignore = explode(chr(10), $ignore);
-            }
-            $allow = array();
-            if(is_file($dir.'/allow')) {
-                $allow = file_get_contents($dir.'/allow');
-                if(strlen($allow)==0) return;
-                $allow = str_replace(chr(13), '', $allow);
-                $allow = explode(chr(10), $allow);
-            }
+            $rules = self::directoryRules($dir);
+            if($rules['closed']) return;
             $content = 'dir'.$this->separator.$member.$this->separator.filemtime($dir).chr(10);
             $this->write($content);
             $mydir = opendir($dir);
@@ -189,8 +230,7 @@ class myPacker extends myBase {
             try {
             while($file = readdir($mydir)) {
                 if(trim($file, '.') == '' || $file == 'ignore' || $file == 'allow' || strpos($file, '.mystep-') === 0) continue;
-                if(!empty($allow) && array_search($file, $allow)===false) continue;
-                if(!empty($ignore) && array_search($file, $ignore)!==false) continue;
+                if(!self::allowsEntry($file, is_dir($dir.'/'.$file), $rules)) continue;
                 $this->packFile($dir.'/'.$file);
             }
             } finally { closedir($mydir); }
