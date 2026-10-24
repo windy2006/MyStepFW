@@ -1,6 +1,6 @@
 # myStep：框架请求控制
 
-修订日期：2026-10-23。功能详解。
+修订日期：2026-10-24。功能详解。
 
 ## 职责与调用位置
 
@@ -260,7 +260,7 @@ $result = myStep::auth_code();
 
 ### myStep::setInstance
 
-功能说明：声明重要实例
+功能说明：按驱动签名准备缓存与数据库实例
 
 参数说明：无显式参数。
 
@@ -279,7 +279,9 @@ public function setInstance();
 $result = $instance->setInstance();
 ```
 
-定位：`lib/myStep.class.php:344`。
+定位：`lib/myStep.class.php:346`。
+
+SQLite 初始化只接收数据库文件路径或 `:memory:`，不传入 MySQL 的用户名、密码和字符集。配置中的相对文件路径由 `myPath::absolute()` 按网站根解析，不依赖服务器工作目录。自动连接仍受当前应用的 `db.auto` 配置控制；已有数据库实例继续复用。
 
 ### myStep::clearDataCache
 
@@ -306,7 +308,7 @@ public static function clearDataCache();
 $result = myStep::clearDataCache();
 ```
 
-定位：`lib/myStep.class.php:380`。
+定位：`lib/myStep.class.php:390`。
 
 ### myStep::show
 
@@ -333,7 +335,7 @@ public function show(myTemplate $tpl, $append_pare = []);
 $result = $instance->show($tpl, $append_pare);
 ```
 
-定位：`lib/myStep.class.php:398`。
+定位：`lib/myStep.class.php:408`。
 
 ### myStep::render
 
@@ -357,7 +359,7 @@ public function render(myTemplate $tpl, $append_pare = []);
 $result = $instance->render($tpl, $append_pare);
 ```
 
-定位：`lib/myStep.class.php:445`。
+定位：`lib/myStep.class.php:455`。
 
 ### myStep::checkCache
 
@@ -383,7 +385,7 @@ public function checkCache(myTemplate $tpl);
 $result = $instance->checkCache($tpl);
 ```
 
-定位：`lib/myStep.class.php:479`。
+定位：`lib/myStep.class.php:489`。
 
 ### myStep::end
 
@@ -409,7 +411,7 @@ public function end();
 $result = $instance->end();
 ```
 
-定位：`lib/myStep.class.php:496`。
+定位：`lib/myStep.class.php:506`。
 
 ### myStep::gzOut
 
@@ -435,7 +437,7 @@ public function gzOut($level = 3, $query = 0, $time = 0, $mem = 0);
 $result = $instance->gzOut($level, $query, $time, $mem);
 ```
 
-定位：`lib/myStep.class.php:516`。
+定位：`lib/myStep.class.php:526`。
 
 ### myStep::addCSS
 
@@ -459,7 +461,7 @@ public function addCSS($file, $code=false);
 $result = $instance->addCSS($file, $code);
 ```
 
-定位：`lib/myStep.class.php:556`。
+定位：`lib/myStep.class.php:566`。
 
 ### myStep::CSS
 
@@ -484,7 +486,7 @@ public function CSS($cache='', $dummy_1='', $dummy_2='');
 $result = $instance->CSS($cache, $dummy_1, $dummy_2);
 ```
 
-定位：`lib/myStep.class.php:577`。
+定位：`lib/myStep.class.php:587`。
 
 ### myStep::addJS
 
@@ -508,7 +510,7 @@ public function addJS($file, $code=false);
 $result = $instance->addJS($file, $code);
 ```
 
-定位：`lib/myStep.class.php:591`。
+定位：`lib/myStep.class.php:601`。
 
 ### myStep::JS
 
@@ -533,7 +535,7 @@ public function JS($cache='', $dummy_1='', $dummy_2='');
 $result = $instance->JS($cache, $dummy_1, $dummy_2);
 ```
 
-定位：`lib/myStep.class.php:612`。
+定位：`lib/myStep.class.php:622`。
 
 ### myStep::editorSetPlugin
 
@@ -557,7 +559,7 @@ public function editorSetPlugin($code, $btn='');
 $result = $instance->editorSetPlugin($code, $btn);
 ```
 
-定位：`lib/myStep.class.php:626`。
+定位：`lib/myStep.class.php:636`。
 
 ### myStep::editorGetPlugin
 
@@ -580,7 +582,7 @@ public function editorGetPlugin();
 $result = $instance->editorGetPlugin();
 ```
 
-定位：`lib/myStep.class.php:640`。
+定位：`lib/myStep.class.php:650`。
 
 ### myStep::info
 
@@ -606,7 +608,7 @@ public static function info($msg, $url = '');
 $result = myStep::info($msg, $url);
 ```
 
-定位：`lib/myStep.class.php:673`。
+定位：`lib/myStep.class.php:683`。
 
 ### myStep::captcha
 
@@ -634,7 +636,7 @@ public static function captcha($len = 4, $scope = 3);
 $result = myStep::captcha($len, $scope);
 ```
 
-定位：`lib/myStep.class.php:722`。
+定位：`lib/myStep.class.php:732`。
 
 ### myStep::language
 
@@ -657,7 +659,7 @@ public static function language($app_name, $type='default');
 $result = myStep::language($app_name, $type);
 ```
 
-定位：`lib/myStep.class.php:737`。
+定位：`lib/myStep.class.php:747`。
 
 ### myStep::setting
 
@@ -683,7 +685,7 @@ public static function setting($app_name);
 $result = myStep::setting($app_name);
 ```
 
-定位：`lib/myStep.class.php:777`。
+定位：`lib/myStep.class.php:787`。
 
 ### myStep::apiOriginAllowed
 
@@ -709,7 +711,7 @@ public static function apiOriginAllowed($origin, $current, array $domains, $cook
 $result = myStep::apiOriginAllowed($origin, $current, $domains, $cookie_domain, $extra);
 ```
 
-定位：`lib/myStep.class.php:823`。
+定位：`lib/myStep.class.php:833`。
 
 ### myStep::api
 
@@ -738,7 +740,7 @@ public static function api($path);
 $result = myStep::api($path);
 ```
 
-定位：`lib/myStep.class.php:851`。
+定位：`lib/myStep.class.php:861`。
 
 ### myStep::module
 
@@ -761,7 +763,7 @@ public static function module($path, $dummy = '');
 $result = myStep::module($path, $dummy);
 ```
 
-定位：`lib/myStep.class.php:923`。
+定位：`lib/myStep.class.php:933`。
 
 ### myStep::appFunc
 
@@ -783,7 +785,7 @@ public static function appFunc($func);
 $result = myStep::appFunc($func);
 ```
 
-定位：`lib/myStep.class.php:961`。
+定位：`lib/myStep.class.php:971`。
 
 ### myStep::upload
 
@@ -805,7 +807,7 @@ public static function upload();
 $result = myStep::upload();
 ```
 
-定位：`lib/myStep.class.php:983`。
+定位：`lib/myStep.class.php:993`。
 
 ### myStep::download
 
@@ -827,7 +829,7 @@ public static function download($idx='');
 $result = myStep::download($idx);
 ```
 
-定位：`lib/myStep.class.php:1019`。
+定位：`lib/myStep.class.php:1029`。
 
 ### myStep::remove_ul
 
@@ -849,7 +851,7 @@ public static function remove_ul($idx='');
 $result = myStep::remove_ul($idx);
 ```
 
-定位：`lib/myStep.class.php:1038`。
+定位：`lib/myStep.class.php:1048`。
 
 ### myStep::header
 
@@ -873,7 +875,7 @@ public static function header($idx, $para = '', $exit = true);
 $result = myStep::header($idx, $para, $exit);
 ```
 
-定位：`lib/myStep.class.php:1058`。
+定位：`lib/myStep.class.php:1068`。
 
 ### myStep::setURL
 
@@ -895,7 +897,7 @@ public static function setURL($url='');
 $result = myStep::setURL($url);
 ```
 
-定位：`lib/myStep.class.php:1083`。
+定位：`lib/myStep.class.php:1093`。
 
 ### myStep::redirect
 
@@ -918,7 +920,7 @@ public static function redirect($url = '', $code = '302');
 $result = myStep::redirect($url, $code);
 ```
 
-定位：`lib/myStep.class.php:1110`。
+定位：`lib/myStep.class.php:1120`。
 
 ### myStep::init
 
@@ -945,7 +947,7 @@ public static function init();
 $result = myStep::init();
 ```
 
-定位：`lib/myStep.class.php:1136`。
+定位：`lib/myStep.class.php:1146`。
 
 ### myStep::activePlugins
 
@@ -969,7 +971,7 @@ public static function activePlugins();
 $result = myStep::activePlugins();
 ```
 
-定位：`lib/myStep.class.php:1182`。
+定位：`lib/myStep.class.php:1192`。
 
 ### myStep::refreshRoutes
 
@@ -993,7 +995,7 @@ public static function refreshRoutes();
 $result = myStep::refreshRoutes();
 ```
 
-定位：`lib/myStep.class.php:1217`。
+定位：`lib/myStep.class.php:1227`。
 
 ### myStep::go
 
@@ -1022,7 +1024,7 @@ public static function go();
 $result = myStep::go();
 ```
 
-定位：`lib/myStep.class.php:1305`。
+定位：`lib/myStep.class.php:1315`。
 
 ### myStep::setPara
 
@@ -1044,7 +1046,7 @@ public static function setPara();
 $result = myStep::setPara();
 ```
 
-定位：`lib/myStep.class.php:1480`。
+定位：`lib/myStep.class.php:1490`。
 
 ### myStep::checkBind
 
@@ -1066,7 +1068,7 @@ public static function checkBind($pattern);
 $result = myStep::checkBind($pattern);
 ```
 
-定位：`lib/myStep.class.php:1550`。
+定位：`lib/myStep.class.php:1560`。
 
 ### myStep::checkClose
 
@@ -1088,7 +1090,7 @@ public static function checkClose();
 $result = myStep::checkClose();
 ```
 
-定位：`lib/myStep.class.php:1571`。
+定位：`lib/myStep.class.php:1581`。
 
 ### myStep::getModule
 
@@ -1110,7 +1112,7 @@ public static function getModule($m);
 $result = myStep::getModule($m);
 ```
 
-定位：`lib/myStep.class.php:1591`。
+定位：`lib/myStep.class.php:1601`。
 
 ### myStep::vendor
 
@@ -1134,7 +1136,7 @@ public static function vendor();
 $result = myStep::vendor();
 ```
 
-定位：`lib/myStep.class.php:1627`。
+定位：`lib/myStep.class.php:1637`。
 
 ### myStep::segment
 
@@ -1156,7 +1158,7 @@ public static function segment($str='');
 $result = myStep::segment($str);
 ```
 
-定位：`lib/myStep.class.php:1665`。
+定位：`lib/myStep.class.php:1675`。
 
 ### myStep::checkPower
 
@@ -1178,7 +1180,7 @@ public static function checkPower($idx);
 $result = myStep::checkPower($idx);
 ```
 
-定位：`lib/myStep.class.php:1685`。
+定位：`lib/myStep.class.php:1695`。
 
 ### myStep::getCore
 
@@ -1200,4 +1202,4 @@ public static function getCore();
 $result = myStep::getCore();
 ```
 
-定位：`lib/myStep.class.php:1712`。
+定位：`lib/myStep.class.php:1722`。

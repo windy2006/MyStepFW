@@ -929,7 +929,7 @@
     ]
   },
   "lib/myStep.class.php": {
-    "sha256": "fdeb3b7c0b46392b7dc615a2b2d1d4f51267cabbf5420f973ec92415d9383aa4",
+    "sha256": "bcf22a88c63341b7ccf8ddd7982136c5498d9f066a53d00ebc654fc63646bc68",
     "document": "docs/backend/reference/mystep.md",
     "methods": [
       "myStep::__construct",

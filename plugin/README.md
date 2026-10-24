@@ -441,3 +441,9 @@ Admin实现位于 `app/Admin/plugin_layout.php` 和 `Admin::pluginLayout()`，�
 `test/`、`tests/`、`maintenance/` 和 `AGENTS.md` 仅在开发者本机保留，不纳入 GitHub 当前版本或整站安装包。上文测试命令是本机回归说明。manager 的独立安装模板最低要求 PHP 7.4.0，与统一入口和 Composer 一致。
 
 myPacker、整站打包与文件校验共用 allow/ignore 解析：按当前目录精确名称匹配，支持整行 `#` 注释和首尾空白；带 `/` 仅匹配目录，空规则文件仍跳过整个目录，排除优先于白名单。配置方法和示例见 [归档指南](../docs/backend/tools/archives.md)。
+
+### 安装包功能源码的识别（manager 1.1.6）
+
+应用或插件 `module/` 下的 `plugin.php` 是正常功能脚本，须进入整站安装包、文件校验及升级清单；应用根目录同名 `plugin.php` 是当前站点的插件绑定，仍排除。不能仅按文件名将后台插件管理页面当作绑定配置过滤。
+
+开发指南中的 `docs/**/cache`、`docs/**/session` 是文档分类，不按运行缓存或会话过滤；源码目录中的缓存、会话及上传数据仍受保护。应用和插件发布白名单显式保留 README.md，使安装后的框架指南包含开发规范。

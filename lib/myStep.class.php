@@ -335,8 +335,10 @@ class myStep extends myController {
     }
 
     /**
-     * 功能说明：声明重要实例
+     * 功能说明：按驱动签名准备缓存与数据库实例
      *
+     * SQLite 仅传入数据库文件路径（或 :memory:），相对路径按 ROOT 解析；
+     * MySQL/MSSQL 沿用服务器、用户、密码及字符集参数。已有全局实例继续复用。
      * 参数说明：无显式参数。
      *
      * @return void 无返回值。
@@ -355,9 +357,17 @@ class myStep extends myController {
             $cache = self::getInstance('myCache', 'myCache_'.$this->setting->gen->cache_mode, $cache_setting);
         }
         if(empty($db)) {
-            $db = self::getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
+            $sqlite = strtolower($this->setting->db->type) === 'sqlite';
+            if($sqlite) {
+                // SQLite 的第二个初始化参数是打开标志，不能传入 MySQL 用户名。
+                $file = $this->setting->db->host === ':memory:' ? ':memory:' : myPath::absolute($this->setting->db->host);
+                $db = self::getInstance('myDb', $this->setting->db->type, $file);
+            } else {
+                $db = self::getInstance('myDb', $this->setting->db->type, $this->setting->db->host, $this->setting->db->user, $this->setting->db->password, $this->setting->db->charset);
+            }
             if($this->setting->db->auto) {
-                $db->connect($this->setting->db->pconnect, $this->setting->db->name);
+                if($sqlite) $db->connect();
+                else $db->connect($this->setting->db->pconnect, $this->setting->db->name);
                 $db->setCache($cache, 600);
             } else {
                 $this->setting->session->mode='sess_file';

@@ -4,3 +4,4 @@ memcached
 frontend
 badReq
 interface_plugin.class.php
+README.md

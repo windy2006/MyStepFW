@@ -669,8 +669,12 @@ class plugin_manager implements interface_plugin {
                     if($relative==='' && in_array($name,['test','tests','maintenance','AGENTS.md'],true)) continue;
                     if(in_array($name,['ignore','allow','config_new.php'],true) || ($name[0]==='.' && $name!=='.htaccess')) continue;
                     $defaults=array_diff(self::IGNORE,['cache/','config.php','construction.php']);
+                    $documentation=strpos($member,'docs/')===0;
+                    if($documentation) $defaults=array_diff($defaults,['cache/']);
+                    // 功能模块 plugin.php 不是应用根目录的插件绑定配置。
+                    if(preg_match('#\A(?:app|plugin)/[A-Za-z][A-Za-z0-9_]*/module/(?:[A-Za-z0-9_]+/)*plugin\.php\z#D',$member)) $defaults=array_diff($defaults,['plugin.php']);
                     if(in_array($name,$defaults,true) || in_array($name.'/',$defaults,true) || preg_match('/(?:\.db(?:-wal|-shm|-journal)?|\.sqlite3?|\.lock|\.log|\.bak)$/i',$name) || strpos($name,'_bak')!==false) continue;
-                    if($member==='files' || (in_array($name,['cache','session'],true) && !in_array($member,['lib/cache','lib/session'],true))) continue;
+                    if($member==='files' || (in_array($name,['cache','session'],true) && !$documentation && !in_array($member,['lib/cache','lib/session'],true))) continue;
                     if(in_array($member,['config/config.php','config/api.php','config/domain.php','config/route.php','config/route.php.sources.json','config/priority'],true)) continue;
                     if($name==='config.php' && !preg_match('#\A(?:app|plugin)/[A-Za-z][A-Za-z0-9_]*/config\.php\z#D',$member)) continue;
                     if(++$count>10000) throw new RuntimeException('System package member budget exceeded');
@@ -879,6 +883,9 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
         $rules=myPacker::directoryRules($directory);$defaults=self::IGNORE;
         $root=rtrim(myFile::realPath(ROOT),'/');
         if($directory===$root.'/lib') $defaults=array_diff($defaults,['cache/']);
+        $relative=substr($directory,strlen($root)+1);
+        if($relative==='docs' || strpos($relative,'docs/')===0) $defaults=array_diff($defaults,['cache/']);
+        if(preg_match('#\A(?:app|plugin)/[A-Za-z][A-Za-z0-9_]*/module(?:/[A-Za-z0-9_]+)*\z#D',$relative)) $defaults=array_diff($defaults,['plugin.php']);
         if($directory===$root) $defaults=array_merge($defaults,['test/','tests/','maintenance/','AGENTS.md']);
         $rules['ignore']+=array_fill_keys($defaults,true);
         return $rules;
@@ -1311,6 +1318,8 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
      *
      * lib/cache与lib/session仅作为固定的框架源码目录放行；其他cache/session目录仍受保护。
      * config/api.php保存站点API策略，不进入升级替换成员。
+     * 应用/插件 module 下的 plugin.php 为功能源码，可发布；根目录同名绑定配置仍受保护。
+     * docs 中 cache/session 为开发指南分类，可发布；运行缓存、会话目录仍受保护。
      *
      * @param string $name 清单成员路径
      * @return string 不带前导斜线的路径
@@ -1323,8 +1332,10 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
         if(($parts[0] ?? '')==='files') throw new InvalidArgumentException('Upload data is not an update member');
         foreach($parts as $position=>$part) {
             $libraryDirectory=$position===1 && $parts[0]==='lib' && in_array($part,['cache','session'],true);
+            $documentationDirectory=$parts[0]==='docs' && in_array($part,['cache','session'],true);
+            $moduleScript=$part==='plugin.php' && $position===count($parts)-1 && preg_match('#\A(?:app|plugin)/[A-Za-z][A-Za-z0-9_]*/module/(?:[A-Za-z0-9_]+/)*plugin\.php\z#D',$name);
             if($part==='' || $part==='.' || $part==='..' || (isset($part[0]) && $part[0]==='.' && !in_array($part,['.htaccess'],true))
-                || (!$libraryDirectory && in_array($part,['config.php','plugin.php','construction.php','cache','session','error.log','plugin.db','data.db','update.db','ban_ip.php'],true))) throw new InvalidArgumentException('Private or invalid update member');
+                || (!$libraryDirectory && !$documentationDirectory && !$moduleScript && in_array($part,['config.php','plugin.php','construction.php','cache','session','error.log','plugin.db','data.db','update.db','ban_ip.php'],true))) throw new InvalidArgumentException('Private or invalid update member');
         }
         return implode('/',$parts);
     }
