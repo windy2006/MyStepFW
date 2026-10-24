@@ -6,7 +6,7 @@
  * 对应模板：function_api、api_endpoint；字段沿用component_field。
  * 使用说明：Admin统一执行管理员、POST、CSRF和版本检查；AJAX返回JSON，普通提交保留303。
  */
-require_once APP.'myStep/MyStepApiManager.class.php';
+require_once APP.'myStep/lib.php';
 return [
     /**
      * 功能说明：在每条API下方装配独立设置表单，地址以不带格式的纯文本显示。

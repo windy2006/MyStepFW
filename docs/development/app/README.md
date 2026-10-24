@@ -21,3 +21,7 @@
 - [完整实例：第一个应用](first-app.md)
 
 [文档总览](../../README.md)
+
+## 后台功能的组织约定
+
+后台功能以 manager 的 module/template 对应模式为准。页面执行放在对应 module，HTML 放在对应 template；应用根目录不增加独立页面装配、页面清单或辅助类文件。公共辅助声明使用已有 lib.php，核心类与应用同名并继承 myStep。具体目录和示例见 [应用编写规范](../../../app/README.md)。

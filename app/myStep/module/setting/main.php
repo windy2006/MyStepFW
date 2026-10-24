@@ -9,7 +9,7 @@ if(!empty($app)) {
     $file = CONFIG.'config.php';
     $builder = CONFIG.'construction/'.$ms_setting->gen->language.'.php';
 }
-require_once APP.'myStep/MyStepApiManager.class.php';
+require_once APP.'myStep/lib.php';
 $config = new myConfig($file);
 if($app==='')MyStepApiManager::frameworkSettings($config);
 $config->merge(myPath::settings($config->get(true), $app?:'myStep'));

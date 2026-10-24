@@ -4,7 +4,7 @@
  * 功能说明：将manager插件功能主体装配到Admin自己的布局与风格模板中。
  * 方法目录：manager（模块视图回调，说明见下方PHPDoc）。
  * 对应模板：manager。
- * 使用说明：由pages.php登记并经AdminService加载；Admin负责登录检查，插件保留原操作入口。
+ * 使用说明：由lib.php的pages()登记并经AdminService加载；Admin负责登录检查，插件保留原操作入口。
  */
 return [
     /**

@@ -4,7 +4,7 @@
 
 ## 定位和适用场景
 
-使用同一框架机制的管理应用，核心类、服务、页面清单、模块与模板均在应用目录。与原后台共用框架设置、插件注册和API策略。
+使用同一框架机制的管理应用，核心类在应用根目录，公共辅助声明在已有 lib.php，功能模块与模板分别归入 module/、template/。与原后台共用框架设置、插件注册和API策略。
 
 ## 当前目录及主要文件
 
@@ -13,8 +13,6 @@
 ```text
 app/Admin/
 ├── Admin.class.php
-├── AdminService.class.php
-├── AdminStore.class.php
 ├── README.md
 ├── asset/
 ├── config.php
@@ -24,7 +22,6 @@ app/Admin/
 ├── language/
 ├── lib.php
 ├── module/
-├── pages.php
 ├── plugin.php
 ├── plugin_layout.php
 ├── route.php
@@ -34,7 +31,18 @@ app/Admin/
 
 ## 入口与执行过程
 
-Admin.class.php按pages.php白名单选择AdminService回调；POST动作验证字段、CSRF和管理员，再调用module中的处理。
+Admin.class.php 使用 lib.php 中的受信页面定义选择 module/ 回调；POST动作验证字段、CSRF和管理员，再调用module中的处理。
+
+## 功能脚本与模板对应
+
+| 功能脚本 | 默认风格模板 |
+| --- | --- |
+| `module/info/error.php` | `template/default/info_error.tpl` |
+| `module/setting/main.php` | `template/default/setting_main.tpl` |
+| `module/function/api.php` | `template/default/function_api.tpl` |
+| `module/guide.php` | `template/default/guide.tpl` |
+
+页面的读取、动作与模板赋值在对应模块，复用的模板片段仍保留各自文件。AdminStore、AdminService 是 lib.php 内的辅助声明，不再是根目录下的独立文件。
 
 ## 配置、模板和资源
 

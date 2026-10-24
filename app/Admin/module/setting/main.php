@@ -4,10 +4,10 @@
  * 功能说明：本功能页面读取与动作处理，保持业务和对应模板独立维护。
  * 方法目录：settings、saveSettings（受信模块回调，功能及参数说明见各回调PHPDoc）。
  * 对应模板：setting_main。
- * 使用说明：由AdminService按pages.php中的固定模块映射加载；$this为应用服务，ui为当前Admin。
+ * 使用说明：由AdminService按lib.php中pages()的固定模块映射加载；$this为应用服务，ui为当前Admin。
  * 返回说明：视图回调返回模板HTML，动作返回反馈或下载描述；HTTP鉴权及参数校验由Admin统一完成。
  */
-require_once APP.'myStep/MyStepApiManager.class.php';
+require_once APP.'myStep/lib.php';
 return [
     /**
      * 功能说明：全局/应用配置表单。

@@ -51,7 +51,7 @@ class Admin extends myStep {
      * @return array 页面路径到title/group/menu_links/module/view/actions定义
      */
     protected function definition() {
-        return include __DIR__.'/pages.php';
+        return \app\Admin\pages();
     }
     /**
      * 功能说明：创建当前应用业务服务。

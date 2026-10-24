@@ -21,6 +21,20 @@
 
 规则按三个层次使用：同名核心类、继承关系和应用文件归属属于统一约束；模块、模板及有关入口按实际功能配置；旧应用的兼容回退行为不代替新应用规范。纯数据 API 可以没有页面模板，具有展示功能的模块则应明确对应模板。
 
+### 后台功能的强制组织规则
+
+后台以 `plugin/manager/module/manager.php` 配合 `template/manager.tpl` 的模式为范例。每个功能的页面读取、动作处理和模板赋值放在自己的 `module/` 脚本，HTML 放在对应 `template/` 文件；不能再在应用根目录另设功能装配脚本、页面清单文件或独立辅助类文件。
+
+```text
+module/guide.php          → template/guide.tpl
+module/function/api.php   → template/function_api.tpl
+module/setting/main.php   → template/setting_main.tpl
+```
+
+模板允许按风格位于 `template/default/` 等目录，模块子目录用下划线连接为模板名；一个功能的列表、输入和局部模板仍归该功能维护。跨模块复用的应用函数、辅助声明集中在应用已有 `lib.php`，只做公共支持；页面执行与展示仍留在对应 module/template，不把页面业务堆入 lib.php。
+
+根目录保留同名核心类及框架约定的入口、路由、元信息、配置、语言设置、菜单和扩展钩子。普通应用的核心类仍与应用同名并继承 myStep；插件使用其约定的 class.php，不混用两者的主类文件名。API 管理和框架指南也遵循以上布局，不作为例外。
+
 ## 2. 应用标识与核心类
 
 以下名称必须一致，大小写也保持一致：
@@ -61,7 +75,7 @@ app/Hello/
 ├── config_manage.php        # 可选，manage 路由入口的配置覆盖
 ├── index.php                # 默认页面分发入口
 ├── route.php                # 自定义路由／API 声明，按需提供
-├── lib.php                  # 应用函数及辅助类加载，按需提供
+├── lib.php                  # 应用内复用函数与辅助声明，按需提供
 ├── global.php               # 页面公共数据准备，按需提供
 ├── plugin.php               # 本应用使用的插件标识，按需提供
 ├── plugin_addon.php         # 可选，插件模块页面的应用布局适配
@@ -123,7 +137,7 @@ app/Hello/
 | `config_入口名.php` | 指定入口配置覆盖 | 与匹配路由入口首段关联；例如 CMS 的 config_admin_cms.php 选择后台风格 |
 | `index.php` | 默认请求的页面调度 | 使用固定模块清单或受控映射；分发及公共装配保持简明 |
 | `route.php` | 路由、格式及 API 声明 | 按需要定义 `$rule`、`$format`、`$api`；避免数据库写入和页面输出 |
-| `lib.php` | 应用内部复用函数 | 参照 `namespace app\Hello;`；按需明确引入应用辅助类 |
+| `lib.php` | 应用内部复用函数和辅助声明 | 命名空间与类声明显式组织；复用辅助类在本文件声明，不另建应用根目录文件 |
 | `global.php` | 页面共享变量和模板数据 | 只承担当前应用页面公共准备；不要假定每种 API 分支都会加载它 |
 | `module/` | 具体功能的数据处理和动作 | 按功能分组；页面功能具有明确对应模板 |
 | `template/` | 页面结构和展示 | 使用 myTemplate 的变量、条件、循环和子模板组合 |

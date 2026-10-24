@@ -6,7 +6,7 @@
  * 使用说明：框架后台鉴权后加载，读取doc标识；guide_group和guide模板承担展示。
  * 对应模板：template/guide.tpl、template/guide_group.tpl，沿用当前path/style及default回退。
  */
-require_once APP.'myStep/MyStepGuide.class.php';
+require_once APP.'myStep/lib.php';
 $mystep->addCSS(APP.'myStep/asset/guide.css');
 $mystep->addJS(STATICS.'js/checkForm.js');$mystep->addJS(APP.'myStep/asset/guide.js');
 $guideHome=myStep::setURL(trim($ms_setting->gen->path_admin,'/').'/guide');

@@ -12,9 +12,6 @@
 
 ```text
 app/myStep/
-├── MyStepApiManager.class.php
-├── MyStepGuide.class.php
-├── api_admin.php
 ├── asset/
 ├── config.php
 ├── config/
@@ -49,7 +46,7 @@ route.php → 框架后台登录检查 → module/功能脚本 → template/对�
 
 ## 指南阅读与搜索
 
-新旧后台共用本应用的MyStepGuide及asset/guide.js。文档展示继续使用各自的guide、guide_group与guide_article模板，遵循原有风格和default回退；应用可覆盖正文片段模板。普通链接保留原地址，启用浏览器脚本后改为局部加载。
+新旧后台共用本应用 lib.php 内的 MyStepGuide 辅助声明及 asset/guide.js。API 管理装配直接位于 module/function/api.php，MyStepApiManager 公共声明也在 lib.php，不另设根目录功能文件。文档展示继续使用各自的guide、guide_group与guide_article模板，遵循原有风格和default回退；应用可覆盖正文片段模板。普通链接保留原地址，启用浏览器脚本后改为局部加载。
 
 搜索只读取当前受信目录中的文档，返回当前后台的链接和纯文本摘要；不会搜索旧备份或使用请求参数选择磁盘文件。局部阅读与搜索均经过原后台登录校验。并发请求采用取消与序号校验，失效登录、网络错误和不存在的文档保留当前正文并显示反馈。
 
