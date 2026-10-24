@@ -1,10 +1,10 @@
-# simpleDB：simpleDB 数据库驱动／协议
+# simpleDB：本地小型数据库
 
-修订日期：2026-10-23。功能详解。
+修订日期：2026-10-24。
 
 ## 职责与调用位置
 
-本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
+管理固定记录格式的本地小表。删除使用destroy；不能把文件级锁视为多表事务。
 
 源码：`lib/database/simpleDB.class.php`。本页列出该文件直接声明的全部类、接口、trait和具名函数；继承及trait导入方法按原声明页查询，不重复伪装成另一次声明。
 
@@ -15,11 +15,11 @@
 ## 主要用法示例
 
 ```php
-// 在应用已取得当前$db的上下文中，先检测能力再调用。
-if ($db->supports(interface_db_prepared::class)) {
-    $row = $db->fetchOne('SELECT id,title FROM items WHERE id=?', [$id]);
-}
-// items为业务示意表，$id必须先验证；连接参数由当前应用配置提供。
+$db = new myDb('simpleDB', 'demo', $directory);
+if (!$db->check()) $db->create([['title', 100], ['count', 8]]);
+$db->insert(['title'=>'示例', 'count'=>1]);
+$rows = $db->select();
+$db->destroy(); // 仅删除本例独占的demo.db，生产环境须先完成权限检查。
 ```
 
 ## 声明与类职责
@@ -31,7 +31,7 @@ if ($db->supports(interface_db_prepared::class)) {
 使用说明：
   1. 适合少量本地结构化记录；通过create定义字段后读写。
   2. 参数采用文件/字段/条件/行号语义，不能直接套用SQL驱动参数。
-  3. destroy为正确拼写入口，保留历史destory兼容方法。
+  3. 使用destroy删除当前表文件。
 
 补充说明：
 兼容旧固定长度 .db 格式的本地小表，读写在同一个文件锁内完成。
@@ -42,11 +42,11 @@ if ($db->supports(interface_db_prepared::class)) {
 
 以下是本文件中的字段声明。public字段属于可见状态，protected/private字段只用于解释执行过程，不能绕过方法校验写入。字段用途需结合初始化、设置及读取方法；这些值不是站点的当前私有配置。
 
-```text
+```php
 private $name='', $path='', $file='', $tlen=500, $fp=null, $maxlen=10, $separator="\0", $max_bytes=33554432;
 ```
 
-```text
+```php
 public $pos=0, $row=0;
 ```
 
@@ -66,8 +66,7 @@ public $pos=0, $row=0;
 | `simpleDB::access` | 在共享/排他锁内取得快照并执行操作，写前完成全部编码 |
 | `simpleDB::mutate` | 在单个排他锁内读取、变更及保存整个记录集，避免empty/insert多次操作的空表窗口。 |
 | `simpleDB::create` | 原子独占创建空表，已存在时不截断 |
-| `simpleDB::destory` | 保留历史拼写，删除当前表文件；不与其他进程的文件替换组成事务 |
-| `simpleDB::destroy` | 正确拼写的删除入口，委托 destory |
+| `simpleDB::destroy` | 关闭当前表并删除文件，不与其他进程的文件替换组成事务。 |
 | `simpleDB::empty` | 在排他锁内清空记录，保留原字段设置 |
 | `simpleDB::matcher` | 将字符串比较或字段映射转换为 AND 过滤器，值中的等号保持原样 |
 | `simpleDB::query` | 查询记录，包含空条件时也按指定模式和条数返回 |
@@ -91,7 +90,7 @@ public $pos=0, $row=0;
 
 功能说明：按可选位置参数初始化，不立即创建文件
 
-```text
+```php
 public function __construct();
 ```
 
@@ -103,13 +102,13 @@ public function __construct();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/database/simpleDB.class.php:86`。
+定位：`lib/database/simpleDB.class.php:85`。
 
 ### simpleDB::init
 
 功能说明：关闭旧句柄并设置本地数据文件
 
-```text
+```php
 public function init($name,$path='./',$tlen=500,$max_bytes=33554432);
 ```
 
@@ -131,13 +130,13 @@ public function init($name,$path='./',$tlen=500,$max_bytes=33554432);
 $result = $instance->init($name, $path, $tlen, $max_bytes);
 ```
 
-定位：`lib/database/simpleDB.class.php:98`。
+定位：`lib/database/simpleDB.class.php:97`。
 
 ### simpleDB::connect
 
 功能说明：打开现有数据文件；write/w 不再隐式截断，清空数据使用 empty
 
-```text
+```php
 public function connect($mode='r');
 ```
 
@@ -154,13 +153,13 @@ public function connect($mode='r');
 $result = $instance->connect($mode);
 ```
 
-定位：`lib/database/simpleDB.class.php:111`。
+定位：`lib/database/simpleDB.class.php:110`。
 
 ### simpleDB::selectDB
 
 功能说明：切换本地表并打开只读句柄
 
-```text
+```php
 public function selectDB($name,$path='',$tlen=500);
 ```
 
@@ -179,7 +178,7 @@ public function selectDB($name,$path='',$tlen=500);
 $result = $instance->selectDB($name, $path, $tlen);
 ```
 
-定位：`lib/database/simpleDB.class.php:121`。
+定位：`lib/database/simpleDB.class.php:120`。
 
 ### simpleDB::check
 
@@ -187,7 +186,7 @@ $result = $instance->selectDB($name, $path, $tlen);
 
 参数说明：无显式参数。
 
-```text
+```php
 public function check();
 ```
 
@@ -202,7 +201,7 @@ public function check();
 $result = $instance->check();
 ```
 
-定位：`lib/database/simpleDB.class.php:130`。
+定位：`lib/database/simpleDB.class.php:129`。
 
 ### simpleDB::close
 
@@ -210,7 +209,7 @@ $result = $instance->check();
 
 参数说明：无显式参数。
 
-```text
+```php
 public function close();
 ```
 
@@ -225,7 +224,7 @@ public function close();
 $result = $instance->close();
 ```
 
-定位：`lib/database/simpleDB.class.php:139`。
+定位：`lib/database/simpleDB.class.php:138`。
 
 ### simpleDB::__destruct
 
@@ -233,7 +232,7 @@ $result = $instance->close();
 
 参数说明：无显式参数。
 
-```text
+```php
 public function __destruct();
 ```
 
@@ -243,13 +242,13 @@ public function __destruct();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/database/simpleDB.class.php:148`。
+定位：`lib/database/simpleDB.class.php:147`。
 
 ### simpleDB::decode
 
 功能说明：校验表头及固定记录边界，读取旧格式；损坏文件明确失败
 
-```text
+```php
 private function decode($content);
 ```
 
@@ -263,13 +262,13 @@ private function decode($content);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/database/simpleDB.class.php:158`。
+定位：`lib/database/simpleDB.class.php:157`。
 
 ### simpleDB::encode
 
 功能说明：在任何写入之前验证所有记录并编码固定长度内容
 
-```text
+```php
 private function encode(array $schema,array $rows);
 ```
 
@@ -284,13 +283,13 @@ private function encode(array $schema,array $rows);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/database/simpleDB.class.php:179`。
+定位：`lib/database/simpleDB.class.php:178`。
 
 ### simpleDB::access
 
 功能说明：在共享/排他锁内取得快照并执行操作，写前完成全部编码
 
-```text
+```php
 private function access($write,callable $callback);
 ```
 
@@ -305,7 +304,7 @@ private function access($write,callable $callback);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/database/simpleDB.class.php:199`。
+定位：`lib/database/simpleDB.class.php:198`。
 
 ### simpleDB::mutate
 
@@ -314,7 +313,7 @@ private function access($write,callable $callback);
 回调接收引用记录数组及只读结构数组；抛异常时保留原文件，返回值原样传回调用方。
 返回false本身不会取消保存；需要取消时应抛异常。受信代码负责具体业务约束。
 
-```text
+```php
 public function mutate(callable $callback);
 ```
 
@@ -333,13 +332,13 @@ public function mutate(callable $callback);
 $result = $instance->mutate($callback);
 ```
 
-定位：`lib/database/simpleDB.class.php:222`。
+定位：`lib/database/simpleDB.class.php:221`。
 
 ### simpleDB::create
 
 功能说明：原子独占创建空表，已存在时不截断
 
-```text
+```php
 public function create($setting);
 ```
 
@@ -358,46 +357,21 @@ public function create($setting);
 $result = $instance->create($setting);
 ```
 
-定位：`lib/database/simpleDB.class.php:236`。
-
-### simpleDB::destory
-
-功能说明：保留历史拼写，删除当前表文件；不与其他进程的文件替换组成事务
-
-参数说明：无显式参数。
-
-```text
-public function destory();
-```
-
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
-
-**返回值**：bool 文件存在且成功删除时 true
-
-**相关入口**：simpleDB::destroy() 正确拼写入口；历史拼写继续兼容
-
-调用形式：
-
-```php
-// $instance为已初始化的simpleDB实例。
-$result = $instance->destory();
-```
-
-定位：`lib/database/simpleDB.class.php:253`。
+定位：`lib/database/simpleDB.class.php:235`。
 
 ### simpleDB::destroy
 
-功能说明：正确拼写的删除入口，委托 destory
+功能说明：关闭当前表并删除文件，不与其他进程的文件替换组成事务。
 
 参数说明：无显式参数。
 
-```text
+```php
 public function destroy();
 ```
 
 显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
-**返回值**：bool 删除当前表文件的结果，与历史destory入口一致
+**返回值**：bool 当前表文件存在且成功删除时为true，否则false
 
 调用形式：
 
@@ -406,7 +380,7 @@ public function destroy();
 $result = $instance->destroy();
 ```
 
-定位：`lib/database/simpleDB.class.php:262`。
+定位：`lib/database/simpleDB.class.php:251`。
 
 ### simpleDB::empty
 
@@ -414,7 +388,7 @@ $result = $instance->destroy();
 
 参数说明：无显式参数。
 
-```text
+```php
 public function empty();
 ```
 
@@ -429,13 +403,13 @@ public function empty();
 $result = $instance->empty();
 ```
 
-定位：`lib/database/simpleDB.class.php:271`。
+定位：`lib/database/simpleDB.class.php:260`。
 
 ### simpleDB::matcher
 
 功能说明：将字符串比较或字段映射转换为 AND 过滤器，值中的等号保持原样
 
-```text
+```php
 private function matcher($condition);
 ```
 
@@ -449,13 +423,13 @@ private function matcher($condition);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/database/simpleDB.class.php:281`。
+定位：`lib/database/simpleDB.class.php:270`。
 
 ### simpleDB::query
 
 功能说明：查询记录，包含空条件时也按指定模式和条数返回
 
-```text
+```php
 public function query($condition=[],$mode=2,$limit=1);
 ```
 
@@ -474,13 +448,13 @@ public function query($condition=[],$mode=2,$limit=1);
 $result = $instance->query($condition, $mode, $limit);
 ```
 
-定位：`lib/database/simpleDB.class.php:296`。
+定位：`lib/database/simpleDB.class.php:285`。
 
 ### simpleDB::select
 
 功能说明：读取纯记录，尊重传入条数
 
-```text
+```php
 public function select($condition=null,$limit=null);
 ```
 
@@ -498,13 +472,13 @@ public function select($condition=null,$limit=null);
 $result = $instance->select($condition, $limit);
 ```
 
-定位：`lib/database/simpleDB.class.php:308`。
+定位：`lib/database/simpleDB.class.php:297`。
 
 ### simpleDB::insert
 
 功能说明：在单次排他锁内追加一条或多条记录，按最新表头计算偏移
 
-```text
+```php
 public function insert($data=[],$mode=false);
 ```
 
@@ -524,13 +498,13 @@ public function insert($data=[],$mode=false);
 $result = $instance->insert($data, $mode);
 ```
 
-定位：`lib/database/simpleDB.class.php:318`。
+定位：`lib/database/simpleDB.class.php:307`。
 
 ### simpleDB::update
 
 功能说明：在同一排他锁内筛选并更新记录，空条件明确更新全部
 
-```text
+```php
 public function update($condition=null,$data=[],$mode=true);
 ```
 
@@ -549,13 +523,13 @@ public function update($condition=null,$data=[],$mode=true);
 $result = $instance->update($condition, $data, $mode);
 ```
 
-定位：`lib/database/simpleDB.class.php:331`。
+定位：`lib/database/simpleDB.class.php:320`。
 
 ### simpleDB::delete
 
 功能说明：在同一排他锁内删除并压实记录，不使用空白正则改写数据
 
-```text
+```php
 public function delete($condition=null);
 ```
 
@@ -572,13 +546,13 @@ public function delete($condition=null);
 $result = $instance->delete($condition);
 ```
 
-定位：`lib/database/simpleDB.class.php:342`。
+定位：`lib/database/simpleDB.class.php:331`。
 
 ### simpleDB::record
 
 功能说明：按 1 起始行号读取记录，0/非数字取首行，负数取随机行，越界正数取末行
 
-```text
+```php
 public function record($row=0);
 ```
 
@@ -595,13 +569,13 @@ public function record($row=0);
 $result = $instance->record($row);
 ```
 
-定位：`lib/database/simpleDB.class.php:350`。
+定位：`lib/database/simpleDB.class.php:339`。
 
 ### simpleDB::records
 
 功能说明：读取全部纯记录
 
-```text
+```php
 public function records($tmp='');
 ```
 
@@ -618,13 +592,13 @@ public function records($tmp='');
 $result = $instance->records($tmp);
 ```
 
-定位：`lib/database/simpleDB.class.php:358`。
+定位：`lib/database/simpleDB.class.php:347`。
 
 ### simpleDB::random
 
 功能说明：无重复随机抽取记录，不通过反复碰撞重试
 
-```text
+```php
 public function random($rows=1);
 ```
 
@@ -641,13 +615,13 @@ public function random($rows=1);
 $result = $instance->random($rows);
 ```
 
-定位：`lib/database/simpleDB.class.php:366`。
+定位：`lib/database/simpleDB.class.php:355`。
 
 ### simpleDB::getData
 
 功能说明：读取某行或指定字段
 
-```text
+```php
 public function getData($line=0,$field='');
 ```
 
@@ -665,13 +639,13 @@ public function getData($line=0,$field='');
 $result = $instance->getData($line, $field);
 ```
 
-定位：`lib/database/simpleDB.class.php:375`。
+定位：`lib/database/simpleDB.class.php:364`。
 
 ### simpleDB::result
 
 功能说明：读取首个匹配项的字段，未指定字段时返回第一列
 
-```text
+```php
 public function result($condition,$field='');
 ```
 
@@ -689,13 +663,13 @@ public function result($condition,$field='');
 $result = $instance->result($condition, $field);
 ```
 
-定位：`lib/database/simpleDB.class.php:384`。
+定位：`lib/database/simpleDB.class.php:373`。
 
 ### simpleDB::getFields
 
 功能说明：取得旧格式字段设置及最新长度元数据
 
-```text
+```php
 public function getFields($tmp='');
 ```
 
@@ -712,13 +686,13 @@ public function getFields($tmp='');
 $result = $instance->getFields($tmp);
 ```
 
-定位：`lib/database/simpleDB.class.php:392`。
+定位：`lib/database/simpleDB.class.php:381`。
 
 ### simpleDB::setOrder
 
 功能说明：排序结果，随机模式使用 shuffle，不使用不满足传递性的随机比较器
 
-```text
+```php
 public function setOrder($result,$col='rand',$mode='asc');
 ```
 
@@ -737,4 +711,4 @@ public function setOrder($result,$col='rand',$mode='asc');
 $result = $instance->setOrder($result, $col, $mode);
 ```
 
-定位：`lib/database/simpleDB.class.php:402`。
+定位：`lib/database/simpleDB.class.php:391`。

@@ -91,7 +91,7 @@ function documentPage($name, $mode = 'show') {
 }
 
 try {
-    $examples = ['myApi','myArchive','myAttachment','myAuth','myBase','myClassLoader','myDb','myPath','myProxy','mySecurity','myTrait'];
+    $examples = ['myApi','myArchive','myAttachment','myAuth','myBase','myClassLoader','myDb','myEncrypt','myPath','myProxy','mySecurity','myTrait'];
     $checks = [
         'myApi'=>['原始结果（整数）','XML响应','MYSTEP'],
         'myArchive'=>['统一发布成功','MyStep 暂存发布示例'],
@@ -100,6 +100,7 @@ try {
         'myBase'=>['构造时初始化','手动延迟初始化'],
         'myClassLoader'=>['interface_plugin','拒绝过期版本覆盖'],
         'myDb'=>['MyStep 示例','回滚后记录数'],
+        'myEncrypt'=>['字符串往返一致','文件明文恢复一致'],
         'myPath'=>['app/Document/template/','拒绝越过网站根目录'],
         'myProxy'=>['欢迎，开发者','通过引用增加'],
         'mySecurity'=>['正文超限的检查结果','413'],
@@ -128,6 +129,7 @@ try {
                 'myAuth'=>['摘要使用v2前缀','正确密码','历史摘要仍可校验','用途及签名正确','不同用途被拒绝'],
                 'myClassLoader'=>['拒绝过期版本覆盖'],
                 'myDb'=>['支持参数化','支持受管事务','异常已回滚'],
+                'myEncrypt'=>['字符串往返一致','错误密钥被拒绝','文件明文恢复一致','错误密钥保留文件'],
                 'myPath'=>['根目录以斜杠结束','拒绝越过网站根目录'],
                 'mySecurity'=>['当前会话令牌有效','非法令牌被拒绝'],
             ];

@@ -1,10 +1,10 @@
-# myEncrypt：加密与兼容数据
+# myEncrypt：字符串与文件认证加密
 
-修订日期：2026-10-23。功能详解。
+修订日期：2026-10-24。
 
 ## 职责与调用位置
 
-新数据使用seal/open认证加密；encStr/decStr等只兼容旧格式，不作为新密码存储。
+字符串使用seal/open，文件使用sealFile/openFile。两者都校验完整性；错误密钥和损坏文件不发布明文。密码摘要由myAuth管理。
 
 源码：`lib/myEncrypt.class.php`。本页列出该文件直接声明的全部类、接口、trait和具名函数；继承及trait导入方法按原声明页查询，不重复伪装成另一次声明。
 
@@ -15,206 +15,62 @@
 ## 主要用法示例
 
 ```php
-$key = bin2hex(random_bytes(32));
+$key = random_bytes(32); // 安全保存，不与密文一同公开。
 $sealed = myEncrypt::seal('保密内容', $key);
 $plain = myEncrypt::open($sealed, $key);
-assert($plain === '保密内容');
+if ($plain === false) throw new RuntimeException('字符串认证失败');
+
+$file = $directory.'/private.bin'; // 已准备好的独占测试文件。
+if (!myEncrypt::sealFile($file, $key)) throw new RuntimeException('文件加密失败');
+if (!myEncrypt::openFile($file, $key)) throw new RuntimeException('文件认证失败');
 ```
 
 ## 声明与类职责
 
 ### myEncrypt
 
-功能说明：提供历史异或兼容接口，以及带认证的现代封装与文件处理。
+功能说明：为字符串及任意大小本地文件提供认证加密，不回退到无认证算法。
 
-使用说明：
-  1. 新数据优先使用seal/open认证封装；旧encStr/decStr等仅用于既有格式兼容。
-  2. 文件入口在临时文件中转换后发布，失败不覆盖原文件。
-  3. 认证密钥由调用方安全管理；不能把可逆加密当成密码哈希。
+字符串MSENC1封装与文件MSFILE1封装用途不同，不能交叉解密。
+文件发布使用同目录rename及协作排他锁；不承诺进程崩溃后的持久化或阻止不遵守文件锁的外部写入。
 
 ## 方法目录
 
 | 方法／函数 | 可见性及用途 |
 | --- | --- |
-| `myEncrypt::keyED` | 按密钥摘要执行历史异或变换，供旧格式加解密复用 |
-| `myEncrypt::encStr` | 将字符串编码为历史可逆加密格式，兼容既有数据 |
-| `myEncrypt::encFile` | 在临时文件中按历史格式加密本地文件并原子替换 |
-| `myEncrypt::decStr` | 解码历史加密字符串，不能据此判断数据完整性 |
-| `myEncrypt::decFile` | 在临时文件中解密历史文件格式并原子替换 |
-| `myEncrypt::transformFile` | 执行历史文件格式转换，失败时保留原文件 |
-| `myEncrypt::seal` | 使用AES-256-GCM生成带版本及认证信息的加密封装 |
-| `myEncrypt::open` | 校验并解密MSENC1封装，认证失败返回false |
+| `myEncrypt::seal` | 使用随机盐、随机nonce及AES-256-GCM生成字符串认证封装。 |
+| `myEncrypt::open` | 校验并解密MSENC1字符串封装，不接受未知或历史异或格式。 |
+| `myEncrypt::sealFile` | 使用Secretstream逐块加密文件，成功后原子替换原文件。 |
+| `myEncrypt::openFile` | 逐块认证MSFILE1文件，确认FINAL及文件尾后原子发布明文。 |
+| `myEncrypt::transformFile` | 持有非阻塞排他锁，将结果写入同目录暂存文件后校验目标并发布。 |
+| `myEncrypt::sealStream` | 生成文件头，并用一块前瞻确定最后一个Secretstream认证块。 |
+| `myEncrypt::openStream` | 按固定最大块读取并认证，要求最后一个块携带FINAL且不存在附加字节。 |
+| `myEncrypt::readChunk` | 在固定预算内循环读取，直到取得要求字节数或正常到达文件尾。 |
+| `myEncrypt::writeAll` | 循环写入剩余字节，拒绝短写后的零进度及底层失败。 |
 
 ## 逐方法参数、返回与示例
 
 下面的“调用形式”说明位置参数及所属对象；变量须按参数表准备。它与上面的完整用法配合阅读，不把尚未准备的文件、连接或请求当作现成环境。内部／魔术方法说明引擎或扩展触发点，不建议直接调用。
 
-### myEncrypt::keyED
-
-功能说明：按密钥摘要执行历史异或变换，供旧格式加解密复用
-
-```text
-public static function keyED($str, $encrypt_key);
-```
-
-| 参数 | 类型、默认值与含义 |
-| --- | --- |
-| `$str` | string；待处理的字符串 |
-| `$encrypt_key` | string；用于历史异或变换的密钥 |
-
-**返回值**：string 历史异或变换后的原始字节串；相同密钥可执行逆变换
-
-**相关入口**：myEncrypt::seal() 新数据的认证加密封装
-
-调用形式：
-
-```php
-$result = myEncrypt::keyED($str, $encrypt_key);
-```
-
-定位：`lib/myEncrypt.class.php:60`。
-
-### myEncrypt::encStr
-
-功能说明：将字符串编码为历史可逆加密格式，兼容既有数据
-
-```text
-public static function encStr($str, $key);
-```
-
-| 参数 | 类型、默认值与含义 |
-| --- | --- |
-| `$str` | string；待处理的字符串 |
-| `$key` | string；加解密密钥 |
-
-**返回值**：string 历史加密格式文本，用于已有数据兼容，不提供认证完整性
-
-**相关入口**：myEncrypt::seal() 新数据的认证加密封装
-
-调用形式：
-
-```php
-$result = myEncrypt::encStr($str, $key);
-```
-
-定位：`lib/myEncrypt.class.php:80`。
-
-### myEncrypt::encFile
-
-功能说明：在临时文件中按历史格式加密本地文件并原子替换
-
-```text
-public static function encFile($file, $key);
-```
-
-| 参数 | 类型、默认值与含义 |
-| --- | --- |
-| `$file` | string；目标文件路径 |
-| `$key` | string；加解密密钥 |
-
-**返回值**：bool 转换并替换原文件成功为true，失败为false
-
-**相关入口**：myEncrypt::seal() 新数据的认证加密封装
-
-调用形式：
-
-```php
-$result = myEncrypt::encFile($file, $key);
-```
-
-定位：`lib/myEncrypt.class.php:100`。
-
-### myEncrypt::decStr
-
-功能说明：解码历史加密字符串，不能据此判断数据完整性
-
-```text
-public static function decStr($str, $key);
-```
-
-| 参数 | 类型、默认值与含义 |
-| --- | --- |
-| `$str` | string；待处理的字符串 |
-| `$key` | string；加解密密钥 |
-
-**返回值**：string 从历史加密格式解出的明文字节串
-
-**相关入口**：myEncrypt::open() 新封装的认证解密
-
-调用形式：
-
-```php
-$result = myEncrypt::decStr($str, $key);
-```
-
-定位：`lib/myEncrypt.class.php:112`。
-
-### myEncrypt::decFile
-
-功能说明：在临时文件中解密历史文件格式并原子替换
-
-```text
-public static function decFile($file, $key);
-```
-
-| 参数 | 类型、默认值与含义 |
-| --- | --- |
-| `$file` | string；目标文件路径 |
-| `$key` | string；加解密密钥 |
-
-**返回值**：bool 转换并替换原文件成功为true，失败为false
-
-**相关入口**：myEncrypt::open() 新封装的认证解密
-
-调用形式：
-
-```php
-$result = myEncrypt::decFile($file, $key);
-```
-
-定位：`lib/myEncrypt.class.php:132`。
-
-### myEncrypt::transformFile
-
-功能说明：执行历史文件格式转换，失败时保留原文件
-
-```text
-private static function transformFile($file, $key, $decrypt);
-```
-
-| 参数 | 类型、默认值与含义 |
-| --- | --- |
-| `$file` | string；目标文件路径 |
-| `$key` | string；加解密密钥 |
-| `$decrypt` | bool；true执行文件解密，false执行文件加密 |
-
-**返回值**：bool 完整转换并原子发布成功为true，失败为false
-
-调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
-
-定位：`lib/myEncrypt.class.php:145`。
-
 ### myEncrypt::seal
 
-功能说明：使用AES-256-GCM生成带版本及认证信息的加密封装
+功能说明：使用随机盐、随机nonce及AES-256-GCM生成字符串认证封装。
 
+通过HKDF-SHA256分离32字节密钥，使用12字节nonce及16字节认证标签。
+同一明文和密钥重复加密会生成不同封装；明文可以为空或包含任意二进制字节。
 
-调用示例：
-    $envelope = myEncrypt::seal('示例文本', $secret);
-    if ($envelope !== false) { $plaintext = myEncrypt::open($envelope, $secret); }
-
-```text
+```php
 public static function seal($plaintext, $key);
 ```
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$plaintext` | string；待加密的明文字节串 |
-| `$key` | string；加解密密钥 |
+| `$plaintext` | string；待加密的原始字节串 |
+| `$key` | string；非空高熵密钥，建议random_bytes(32)生成并安全持久保存 |
 
-**返回值**：string|false MSENC1开头的认证封装；加密失败为false
+**返回值**：string|false MSENC1开头的Base64认证封装；OpenSSL加密失败为false
 
-**异常与失败**：InvalidArgumentException 密钥不是非空字符串
+**异常与失败**：InvalidArgumentException 明文不是字符串或密钥不是非空字符串；RuntimeException 当前PHP没有OpenSSL加密能力；Exception 无法生成安全随机数
 
 调用形式：
 
@@ -222,22 +78,24 @@ public static function seal($plaintext, $key);
 $result = myEncrypt::seal($plaintext, $key);
 ```
 
-定位：`lib/myEncrypt.class.php:186`。
+定位：`lib/myEncrypt.class.php:66`。
 
 ### myEncrypt::open
 
-功能说明：校验并解密MSENC1封装，认证失败返回false
+功能说明：校验并解密MSENC1字符串封装，不接受未知或历史异或格式。
 
-```text
+```php
 public static function open($envelope, $key);
 ```
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$envelope` | string；带版本、随机量与认证信息的加密封装 |
-| `$key` | string；加解密密钥 |
+| `$envelope` | string；seal生成的完整封装 |
+| `$key` | string；加密时使用的同一高熵密钥 |
 
-**返回值**：string|false 解密后的原始明文字节；结构错误或认证失败为false
+**返回值**：string|false 原始明文字节串，可能为空；格式、密钥或认证不正确时为false
+
+**异常与失败**：RuntimeException 当前PHP没有OpenSSL解密能力
 
 调用形式：
 
@@ -245,4 +103,166 @@ public static function open($envelope, $key);
 $result = myEncrypt::open($envelope, $key);
 ```
 
-定位：`lib/myEncrypt.class.php:202`。
+定位：`lib/myEncrypt.class.php:85`。
+
+### myEncrypt::sealFile
+
+功能说明：使用Secretstream逐块加密文件，成功后原子替换原文件。
+
+新文件格式MSFILE1使用随机盐、HKDF密钥分离和Secretstream生成的随机流头。
+最后一个块带FINAL标记，空文件也包含最终认证块；不将整个文件载入内存。
+
+```php
+public static function sealFile($file, $key);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$file` | string；已存在的本地普通文件路径，可为网站根解析后的绝对路径 |
+| `$key` | string；非空高熵密钥，解密时须使用同一密钥 |
+
+**返回值**：bool 转换成功为true；路径、文件锁、读写或发布失败为false且不替换原文件
+
+**异常与失败**：InvalidArgumentException 密钥不是非空字符串；RuntimeException 当前PHP没有Sodium Secretstream能力；Exception 无法生成安全随机数或底层加密发生异常
+
+调用形式：
+
+```php
+$result = myEncrypt::sealFile($file, $key);
+```
+
+定位：`lib/myEncrypt.class.php:106`。
+
+### myEncrypt::openFile
+
+功能说明：逐块认证MSFILE1文件，确认FINAL及文件尾后原子发布明文。
+
+错误密钥、损坏、截断、块重排及尾部追加均不会发布暂存明文；不回退读取旧文件格式。
+
+```php
+public static function openFile($file, $key);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$file` | string；sealFile生成的本地加密文件路径 |
+| `$key` | string；加密时使用的同一高熵密钥 |
+
+**返回值**：bool 全部认证并发布成功为true；格式、认证、文件锁或文件操作失败为false
+
+**异常与失败**：InvalidArgumentException 密钥不是非空字符串；RuntimeException 当前PHP没有Sodium Secretstream能力；Exception 底层加密发生异常；原文件不被替换
+
+调用形式：
+
+```php
+$result = myEncrypt::openFile($file, $key);
+```
+
+定位：`lib/myEncrypt.class.php:121`。
+
+### myEncrypt::transformFile
+
+功能说明：持有非阻塞排他锁，将结果写入同目录暂存文件后校验目标并发布。
+
+暂存初始权限0600，完整成功后才恢复原文件权限；身份、大小及时间状态变化时拒绝覆盖。
+不接受URL、流包装器及文件符号链接；finally负责释放资源及删除未发布暂存。
+
+```php
+private static function transformFile($file, $key, $decrypt);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$file` | string；本地普通文件路径 |
+| `$key` | string；非空高熵密钥 |
+| `$decrypt` | bool；true解密，false加密 |
+
+**返回值**：bool 完整转换并原子发布是否成功
+
+**异常与失败**：InvalidArgumentException 密钥无效；RuntimeException 缺少Sodium扩展；Exception 随机数或加密异常继续传递，暂存仍会清理
+
+调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
+
+定位：`lib/myEncrypt.class.php:138`。
+
+### myEncrypt::sealStream
+
+功能说明：生成文件头，并用一块前瞻确定最后一个Secretstream认证块。
+
+```php
+private static function sealStream($input, $output, $key);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$input` | resource；已锁定的本地输入流 |
+| `$output` | resource；权限受限的暂存输出流 |
+| `$key` | string；调用方密钥 |
+
+**返回值**：bool 完整写入文件头和全部认证块是否成功
+
+**异常与失败**：Exception 随机数或Sodium异常继续传递
+
+调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
+
+定位：`lib/myEncrypt.class.php:185`。
+
+### myEncrypt::openStream
+
+功能说明：按固定最大块读取并认证，要求最后一个块携带FINAL且不存在附加字节。
+
+```php
+private static function openStream($input, $output, $key);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$input` | resource；已锁定的本地输入流 |
+| `$output` | resource；尚未发布的明文暂存流 |
+| `$key` | string；调用方密钥 |
+
+**返回值**：bool 格式、所有块及最终结束条件均有效时为true
+
+**异常与失败**：Exception Sodium初始化或解密异常继续传递
+
+调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
+
+定位：`lib/myEncrypt.class.php:219`。
+
+### myEncrypt::readChunk
+
+功能说明：在固定预算内循环读取，直到取得要求字节数或正常到达文件尾。
+
+```php
+private static function readChunk($stream, $length);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$stream` | resource；本地可读文件流 |
+| `$length` | int；本次最多读取的字节数 |
+
+**返回值**：string|false 读取到的字节，正常文件尾可能为空；错误或零进度为false
+
+调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
+
+定位：`lib/myEncrypt.class.php:251`。
+
+### myEncrypt::writeAll
+
+功能说明：循环写入剩余字节，拒绝短写后的零进度及底层失败。
+
+```php
+private static function writeAll($stream, $data);
+```
+
+| 参数 | 类型、默认值与含义 |
+| --- | --- |
+| `$stream` | resource；本地可写暂存文件流 |
+| `$data` | string；本次完整待写字节串，允许为空 |
+
+**返回值**：bool 所有字节写入成功为true，否则false
+
+调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
+
+定位：`lib/myEncrypt.class.php:267`。

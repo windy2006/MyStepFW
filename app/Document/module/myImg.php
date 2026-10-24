@@ -6,7 +6,7 @@ $myImg->watermark(PATH.'data/image/logo.png', 3, PATH.'data/watermark.png')
             ->thumb(400, 300, PATH.'data/thumb.png')
             ->init()
             ->captcha('ab哈cd', PATH.'data/image/font.ttc', 16)
-            ->destory();
+            ->destroy();
 */
 
 /*
@@ -33,7 +33,7 @@ $myImg->setLine(20, array('white', 'white', 'white', 'red', 'red', 'red', 'green
             ->addNoise(1000)
             ->setFilter(IMG_FILTER_GAUSSIAN_BLUR)
             ->make()
-            ->destory();
+            ->destroy();
 */
 
 //Chart test
@@ -79,4 +79,4 @@ $data = array(1182, 1702, 1536, 1498, 1266, 1629);
 $painter->setLine(5)
                 ->drawZigzag(array($data, array_reverse($data)), array('red', 'green'), array('中国', '美国'));
 
-$painter->make()->destory();
+$painter->make()->destroy();

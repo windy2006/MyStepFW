@@ -127,7 +127,7 @@
 - [myController · 控制器基础资源](backend/reference/mycontroller.md)
 - [myDb · 数据库代理与SQL构建](backend/reference/mydb.md)
 - [myEmail · 邮件组装和发送](backend/reference/myemail.md)
-- [myEncrypt · 加密与兼容数据](backend/reference/myencrypt.md)
+- [myEncrypt · 字符串与文件认证加密](backend/reference/myencrypt.md)
 - [myExcel · XML Spreadsheet导出](backend/reference/myexcel.md)
 - [myException · 错误处理与日志](backend/reference/myexception.md)
 - [myFile · 本地文件、路径和远程读取](backend/reference/myfile.md)

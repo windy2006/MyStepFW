@@ -483,7 +483,7 @@
         },
         {
             "id": "ref-myencrypt",
-            "title": "myEncrypt · 加密与兼容数据",
+            "title": "myEncrypt · 字符串与文件认证加密",
             "path": "docs/backend/reference/myencrypt.md",
             "group": "公共类与函数"
         },

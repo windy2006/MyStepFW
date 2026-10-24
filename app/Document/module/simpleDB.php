@@ -39,5 +39,5 @@ echo "\n====================\n";
 var_dump($db->result('idx=xxx_3', 'idx'));
 echo '</pre>';
 
-$db->destory();
+$db->destroy();
 

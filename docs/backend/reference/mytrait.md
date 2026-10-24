@@ -1,6 +1,6 @@
 # myTrait：类的通用扩展
 
-修订日期：2026-10-23。功能详解。
+修订日期：2026-10-24。
 
 ## 职责与调用位置
 
@@ -36,7 +36,7 @@ assert($object->upper('hello') === 'HELLO');
 
     $object->addMethod(function ($v) { return $this->value + $v; }, 'sum');
     ClassName::regAlias(['short' => 'fullName']); // 多级别名会先校验循环
-    $fresh = $object->instance;                 // 新建实际调用类，旧 instatnce 仍兼容
+    $fresh = $object->instance;                 // 新建实际调用类，不复制当前状态
 
 扩展方法优先于历史全局函数回退，别名优先于扩展方法；全局函数回退为兼容保留，
 不能把未知方法名直接视为 API 白名单。序列化只保存实例状态，恢复时不重跑构造；
@@ -46,15 +46,15 @@ assert($object->upper('hello') === 'HELLO');
 
 以下是本文件中的字段声明。public字段属于可见状态，protected/private字段只用于解释执行过程，不能绕过方法校验写入。字段用途需结合初始化、设置及读取方法；这些值不是站点的当前私有配置。
 
-```text
+```php
 protected $methods = [];
 ```
 
-```text
+```php
 protected $vars = [];
 ```
 
-```text
+```php
 protected static $extension_aliases = [];
 ```
 
@@ -62,7 +62,7 @@ protected static $extension_aliases = [];
 
 | 方法／函数 | 可见性及用途 |
 | --- | --- |
-| `myTrait::__get` | 读取辅助属性，兼容旧实例工厂拼写并补充正确的 instance 名称 |
+| `myTrait::__get` | 读取辅助属性，并通过 instance 新建同类实例 |
 | `myTrait::__set` | 写入辅助属性，不以外部魔术调用修改受保护/私有成员 |
 | `myTrait::__destruct` | 释放扩展方法及辅助属性引用，其他成员由 PHP 正常释放 |
 | `myTrait::__isset` | 按 PHP isset 约定检查辅助属性 |
@@ -86,27 +86,27 @@ protected static $extension_aliases = [];
 
 ### myTrait::__get
 
-功能说明：读取辅助属性，兼容旧实例工厂拼写并补充正确的 instance 名称
+功能说明：读取辅助属性，并通过 instance 新建同类实例
 
-```text
+```php
 public function __get($para);
 ```
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$para` | string；属性名；instance/instatnce 新建实际调用类，不复制当前状态 |
+| `$para` | string；属性名；instance 新建实际调用类，不复制当前状态 |
 
 **返回值**：mixed 辅助属性值（保留 null）或新实例；不存在时为 null
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:72`。
+定位：`lib/myTrait.class.php:71`。
 
 ### myTrait::__set
 
 功能说明：写入辅助属性，不以外部魔术调用修改受保护/私有成员
 
-```text
+```php
 public function __set($para, $value);
 ```
 
@@ -119,7 +119,7 @@ public function __set($para, $value);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:84`。
+定位：`lib/myTrait.class.php:83`。
 
 ### myTrait::__destruct
 
@@ -127,7 +127,7 @@ public function __set($para, $value);
 
 参数说明：无显式参数。
 
-```text
+```php
 public function __destruct();
 ```
 
@@ -137,13 +137,13 @@ public function __destruct();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:93`。
+定位：`lib/myTrait.class.php:92`。
 
 ### myTrait::__isset
 
 功能说明：按 PHP isset 约定检查辅助属性
 
-```text
+```php
 public function __isset($para);
 ```
 
@@ -155,13 +155,13 @@ public function __isset($para);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:101`。
+定位：`lib/myTrait.class.php:100`。
 
 ### myTrait::__unset
 
 功能说明：移除辅助属性，不删除对象自身受保护成员
 
-```text
+```php
 public function __unset($para);
 ```
 
@@ -173,13 +173,13 @@ public function __unset($para);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:109`。
+定位：`lib/myTrait.class.php:108`。
 
 ### myTrait::extensionAliases
 
 功能说明：汇总实例/静态默认别名与实际类的扩展别名，统一为小写索引
 
-```text
+```php
 protected static function extensionAliases($instance = null);
 ```
 
@@ -193,13 +193,13 @@ protected static function extensionAliases($instance = null);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:118`。
+定位：`lib/myTrait.class.php:117`。
 
 ### myTrait::resolveExtensionMethod
 
 功能说明：解析多级别名并拒绝循环，避免魔术分发无限递归
 
-```text
+```php
 protected static function resolveExtensionMethod($func, array $aliases);
 ```
 
@@ -214,13 +214,13 @@ protected static function resolveExtensionMethod($func, array $aliases);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:141`。
+定位：`lib/myTrait.class.php:140`。
 
 ### myTrait::__call
 
 功能说明：按别名、实例扩展、历史全局函数回退的顺序处理未知方法
 
-```text
+```php
 public function __call($func, array $args);
 ```
 
@@ -235,13 +235,13 @@ public function __call($func, array $args);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:159`。
+定位：`lib/myTrait.class.php:158`。
 
 ### myTrait::__callStatic
 
 功能说明：解析静态别名或历史全局函数回退，不创建实例、不调用实例方法
 
-```text
+```php
 public static function __callStatic($func, $args);
 ```
 
@@ -256,7 +256,7 @@ public static function __callStatic($func, $args);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:180`。
+定位：`lib/myTrait.class.php:179`。
 
 ### myTrait::__sleep
 
@@ -264,7 +264,7 @@ public static function __callStatic($func, $args);
 
 参数说明：无显式参数。
 
-```text
+```php
 public function __sleep();
 ```
 
@@ -274,7 +274,7 @@ public function __sleep();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:199`。
+定位：`lib/myTrait.class.php:198`。
 
 ### myTrait::__wakeup
 
@@ -282,7 +282,7 @@ public function __sleep();
 
 参数说明：无显式参数。
 
-```text
+```php
 public function __wakeup();
 ```
 
@@ -292,7 +292,7 @@ public function __wakeup();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:208`。
+定位：`lib/myTrait.class.php:207`。
 
 ### myTrait::__toString
 
@@ -300,7 +300,7 @@ public function __wakeup();
 
 参数说明：无显式参数。
 
-```text
+```php
 public function __toString();
 ```
 
@@ -310,13 +310,13 @@ public function __toString();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:217`。
+定位：`lib/myTrait.class.php:216`。
 
 ### myTrait::__invoke
 
 功能说明：兼容对象函数式调用：文本生成扰动摘要，数值生成确定整数，映射批量赋值
 
-```text
+```php
 public function __invoke($para);
 ```
 
@@ -331,13 +331,13 @@ public function __invoke($para);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:231`。
+定位：`lib/myTrait.class.php:230`。
 
 ### myTrait::__set_state
 
 功能说明：从 var_export() 状态重建实际调用类，不触发构造及初始化副作用
 
-```text
+```php
 public static function __set_state($para_arr);
 ```
 
@@ -351,7 +351,7 @@ public static function __set_state($para_arr);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:249`。
+定位：`lib/myTrait.class.php:248`。
 
 ### myTrait::__debugInfo
 
@@ -359,7 +359,7 @@ public static function __set_state($para_arr);
 
 参数说明：无显式参数。
 
-```text
+```php
 public function __debugInfo();
 ```
 
@@ -369,7 +369,7 @@ public function __debugInfo();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:269`。
+定位：`lib/myTrait.class.php:268`。
 
 ### myTrait::addMethod
 
@@ -381,7 +381,7 @@ public function __debugInfo();
 
 回调参数由扩展方法自身定义，__call按调用位置顺序传入并返回原值。普通未绑定闭包可读取当前$this，其他可调用对象保持原绑定。
 
-```text
+```php
 public function addMethod($func, $name='');
 ```
 
@@ -396,13 +396,13 @@ public function addMethod($func, $name='');
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:285`。
+定位：`lib/myTrait.class.php:284`。
 
 ### myTrait::regAlias
 
 功能说明：原子合并类方法别名，支持未声明静态 func_alias 的普通 trait 使用类
 
-```text
+```php
 public static function regAlias($alias = []);
 ```
 
@@ -416,4 +416,4 @@ public static function regAlias($alias = []);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`lib/myTrait.class.php:316`。
+定位：`lib/myTrait.class.php:315`。

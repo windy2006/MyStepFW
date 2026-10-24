@@ -28,8 +28,7 @@
  *   private simpleDB::access($write,callable $callback) — 在共享/排他锁内取得快照并执行操作，写前完成全部编码
  *   public simpleDB::mutate(callable $callback) — 在单个排他锁内执行批量记录变更，异常不保存
  *   public simpleDB::create($setting) — 原子独占创建空表，已存在时不截断
- *   public simpleDB::destory() — 保留历史拼写，删除当前表文件；不与其他进程的文件替换组成事务
- *   public simpleDB::destroy() — 正确拼写的删除入口，委托 destory
+ *   public simpleDB::destroy() — 关闭当前表并删除文件，不与其他进程的文件替换组成事务
  *   public simpleDB::empty() — 在排他锁内清空记录，保留原字段设置
  *   private simpleDB::matcher($condition) — 将字符串比较或字段映射转换为 AND 过滤器，值中的等号保持原样
  *   public simpleDB::query($condition=[],$mode=2,$limit=1) — 查询记录，包含空条件时也按指定模式和条数返回
@@ -48,7 +47,7 @@
  * 使用说明：
  *   1. 适合少量本地结构化记录；通过create定义字段后读写。
  *   2. 参数采用文件/字段/条件/行号语义，不能直接套用SQL驱动参数。
- *   3. destroy为正确拼写入口，保留历史destory兼容方法。
+ *   3. 使用destroy删除当前表文件。
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
@@ -62,7 +61,7 @@
  * 使用说明：
  *   1. 适合少量本地结构化记录；通过create定义字段后读写。
  *   2. 参数采用文件/字段/条件/行号语义，不能直接套用SQL驱动参数。
- *   3. destroy为正确拼写入口，保留历史destory兼容方法。
+ *   3. 使用destroy删除当前表文件。
  *
  * 补充说明：
  * 兼容旧固定长度 .db 格式的本地小表，读写在同一个文件锁内完成。
@@ -243,23 +242,13 @@ class simpleDB implements interface_db {
     }
 
     /**
-     * 功能说明：保留历史拼写，删除当前表文件；不与其他进程的文件替换组成事务
+     * 功能说明：关闭当前表并删除文件，不与其他进程的文件替换组成事务。
      *
      * 参数说明：无显式参数。
      *
-     * @return bool 文件存在且成功删除时 true
-     * @see simpleDB::destroy() 正确拼写入口；历史拼写继续兼容
+     * @return bool 当前表文件存在且成功删除时为true，否则false
      */
-    public function destory() { $this->close();return $this->check()?unlink($this->file):false; }
-
-    /**
-     * 功能说明：正确拼写的删除入口，委托 destory
-     *
-     * 参数说明：无显式参数。
-     *
-     * @return bool 删除当前表文件的结果，与历史destory入口一致
-     */
-    public function destroy() { return $this->destory(); }
+    public function destroy() { $this->close();return $this->check()?unlink($this->file):false; }
 
     /**
      * 功能说明：在排他锁内清空记录，保留原字段设置

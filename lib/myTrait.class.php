@@ -6,7 +6,7 @@
  *   提供辅助属性、扩展方法登记、别名解析和可恢复调用状态。
  *
  * 方法目录：
- *   public myTrait::__get($para) — 读取辅助属性，兼容旧实例工厂拼写并补充正确的 instance 名称
+ *   public myTrait::__get($para) — 读取辅助属性，并通过 instance 新建同类实例
  *   public myTrait::__set($para, $value) — 写入辅助属性，不以外部魔术调用修改受保护/私有成员
  *   public myTrait::__destruct() — 释放扩展方法及辅助属性引用，其他成员由 PHP 正常释放
  *   public myTrait::__isset($para) — 按 PHP isset 约定检查辅助属性
@@ -44,7 +44,7 @@
  *
  *     $object->addMethod(function ($v) { return $this->value + $v; }, 'sum');
  *     ClassName::regAlias(['short' => 'fullName']); // 多级别名会先校验循环
- *     $fresh = $object->instance;                 // 新建实际调用类，旧 instatnce 仍兼容
+ *     $fresh = $object->instance;                 // 新建实际调用类，不复制当前状态
  *
  * 扩展方法优先于历史全局函数回退，别名优先于扩展方法；全局函数回退为兼容保留，
  * 不能把未知方法名直接视为 API 白名单。序列化只保存实例状态，恢复时不重跑构造；
@@ -53,7 +53,6 @@
  * 方法目录：参见本文件顶部；只列直接声明，继承和trait别名沿用原声明注释。
  *
  * @property-read object $instance 新建实际调用类实例；是否自动初始化遵循该类构造约定
- * @property-read object $instatnce instance的历史兼容拼写
  */
 trait myTrait {
     /** @var array 实例扩展方法，键为规范化的方法名 */
@@ -64,13 +63,13 @@ trait myTrait {
     protected static $extension_aliases = [];
 
     /**
-     * 功能说明：读取辅助属性，兼容旧实例工厂拼写并补充正确的 instance 名称
+     * 功能说明：读取辅助属性，并通过 instance 新建同类实例
      *
-     * @param string $para 属性名；instance/instatnce 新建实际调用类，不复制当前状态
+     * @param string $para 属性名；instance 新建实际调用类，不复制当前状态
      * @return mixed 辅助属性值（保留 null）或新实例；不存在时为 null
      */
     public function __get($para) {
-        if($para === 'instance' || $para === 'instatnce') { $class = get_class($this); return new $class(); }
+        if($para === 'instance') { $class = get_class($this); return new $class(); }
         return array_key_exists($para, $this->vars) ? $this->vars[$para] : null;
     }
 

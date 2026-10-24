@@ -1,6 +1,6 @@
 # tests 文件汇总与运行说明
 
-整理日期：2026-10-23。按实际脚本核对用途、入口、依赖和数据影响。当前共 60 个测试／夹具文件：37 个 PHP、11 个 Python、11 个 JavaScript、1 个 HTML；另有本说明。文件名含 browser 不一定需要浏览器，fixture 也不一定是独立测试入口，见下表。
+整理日期：2026-10-23。按实际脚本核对用途、入口、依赖和数据影响。当前共 61 个测试／夹具文件：38 个 PHP、11 个 Python、11 个 JavaScript、1 个 HTML；另有本说明。文件名含 browser 不一定需要浏览器，fixture 也不一定是独立测试入口，见下表。
 
 ## 1. 先区分两个目录
 
@@ -17,7 +17,7 @@
 | --- | --- | ---: |
 | [core/](core/) | 核心流程、路由、启动与路径 | 6 |
 | [security/](security/) | 输入预算、认证、账户与安全桥接 | 7 |
-| [utilities/](utilities/) | 公共工具、编码与资源 | 4 |
+| [utilities/](utilities/) | 公共工具、编码与资源 | 5 |
 | [extensions/](extensions/) | API管理、通用扩展和XML Excel | 3 |
 | [templates/](templates/) | 模板与缓存兼容 | 1 |
 | [database/](database/) | 数据库及能力接口 | 2 |
@@ -68,6 +68,7 @@ SQLite、Memcached 和 SQLSRV 替身检查不代表相应真实服务器均已�
 | [security_regression.php](security/security_regression.php) | 密码与签名令牌、认证、请求来源及 TLS 客户端边界 | `php tests/security/security_regression.php` | 默认临时文件；--database 使用 MySQL 临时表；TLS 子场景由 https_fixture.py 提供服务 |
 | [account_workflow.php](security/account_workflow.php) | CMS 管理员与用户账户修改的真实模块流程 | `php tests/security/account_workflow.php` | 直接连接已配置 MySQL 的 mystep_cms；使用 workflow_* TEMPORARY 表，无 --database 开关 |
 | [password_confirmation_regression.php](security/password_confirmation_regression.php) | CMS 后台管理员／用户密码确认及保留原密码行为 | `php tests/security/password_confirmation_regression.php` | 直接连接 mystep_cms；使用 confirm_* TEMPORARY 表和子进程 |
+| [crypto_regression.php](utilities/crypto_regression.php) | 认证加密、文件边界与篡改、Sodium互操作、24MiB文件的内存预算 | `php tests/utilities/crypto_regression.php` | OpenSSL及Sodium；随机临时文件，不访问业务数据；内部大文件worker限制16MiB内存 |
 | [utility_regression.php](utilities/utility_regression.php) | 文件、请求、上传、字符串、异常、归档、图像、邮件、加密和字典 | `php tests/utilities/utility_regression.php` | 合成数据及临时目录；MIME 构建不投递外部邮件 |
 | [core_improvements.php](utilities/core_improvements.php) | 附件定位、CSRF、Minify 指纹／并发、图片预算、归档 CRC／回滚及大包 | `php tests/utilities/core_improvements.php` | 临时文件；自动派生守卫、压缩和受限内存子进程 |
 | [mechanism_regression.php](integration/mechanism_regression.php) | 路由、对象代理、配置类型／保存、数据库及缓存共用机制 | `php tests/integration/mechanism_regression.php` | 默认临时文件／SQLite；--database 建立并删除随机 mystep_review_* 库 |
@@ -93,7 +94,7 @@ SQLite、Memcached 和 SQLSRV 替身检查不代表相应真实服务器均已�
 | --- | --- | --- | --- |
 | [cms_link_regression.php](applications/cms_link_regression.php) | 真实 CMS 模板与链接辅助函数、筛选／分页、域名绑定和三种路由 | `php tests/applications/cms_link_regression.php` | 不连接数据库；CMS_LINK_* 选择组合；--fixtures 输出供 Node 使用的夹具 |
 | [app_regression.php](applications/app_regression.php) | CMS 栏目／标签／公共 SQL 逻辑，Sample 公开配置及 test 分发 | `php tests/applications/app_regression.php` | 临时文件和替身，不连接业务数据库 |
-| [document_regression.php](applications/document_regression.php) | Document顶层功能类覆盖、11项新增样例及方法反射、演示数据隔离 | `php tests/applications/document_regression.php` | 随机临时项目、独立SQLite内存库；不连接业务数据库、不发网络请求 |
+| [document_regression.php](applications/document_regression.php) | Document顶层功能类覆盖、12项功能类样例及方法反射、演示数据隔离 | `php tests/applications/document_regression.php` | 随机临时项目、独立SQLite内存库；不连接业务数据库、不发网络请求 |
 | [app_database_regression.php](applications/app_database_regression.php) | CMS 查询、栏目、标签、统计、验证码、密码及锁定模块 | `php tests/applications/app_database_regression.php` | 直接使用已配置 MySQL 连接和随机 TEMPORARY 表；由父进程运行各场景 |
 | [plugin_runtime.php](plugins/plugin_runtime.php) | 真实核心的活动顺序、绑定去重、前置脚本和停用路由/API | `php tests/plugins/plugin_runtime.php` | 临时注册表、应用及脚本，不修改网站插件状态 |
 | [plugin_regression.php](plugins/plugin_regression.php) | 六个插件的公共逻辑、路径／配置、封禁、资源和状态边界 | `php tests/plugins/plugin_regression.php` | 临时插件目录／SQLite／替身，不执行正式插件升级或安装 |

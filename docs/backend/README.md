@@ -103,7 +103,7 @@
 - [myController · 控制器基础资源](reference/mycontroller.md)
 - [myDb · 数据库代理与SQL构建](reference/mydb.md)
 - [myEmail · 邮件组装和发送](reference/myemail.md)
-- [myEncrypt · 加密与兼容数据](reference/myencrypt.md)
+- [myEncrypt · 字符串与文件认证加密](reference/myencrypt.md)
 - [myExcel · XML Spreadsheet导出](reference/myexcel.md)
 - [myException · 错误处理与日志](reference/myexception.md)
 - [myFile · 本地文件、路径和远程读取](reference/myfile.md)

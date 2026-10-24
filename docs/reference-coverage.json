@@ -244,7 +244,7 @@
     ]
   },
   "lib/database/simpleDB.class.php": {
-    "sha256": "6efabda794c3dbca2dea1e06f3e40f6cdff06ec13e6f33122ae57746d50b474b",
+    "sha256": "fff0e8376b1c1d2a4a4d86900592071230b5a8ed07c8c0293473552d09ace3e5",
     "document": "docs/backend/reference/database/simpledb.md",
     "methods": [
       "simpleDB::__construct",
@@ -259,7 +259,6 @@
       "simpleDB::access",
       "simpleDB::mutate",
       "simpleDB::create",
-      "simpleDB::destory",
       "simpleDB::destroy",
       "simpleDB::empty",
       "simpleDB::matcher",
@@ -616,17 +615,18 @@
     ]
   },
   "lib/myEncrypt.class.php": {
-    "sha256": "be0f83be9019748cf4f8c9334c99f5f8e1c53c63ca272dd8370574633c0c7256",
+    "sha256": "afd77a7d255b31f8b0dbdd301e2124182e8600e192dc33af45e01de423ff6acf",
     "document": "docs/backend/reference/myencrypt.md",
     "methods": [
-      "myEncrypt::keyED",
-      "myEncrypt::encStr",
-      "myEncrypt::encFile",
-      "myEncrypt::decStr",
-      "myEncrypt::decFile",
-      "myEncrypt::transformFile",
       "myEncrypt::seal",
-      "myEncrypt::open"
+      "myEncrypt::open",
+      "myEncrypt::sealFile",
+      "myEncrypt::openFile",
+      "myEncrypt::transformFile",
+      "myEncrypt::sealStream",
+      "myEncrypt::openStream",
+      "myEncrypt::readChunk",
+      "myEncrypt::writeAll"
     ]
   },
   "lib/myExcel.class.php": {
@@ -1060,7 +1060,7 @@
     ]
   },
   "lib/myTrait.class.php": {
-    "sha256": "8996109194705ed079014781aa4d92159da2681810b38c6239f463751e2ca060",
+    "sha256": "69e636e0ba572d6f5807d94ae748535db7e054720e940e1c3320bb892eea69bb",
     "document": "docs/backend/reference/mytrait.md",
     "methods": [
       "myTrait::__get",
