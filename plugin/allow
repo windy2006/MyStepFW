@@ -1,6 +1,7 @@
 sample
 manager
 memcached
+redis
 frontend
 badReq
 interface_plugin.class.php

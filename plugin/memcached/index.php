@@ -16,7 +16,8 @@
  *       方法目录覆盖本文件直接声明；闭包参数及捕获变量说明见各回调旁 PHPDoc。
  */
 
-if($GLOBALS['info_app']['app']=='myStep') return;
+// 显式选择的Redis缓存优先，避免普通插件初始化再次覆盖框架缓存。
+if($GLOBALS['info_app']['app']=='myStep' || (isset($this->setting) && strtolower((string)$this->setting->gen->cache_mode)==='redis')) return;
 if(class_exists('Memcached')) {
     global $cache, $db;
     require_once(__DIR__."/memoryCache.class.php");

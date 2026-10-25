@@ -21,7 +21,7 @@ $mystep->setLanguagePack(dirname(__FILE__).'/language/', $mystep->setting->gen->
 return array(
     'name' => $mystep->getLanguage('plugin_manager_info_name'),
     'idx' => basename(realpath(__DIR__)),
-    'ver' => '1.1.6',
+    'ver' => '1.1.7',
     'intro' => $mystep->getLanguage('plugin_manager_info_intro'),
     'copyright' => $mystep->getLanguage('plugin_manager_info_copyright'),
     'description' => $mystep->getLanguage('plugin_manager_info_description'),

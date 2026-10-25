@@ -26,6 +26,7 @@ $setting['web']['etag'] = 'etag_20220101';
 $setting['web']['css'] = 'bootstrap,font-awesome,glyphicons';
 $setting['web']['js'] = 'jquery,jquery.addon,bootstrap.bundle';
 
+
 $setting['api'] = ['enabled'=>true,'default_format'=>'json','body_bytes'=>33554432,'domain'=>''];
 
 $setting['upload'] = array();

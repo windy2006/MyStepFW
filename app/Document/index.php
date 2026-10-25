@@ -6,9 +6,13 @@ if (is_null($mode)) $mode = 'show';
 $examples = glob(PATH.'module/*.php');
 $allowed = array_map(function($file) { return pathinfo($file,PATHINFO_FILENAME); },$examples);
 if(!is_null($module) && $module!=='' && (!is_string($module) || !in_array($module,$allowed,true))) myStep::header('404');
-set_include_path(get_include_path().PATH_SEPARATOR.LIB.'database/'.PATH_SEPARATOR.LIB.'cache/');
+set_include_path(get_include_path().PATH_SEPARATOR.LIB.'database/'.PATH_SEPARATOR.LIB.'cache/'.PATH_SEPARATOR.LIB.'session/');
 spl_autoload_extensions('.class.php,.php');
 spl_autoload_register();
+// Redis插件的固定白名单声明用于反射展示；不会连接服务或启用存储。
+spl_autoload_register(static function($name) {
+    if(in_array($name,['myRedis','myCache_Redis','sess_redis'],true) && is_file(PLUGIN.'redis/'.$name.'.class.php'))require_once PLUGIN.'redis/'.$name.'.class.php';
+});
 $sp_module = ['myExcel', 'myImg'];
 $tpl_setting['name'] = 'main';
 $tpl = new myTemplate($tpl_setting, false);

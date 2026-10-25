@@ -273,7 +273,7 @@ $result = $instance->remember($key, $producer, $ttl);
 
 功能说明：显式清空当前后端全部数据，用于管理员清理；不同于只回收过期项的clean。
 
-同目录/同表的所有namespace均受影响，文件锁基础设施保留；并发请求仍可重建值。
+File/SQL同目录或同表的namespace均受影响；Redis仅清理当前站点及namespace。锁基础设施保留，并发请求仍可重建值。
 第三方后端须显式提供clear，不把含义不确定的clean当作清空入口。
 
 参数说明：无显式参数。
@@ -456,3 +456,7 @@ $result = $instance->rememberLocked($key, $producer, $ttl, $timeout);
 ```
 
 定位：`lib/myCache.class.php:386`。
+
+## Redis插件支持（2.5.0）
+
+Redis连接、缓存及会话驱动由`plugin/redis/`提供。先安装、启用并配置插件，再在框架参数设置选择Redis缓存或Session；保存前验证插件及实际连接。框架显式选择的存储不依赖应用绑定。缓存清理只删除当前站点及namespace的缓存值，会话故障不回退文件存储。详见[Redis插件](../../showcase/plugins/redis.md)。

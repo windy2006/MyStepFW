@@ -21,8 +21,8 @@ $setting_detail['gen'] = array(
         ),
         'cache_mode' => array(
             'name' => '数据缓存',
-            'describe' => '开启数据缓存，减少数据重复查询，以提高效率',
-            'type' => array('select', array('文件缓存'=>'File', '数据库缓存'=>'MySQL'))
+            'describe' => '选择Redis须先在插件管理安装、启用并配置Redis插件；故障不静默切换存储',
+            'type' => array('select', array('文件缓存'=>'File', '数据库缓存'=>'MySQL', 'Redis缓存'=>'Redis'))
         ),
         'cache_page' => array(
             'name' => '页面缓存',
@@ -181,8 +181,8 @@ $setting_detail['session'] = array(
         ),
         'mode' => array(
             'name' => '处理模式',
-            'describe' => '存储Session的模式（非mystep模式会影响到在线统计）',
-            'type' => array('select', array('MyStep模式'=>'sess_mystep', '数据库存储'=>'sess_mysql', '文件存储'=>'sess_file'))
+            'describe' => '选择Redis须先在插件管理安装、启用并配置Redis插件；故障不静默切换存储',
+            'type' => array('select', array('MyStep模式'=>'sess_mystep', '数据库存储'=>'sess_mysql', '文件存储'=>'sess_file', 'Redis存储'=>'sess_redis'))
         ),
         'path' => array(
             'name' => '存储路径',

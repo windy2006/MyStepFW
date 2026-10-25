@@ -1203,3 +1203,49 @@ $result = myStep::getCore();
 ```
 
 定位：`lib/myStep.class.php:1722`。
+
+## Redis插件支持（2.5.0）
+
+Redis连接、缓存及会话驱动由`plugin/redis/`提供。先安装、启用并配置插件，再在框架参数设置选择Redis缓存或Session；保存前验证插件及实际连接。框架显式选择的存储不依赖应用绑定。缓存清理只删除当前站点及namespace的缓存值，会话故障不回退文件存储。详见[Redis插件](../../showcase/plugins/redis.md)。
+
+### myStep::storagePlugin
+
+```php
+public static myStep::storagePlugin($name)
+```
+
+在缓存和Session初始化前验证插件目录、安装/启用状态及扩展，返回已加载驱动的插件主类。全局存储显式选择生效，无需应用绑定。
+
+@param string $name 插件目录标识。
+
+@return string 已校验的主类名。
+
+@throws InvalidArgumentException 插件不可用或连接检查失败。
+
+```php
+$class = myStep::storagePlugin('redis');
+$options = $class::options();
+```
+
+### myStep::configureStorage
+
+```php
+public static myStep::configureStorage(myConfig $config,$probe = false)
+```
+
+框架或应用选择Redis存储时校验插件；probe=true额外执行PING，失败抛出InvalidArgumentException，调用方不保存配置。未选Redis时不加载、不连接插件。
+
+@param myConfig $config 待保存的配置。
+
+@param bool $probe 是否执行连接检查，默认false。
+
+@return void 不保存文件。
+
+@throws InvalidArgumentException 插件不可用或连接检查失败。
+
+```php
+$config = new myConfig(CONFIG.'config.php');
+$config->gen->cache_mode = 'Redis';
+myStep::configureStorage($config, true);
+$config->save('php');
+```

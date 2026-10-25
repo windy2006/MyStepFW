@@ -36,6 +36,7 @@ return [
      */
     'togglePlugin' => function($p) {
         $id = AdminStore::identifier($p['idx']);
+        list($dir,$class)=$this->plugin($id);
         $db = $this->registry();
         if(!$db)throw new InvalidArgumentException('插件尚未安装。');
         try {
@@ -47,8 +48,8 @@ return [
                  * @return bool 更新目标后返回true
                  * @throws InvalidArgumentException 目标未安装或刚被卸载
                  */
-                function(&$rows)use($id) {
-                    foreach($rows as &$row)if($row['idx']===$id){$row['active']=trim($row['active'])==='1'?0:1;return true;}
+                function(&$rows)use($id,$class) {
+                    foreach($rows as &$row)if($row['idx']===$id){if(trim($row['active'])==='1' && is_callable([$class,'beforeDisable']))$class::beforeDisable();$row['active']=trim($row['active'])==='1'?0:1;return true;}
                     throw new InvalidArgumentException('插件尚未安装。');
                 }
             )!==true)throw new RuntimeException('无法更新插件状态。');

@@ -2,7 +2,7 @@
 return array (
     'plugin_myBackup_info_name' => 'Plugin myBackup',
     'plugin_myBackup_info_intro' => 'Backup or resort MySQL data',
-    'plugin_myBackup_info_copyright' => 'Copyright 2019-2022 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
+    'plugin_myBackup_info_copyright' => '版权所有 2019-2026 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
     'plugin_myBackup_info_description' => '<i>Data Backup</i>: Backup or resort MySQL data.',
     
     'plugin_myBackup_import' => 'Data Import',

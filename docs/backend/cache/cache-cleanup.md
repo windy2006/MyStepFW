@@ -11,6 +11,7 @@
 - 内置 clean()：只回收过期/损坏数据，保留有效值。
 - clear()：显式清空当前存储中的数据。File 保留写锁和计算锁；SQL 保留表结构。相同目录或表的所有 namespace 均受影响。
 - myStep::clearDataCache()：后台及更新器使用的共享入口，处理框架默认数据文件与当前缓存后端。第三方后端没有明确 clear 方法时报告不支持，不推断 clean 的含义。
+- Redis clear()：SCAN分批清理当前站点、当前namespace的缓存值，保留Redis会话、业务键和活动锁，不执行FLUSHDB/FLUSHALL。
 - Memcached clear()：沿用该插件原有手动 flush 的服务级范围，可能影响共用服务的其他业务。不会在插件初始化时执行。
 - 并发计算或新请求可在清空后重新写入；clear 不承诺全局原子清空或业务副作用恰好执行一次。
 

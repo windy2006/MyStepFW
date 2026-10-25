@@ -1064,6 +1064,30 @@
             "group": "现有插件介绍"
         },
         {
+            "id": "cache-redis",
+            "title": "Redis连接、缓存、会话与设置",
+            "path": "docs/showcase/plugins/redis.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "ref-myredis",
+            "title": "myRedis · Redis连接与键隔离",
+            "path": "docs/showcase/plugins/redis/myredis.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "ref-cache-redis",
+            "title": "myCache_Redis · Redis缓存驱动",
+            "path": "docs/showcase/plugins/redis/mycache-redis.md",
+            "group": "现有插件介绍"
+        },
+        {
+            "id": "ref-session-redis",
+            "title": "sess_redis · Redis会话处理器",
+            "path": "docs/showcase/plugins/redis/sess-redis.md",
+            "group": "现有插件介绍"
+        },
+        {
             "id": "plugin-info-sample",
             "title": "sample · 插件机制演示",
             "path": "docs/showcase/plugins/sample.md",

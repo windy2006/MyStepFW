@@ -50,6 +50,8 @@
  *   public static myStep::setURL($url='') — 链接处理
  *   public static myStep::redirect($url = '', $code = '302') — 链接跳转
  *   public static myStep::init() — 框架变量初始化
+ *   public static myStep::storagePlugin($name) — 在缓存和会话初始化前校验并加载已启用的存储插件。
+ *   public static myStep::configureStorage(myConfig $config,$probe = false) — 校验显式选择的插件存储，保存前可执行连接检查。
  *   public static myStep::activePlugins() — 按框架插件配置收集已启用插件并在当前请求内复用结果
  *   public static myStep::refreshRoutes() — 仅在路由定义或配置变化时重建注册表，否则加载已编译规则
  *   public static myStep::go() — 执行框架
@@ -248,9 +250,13 @@ class myStep extends myController {
         if($this->setting->session->mode=='sess_mysql') {
             sess_mysql::set((array)$this->setting->db);
         }
+        if($this->setting->session->mode==='sess_redis' && empty($GLOBALS['no_log'])) {
+            $plugin=self::storagePlugin('redis');
+            if(!sess_redis::set($plugin::options()))throw new RuntimeException('Redis会话配置无效，请检查插件设置。');
+        }
         // 会话后端故障时停止认证流程；no_log公开端点按设计不启动会话。
         if(myReq::sessionStart($this->setting->session->mode) === false && !myReq::sessionCheck() && empty($GLOBALS['no_log'])) {
-            throw new RuntimeException('Session storage unavailable.');
+            throw new RuntimeException($this->setting->session->mode==='sess_redis' ? 'Redis会话启动失败，请检查Redis插件连接设置、服务状态和会话锁。' : 'Session storage unavailable.');
         }
         mySecurity::guard();
         $this->login();
@@ -338,7 +344,8 @@ class myStep extends myController {
      * 功能说明：按驱动签名准备缓存与数据库实例
      *
      * SQLite 仅传入数据库文件路径（或 :memory:），相对路径按 ROOT 解析；
-     * MySQL/MSSQL 沿用服务器、用户、密码及字符集参数。已有全局实例继续复用。
+     * MySQL/MSSQL 沿用服务器、用户、密码及字符集参数；Redis缓存读取plugin/redis/config.php。
+     * 关闭业务数据库自动连接时，仅数据库会话回退文件模式，Redis会话独立工作。已有全局实例继续复用。
      * 参数说明：无显式参数。
      *
      * @return void 无返回值。
@@ -347,6 +354,10 @@ class myStep extends myController {
         global $cache, $db;
         if(empty($cache)) {
             switch(strtolower($this->setting->gen->cache_mode)) {
+                case 'redis':
+                    $plugin=self::storagePlugin('redis');
+                    $cache_setting = $plugin::options();
+                    break;
                 case 'mysql':
                 case 'mssql':
                     $cache_setting = myConfig::o2a($this->setting->db);
@@ -369,7 +380,7 @@ class myStep extends myController {
                 if($sqlite) $db->connect();
                 else $db->connect($this->setting->db->pconnect, $this->setting->db->name);
                 $db->setCache($cache, 600);
-            } else {
+            } elseif(in_array($this->setting->session->mode, ['sess_mysql','sess_mystep'], true)) {
                 $this->setting->session->mode='sess_file';
             }
         }
@@ -379,6 +390,7 @@ class myStep extends myController {
      * 功能说明：清空框架数据文件及当前缓存后端，供后台和更新器共同使用。
      *
      * 使用驱动clear保留活动锁；SQL/Memcached后端也执行显式清空。
+     * Redis只清理当前站点及namespace的缓存值，保留Redis会话和业务键。
      * 同目录/同表/同Memcached服务的其他namespace可能受影响，并发请求可重建数据。
      *
      * 参数说明：无显式参数。
@@ -1181,6 +1193,39 @@ code;
     protected static $active_plugins = null, $known_plugins = [], $plugin_signature = null;
 
     /**
+     * 功能说明：在普通插件入口前加载显式选择的存储插件，不要求应用绑定。
+     * @param string $name 插件目录标识，仅允许字母开头的字母、数字、下划线
+     * @return string 已检查扩展并加载驱动的插件主类名
+     * @throws InvalidArgumentException 插件目录缺失、未安装/未启用、扩展不满足或加载协议无效
+     */
+    public static function storagePlugin($name) {
+        if(!is_string($name) || !preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$name))throw new InvalidArgumentException('存储插件标识无效。');
+        $dir=PLUGIN.$name.'/';
+        if(is_link(rtrim($dir,'/')) || !is_file($dir.'class.php') || !is_file($dir.'info.php'))throw new InvalidArgumentException($name.'存储插件目录缺失，请恢复插件文件。');
+        if(!isset(self::activePlugins()[$name]))throw new InvalidArgumentException($name.'存储插件未安装或未启用，请在插件管理中安装并启用后再选择缓存或Session。');
+        require_once PLUGIN.'interface_plugin.class.php';
+        require_once $dir.'class.php';
+        $class='plugin_'.$name;$reason='';
+        if(!is_subclass_of($class,'interface_plugin') || !is_callable([$class,'load']))throw new InvalidArgumentException($name.'存储插件缺少加载协议。');
+        if(!$class::check($reason))throw new InvalidArgumentException($reason);
+        $class::load();
+        return $class;
+    }
+
+    /**
+     * 功能说明：校验框架显式选择的Redis插件存储；未选用时不加载、不连接插件。
+     * @param myConfig $config 待保存的框架或应用配置
+     * @param bool $probe true在保存前PING验证连接，失败不保存（默认：false）
+     * @return void 无返回值，不改写配置文件或切换活动会话
+     * @throws InvalidArgumentException 所选Redis插件不可用或连接检查失败
+     */
+    public static function configureStorage(myConfig $config,$probe = false) {
+        if(strtolower((string)$config->value('gen.cache_mode',''))!=='redis' && $config->value('session.mode','')!=='sess_redis')return;
+        $class=self::storagePlugin('redis');
+        if($probe){$options=new myConfig(PLUGIN.'redis/config.php');$class::validateConfig($options);}
+    }
+
+    /**
      * 功能说明：按注册表 order 从大到小收集活动插件，内容未变时复用结果
      *
      * 参数说明：无显式参数。
@@ -1315,6 +1360,7 @@ code;
     public static function go() {
         global $ms_setting, $router, $info_app, $tpl_setting, $tpl_cache, $mystep, $db, $cache, $host, $domain;
         $ms_setting = new myConfig(CONFIG.'config.php');
+        self::configureStorage($ms_setting);
         $api=$ms_setting->value('api',null);
         if($api===null){$api=myApi::httpConfiguration();unset($api['endpoints']);}
         else {$api=myApi::httpSettings(is_object($api)?myConfig::o2a($api):$api);}

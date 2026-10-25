@@ -402,7 +402,7 @@
     ]
   },
   "lib/myCache.class.php": {
-    "sha256": "55a3fcf93caedb28fef5d24cca427160bcedb495abbcb7a44620b5780a02f5d4",
+    "sha256": "cf520d9b1c554ea15e98e95f7979ceea4b1ef2acb9596962f0340d1478333bff",
     "document": "docs/backend/reference/mycache.md",
     "methods": [
       "myCache::init",
@@ -849,7 +849,7 @@
     ]
   },
   "lib/myReq.class.php": {
-    "sha256": "72edd9a1722231701f62ef618f2b79bbec1c916ae558cadfa7b8584c7d267e90",
+    "sha256": "cd119f1b2ff72993e154965f22435d843d919e758094d8c3278e8047a47ac167",
     "document": "docs/backend/reference/myreq.md",
     "methods": [
       "myReq::init",
@@ -929,7 +929,7 @@
     ]
   },
   "lib/myStep.class.php": {
-    "sha256": "bcf22a88c63341b7ccf8ddd7982136c5498d9f066a53d00ebc654fc63646bc68",
+    "sha256": "e21476669943598f10bff1a3c10ba2c56b450d010175f96d34ccafd47f4b4ac1",
     "document": "docs/backend/reference/mystep.md",
     "methods": [
       "myStep::__construct",
@@ -976,7 +976,9 @@
       "myStep::vendor",
       "myStep::segment",
       "myStep::checkPower",
-      "myStep::getCore"
+      "myStep::getCore",
+      "myStep::storagePlugin",
+      "myStep::configureStorage"
     ]
   },
   "lib/myString.class.php": {
@@ -1216,6 +1218,55 @@
       "showPluginPage",
       "setPriority",
       "removePriority"
+    ]
+  },
+  "plugin/redis/myRedis.class.php": {
+    "sha256": "e6a33def1b5a519a3bdb78660f1af59f4169f87fd881f6522f51c873869de1d9",
+    "document": "docs/showcase/plugins/redis/myredis.md",
+    "methods": [
+      "myRedis::__construct",
+      "myRedis::settings",
+      "myRedis::configure",
+      "myRedis::client",
+      "myRedis::prefix",
+      "myRedis::key",
+      "myRedis::acquire",
+      "myRedis::release",
+      "myRedis::close"
+    ]
+  },
+  "plugin/redis/myCache_Redis.class.php": {
+    "sha256": "20feaa675b3b0156056b1ce685699b69889e43b7a0ce6ac711c8e1af27729d95",
+    "document": "docs/showcase/plugins/redis/mycache-redis.md",
+    "methods": [
+      "myCache_Redis::__construct",
+      "myCache_Redis::set",
+      "myCache_Redis::fetch",
+      "myCache_Redis::get",
+      "myCache_Redis::remove",
+      "myCache_Redis::clean",
+      "myCache_Redis::clear",
+      "myCache_Redis::synchronized"
+    ]
+  },
+  "plugin/redis/sess_redis.class.php": {
+    "sha256": "b757d980c427508b015ac4f3672b6d80c5e8cc953749625f24c24e32bd7b9318",
+    "document": "docs/showcase/plugins/redis/sess-redis.md",
+    "methods": [
+      "sess_redis::set",
+      "sess_redis::getLastError",
+      "sess_redis::open",
+      "sess_redis::validId",
+      "sess_redis::lock",
+      "sess_redis::unlock",
+      "sess_redis::operate",
+      "sess_redis::read",
+      "sess_redis::write",
+      "sess_redis::validateId",
+      "sess_redis::updateTimestamp",
+      "sess_redis::destroy",
+      "sess_redis::gc",
+      "sess_redis::close"
     ]
   }
 }

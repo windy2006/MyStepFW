@@ -22,7 +22,7 @@ return [
         list($file, $builder) = $this->configTarget($target);
         $version = AdminStore::version($file);
         $config = new myConfig($file);
-        if($target==='')MyStepApiManager::frameworkSettings($config);
+        if($target===''){MyStepApiManager::frameworkSettings($config);}
         $config->merge(myPath::settings($config->get(true), $target?:'myStep'));
         return $this->ui->view('setting_main', ['target' => $target, 'version' => $version, 'config_fields' => $this->configFields($config, $builder)], ['apps' => $apps]);
     },
@@ -35,11 +35,12 @@ return [
         $target = $p['target']??'';
         list($file, $builder) = $this->configTarget($target);
         $config = new myConfig($file);
-        if($target==='')MyStepApiManager::frameworkSettings($config);
+        if($target===''){MyStepApiManager::frameworkSettings($config);}
         $before = $config->get(true);
         $this->passwords($p['setting']);
         $config->set($p['setting']);
         if($target==='')MyStepApiManager::frameworkSettings($config);
+        myStep::configureStorage($config,true);
         $data = myPath::settings($config->get(true), $target?:'myStep');
         if(isset($data['gen']['path_admin']) && !preg_match('#\A[a-zA-Z][a-zA-Z0-9_/-]*\z#D', $data['gen']['path_admin']))throw new InvalidArgumentException('后台路径无效。');
         $prepare = include dirname(__DIR__, 2).'/setting_expand.php';

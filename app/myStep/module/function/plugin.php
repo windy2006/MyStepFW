@@ -52,6 +52,7 @@ switch($method) {
             if(isset($_POST['setting'])) {
                 $config = new myConfig(PLUGIN.$idx.'/config.php');
                 $config->set($_POST['setting']);
+                if(is_callable([$class,'validateConfig'])){try{$class::validateConfig($config);}catch(InvalidArgumentException $error){myStep::info(htmlspecialchars($error->getMessage(),ENT_QUOTES,$ms_setting->gen->charset));}}
                 $config->save('php');
             }
 
@@ -75,6 +76,7 @@ switch($method) {
         if(myReq::check('post')) {
             $config = new myConfig(PLUGIN.$idx.'/config.php');
             $config->set($_POST['setting']);
+            if(is_callable([$class,'validateConfig'])){try{$class::validateConfig($config);}catch(InvalidArgumentException $error){myStep::info(htmlspecialchars($error->getMessage(),ENT_QUOTES,$ms_setting->gen->charset));}}
             $config->save('php');
             setPluginApps($idx, $_POST['apps'] ?? [], is_array($info['app'] ?? null) ? $info['app'] : []);
             myStep::redirect($app_root.'/function/plugin/');
@@ -128,7 +130,7 @@ switch($method) {
     case 'active':
         // 状态读取和切换处于同一注册表排他锁，避免并发切换丢失一次操作。
         if(!$installed) myStep::info('page_error_plugin');
-        if($mydb->mutate(
+        try {if($mydb->mutate(
             /**
              * 功能说明：切换锁内读取到的目标插件状态。
              * 闭包依赖：通过use捕获idx。
@@ -136,11 +138,12 @@ switch($method) {
              * @return bool 找到并更新目标后返回true
              * @throws InvalidArgumentException 目标在获取锁前已经被卸载
              */
-            function(&$rows) use ($idx) {
-                foreach($rows as &$row) if($row['idx']===$idx) {$row['active']=trim($row['active'])==='1' ? 0 : 1;return true;}
+            function(&$rows) use ($idx,$class) {
+                foreach($rows as &$row) if($row['idx']===$idx) {if(trim($row['active'])==='1' && is_callable([$class,'beforeDisable']))$class::beforeDisable();$row['active']=trim($row['active'])==='1' ? 0 : 1;return true;}
                 throw new InvalidArgumentException('Plugin is not installed');
             }
-        )!==true) throw new RuntimeException('Cannot update plugin state');
+        )!==true) throw new RuntimeException('Cannot update plugin state');}
+        catch(InvalidArgumentException $error){myStep::info(htmlspecialchars($error->getMessage(),ENT_QUOTES,$ms_setting->gen->charset));}
         myStep::redirect($app_root.'/function/plugin/');
         break;
     case 'delete':
@@ -150,7 +153,8 @@ switch($method) {
         break;
     case 'uninstall':
         if(!$installed) myStep::info('page_error_plugin');
-        call_user_func(array($class, 'uninstall'));
+        try {call_user_func(array($class, 'uninstall'));}
+        catch(InvalidArgumentException $error){myStep::info(htmlspecialchars($error->getMessage(),ENT_QUOTES,$ms_setting->gen->charset));}
         $mydb->delete('idx='.$idx);
         setPluginApps($idx, []);
         myStep::info('plugin_uninstalled', $app_root.'/function/plugin/');

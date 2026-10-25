@@ -21,8 +21,8 @@ $setting_detail['gen'] = array(
         ),
         'cache_mode' => array(
             'name' => 'Cache Mode',
-            'describe' => 'Open the cache mode to reduce the db query',
-            'type' => array('select', array('File Mode'=>'File', 'DB Mode'=>'MySQL'))
+            'describe' => 'Redis requires an installed, enabled and configured Redis plugin; storage failures do not silently switch backends',
+            'type' => array('select', array('File Mode'=>'File', 'DB Mode'=>'MySQL', 'Redis'=>'Redis'))
         ),
         'cache_page' => array(
             'name' => 'HTML Cache',
@@ -181,8 +181,8 @@ $setting_detail['session'] = array(
         ),
         'mode' => array(
             'name' => 'Mode',
-            'describe' => 'Which mode will be used to save the Session data',
-            'type' => array('select', array('MyStep mode'=>'sess_mystep', 'DB mode'=>'sess_mysql', 'File Mode'=>'sess_file'))
+            'describe' => 'Redis requires an installed, enabled and configured Redis plugin; storage failures do not silently switch backends',
+            'type' => array('select', array('MyStep mode'=>'sess_mystep', 'DB mode'=>'sess_mysql', 'File Mode'=>'sess_file', 'Redis'=>'sess_redis'))
         ),
         'path' => array(
             'name' => 'Path',

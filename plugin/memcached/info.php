@@ -21,7 +21,7 @@ $mystep->setLanguagePack(dirname(__FILE__).'/language/', $mystep->setting->gen->
 return array(
     'name' => $mystep->getLanguage('plugin_memcached_info_name'),
     'idx' => basename(realpath(__DIR__)),
-    'ver' => '1.0',
+    'ver' => '1.0.2',
     'intro' => $mystep->getLanguage('plugin_memcached_info_intro'),
     'copyright' => $mystep->getLanguage('plugin_memcached_info_copyright'),
     'description' => $mystep->getLanguage('plugin_memcached_info_description'),

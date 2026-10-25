@@ -64,7 +64,7 @@ require_once __DIR__.'/cache/myCacheCodec.class.php';
  *     $cache->clear();                            // 管理员显式清空；clean仅回收过期
  *
  * 使用说明：
- * 1. File/MySQL/MSSQL简称不区分大小写；第三方仍只须实现原interface_cache。
+ * 1. File/MySQL/MSSQL/Redis简称不区分大小写；第三方仍只须实现原interface_cache。
  * 2. 只有无需必需参数的显式collectGarbage钩子参与自动回收，不自动调用clean。
  * 3. 查询缓存遵循数据库读写位、事务和共享失效；参数化读取本身不使用共享缓存。
  * 4. 对象回调身份仅在当前代理及对象生命周期内稳定；跨请求使用显式remember键，
@@ -102,7 +102,7 @@ class myCache extends myProxy {
      * 自动垃圾回收仅调用 collectGarbage()，不把第三方 clean() 当成回收方法。
      *
      * @param string|interface_cache $module 驱动简称、类名或已初始化驱动；空字符串使用 File（默认：''）
-     * @param mixed $setting 驱动构造参数：File 为目录/选项数组，SQL 为连接及编解码选项；对象模式忽略（默认：null）
+     * @param mixed $setting 驱动构造参数：File 为目录/选项数组，SQL 为连接及编解码选项，Redis为插件连接及编解码选项；对象模式忽略（默认：null）
      * @param float $gc_rate 本次初始化触发回收的概率，范围 0 到 1；0 禁止，默认 0.1（默认：0.1）
      * @return void 无返回值。
      * @throws InvalidArgumentException 驱动接口不符、名称类型非法或回收概率越界
@@ -112,7 +112,7 @@ class myCache extends myProxy {
         if(!self::$cache_autoload_registered) {
             spl_autoload_register(function($class) {
                 if(!preg_match('/\A\w+\z/D', $class)) return;
-                $known=['mycache_file'=>'myCache_File','mycache_mysql'=>'myCache_MySQL','mycache_mssql'=>'myCache_MSSQL',
+                $known=['mycache_file'=>'myCache_File','mycache_mysql'=>'myCache_MySQL','mycache_mssql'=>'myCache_MSSQL','mycache_redis'=>'myCache_Redis',
                     'interface_cache'=>'interface_cache','interface_cache_lookup'=>'interface_cache_lookup','interface_cache_lock'=>'interface_cache_lock','mycachecodec'=>'myCacheCodec'];
                 $name=$known[strtolower($class)]??$class;
                 foreach([__DIR__.'/cache/'.$name.'.class.php', __DIR__.'/cache/myCache_'.$name.'.class.php'] as $file) if(is_file($file)) { require_once $file; return; }
@@ -123,9 +123,13 @@ class myCache extends myProxy {
         if(is_object($module)) $target = $module;
         else {
             if(!is_string($module)) throw new InvalidArgumentException('Cache module must be a class name or adapter');
-            $known = ['file'=>'myCache_File', 'mysql'=>'myCache_MySQL', 'mssql'=>'myCache_MSSQL'];
+            $known = ['file'=>'myCache_File', 'mysql'=>'myCache_MySQL', 'mssql'=>'myCache_MSSQL', 'redis'=>'myCache_Redis'];
             $short = strtolower(preg_replace('/^myCache_/i', '', $module));
             $candidate = $known[$short] ?? (strpos($module, 'myCache_') === 0 ? $module : 'myCache_'.$module);
+            if($short==='redis'){
+                $plugin=myStep::storagePlugin('redis');
+                if($setting===null)$setting=$plugin::options();
+            }
             if(class_exists($candidate)) {
                 if(!is_subclass_of($candidate, 'interface_cache')) throw new InvalidArgumentException('Invalid cache adapter class');
                 $target = new $candidate($setting);
@@ -265,7 +269,8 @@ class myCache extends myProxy {
     /**
      * 功能说明：显式清空当前后端全部数据，用于管理员清理；不同于只回收过期项的clean。
      *
-     * 同目录/同表的所有namespace均受影响，文件锁基础设施保留；并发请求仍可重建值。
+     * File/SQL同目录或同表的namespace均受影响；Redis仅清理当前站点及namespace。
+     * 锁基础设施保留；并发请求仍可重建值。
      * 第三方后端须显式提供clear，不把含义不确定的clean当作清空入口。
      *
      * 参数说明：无显式参数。

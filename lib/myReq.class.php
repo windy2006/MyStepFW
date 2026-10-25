@@ -546,12 +546,14 @@ class myReq extends myBase {
      * @param string|array $handle 处理器类名、6个原回调或9个完整回调；空数组使用原生files（默认：array()）
      * @param bool $httponly Cookie是否禁止脚本读取（默认：true）
      * @return string|false 成功返回实际ID；no_log禁用、处理器无效或启动失败返回false，不静默切换存储
+     * @throws InvalidArgumentException 显式选择的Redis存储插件未安装、未启用或PHP扩展不可用
      * @phpstan-param string|list<callable> $handle
      */
     public static function sessionStart($handle = array(), $httponly = true) {
         if(!empty($GLOBALS['no_log']) || self::sessionCheck() || headers_sent()) return false;
         $callbacks = [];
         if(is_string($handle) && $handle !== '' && $handle !== 'files') {
+            if(strtolower($handle)==='sess_redis')myStep::storagePlugin('redis');
             if(!class_exists($handle)) return false;
             foreach(['open','close','read','write','destroy','gc'] as $method) {
                 if(!is_callable([$handle, $method])) return false;
@@ -594,7 +596,9 @@ class myReq extends myBase {
         }
         session_cache_limiter('private,must-revalidate');
         session_cache_expire(self::$session_opt['expire']);
-        if(!session_start()) return false;
+        // Redis处理器已保留安全错误摘要；将PHP存储警告交给上层统一提示，避免原始警告提前中断认证流程。
+        $started=is_string($handle) && strtolower($handle)==='sess_redis' ? @session_start() : session_start();
+        if(!$started) return false;
         function_exists('session_register_shutdown') ? session_register_shutdown() : register_shutdown_function('session_write_close');
         return session_id();
     }

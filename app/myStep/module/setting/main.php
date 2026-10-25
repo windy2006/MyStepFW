@@ -11,15 +11,17 @@ if(!empty($app)) {
 }
 require_once APP.'myStep/lib.php';
 $config = new myConfig($file);
-if($app==='')MyStepApiManager::frameworkSettings($config);
+if($app===''){MyStepApiManager::frameworkSettings($config);}
 $config->merge(myPath::settings($config->get(true), $app?:'myStep'));
 if(myReq::check('post')) {
-    $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
     if(!empty($app) && file_exists(APP.$app.'/setting_expand.php')) include(APP.$app.'/setting_expand.php');
     $config->set($_POST['setting']);
     if($app==='')MyStepApiManager::frameworkSettings($config);
+    try {myStep::configureStorage($config,true);}
+    catch(InvalidArgumentException $error) {myStep::info(htmlspecialchars($error->getMessage(), ENT_QUOTES, $ms_setting->gen->charset));}
     $config->merge(myPath::settings($config->get(true), $app?:'myStep'));
     $config->save('php');
+    $mystep->setAddedContent('end', '<script>alert("'.$mystep->getLanguage('setting_done').'");</script>');
     if($app==='')(new MyStepApiManager())->normalizeStorage();
 }
 

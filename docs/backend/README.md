@@ -45,6 +45,7 @@
 - [序列化预算、对象与命名空间](cache/cache-serialization.md)
 - [File、MySQL和MSSQL缓存驱动](cache/cache-drivers.md)
 - [过期回收、全量清理与引用保留](cache/cache-cleanup.md)
+- [Redis连接、缓存、会话与设置](../showcase/plugins/redis.md)
 
 ## 会话与安全
 
@@ -98,6 +99,7 @@
 - [myAuth · 密码和登录凭据](reference/myauth.md)
 - [myBase · 基础抽象类](reference/mybase.md)
 - [myCache · 缓存代理与能力](reference/mycache.md)
+- [myRedis · Redis连接与键隔离](../showcase/plugins/redis/myredis.md)
 - [myClassLoader · 类加载声明](reference/myclassloader.md)
 - [myConfig · 配置读取、合并和保存](reference/myconfig.md)
 - [myController · 控制器基础资源](reference/mycontroller.md)
@@ -144,6 +146,7 @@
 - [myCache_File · myCache_File 缓存驱动／协议](reference/cache/mycache-file.md)
 - [myCache_MSSQL · myCache_MSSQL 缓存驱动／协议](reference/cache/mycache-mssql.md)
 - [myCache_MySQL · myCache_MySQL 缓存驱动／协议](reference/cache/mycache-mysql.md)
+- [myCache_Redis · Redis缓存驱动](../showcase/plugins/redis/mycache-redis.md)
 
 ## Session处理器
 
@@ -151,5 +154,6 @@
 - [sess_file · sess_file 会话处理器](reference/session/sess-file.md)
 - [sess_mysql · sess_mysql 会话处理器](reference/session/sess-mysql.md)
 - [sess_mystep · sess_mystep 会话处理器](reference/session/sess-mystep.md)
+- [sess_redis · Redis会话处理器](../showcase/plugins/redis/sess-redis.md)
 
 [文档总览](../README.md)

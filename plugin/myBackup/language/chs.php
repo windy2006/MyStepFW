@@ -2,7 +2,7 @@
 return array (
     'plugin_myBackup_info_name' => 'MySQL备份',
     'plugin_myBackup_info_intro' => 'MySQL数据备份及恢复',
-    'plugin_myBackup_info_copyright' => '版权所有 2019-2022 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
+    'plugin_myBackup_info_copyright' => '版权所有 2019-2026 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
     'plugin_myBackup_info_description' => '<i>数据备份</i>，备份或恢复MySQL数据库。',
 
     'plugin_myBackup_import' => '导入数据',

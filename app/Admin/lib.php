@@ -626,6 +626,8 @@ class AdminService {
             $config = new myConfig($file);
             $this->passwords($p['setting']);
             $config->set($p['setting']);
+            // 存储等插件可在发布设置前执行服务端验证；失败保持原配置。
+            if(is_callable([$class,'validateConfig']))$class::validateConfig($config);
             AdminStore::saveData($file, $config->get(true), $p['version']);
         }
         if($install) {
