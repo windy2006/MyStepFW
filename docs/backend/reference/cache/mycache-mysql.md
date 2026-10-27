@@ -1,6 +1,6 @@
-# myCache_MySQL：myCache_MySQL 缓存驱动／协议
+# MySQL缓存
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myCache_MySQL`。
 
 ## 职责与调用位置
 
@@ -37,7 +37,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 补充说明：
 MySQL缓存：专用连接、参数化UPSERT、容量保护及精确命中。
-兼容旧TEXT/原始序列化和MS_CACHE2编码；普通请求不ALTER已有表。
+兼容TEXT列/原始序列化和MS_CACHE2编码；普通请求不ALTER已有表。
 可选table和namespace隔离业务键，synchronized用同一写实例的命名锁；需要mysqli/mysqlnd。
 
 ## 状态字段与公开变量
@@ -135,7 +135,6 @@ $result = $instance->getLastError();
 ### myCache_MySQL::run
 
 功能说明：执行内部参数化模板；关闭连接/SQL错误均转换为false，及时释放statement。
-
 
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 

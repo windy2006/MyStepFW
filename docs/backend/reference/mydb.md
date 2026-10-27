@@ -1,6 +1,6 @@
-# myDb：数据库代理与SQL构建
+# 数据库代理
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myDb`。
 
 ## 职责与调用位置
 
@@ -296,8 +296,8 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；myProxy::init的驱动类名/对象及其初始化参数（历史位置参数，由func_get_args读取） |
-| `$module` | string\|object；历史位置参数说明：第一个可选位置参数：驱动类名或现有驱动实例，省略时不初始化 |
+| `...$args` | mixed；myProxy::init的驱动类名/对象及其初始化参数（位置参数，由func_get_args读取） |
+| `$module` | string\|object；位置参数说明：第一个可选位置参数：驱动类名或现有驱动实例，省略时不初始化 |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -342,7 +342,6 @@ $result = $instance->supports($interface);
 
 正常返回（包括 false）提交；异常回滚并继续抛出，嵌套事务由驱动使用保存点。
 回调不可自行提交或执行隐式提交 DDL；文件、邮件等外部副作用不受回滚保障。
-
 
 调用示例：
     if ($db->supports(interface_db_transaction::class)) {
@@ -1234,7 +1233,6 @@ public function fetchOne($sql, array $params = [], $mode = 2);
 
 功能说明：绑定参数读取第一行第一列，保留 SQL NULL、0 及空字符串
 
-
 调用示例：
     $value = $db->fetchValue('SELECT value FROM items WHERE id=?', [1]);
     if ($value === false) {
@@ -1454,8 +1452,8 @@ public function field($field = null);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$field` | string\|array\|null；列字符串/列表、含别名的列、写入字段映射；可传多个位置参数；<br>                               null 读取片段，[reset] 清空，all/distinct/distinctrow 设置前缀（默认：null） |
-| `...$args` | mixed；兼容入口的附加字段参数，按field内部规则组合（历史位置参数，由func_get_args读取） |
-| `$fields` | mixed；历史位置参数说明：多位置参数形式的补充列，存在时与第一个参数一起作为列列表 |
+| `...$args` | mixed；兼容入口的附加字段参数，按field内部规则组合（位置参数，由func_get_args读取） |
+| `$fields` | mixed；位置参数说明：多位置参数形式的补充列，存在时与第一个参数一起作为列列表 |
 
 **返回值**：$this|string 设置/重置返回当前构建器，无参返回列清单或赋值片段
 
@@ -1498,7 +1496,7 @@ public function values();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；一行的位置值列表，或若干行数组；与field列顺序对应（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；一行的位置值列表，或若干行数组；与field列顺序对应（位置参数，由func_get_args读取） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -1570,7 +1568,7 @@ public function group($group=null);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$group` | string\|array\|null；分组字段，或含 field/having 的数组，也可传 [字段, 条件]；<br>                               null 返回当前结构，字段列表可为逗号字符串或数组（默认：null） |
-| `...$args` | mixed；兼容第二位置参数：HAVING条件（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；兼容第二位置参数：HAVING条件（位置参数，由func_get_args读取） |
 
 **返回值**：$this|array 设置返回当前构建器；读取返回结构数组，SQL 生成时不改写其内容
 

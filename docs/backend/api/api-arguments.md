@@ -1,14 +1,12 @@
-# API参数位置、保留字段与格式
-
-修订日期：2026-10-23。适用于当前框架。
+# 接口参数
 
 ## 本篇目标与调用场景
 
-HTTP分发仅调用已登记处理器。当前接口只有启用、方法、跨域、仅限后台四项额外设置；参数统一沿用兼容位置模式。
+HTTP分发仅调用已登记处理器。接口提供启用、允许方法、跨域、仅限后台四项设置；参数按处理器签名的位置传入。
 
-## 6. 兼容参数与输出
+## 6. 保留参数与输出
 
-接口统一按原有位置参数约定执行：GET按顺序取值，非GET/HEAD再合并POST，同名项由POST覆盖；移除core后追加路径段，包括格式尾参。参数名不会匹配函数形参，GET/POST全量读取沿用HTML转义。不再提供结构化参数模式或逐接口返回格式限制。
+接口统一按位置参数约定执行：GET按顺序取值，非GET/HEAD再合并POST，同名项由POST覆盖；移除core后追加路径段，包括格式尾参。参数名不会匹配函数形参，GET/POST全量读取沿用HTML转义。不再提供结构化参数模式或逐接口返回格式限制。
 
 ```php
 namespace app\Hello;
@@ -22,7 +20,6 @@ function detail($id = '', $format = 'json') {
 JSON、XML、二进制等原始正文由业务自行通过php://input读取；框架前置正文上限仍生效，业务负责格式解析、深度与解码资源预算。
 
 输出支持json/j、xml/x、string/s、hex/h、code/c/script，JSON固定UTF-8。普通回调return数据；echo、下载和CSRF等直接输出接口保留原行为。未指定格式时使用框架API默认格式。
-
 
 ## 主要方法：参数、返回和失败约定
 
@@ -43,7 +40,7 @@ public static function httpFormat($value, $default = 'json');
 
 ### myApi::httpArguments
 
-功能说明：按原有位置参数约定构造接口参数；各内容类型已先执行正文上限。
+功能说明：按位置参数约定构造接口参数；各内容类型已先执行正文上限。
 
 ```text
 public static function httpArguments(array $tail, array $policy, array $config, $legacy_format);
@@ -52,7 +49,7 @@ public static function httpArguments(array $tail, array $policy, array $config, 
 | 参数说明 |
 | --- |
 | array $tail 接口之后的路径段 |
-| array $policy 当前接口策略；保留签名兼容，参数模式不再可配置 |
+| array $policy 当前接口策略；请求参数按处理器签名的位置传入 |
 | array $config 已验证配置 |
 | mixed $legacy_format 旧分发器的格式候选 |
 

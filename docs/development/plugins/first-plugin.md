@@ -1,6 +1,6 @@
-# 开发第一个 MyStepFW 插件
+# 插件实例
 
-本教程创建一个名为 `hellonote` 的插件：给页面末尾加入可配置提示，并提供一个纯文本页面和只读状态 API。示例兼容 PHP 7.4，不建立业务表，不引入访问频率限制。
+本教程创建一个名为 `hellonote` 的插件：给页面末尾加入可配置提示，并提供一个纯文本页面和只读状态 API。示例面向当前 PHP 7.4 框架，不建立业务表，不引入访问频率限制。
 
 先完成 [第一个应用](../app/first-app.md)，得到 `Hello` 应用。本文默认只给该应用启用页面提示；插件独立路由的可见范围由路由和处理器控制，不自动受应用引用列表限制。
 
@@ -32,7 +32,7 @@ plugin/hellonote/
     └── chs.php
 ```
 
-插件目录及 idx 为 `hellonote`，生命周期类名固定为 `plugin_hellonote`。旧后台初建插件注册表的 idx 字段宽度为 10，Admin 初建表时为 40；存量表不会自动扩宽。本入门示例使用不超过 10 个 ASCII 字符的标识，兼容新旧后台及既有注册表。结构和现状说明见 [插件目录说明](../../../plugin/README.md)。
+插件目录及 idx 为 `hellonote`，生命周期类名固定为 `plugin_hellonote`。插件标识须符合注册表idx列的长度限制；本例使用不超过10个ASCII字符的标识。结构和现状说明见 [插件目录说明](../../../plugin/README.md)。
 
 `class.php` 不是继承 `myStep` 的第二个控制器，而是实现 `interface_plugin` 的插件类。运行期 `index.php` 被包含到控制器方法作用域中，里面的 `$this` 才是当前框架控制器。
 
@@ -47,7 +47,7 @@ return [
     'idx' => 'hellonote',
     'ver' => '1.0.0',
     'intro' => '展示插件配置、页面钩子与独立接口',
-    'copyright' => 'HelloNote plugin',
+    'copyright' => '版权所有 2019-2026 <a href="mailto:windy2006@gmail.com">Windy2000</a>',
     'description' => '给 Hello 应用加入一条提示信息。',
     'app' => ['Hello'],
 ];
@@ -212,7 +212,7 @@ $api = [
 | `setPriority($idx)` | 完整发布脚本返回 `true`；没有 `priority.php` 返回 `false`。 |
 | `removePriority($idx)` | 删除成功或原文件不存在均返回 `true`，不递归删除意外同名目录。 |
 
-路由操作需要框架已初始化全局 `$router`。源映射使用旁路锁合并，避免同时安装插件时覆盖彼此；菜单、源映射和优先脚本均先写临时文件再原子替换。非法标识、损坏的映射、加锁和写入失败会抛出异常。接口 `install()`/`uninstall()` 保留旧式无返回值写法，管理器不检查它们的返回值；必需资源失败时应抛出异常。各文件原子发布不代表整个插件安装具备事务回滚。
+路由操作需要框架已初始化全局 `$router`。源映射使用旁路锁合并，避免同时安装插件时覆盖彼此；菜单、源映射和优先脚本均先写临时文件再原子替换。非法标识、损坏的映射、加锁和写入失败会抛出异常。接口 `install()`/`uninstall()` 保留无返回值写法，管理器不检查它们的返回值；必需资源失败时应抛出异常。各文件原子发布不代表整个插件安装具备事务回滚。
 
 后台插件页使用 `showPluginPage($idx, $page)`，先验证登录，再加载 `template/$page.tpl` 及可选的 `module/$page.php`；省略页名时使用插件目录名。模块可通过 `$tpl_sub` 赋值，或设置 `$content` 直接提供主体内容。
 
@@ -226,7 +226,6 @@ $mystep->show($outer);
 ```
 
 第三个参数 `false` 复用应用的全局 `$tpl_setting`/`$tpl_cache` 创建外层模板，调用后不修改这两个全局变量；默认 `true` 使用框架后台 `main.tpl`。内容子模板始终关闭页面缓存，防止覆盖外层的整页缓存；外层启用缓存时仍需自行按身份、语言等设置隔离维度。
-
 
 插件 API 分组会变为 `plugin_hellonote`，访问路径为 `/api/plugin_hellonote/status/json`。它不会自动继承应用的权限策略。示例的只读公开信息可以匿名查看；敏感 API 需要在自身方法中验证身份、权限和请求方法。
 
@@ -292,11 +291,11 @@ return include __DIR__.'/chs.php';
 | 访问 `/api/plugin_hellonote/status/json` | JSON 中 plugin 为 hellonote，ok 为 true |
 | 在后台修改 message，再访问页面 | 显示新值 |
 | 将 message 设为 `<script>alert(1)</script>` | 页面按文本显示，不执行脚本 |
-| 后台禁用插件 | Hello 页面没有提示；独立页面和 API 返回 404 |
+| 后台禁用插件 | Hello 页面没有提示；路由/API停止登记，不再执行插件方法 |
 | 仅从 Hello 关联中移除、仍保持活动 | Hello 页面没有提示；全局独立接口仍可调用 |
 | 卸载插件 | 移除注册、应用关联、优先级及显式路由映射；配置源码保留 |
 
-卸载后，原来的自定义 URL 可能交给站点默认入口，不保证统一返回 404；应检查该插件的方法不再执行，以及 API 不再返回插件成功数据。API可通过普通路径或已配置的专属域名验证；专属域名不强制重定向原路径，跨域与登录分别按当前接口和会话设置处理。
+禁用或卸载后，原来的自定义URL可能交给站点默认入口，不保证统一返回404；没有登记的API沿现有协议返回Module is Missing，不能仅用HTTP 200判断业务成功。应检查该插件的方法不再执行，以及 API 不再返回插件成功数据。API可通过普通路径或已配置的专属域名验证；专属域名不强制重定向原路径，跨域与登录分别按当前接口和会话设置处理。
 
 ## 10. 生命周期速查
 
@@ -346,8 +345,6 @@ flowchart TD
 框架接口依据：`plugin/interface_plugin.class.php`、`lib/myController.class.php`、`lib/myStep.class.php` 与 `app/myStep/module/function/plugin.php`。更多执行顺序见 [通用详细执行流程](../../backend/runtime/execution.md)。
 
 ## 13. 示例核验
-
-本教程与应用教程共 18 个完整示例文件已从文档提取，使用 PHP 7.4 完成语法及实际框架的隔离运行验证。插件场景覆盖配置表单生成、安装登记、宿主页钩子、独立页面和 API、HTML 转义、禁用拒绝及卸载清理；两篇合计 18 个运行场景通过。
 
 验证在临时目录执行生命周期方法和框架请求调度，未在正式站点安装、启用或卸载插件；后台界面操作和浏览器展示需在开发环境按第 8、9 节验证。
 

@@ -1,6 +1,6 @@
-# myImg：图片处理与绘图
+# 图像工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myImg`。
 
 ## 职责与调用位置
 
@@ -224,7 +224,7 @@ public function init();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；图片路径，或宽度、高度、create参数数组[真彩,背景]（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；图片路径，或宽度、高度、create参数数组[真彩,背景]（位置参数，由func_get_args读取） |
 
 **返回值**：$this|false 返回当前实例；图像加载失败为false
 
@@ -338,7 +338,6 @@ $result = $instance->randomColor($rand, $alpha);
 
 功能说明：读取图片文件，并返回图片信息
 
-
 资源所有权：直接调用load得到独立句柄，调用方负责imagedestroy；经init加载时由当前图像实例管理，destroy可显式释放。
 
 ```text
@@ -364,7 +363,6 @@ $result = $instance->load($image, $data);
 ### myImg::rotate
 
 功能说明：旋转画布
-
 
 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
 
@@ -396,7 +394,6 @@ $result = $instance->rotate($angle, $img);
 
 功能说明：按比例缩放画布（可选择返回图像源）
 
-
 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
 
 ```text
@@ -422,7 +419,6 @@ $result = $instance->resize($rate, $img);
 ### myImg::crop
 
 功能说明：截取画布的一部分（可选择返回图像源）
-
 
 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
 
@@ -580,7 +576,7 @@ public function setColor($idx = '');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$idx` | string；颜色索引名，空串自动分配；附加参数指定RGB及透明度（默认：''） |
-| `...$args` | mixed；[R,G,B]及可选透明度，或R/G/B及可选透明度；GD透明度0至127（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；[R,G,B]及可选透明度，或R/G/B及可选透明度；GD透明度0至127（位置参数，由func_get_args读取） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -1012,7 +1008,7 @@ public function checkPoint();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | array；需要逐个校验的[x,y]数值坐标数组，至少一个（历史位置参数，由func_get_args读取） |
+| `...$args` | array；需要逐个校验的[x,y]数值坐标数组，至少一个（位置参数，由func_get_args读取） |
 
 **返回值**：bool 至少一个参数且所有参数均为两个数值组成的数组时为true，否则为false
 

@@ -1,6 +1,6 @@
-# myCacheCodec：myCacheCodec 缓存驱动／协议
+# 缓存编码
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myCacheCodec`。
 
 ## 职责与调用位置
 
@@ -54,7 +54,7 @@ protected $max_bytes = 8388608, $depth = 128, $allowed = true, $namespace = '';
 | `myCacheCodec::inspect` | 拒绝PHP会静默编码为0的资源，并对数组引用/对象循环去重。 |
 | `myCacheCodec::pack` | 编码受信数据，超限或不可序列化时不发布新条目。 |
 | `myCacheCodec::unpack` | 解码已确认未过期的受信数据，不执行超出预算的数据。 |
-| `myCacheCodec::sqlUnpack` | 读取SQL缓存的MS_CACHE2 Base64封装或旧原始序列化值。 |
+| `myCacheCodec::sqlUnpack` | 读取SQL缓存的MS_CACHE2 Base64封装或原始序列化值。 |
 
 ## 逐方法参数、返回与示例
 
@@ -274,7 +274,7 @@ $result = $instance->unpack($data, $valid);
 
 ### myCacheCodec::sqlUnpack
 
-功能说明：读取SQL缓存的MS_CACHE2 Base64封装或旧原始序列化值。
+功能说明：读取SQL缓存的MS_CACHE2 Base64封装或原始序列化值。
 
 ```text
 public function sqlUnpack($data, &$valid);

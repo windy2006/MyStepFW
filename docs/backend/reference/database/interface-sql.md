@@ -1,6 +1,6 @@
-# interface_sql：interface_sql 数据库驱动／协议
+# 构造器协议
 
-修订日期：2026-10-23。功能详解。
+接口说明：`interface_sql`。
 
 ## 职责与调用位置
 

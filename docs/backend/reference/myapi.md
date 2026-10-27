@@ -1,6 +1,6 @@
-# myApi：注册接口与HTTP协议
+# 应用接口
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myApi`。
 
 ## 职责与调用位置
 
@@ -41,7 +41,7 @@ assert(json_decode($api->run('sum', [2, 3]), true) === 5);
     $api->removeMethod('sum');           // 注销单个接口
 
 run() 保留未知接口编码空字符串的旧约定，invoke() 对未知接口明确报错。
-参数使用位置顺序，不将关联键解释为 PHP 8 命名参数。JSON 恒为 UTF-8；XML 先以
+参数使用位置顺序，不按关联键匹配函数形参。JSON 恒为 UTF-8；XML 先以
 UTF-8 生成，再按显式 charset 无损转码。回调、格式或编码异常不包装成成功空响应。
 注册表不是认证/权限系统；HTTP 方法、CSRF、授权仍由应用及框架入口负责。
 
@@ -515,7 +515,6 @@ $result = $instance->removeMethod($method);
 ### myApi::invoke
 
 功能说明：执行已登记接口并返回原始结果，不编码、不修改响应头
-
 
 调用示例：
     $api->regMethod('sum', function ($a, $b) { return $a + $b; });

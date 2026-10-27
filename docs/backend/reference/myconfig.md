@@ -1,6 +1,6 @@
-# myConfig：配置读取、合并和保存
+# 设置管理
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myConfig`。
 
 ## 职责与调用位置
 
@@ -245,7 +245,6 @@ public function __clone();
 ### myConfig::value
 
 功能说明：无副作用地读取点分隔配置路径，保留已存在的 null
-
 
 调用示例：
     $port = $config->value('db.port', 3306); // 不创建缺失分组
@@ -524,7 +523,6 @@ protected function formValue($value, $current);
 
 先编码后写入，编码失败保留原文件。保存原文件时比较加载摘要，成功后更新本实例
 版本；显式导出其他路径不套用原文件版本检查。新文件权限 0600，既有权限保留。
-
 
 调用示例：
     try {

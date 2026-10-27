@@ -1,6 +1,4 @@
-# SQLite：sqlite 数据库驱动／协议
-
-修订日期：2026-10-23。功能详解。
+# SQLite
 
 ## 职责与调用位置
 
@@ -108,12 +106,12 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init声明顺序传入的SQLite路径等设置（历史位置参数，由func_get_args读取） |
-| `$file` | string；历史位置参数说明：可选文件路径或 :memory:，转给 init() |
-| `$flag` | int；历史位置参数说明：可选 SQLite3 打开标志，默认 -1 自动判断 |
-| `$key` | string\|null；历史位置参数说明：可选加密密钥，须由 SQLite 构建提供加密支持 |
-| `$exception` | bool；历史位置参数说明：可选是否让 SQLite3 抛异常，默认 false |
-| `$timeout` | int；历史位置参数说明：可选忙等待毫秒数，默认 5000 |
+| `...$args` | mixed；按init声明顺序传入的SQLite路径等设置（位置参数，由func_get_args读取） |
+| `$file` | string；位置参数说明：可选文件路径或 :memory:，转给 init() |
+| `$flag` | int；位置参数说明：可选 SQLite3 打开标志，默认 -1 自动判断 |
+| `$key` | string\|null；位置参数说明：可选加密密钥，须由 SQLite 构建提供加密支持 |
+| `$exception` | bool；位置参数说明：可选是否让 SQLite3 抛异常，默认 false |
+| `$timeout` | int；位置参数说明：可选忙等待毫秒数，默认 5000 |
 
 **返回值**：void 初始化或释放资源，无返回值。
 

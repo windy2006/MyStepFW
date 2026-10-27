@@ -1,6 +1,4 @@
-# jquery.addon插件与资源加载
-
-修订日期：2026-10-23。浏览器脚本用法。
+# 资源加载
 
 ## 本篇目标与调用场景
 
@@ -16,7 +14,7 @@
 
 ## 1. jquery.addon.js 概览
 
-[jquery.addon.js](../../../static/js/jquery.addon.js) 包含旧 JSON 辅助、鼠标滚轮事件、Cookie、资源加载器及几个 jQuery 实例扩展。先加载 jQuery；$.vendor 运行时需要 global，$.setCSS 运行时需要 md5，因此这些调用应发生在 global.js 已加载之后。
+`static/js/jquery.addon.js`（jquery.addon.js） 包含旧 JSON 辅助、鼠标滚轮事件、Cookie、资源加载器及几个 jQuery 实例扩展。先加载 jQuery；$.vendor 运行时需要 global，$.setCSS 运行时需要 md5，因此这些调用应发生在 global.js 已加载之后。
 
 ### JSON 工具
 
@@ -140,7 +138,6 @@ panel.mousewheel(onWheel);
 ```
 
 处理任意表单提交数据时，可优先使用 FormData 或按业务白名单读取字段；框架查询 GET 路由转换使用自己的安全参数字典，不依赖 serializeObject。
-
 
 ## 明确调用示例
 

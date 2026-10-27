@@ -1,6 +1,6 @@
-# myCache_File：myCache_File 缓存驱动／协议
+# 文件缓存
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myCache_File`。
 
 ## 职责与调用位置
 
@@ -28,7 +28,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 ### myCache_File
 
-功能说明：提供V3校验帧、旧V2兼容、原子写入、精确命中、计算锁及有限预算回收。
+功能说明：提供V3校验帧、V2兼容、原子写入、精确命中、计算锁及有限预算回收。
 
 使用说明：
   1. 通过new myCache('File',CACHE.'data')使用，或传入含path的选项数组。
@@ -37,7 +37,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 补充说明：
 文件缓存：稳定v2路径、V3校验帧、原子发布及有限预算GC。
-兼容旧V2序列化条目；过期判断先于对象实例化，目录须为受信私有存储。
+兼容V2序列化条目；过期判断先于对象实例化，目录须为受信私有存储。
 fetch可区分有效false/null，synchronized提供显式防击穿锁；clean只回收过期，clear显式清空并保留锁。
 
 ## 状态字段与公开变量

@@ -4,10 +4,13 @@
 
 ## 基础说明
 
-- [整体介绍与框架组成](01-guide-basics.md)
-- [安装环境与基础配置](02-installation.md)
-- [功能设置与管理入口](03-management.md)
-- [框架概要与执行主线](04-architecture.md)
-- [开发规范与目录归属](05-standards.md)
+- [框架简介](01-guide-basics.md)
+- [安装环境](02-installation.md)
+- [运行环境](06-php74.md)
+- [功能设置](03-management.md)
+- [执行概要](04-architecture.md)
+- [功能选用](07-design.md)
+- [开发规范](05-standards.md)
+- [命名规范](09-naming.md)
 
 [文档总览](../README.md)

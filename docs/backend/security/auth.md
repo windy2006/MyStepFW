@@ -1,16 +1,18 @@
-# 密码、旧散列迁移与记住登录
-
-修订日期：2026-10-23。适用于当前框架。
+# 安全认证
 
 ## 本篇目标与调用场景
 
 会话与凭据是框架辅助能力，业务仍独立校验身份、数据归属及操作权限。代码预算不替代PHP解析前的补丁与服务器限制。
 
+## 配套完整示例
+
+阅读[密码摘要与认证加密](auth-example.md)：包含准备步骤、完整代码、预期输出及实际应用中的替换位置。先跑通示例，再查本页逐方法参数。
+
 ## 主要方法：参数、返回和失败约定
 
 ### myAuth::hashPassword
 
-功能说明：为非空明文密码生成带 v2 前缀的新格式摘要
+功能说明：为非空明文密码生成带 v2 前缀的密码摘要
 
 先对密码进行 SHA-384 二进制摘要，再将其 Base64 编码为固定 64 字节字符串，
 最后交给 password_hash(PASSWORD_DEFAULT) 自动生成盐并计算摘要。
@@ -31,12 +33,11 @@ public static function hashPassword($password);
 
 ### myAuth::protectLegacyHash
 
-功能说明：在没有明文密码时，为历史裸 MD5 摘要增加 password_hash() 包装
+功能说明：在没有明文密码时，为32位十六进制MD5摘要增加 password_hash() 包装
 
 仅处理恰好 32 位的十六进制字符串，将其转为小写后用 PASSWORD_DEFAULT
 再次散列，并添加 v1: 前缀；已有版本摘要、其他字符串及非字符串输入原样返回。
-此操作保留旧密码的兼容校验能力，但不会恢复明文，也不生成 v2 格式。
-返回的新摘要是否写入账户存储由调用方决定，成功登录后仍可升级为 v2。
+由调用方将返回摘要保存到账户存储。
 
 ```text
 public static function protectLegacyHash($hash);
@@ -44,19 +45,17 @@ public static function protectLegacyHash($hash);
 
 | 参数说明 |
 | --- |
-| mixed $hash 历史密码摘要或需要保持原样的其他值 |
+| mixed $hash 待包装的密码摘要或需要保持原样的其他值 |
 
 **返回**：mixed 包装后的 v1 摘要，或不符合裸 MD5 格式时的原始输入
 
 ### myAuth::verifyPassword
 
-功能说明：根据已保存摘要的格式，兼容校验用户提交的明文密码
+功能说明：根据已保存摘要的格式，支持校验用户提交的明文密码
 
 v2: 使用 SHA-384/Base64 预处理后执行 password_verify()；
-v1: 对密码计算 MD5，再与已包装的旧摘要比较；裸 MD5 使用 hash_equals() 比较；
+v1: 对密码计算 MD5，再与已包装的摘要比较；裸 MD5 使用 hash_equals() 比较；
 其他非空字符串按无版本前缀的 password_hash() 摘要执行原生校验。
-v1 和裸 MD5 还兼容旧 CMS 把 htmlspecialchars() 结果作为密码的历史行为，
-该分支沿用当前 PHP 的默认转义选项和字符集；v2 不尝试此兼容转换。
 非字符串或空输入返回 false。本方法不会自动升级摘要或写入登录状态。
 
 ```text
@@ -137,7 +136,7 @@ public static function readToken($token);
 用途 s、Unix 过期时间 e 及由 16 字节安全随机数生成的十六进制 n。
 JSON 载荷经 Base64URL 编码后，以 SHA-256(secret + 空字节 + 密码摘要)
 的二进制结果作为 HMAC-SHA256 密钥签名，返回“载荷.十六进制签名”。
-密码摘要必须与账户当前持久化值完全一致；更改摘要或站点密钥会使旧令牌失效。
+密码摘要必须与账户当前持久化值完全一致；更改摘要或站点密钥会使此前签发的令牌失效。
 参数内容应由调用方验证，用户名及用途应为可进行 JSON 编码的 UTF-8 文本；
 本方法不设置 Cookie，也不保存随机值或单个令牌的撤销记录。
 
@@ -189,7 +188,7 @@ public static function verifyToken($token, $username, $hash, $scope, $secret);
 功能说明：为已经启动的会话重新生成 Session ID，降低会话固定攻击风险
 
 仅在 session_status() 为 PHP_SESSION_ACTIVE 时调用
-session_regenerate_id(true)，保留当前会话数据并请求删除旧 ID 对应的存储。
+session_regenerate_id(true)，保留当前会话数据并请求删除轮换前的ID 对应的存储。
 通常在登录成功或身份变更后、响应头发送前调用；未启动会话时不执行操作。
 本方法不启动会话、不设置身份，也不返回底层 ID 更新是否成功的结果。
 

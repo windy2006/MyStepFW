@@ -1,6 +1,4 @@
-# MySQL：mysql 数据库驱动／协议
-
-修订日期：2026-10-23。功能详解。
+# MySQL
 
 ## 职责与调用位置
 
@@ -43,7 +41,7 @@ MySQL 驱动，使用 mysqli 执行普通 SQL、参数绑定及共享构建/事�
     $mysql->transaction(function ($tx) { ... });      // 继承 base_db，支持嵌套保存点
 
 使用说明：
-1. 新连接沿用服务端 wait_timeout，不再强制改为 3 秒；初始化仍沿用历史 sql_mode 设置。
+1. 连接使用服务端wait_timeout；初始化时设置sql_mode，SQL行为以实际连接模式为准。
 2. query() 只在已筛选的无事务/会话依赖 SELECT 遭遇 2006 断线时重连并重试一次；
    不重放写入。execute() 不自动重试，也不使用共享查询结果缓存。
 3. 参数化结果读取需要 mysqlnd；参数只能代替数据值，标识符与 SQL 片段由应用限定。
@@ -115,12 +113,12 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init声明顺序传入的连接设置；构造不立即连接（历史位置参数，由func_get_args读取） |
-| `$host` | string；历史位置参数说明：可选第一参数，服务器地址，传入时须同时提供 user/pwd |
-| `$user` | string；历史位置参数说明：数据库用户名，传给 init() |
-| `$pwd` | string；历史位置参数说明：数据库密码，传给 init() |
-| `$charset` | string；历史位置参数说明：字符集，默认 utf8；建议明确使用 utf8mb4 |
-| `$options` | array；历史位置参数说明：可选 sql_mode 策略，转给 init |
+| `...$args` | mixed；按init声明顺序传入的连接设置；构造不立即连接（位置参数，由func_get_args读取） |
+| `$host` | string；位置参数说明：可选第一参数，服务器地址，传入时须同时提供 user/pwd |
+| `$user` | string；位置参数说明：数据库用户名，传给 init() |
+| `$pwd` | string；位置参数说明：数据库密码，传给 init() |
+| `$charset` | string；位置参数说明：字符集，默认 utf8；建议明确使用 utf8mb4 |
+| `$options` | array；位置参数说明：可选 sql_mode 策略，转给 init |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -336,7 +334,6 @@ $result = $instance->query($sql, $reset);
 
 按 PHP 类型推断绑定类型，null 保持 SQL NULL；流参数使用分块 send_long_data()。
 结果集保留给 getRS()/fetch*()，预处理语句在 finally 中关闭，成功后跟踪缓存失效。
-
 
 流所有权：BLOB从当前流位置读取到末尾，不负责rewind或关闭调用方的流；statement在finally关闭，读取结果集由驱动free/后续读取入口释放。
 
@@ -611,7 +608,7 @@ public function optTabs();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | string；可选表名列表；省略时优化当前库的所有表（历史位置参数，由func_get_args读取） |
+| `...$args` | string；可选表名列表；省略时优化当前库的所有表（位置参数，由func_get_args读取） |
 
 **返回值**：void 使用正确的 getTbls() 入口；会执行数据库维护操作，调用方自行选择维护时机
 

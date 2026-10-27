@@ -1,6 +1,6 @@
-# function：PHP公共函数
+# 函数目录
 
-修订日期：2026-10-23。功能详解。
+接口说明：`function`。
 
 ## 职责与调用位置
 
@@ -291,7 +291,7 @@ function arrayMerge($arr_1, $arr_2);
 | `$arr_1` | array；用于合并的基础数组 |
 | `$arr_2` | mixed；递归合并的数组；非数组值追加到第一个数组 |
 
-**返回值**：array|false 按历史递归覆盖/追加规则合并的新数组；第一个参数不是数组为false
+**返回值**：array|false 按递归覆盖/追加规则合并的新数组；第一个参数不是数组为false
 
 调用形式：
 
@@ -356,7 +356,7 @@ function debug_show();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；需要依次输出的任意个调试值（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；需要依次输出的任意个调试值（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -378,7 +378,7 @@ function debug();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；需要依次展示的调试值，展示后结束请求（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；需要依次展示的调试值，展示后结束请求（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -422,7 +422,7 @@ function debug_check();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；条件调试开启时交给debug的值（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；条件调试开启时交给debug的值（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 

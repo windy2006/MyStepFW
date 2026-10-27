@@ -1,6 +1,4 @@
-# security.js：CSRF表单与AJAX整合
-
-修订日期：2026-10-23。JavaScript前端脚本；源文件为`static/js/security.js`。
+# 请求令牌
 
 ## 加载与变量
 

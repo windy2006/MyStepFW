@@ -2,6 +2,15 @@
 
 迈思框架是一套以 **PHP 7.4** 为运行目标的轻量化网站开发框架，将路由、模板、配置、数据库、缓存、认证和常用工具整合为可复用的基础能力。通过独立应用组织业务、通过插件扩展功能，让开发者用较少的重复代码完成网站开发，并保持功能清晰、便于维护。
 
+## 版本选择
+
+| 版本线 | 分支 | PHP运行范围 | 安装包 |
+| --- | --- | --- | --- |
+| PHP 8 主线 | [master](https://github.com/windy2006/MyStepFW/tree/master) | >=8.5.12，<9.0.0 | [v2.6.0](https://github.com/windy2006/MyStepFW/releases/tag/v2.6.0) |
+| PHP 7.4 维护版 | [support/php74](https://github.com/windy2006/MyStepFW/tree/support/php74) | >=7.4.0，<8.0.0 | [v2.5.2](https://github.com/windy2006/MyStepFW/releases/tag/v2.5.2) |
+
+按服务器PHP版本选择源码及安装包，更新服务须提供相同通道。运行要求由`config/runtime.json`声明，安装和更新会检查环境；不要混用两条版本线的依赖或更新包。
+
 ## 主要特色
 
 | 能力 | 功能与特点 |

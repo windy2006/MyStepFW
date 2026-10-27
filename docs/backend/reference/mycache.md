@@ -1,6 +1,6 @@
-# myCache：缓存代理与能力
+# 缓存代理
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myCache`。
 
 ## 职责与调用位置
 
@@ -105,7 +105,7 @@ protected
 
 功能说明：选择并初始化缓存适配器，仅登记一次目录自动加载器
 
-验证新驱动后才替换当前目标；未知类名沿用历史行为回退文件驱动。
+验证新驱动后才替换当前目标；未知类名会回退文件驱动，显式指定并检查实际目标能力。
 自动垃圾回收仅调用 collectGarbage()，不把第三方 clean() 当成回收方法。
 
 ```text
@@ -239,7 +239,6 @@ protected function callableIdentity($object);
 
 功能说明：以显式业务键缓存回调结果，使用封装区分空值与未命中
 
-
 回调约定：producer无参数，返回原始业务值；命中时不调用。键应覆盖用户/语言/租户等影响结果的上下文；失败后重试可能再次计算。
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。
 
@@ -351,7 +350,6 @@ $result = $instance->synchronized($key, $operation, $timeout);
 
 功能说明：显式转发引用参数，避免魔术代理丢失命中输出；旧适配器按get结果保守推断。
 
-
 调用示例：
     $value = $cache->fetch('counter', $hit);
     if (!$hit) {
@@ -400,7 +398,6 @@ protected function rememberKey($key);
 
 功能说明：在同一个后端上读取、计算和写入，回调中change不会把旧上下文写进新后端。
 
-
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。
 
 ```text
@@ -423,7 +420,6 @@ protected function rememberUsing(interface_cache $backend, $key, callable $produ
 ### myCache::rememberLocked
 
 功能说明：防并发重建的显式入口：未命中后加锁，再次检查，成功发布后释放。
-
 
 回调约定：producer无参数，返回原始业务值；命中时不调用。键应覆盖用户/语言/租户等影响结果的上下文；失败后重试可能再次计算。
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。

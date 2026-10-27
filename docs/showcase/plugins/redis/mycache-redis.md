@@ -1,6 +1,6 @@
-# myCache_Redis：Redis缓存驱动
+# Redis缓存
 
-修订日期：2026-10-24。适用于系统2.5.0 / Redis插件1.0.0、PHP7.4。
+接口说明：`myCache_Redis`。
 
 ## 功能与调用位置
 
@@ -25,7 +25,7 @@ $demo->clear(); // 仅本缓存namespace；会话和业务键保留
 | `myCache_Redis::__construct` | 验证配置并建立Redis连接，失败时保留代理原来的缓存后端。 |
 | `myCache_Redis::set` | 保存统一编码的数据及TTL，省略value或非正TTL沿用删除约定。 |
 | `myCache_Redis::fetch` | 在Redis端检查字节预算后读取并解码，同时返回精确命中状态。 |
-| `myCache_Redis::get` | 兼容读取入口；精确区分有效false时使用fetch。 |
+| `myCache_Redis::get` | 读取入口；精确区分有效false时使用fetch。 |
 | `myCache_Redis::remove` | 删除当前命名空间的单个缓存键，键不存在也算成功。 |
 | `myCache_Redis::clean` | 沿用过期回收入口；Redis自动回收到期键，不清空有效数据。 |
 | `myCache_Redis::clear` | 用SCAN分批删除当前站点、当前namespace的value键，保留锁、会话和业务键。 |
@@ -91,7 +91,7 @@ public myCache_Redis::fetch($key,&$hit)
 public myCache_Redis::get($key)
 ```
 
-功能说明：兼容读取入口；精确区分有效false时使用fetch。
+功能说明：读取入口；精确区分有效false时使用fetch。
 
 @param scalar|null $key 逻辑缓存键
 
@@ -158,3 +158,33 @@ public myCache_Redis::synchronized($key,callable $operation,$timeout=5)
 ## 边界
 
 Redis单实例锁具有有限租约；`lock_ttl`须大于最长受保护操作。缓存清理保留会话和业务键；会话故障不会回退其他存储。跨服务器共享数据时显式配置相同的`site_id`、前缀和逻辑库。
+
+## 应用缓存示例
+
+在已初始化的应用module中，直接使用框架提供的`$cache`。下面的键应补足实际用户、语言、权限及业务参数，不要把私人内容缓存为所有用户共用的键。
+
+```php
+$cache->set('article:42:published', false, 60);
+$value = $cache->fetch('article:42:published', $hit);
+// $hit === true，$value === false；null、0、空字符串也能精确命中。
+
+$summary = $cache->rememberLocked('report:public:2026', function () {
+    return ['count'=>100]; // 替换为允许重复计算的真实业务查询。
+}, 60, 3);
+
+$cache->remove('article:42:published');
+```
+
+已显式选择Redis缓存时，Memcached插件不会覆盖该缓存实例。Redis必须安装启用；框架存储选择不依赖应用绑定。
+
+TTL单位为秒，正小数向上取整，非正数删除；`set($key)`保留内置缓存的删除约定。编解码使用`myCacheCodec`的字节、深度及对象恢复策略。独立缓存实例可传`namespace`、`max_depth`和`allowed_classes`：
+
+```php
+$options = myConfig::o2a(plugin_redis::options());
+$options['namespace'] = 'public-reports';
+$options['allowed_classes'] = false;
+$reports = new myCache('redis', $options);
+$reports->set('daily', ['total'=>20], 300);
+```
+
+`clean()`依赖Redis自动过期机制，仅确认连接可用；`clear()`用SCAN分批删除当前站点、当前namespace的缓存value键，保留活动锁、其他namespace、会话和业务数据。后台“清理数据缓存”“全部清理”沿用`myStep::clearDataCache()`，会调用当前驱动的`clear()`，不使用FLUSHDB或FLUSHALL。并发业务可以在清理后重新生成缓存。

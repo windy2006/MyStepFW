@@ -1,4 +1,4 @@
-# global.js：函数参数与示例
+# 全局脚本
 
 本页按当前脚本公开声明列出参数、返回和明确调用。先满足本地脚本依赖和DOM条件；省略的业务元素需由页面提供。
 
@@ -10,13 +10,11 @@ getPath(lvl=0);
 
 获取当前来源及前 N 个目录段。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `[lvl=0]` | number | 保留目录层数，负数按 0；0 仅返回带协议及端口的来源。 |
 
 **返回值**：{string} 来源与目录地址。
-
 
 ### 调用示例
 
@@ -30,14 +28,11 @@ console.log(getPath(2));
 $id(id);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `id` | string | 元素 ID。 |
 
 **返回值**：{Element|null} 对应元素。
-
 
 ### 调用示例
 
@@ -51,15 +46,12 @@ const node = $id('title'); if (node) console.log(node.value);
 $name(name, idx);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `name` | string | 元素 name。 |
 | `[idx]` | number\|string | 下标、first 或 last；不传则返回完整集合。 |
 
 **返回值**：{NodeList|Element|undefined} 集合或选中元素。
-
 
 ### 调用示例
 
@@ -73,15 +65,12 @@ const nodes = $name('topics[]'); console.log(nodes.length);
 $tag(name, theOLE);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `name` | string | 标签名。 |
 | `[theOLE=document]` | Document\|Element\|null | 容器。 |
 
 **返回值**：{HTMLCollection} 匹配集合。
-
 
 ### 调用示例
 
@@ -95,15 +84,12 @@ console.log($tag('input', document).length);
 $class(name, context);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `name` | string | 样式类名。 |
 | `[context=document]` | Document\|Element\|null | 容器。 |
 
 **返回值**：{HTMLCollection} 匹配集合。
-
 
 ### 调用示例
 
@@ -117,14 +103,11 @@ console.log($class('notice', document).length);
 isArray(para);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `para` | * | 待判断的值。 |
 
 **返回值**：{boolean} 是否为数组（支持跨窗口数组）。
-
 
 ### 调用示例
 
@@ -140,14 +123,12 @@ loadingShow(info, show);
 
 显示/隐藏加载遮罩，保存并恢复原页面 overflow；info 以纯文本显示。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `info` | string\|null | 提示文字，空值使用语言包或默认文字。 |
-| `[show]` | boolean | 显式指定显示或隐藏；省略时沿用旧版切换约定。 |
+| `[show]` | boolean | 显式指定显示或隐藏；省略时切换当前状态。 |
 
 **返回值**：{boolean} 当前是否显示遮罩。
-
 
 ### 调用示例
 
@@ -161,8 +142,7 @@ loadingShow('正在加载', true); loadingShow('', false);
 openDialog(url, width, height, mode);
 ```
 
-尝试旧版浏览器对话框，不支持时回退普通窗口。
-
+尝试浏览器对话框接口，不支持时回退普通窗口。
 
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
@@ -172,7 +152,6 @@ openDialog(url, width, height, mode);
 | `mode` | boolean | true 为模态，false 为非模态。 |
 
 **返回值**：{Window|*|null} 浏览器返回的窗口/对话框结果，拦截弹窗时可为空。
-
 
 ### 调用示例
 
@@ -187,8 +166,6 @@ openDialog('/Hello/help', 640, 480, 0);
 openWindow(url,width,height);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `url` | string | 地址。 |
@@ -196,7 +173,6 @@ openWindow(url,width,height);
 | `height` | number | 高度像素。 |
 
 **返回值**：{Window|null} 新窗口，拦截时为 null。
-
 
 ### 调用示例
 
@@ -212,13 +188,11 @@ sleep(ms=0);
 
 异步等待，避免忙循环冻结浏览器；旧函数名保留，调用方应 await sleep(ms)。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `ms` | number | 等待毫秒数，负数按 0 处理，最大 2147483647。 |
 
 **返回值**：{Promise<void>} 定时器到期后完成，不阻塞页面。
-
 
 ### 调用示例
 
@@ -248,13 +222,11 @@ copy(obj);
 
 同步复制文字，保留 boolean 返回值；临时输入框移除后恢复焦点和选区。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `obj` | string\|Element\|jQuery | 普通文字、#id/.class 选择器或元素。 |
 
 **返回值**：{boolean} execCommand 的结果；不可用/拒绝/目标不存在时为 false。
-
 
 ### 调用示例
 
@@ -284,7 +256,6 @@ rndNum(min,max);
 
 普通随机整数，闭区间内各整数等概率；不用于安全令牌。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `[min]` | number | 下限；只传一个参数时作为上限，下限为 0。 |
@@ -293,7 +264,6 @@ rndNum(min,max);
 **返回值**：{number} 无参数返回 [0,1) 小数；有参数返回区间整数。
 
 @throws {RangeError} 参数非有限数或区间超出安全整数范围。
-
 
 ### 调用示例
 
@@ -309,15 +279,13 @@ rndStr(len, t_lst='', c_lst=[]);
 
 生成普通随机文本，不能作为认证令牌使用。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `len` | number | 选取次数，0—1000000；小数向下取整。 |
-| `[t_lst='0110']` | string | 大写/小写/数字/汉字的四位开关，短开关沿用旧版补位。 |
+| `[t_lst='0110']` | string | 大写/小写/数字/汉字的四位开关，短开关按规则补位。 |
 | `[c_lst=[]]` | string\|Array<string> | 额外的字符串单元，可为多字符文本。 |
 
 **返回值**：{string} 没有任何候选字符时返回空串。
-
 
 ### 调用示例
 
@@ -333,7 +301,6 @@ watermark(obj, rate=5, copyright='WaterMark Maker, Coded by Windy2000', char_c='
 
 给可信 HTML 的文本片段插入水印，不跨标签拼接干扰 span；不是 HTML 消毒器。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `obj` | string\|Element | 文本或元素；元素会更新 innerHTML。 |
@@ -343,7 +310,6 @@ watermark(obj, rate=5, copyright='WaterMark Maker, Coded by Windy2000', char_c='
 | `[jam_tag=false]` | boolean | 是否在文本片段内插入成对 span。 |
 
 **返回值**：{string} 生成的 HTML。
-
 
 ### 调用示例
 
@@ -357,10 +323,7 @@ const node = $id('article'); if (node) watermark(node, 5, 'Example');
 isMobile();
 ```
 
-
-
 **返回值**：{{Android:boolean,BlackBerry:boolean,iOS:boolean,Windows:boolean,any:boolean}} UA 识别结果，包括桌面 UA 的触控 iPad。
-
 
 ### 调用示例
 
@@ -376,14 +339,12 @@ base64(code, mode);
 
 UTF-8 文本与 Base64 转换；自动判断仅为兼容，含糊的纯字母文本请明确指定 mode。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `code` | string | 文本或标准 Base64 字符串，支持 Unicode 文本。 |
 | `[mode]` | boolean | true 解码、false 编码；省略时尝试解码合法的 UTF-8 Base64，失败则编码。 |
 
 **返回值**：{string} 转换结果；显式解码非法输入时抛出异常。
-
 
 ### 调用示例
 
@@ -397,14 +358,11 @@ const value = base64('中文', false); console.log(base64(value, true));
 md5(str);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
-| `str` | string | UTF-8 文本，ASCII 行为兼容旧版。 |
+| `str` | string | UTF-8文本，也接受ASCII文本。 |
 
 **返回值**：{string} 32 位小写 MD5，仅用于非认证用途的兼容标识。
-
 
 ### 调用示例
 
@@ -418,15 +376,12 @@ console.log(md5('Hello')); // 仅兼容摘要，不用于认证。
 debug(para, mode);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `para` | * | 调试值。 |
 | `[mode=false]` | boolean | true 追加，否则覆盖。 |
 
 **返回值**：{void} 更新页面调试区。
-
 
 ### 调用示例
 
@@ -440,14 +395,11 @@ debug({title:'Hello'}, true);
 c();
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `values` | ...* | 依次写入控制台的值。 |
 
 **返回值**：{void}
-
 
 ### 调用示例
 
@@ -461,14 +413,11 @@ c('Hello');
 a();
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `values` | ...* | 依次弹出提示的值。 |
 
 **返回值**：{void}
-
 
 ### 调用示例
 
@@ -482,14 +431,11 @@ a('Hello');
 info(msg);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `msg` | string\|null | 可信提示 HTML；空值隐藏。 |
 
 **返回值**：{void} 更新页面提示区。
-
 
 ### 调用示例
 
@@ -503,15 +449,12 @@ info('保存完成'); // 仅传受信提示内容。
 checkObj(obj, func_show);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `obj` | Object | 对象。 |
 | `[func_show=alert]` | Function | 每项的输出函数。 |
 
 **返回值**：{void}
-
 
 ### 调用示例
 
@@ -541,7 +484,6 @@ checkNrun(func, params=[], timeout=15000, context=window, interval=100);
 
 等待 language/setting 后调用函数，各次注册相互独立，返回取消函数。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `func` | Function\|string | 回调或 window 上的函数名。 |
@@ -551,7 +493,6 @@ checkNrun(func, params=[], timeout=15000, context=window, interval=100);
 | `[interval=100]` | number | 轮询间隔，至少 10 毫秒。 |
 
 **返回值**：{Function} 取消当前注册；重复取消无副作用。
-
 
 ### 调用示例
 
@@ -567,7 +508,6 @@ checkSetting(timer=500, callback=null, params=[]);
 
 检查配置是否就绪；需要自动重试时显式传入 callback 和参数，兼容严格模式。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `[timer=500]` | number | 重试间隔毫秒数。 |
@@ -575,7 +515,6 @@ checkSetting(timer=500, callback=null, params=[]);
 | `[params=[]]` | Array | 回调参数。 |
 
 **返回值**：{boolean} 两个配置对象均已定义时为 true；不再读取 caller/arguments。
-
 
 ### 调用示例
 
@@ -591,14 +530,12 @@ queryURL(url, params={});
 
 更新 URL 查询参数，保留查询串路由及锚点，不解码或改写路径。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `url` | string | 原始 URL，可含 index.php?/route/&key=value。 |
 | `params` | Object | 参数字典；null 删除，数组生成重复参数。 |
 
 **返回值**：{string} 参数按 URL 标准编码后的 URL。
-
 
 ### 调用示例
 
@@ -614,14 +551,12 @@ routeURL(url, prefix=global.root_fix);
 
 将应用相对链接转换为当前路由模式的地址，查询值和锚点保持原样。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `url` | string | 相对路径或查询串；完整 URL、根路径及锚点直接保留。 |
 | `prefix` | string | 当前模块路径，默认 global.root_fix；可为已转换的路由地址。 |
 
 **返回值**：{string} 可直接用于 href、action 或 location 的地址；可重复转换。
-
 
 ### 调用示例
 
@@ -637,14 +572,12 @@ setURL(prefix=global.root_fix, context=window.document.body);
 
 批量转换容器内的链接、表单和图片；keep-url 标记保留原地址。
 
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `prefix` | string | 应用或模块路由前缀，默认 global.root_fix。 |
 | `context` | Element\|jQuery | 扫描容器，默认页面 body。 |
 
 **返回值**：{boolean|undefined} 已处理返回 true；配置未就绪时等待后重试。
-
 
 ### 调用示例
 
@@ -686,14 +619,11 @@ setLocation(location.pathname + '?page=2', '第二页');
 ms_func_reg(func);
 ```
 
-
-
 | 参数及默认值 | 类型 | 功能说明 |
 | --- | --- | --- |
 | `func` | Function | 页面初始化回调；非函数忽略。 |
 
 **返回值**：{void} 注册到 global.func。
-
 
 ### 调用示例
 
@@ -707,10 +637,7 @@ ms_func_reg(function () { console.log('就绪'); });
 ms_func_run();
 ```
 
-
-
 **返回值**：{void} 绑定本脚本事件并执行当前回调快照；重复调用不叠加事件监听器。
-
 
 ### 调用示例
 

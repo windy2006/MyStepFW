@@ -1,6 +1,4 @@
-# Admin：新管理后台
-
-修订日期：2026-10-23。现有应用介绍专栏。
+# 简明后台
 
 ## 定位和适用场景
 
@@ -42,7 +40,7 @@ Admin.class.php 使用 lib.php 中的受信页面定义选择 module/ 回调；P
 | `module/function/api.php` | `template/default/function_api.tpl` |
 | `module/guide.php` | `template/default/guide.tpl` |
 
-页面的读取、动作与模板赋值在对应模块，复用的模板片段仍保留各自文件。AdminStore、AdminService 是 lib.php 内的辅助声明，不再是根目录下的独立文件。
+页面的读取、动作与模板赋值在对应模块，复用的模板片段仍保留各自文件。AdminStore、AdminService 是 lib.php 内的辅助声明，在lib.php中声明。
 
 ## 配置、模板和资源
 

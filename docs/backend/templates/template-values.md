@@ -1,6 +1,4 @@
-# 模板变量、HTML与URL转义
-
-修订日期：2026-10-23。适用于当前框架。
+# 模板变量
 
 ## 本篇目标与调用场景
 
@@ -14,14 +12,13 @@ myTemplate是PHP后端模板机制，不是JavaScript模板库。模板数据、
 <section><!--content--></section>
 ```
 
-- `<!--name-->` 保留原样输出，兼容现有富文本和 HTML 片段。
+- `<!--name-->` 保留原样输出，支持现有富文本和 HTML 片段。
 - `<!--name|html-->` 对 UTF-8 HTML 文本及已加引号的属性转义，含单双引号和无效字节替换。
 - `<!--name|url-->` 编码一个 URL 组件，不是整个链接。
 - `assignEscaped('name', $value)` 或 `assignEscaped('prefix', $mapping)` 可以在赋值时转义；不要再对同一值使用 `|html`，否则会二次编码。
 - 缺失占位符和不可直接显示的数组/对象输出空串；对象可通过 `assign('user', $object)` 展开一层为 `user_name` 等字段。
 
 HTML 转义不承担 JavaScript、CSS 或链接协议校验。脚本数据应由应用生成合适的 JSON；链接协议由应用校验。
-
 
 ## 主要方法：参数、返回和失败约定
 
@@ -36,7 +33,7 @@ public function assign($name, $value = '');
 | 参数说明 |
 | --- |
 | string\|array\|object $name 名称或无前缀批量变量 |
-| mixed $value 值；非字符串标量保留 myString::fromAny 的历史表示（默认：''） |
+| mixed $value 值；非字符串标量保留 myString::fromAny 的表示（默认：''） |
 
 **返回**：$this 返回当前实例，支持链式调用。
 

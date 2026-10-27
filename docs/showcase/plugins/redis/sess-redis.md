@@ -1,6 +1,6 @@
-# sess_redis：Redis会话处理器
+# Redis会话
 
-修订日期：2026-10-24。适用于系统2.5.0 / Redis插件1.0.0、PHP7.4。
+接口说明：`sess_redis`。
 
 ## 功能与调用位置
 
@@ -218,3 +218,20 @@ public static sess_redis::close()
 ## 边界
 
 Redis单实例锁具有有限租约；`lock_ttl`须大于最长受保护操作。缓存清理保留会话和业务键；会话故障不会回退其他存储。跨服务器共享数据时显式配置相同的`site_id`、前缀和逻辑库。
+
+## Session使用与并发
+
+在后台选择Redis会话后，框架负责设置、启动和关闭处理器。应用代码保持原用法：
+
+```php
+myReq::session('editor_id', 7);
+$editor = myReq::session('editor_id');
+myReq::removeSession('editor_id');
+// 请求结束时PHP自动保存；需要提前释放锁时使用session_write_close()。
+```
+
+会话按站点、前缀、Cookie名称和SID隔离。严格模式只接受实际存在且未过期的ID；未知ID不会创建空会话。到期时间来自`session.expire`，框架转换为`session.gc_maxlifetime`秒数；正常写入和惰性续期都刷新Redis键TTL。
+
+同一SID的锁从读取持有至关闭，排队请求在锁内重新读取最新值。写入、续期和删除通过Lua原子检查所有者令牌；若请求超过`lock_ttl`，失去租约后不能覆盖后继请求的数据，也不能删除后继请求的锁。锁超时或Redis故障返回失败，框架停止认证流程；不静默切到文件会话产生第二套身份状态。
+
+仅做持锁校验不能使长任务无限执行。请将`lock_ttl`设为大于最长请求，批处理、阻塞队列和长耗时工作移到独立进程。单实例租约锁不能代替数据库事务，也不承诺故障切换时业务副作用恰好发生一次。

@@ -1,6 +1,6 @@
-# myStep：框架请求控制
+# 控制核心
 
-修订日期：2026-10-24。功能详解。
+接口说明：`myStep`。
 
 ## 职责与调用位置
 
@@ -151,7 +151,7 @@ public static function getInstance($calledClass = '');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$calledClass` | string；待创建或获取实例的类名（默认：''） |
-| `...$args` | mixed；传给目标类初始化入口的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；传给目标类初始化入口的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：object 按父控制器规则取得并配置别名和错误回调的实例
 
@@ -246,7 +246,7 @@ public static function auth_code();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | scalar；参与SHA-256摘要的盐值片段，按顺序以竖线连接（历史位置参数，由func_get_args读取） |
+| `...$args` | scalar；参与SHA-256摘要的盐值片段，按顺序以竖线连接（位置参数，由func_get_args读取） |
 
 **返回值**：string 按盐片段顺序生成的64位SHA-256十六进制摘要
 
@@ -314,7 +314,6 @@ $result = myStep::clearDataCache();
 
 功能说明：通过模板类显示页面
 
-
 输出约定：填充框架变量与资源标签后调用父类输出，并标记已展示；不自动调用end。仅需字符串时使用render。
 
 ```text
@@ -365,7 +364,6 @@ $result = $instance->render($tpl, $append_pare);
 
 功能说明：检查模版缓存并输出
 
-
 命中页面缓存时输出当前会话装饰后的HTML并调用end终止；未命中时继续返回业务流程。
 
 ```text
@@ -392,7 +390,6 @@ $result = $instance->checkCache($tpl);
 功能说明：框架终止，销毁相关变量
 
 参数说明：无显式参数。
-
 
 生命周期：关闭全局数据库、记录耗时/内存、按需压缩输出并exit；调用后不会回到业务代码。
 
@@ -588,7 +585,6 @@ $result = $instance->editorGetPlugin();
 
 功能说明：信息提示，需先声明mystep类
 
-
 输出约定：清理当前缓冲并输出提示页，调用end后exit；不应把此入口当作可返回的错误字符串函数。
 
 ```text
@@ -613,7 +609,6 @@ $result = myStep::info($msg, $url);
 ### myStep::captcha
 
 功能说明：生成验证码
-
 
 输出约定：需要Referer及Cookie才继续，写入当前会话captcha并输出图片；条件不满足时静默返回。
 
@@ -1124,7 +1119,7 @@ public static function vendor();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；首项为组件名或dir/file/class/namespace数组，其余为构造参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；首项为组件名或dir/file/class/namespace数组，其余为构造参数（位置参数，由func_get_args读取） |
 
 **返回值**：object 按组件声明创建的实例；需附加参数时再调用构造/init
 

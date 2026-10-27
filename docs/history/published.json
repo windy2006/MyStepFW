@@ -1,8 +1,8 @@
 {
-    "ref": "origin/master",
-    "head": "f829cf0f005fbc21f31737c78423c38f5c81b8f9",
-    "remote_verified": true,
-    "commits": 165,
+    "ref": "support/php74",
+    "head": "0108732c389a5d4826e3daff4fab7f34c47bfead",
+    "remote_verified": false,
+    "commits": 166,
     "entries": [
         {
             "id": "history-index",
@@ -46,5 +46,6 @@
             "path": "docs/history/2019.md",
             "group": "更新历史"
         }
-    ]
+    ],
+    "source": "本地保留的已发布PHP7基线"
 }

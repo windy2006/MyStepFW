@@ -1,6 +1,6 @@
-# interface_plugin：插件公共生命周期和辅助函数
+# 插件接口
 
-修订日期：2026-10-23。功能详解。
+接口说明：`interface_plugin`。
 
 ## 职责与调用位置
 
@@ -60,7 +60,7 @@ class plugin_hello implements interface_plugin {
 | `pluginAdminURL` | 生成当前展示后台中的设置、缓存等通用功能链接。 |
 | `renderPluginPage` | 统一装配已启用插件的后台模块及内容模板，返回主体HTML。 |
 | `showPluginPage` | 按当前展示后台统一输出插件管理页，保留原插件路由与业务参数。 |
-| `setPriority` | 将插件 priority.php 原子复制到框架优先脚本目录，覆盖旧版本。 |
+| `setPriority` | 将插件 priority.php 原子复制到框架优先脚本目录，替换同名目标脚本。 |
 | `removePriority` | 删除插件优先脚本并使 OPcache 失效，支持目录已删除和重复清理。 |
 
 ## 逐方法参数、返回与示例
@@ -646,7 +646,7 @@ $result = showPluginPage($idx, $page, $mode);
 
 ### setPriority
 
-功能说明：将插件 priority.php 原子复制到框架优先脚本目录，覆盖旧版本。
+功能说明：将插件 priority.php 原子复制到框架优先脚本目录，替换同名目标脚本。
 
 目标为 CONFIG/priority/plugin_插件标识.php；源文件复制后 __DIR__ 会改变，
 引用插件资源须使用 PLUGIN 常量。调用本函数不会立即执行优先脚本。

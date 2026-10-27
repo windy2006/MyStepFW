@@ -1,7 +1,5 @@
 # 脚本加载
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 以Hello为教学名称，说明本环节的文件位置、调用前提和与其他模块的对应关系。
@@ -28,7 +26,6 @@ $mystep->addJS(APP.'Hello/asset/detail.js');
 ```
 
 依赖配置／语言的 JavaScript 在相关就绪点执行；表单加载本地 checkForm。参数合法性规则参考[前端表单说明](../../frontend/javascript/frontend-forms.md)，不要在每个应用再实现不同含义的 `need`。
-
 
 ## 操作步骤与注意事项
 

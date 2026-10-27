@@ -1,6 +1,4 @@
-# 模板实例、风格和模块对应
-
-修订日期：2026-10-23。适用于当前框架。
+# 页面模板
 
 ## 本篇目标与调用场景
 
@@ -28,13 +26,15 @@ $html = $tpl->render('', false); // false 只返回，不立即输出
 
 `name` 和 `style` 可以是相对的多级子目录，不能含 `..`。`path`、`path_compile`、页面缓存路径由应用配置。找不到首选模板时仍尝试 `path/default/文件名`。后来创建首选文件后，旧默认模板缓存会失效。
 
+## 配套完整示例
+
+阅读[主布局与功能模板](template-example.md)：包含准备步骤、完整代码、预期输出及实际应用中的替换位置。先跑通示例，再查本页逐方法参数。
 
 ## 主要方法：参数、返回和失败约定
 
 ### myTemplate::init
 
 功能说明：初始化模板、静态页面缓存和标签分隔符
-
 
 调用示例：
     $tpl = new myTemplate(['path' => $views, 'path_compile' => $compiled, 'name' => 'home']);
@@ -59,8 +59,7 @@ public function init($setting, $cache = false, $allow_script = false, $delimiter
 
 功能说明：设置模板位置并建立当前对象的数据空间，同一对象切换模板会清空赋值
 
-
-设置结构：name默认main，style默认空串，path默认./，path_compile默认./complied（沿用历史拼写），ext默认tpl，compile_version默认空串；路径名必须来自受信配置。
+设置结构：name默认main，style默认空串，path默认./，path_compile默认./complied（使用拼写），ext默认tpl，compile_version默认空串；路径名必须来自受信配置。
 
 ```text
 public function setTplPara($setting);

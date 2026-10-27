@@ -1,6 +1,4 @@
-# 真实上传、容量和结果检查
-
-修订日期：2026-10-23。适用于当前框架。
+# 文件上传
 
 ## 本篇目标与调用场景
 
@@ -76,7 +74,6 @@ public function do($getsize = true);
 ### myUploader::result
 
 功能说明：取得结构化上传结果或HTML结果表
-
 
 调用示例：
     $uploader->do();

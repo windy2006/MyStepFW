@@ -1,6 +1,6 @@
-# myEmail：邮件组装和发送
+# 邮件工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myEmail`。
 
 ## 职责与调用位置
 
@@ -532,7 +532,6 @@ $result = $instance->buildMail();
 ### myEmail::send
 
 功能说明：邮件发送
-
 
 副作用：会连接SMTP并提交邮件；返回成功只表示SMTP接受该次提交，最终投递由邮件服务器处理。连接在finally中关闭。
 SMTP配置：host必填；mode为smtp/ssl/ssl/tls/tls之一，tls表示STARTTLS；port默认按模式选25/465/587，user为空时不认证，password默认空串。

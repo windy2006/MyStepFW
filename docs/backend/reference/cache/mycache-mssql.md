@@ -1,6 +1,6 @@
-# myCache_MSSQL：myCache_MSSQL 缓存驱动／协议
+# MSSQL缓存
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myCache_MSSQL`。
 
 ## 职责与调用位置
 
@@ -37,7 +37,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 补充说明：
 SQL Server缓存（SQL Server 2012+）：原生参数化读写、独立连接及精确命中。
-新表为BIGINT/VARCHAR(MAX)，旧TEXT格式可读，不自动ALTER旧表；不声明计算锁接口。
+新表为BIGINT/VARCHAR(MAX)，TEXT列格式可读，不自动ALTER旧表；不声明计算锁接口。
 本地无SQLSRV时明确报错，不静默切换后端；SQL Server实库兼容性须在目标环境验证。
 
 ## 状态字段与公开变量
@@ -136,7 +136,6 @@ $result = $instance->getLastError();
 ### myCache_MSSQL::query
 
 功能说明：兼容旧原始查询入口，新增可选参数绑定；调用者负责释放返回statement。
-
 
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 

@@ -1,6 +1,6 @@
-# interface_cache：interface_cache 缓存驱动／协议
+# 缓存协议
 
-修订日期：2026-10-23。功能详解。
+接口说明：`interface_cache`。
 
 ## 职责与调用位置
 

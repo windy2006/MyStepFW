@@ -1,6 +1,4 @@
-# 类加载目录、索引与特别指定
-
-修订日期：2026-10-23。适用于当前框架。
+# 类加载
 
 ## 本篇目标与调用场景
 
@@ -25,16 +23,15 @@ return array (
 );
 ```
 
-每个目录先按类名和扩展名尝试自动加载；特别指定补充类名与文件名不同的映射。PHP数组文本由`myClassLoader::mapping()`解析为纯数据，不使用eval，不执行变量、函数或include；为兼容此前新版后台，旧JSON对象也可读取，保存时仍为PHP数组。扩展名和目录、索引文件的路径边界由`normalize()`统一校验。第一条核心类目录保留为`lib/`。
+每个目录先按类名和扩展名尝试自动加载；特别指定补充类名与文件名不同的映射。PHP数组文本由`myClassLoader::mapping()`解析为纯数据，不使用eval，不执行变量、函数或include；JSON对象也可读取，保存时仍为PHP数组。扩展名和目录、索引文件的路径边界由`normalize()`统一校验。第一条核心类目录保留为`lib/`。
 
-旧绝对类目录若仍在当前项目内，启动时自动迁移为相对目录并保留有效自定义条目；损坏或错误核心索引才重建默认规则。插件路由注册及后台保存采用相同根相对规则，历史绝对路由源仍可读。
-
+目录以网站根为基准填写相对路径。保存前检查目录存在且不是符号链接，第一条核心类目录使用lib/。
 
 ## 主要方法：参数、返回和失败约定
 
 ### myClassLoader::load
 
-功能说明：读取启动类索引，兼容迁移项目内历史绝对目录；损坏索引重建默认规则。
+功能说明：读取启动类索引，损坏索引重建默认规则。
 
 ```text
 public static function load($file);
@@ -46,7 +43,7 @@ public static function load($file);
 
 **返回**：array 含rules规则列表和reset标志；仅reset为true时需重建相关路由/模板缓存
 
-**异常**：RuntimeException 迁移锁或原子发布失败
+**异常**：RuntimeException 配置锁或原子发布失败
 
 ### myClassLoader::save
 
@@ -68,7 +65,7 @@ public static function save($file, array $rules, $version);
 
 ### myClassLoader::mapping
 
-功能说明：解析特别指定文本，只接受PHP数组字面量；兼容旧新版JSON对象。
+功能说明：解析特别指定文本，只接受PHP数组字面量；支持JSON对象。
 
 ```text
 public static function mapping($text);
@@ -76,7 +73,7 @@ public static function mapping($text);
 
 | 参数说明 |
 | --- |
-| string $text array('类名'=>'相对文件')、等价[]语法或历史JSON；空串视为空数组 |
+| string $text array('类名'=>'相对文件')、等价[]语法或JSON；空串视为空数组 |
 
 **返回**：array 类名到相对文件路径；不执行函数、变量、include或其他PHP代码
 
@@ -93,7 +90,7 @@ public static function normalize(array $rules, $check = false);
 | 参数说明 |
 | --- |
 | array $rules 含path/ext/idx的规则列表，idx为已解析数组 |
-| bool $check true时检查目录存在、非符号链接并保留首条核心目录；默认false供启动兼容转换 |
+| bool $check true时检查目录存在、非符号链接并保留首条核心目录；默认false供启动格式转换 |
 
 **返回**：array 数字索引规则列表；path相对于ROOT，idx值相对于该path并可使用../访问项目内其他目录
 

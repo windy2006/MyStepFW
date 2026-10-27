@@ -1,6 +1,28 @@
-# 脚本加载、依赖与就绪
+# 前端加载
 
-修订日期：2026-10-23。浏览器脚本用法。
+## 一次页面请求与浏览器执行的先后
+
+| 阶段 | 实际执行内容 | 应用代码的使用方式 |
+| --- | --- | --- |
+| 服务器setPara | 收集公共、应用和风格脚本，在合并脚本后追加公开设置请求 | 此时只有服务器配置，不能当作浏览器setting对象 |
+| 服务器show | 输出root_web、CSS/JS、页面主体和DOM就绪队列入口 | 模板按正常结构放置page_start/page_end |
+| 浏览器解析资源 | 依次执行jQuery、global.js和应用脚本 | 顶层脚本只登记回调，避免立即读取setting |
+| 异步设置响应 | ms_setting接口定义setting，随后请求ms_language接口 | setting可用不代表language已经返回 |
+| DOM和语言均就绪 | checkNrun检查setting、language后执行回调 | 在回调中生成路由、设置文案和初始化依赖配置的组件 |
+
+配置请求、DOM就绪和其他资源下载并行推进，顺序不靠固定sleep保证。默认框架页面已登记设置与语言加载；独立页面须先提供这些资源，再执行依赖它们的初始化代码。
+
+```javascript
+ms_func_reg(function () {
+    checkNrun(function () {
+        const button = $id('save-button');
+        if (button) button.textContent = language.save || '保存';
+        console.log(setting.app, setting.url_prefix);
+    }, [], 15000, window, 100);
+});
+```
+
+checkNrun返回取消等待函数；超时会停止轮询并输出警告。等待失败时应检查设置与语言请求的状态和地址，不用空setting对象冒充真实配置。
 
 ## 本篇目标与调用场景
 
@@ -33,7 +55,6 @@
 
 CSS 的公共配置项填写文件名，不含 `.css`；JS 配置同理，不含 `.js`。例如默认 `jquery.addon` 对应 `static/js/jquery.addon.js`。额外脚本可通过 `$mystep->addJS()` 登记，应用自身资源不移入公用 lib。
 
-
 ## 2. 变量作用域
 
 框架当前按普通 script 加载，并非 ES Module：
@@ -42,7 +63,6 @@ CSS 的公共配置项填写文件名，不含 `.css`；JS 配置同理，不含
 - `setting`、`language` 是接口返回的顶层 var，需要等异步加载完成。
 - `window.msSecurity` 是显式写入 window 的会话配置；它可能在其他配置对象之前出现。没有经过完整 HTML 装饰的页面不保证存在该对象。
 - 自己的页面数据放在应用命名空间中，不覆盖上述框架标识符。
-
 
 ## 6. 初始化和就绪流程
 
@@ -72,7 +92,6 @@ const cancelReady = checkNrun(function (label) {
 // 页面组件已经销毁、不再需要初始化时调用。
 // cancelReady();
 ```
-
 
 ## 明确调用示例
 

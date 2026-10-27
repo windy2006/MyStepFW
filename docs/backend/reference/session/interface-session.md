@@ -1,6 +1,6 @@
-# interface_session：interface_session 会话处理器
+# 会话协议
 
-修订日期：2026-10-23。功能详解。
+接口说明：`interface_session`。
 
 ## 职责与调用位置
 

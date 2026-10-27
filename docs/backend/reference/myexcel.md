@@ -1,6 +1,6 @@
-# myExcel：XML Spreadsheet导出
+# 表格工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myExcel`。
 
 ## 职责与调用位置
 

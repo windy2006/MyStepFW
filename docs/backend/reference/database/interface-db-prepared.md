@@ -1,6 +1,6 @@
-# interface_db_prepared：interface_db_prepared 数据库驱动／协议
+# 参数化协议
 
-修订日期：2026-10-23。功能详解。
+接口说明：`interface_db_prepared`。
 
 ## 职责与调用位置
 

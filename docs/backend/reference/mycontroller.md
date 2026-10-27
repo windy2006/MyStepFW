@@ -1,6 +1,6 @@
-# myController：控制器基础资源
+# 基础控制
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myController`。
 
 ## 职责与调用位置
 
@@ -162,7 +162,7 @@ public static function getInstance($calledClass);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$calledClass` | string；待创建或获取实例的类名 |
-| `...$args` | mixed；传给目标类init或构造函数的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；传给目标类init或构造函数的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：object 新实例优先执行真实构造，所需参数缺省时延迟初始化；已有单例无参复用，显式传参重新初始化
 
@@ -211,7 +211,7 @@ public function pushAddedContent(myTemplate $tpl);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$tpl` | myTemplate；已经初始化的模板实例 |
-| `...$args` | string；可选页面位置名称列表；省略时一次赋值全部位置（历史位置参数，由func_get_args读取） |
+| `...$args` | string；可选页面位置名称列表；省略时一次赋值全部位置（位置参数，由func_get_args读取） |
 
 **返回值**：void 将内容写入模板变量，不返回拼接结果
 
@@ -497,7 +497,7 @@ public function url($mode);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$mode` | string；已登记的URL生成策略；附加参数传给该策略回调 |
-| `...$args` | mixed；依顺序转交已登记URL回调的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；依顺序转交已登记URL回调的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：mixed 已登记URL回调的原始返回值；未登记模式返回#
 
@@ -515,7 +515,6 @@ $result = $instance->url($mode);
 ### myController::regLog
 
 功能说明：注册登录接口
-
 
 回调签名：login($usr,$pwd)、logout()、chg_psw($id,$psw_org,$psw_new)；原始返回值由对应登录入口直接返回。
 
@@ -810,7 +809,6 @@ $result = $instance->JS($show, $cache_path, $expires);
 
 功能说明：检测过期标签
 
-
 输出约定：写入缓存响应头；GET/HEAD的If-None-Match命中时发送304并exit，支持列表、弱标签及星号；其他方法不返回304。空etag直接返回。
 
 ```text
@@ -884,7 +882,6 @@ $result = myController::guid($para);
 ### myController::setFunction
 
 功能说明：添加钩子代码
-
 
 回调签名取决于run：显式传入第三参数时按管道传递，保留空串、0、false及null；省略第三参数时只传当前控制器。
 
@@ -963,7 +960,6 @@ $result = $instance->start($charset, $set_plugin);
 
 功能说明：显示页面
 
-
 输出约定：渲染并echo页面，可能开启缓冲；本方法本身不结束请求，生命周期收尾由调用方负责。
 
 ```text
@@ -974,7 +970,7 @@ public function show(myTemplate $tpl, $minify = false);
 | --- | --- |
 | `$tpl` | myTemplate；已经初始化的模板实例 |
 | `$minify` | bool；是否压缩最终HTML输出（默认：false） |
-| `...$args` | string；兼容第三位置参数：传给模板render的子模板名称（历史位置参数，由func_get_args读取） |
+| `...$args` | string；兼容第三位置参数：传给模板render的子模板名称（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -992,7 +988,6 @@ $result = $instance->show($tpl, $minify);
 功能说明：页面结束
 
 参数说明：无显式参数。
-
 
 生命周期：执行end钩子及可调用shutdown；通常返回调用方，只有满足预设goto跳转条件时才结束请求。
 

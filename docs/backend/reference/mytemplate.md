@@ -1,6 +1,6 @@
-# myTemplate：模板实例和编译
+# 模板引擎
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myTemplate`。
 
 ## 职责与调用位置
 
@@ -117,7 +117,6 @@ protected $cache = ['use'=>false, 'file'=>'', 'expire'=>300];
 
 功能说明：初始化模板、静态页面缓存和标签分隔符
 
-
 调用示例：
     $tpl = new myTemplate(['path' => $views, 'path_compile' => $compiled, 'name' => 'home']);
     $tpl->assign('title', '示例'); $html = $tpl->render('', false);
@@ -171,8 +170,7 @@ protected function relativeName($value, $empty = false);
 
 功能说明：设置模板位置并建立当前对象的数据空间，同一对象切换模板会清空赋值
 
-
-设置结构：name默认main，style默认空串，path默认./，path_compile默认./complied（沿用历史拼写），ext默认tpl，compile_version默认空串；路径名必须来自受信配置。
+设置结构：name默认main，style默认空串，path默认./，path_compile默认./complied（配置键使用此拼写），ext默认tpl，compile_version默认空串；路径名必须来自受信配置。
 
 ```text
 public function setTplPara($setting);
@@ -270,7 +268,6 @@ public function __unserialize(array $data);
 ### myTemplate::setCacheMode
 
 功能说明：启用或关闭页面缓存；登录态/语言等差异必须由调用方通过 vary 或独立路径区分
-
 
 缓存结构：name默认当前模板名，path默认模板目录/cache/风格，ext默认html，expire默认300秒；expire非正不复用页面，vary用于区分用户/语言等上下文。
 
@@ -517,7 +514,6 @@ protected function parseBlock($attrib, $content, &$block_attrib, &$block_content
 ### myTemplate::regTag
 
 功能说明：登记可信的编译期标签回调，扩展结果可包含 PHP
-
 
 回调签名：function (myTemplate &$tpl, array &$attrs): string；两项按引用传入，允许回调忽略不需要的形参。attrs以解析值为基础并含unit/unit_blank/class，回调可补充占位参数；在编译期执行，返回的PHP仅在渲染时按所处模板分支执行。
 

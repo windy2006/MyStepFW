@@ -966,6 +966,8 @@
       "myStep::setURL",
       "myStep::redirect",
       "myStep::init",
+      "myStep::storagePlugin",
+      "myStep::configureStorage",
       "myStep::activePlugins",
       "myStep::refreshRoutes",
       "myStep::go",
@@ -976,9 +978,7 @@
       "myStep::vendor",
       "myStep::segment",
       "myStep::checkPower",
-      "myStep::getCore",
-      "myStep::storagePlugin",
-      "myStep::configureStorage"
+      "myStep::getCore"
     ]
   },
   "lib/myString.class.php": {

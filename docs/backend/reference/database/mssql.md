@@ -1,6 +1,4 @@
-# MSSQL：mssql 数据库驱动／协议
-
-修订日期：2026-10-23。功能详解。
+# MSSQL
 
 ## 职责与调用位置
 
@@ -94,7 +92,7 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init(host,user,pwd,charset)顺序传入的连接设置；构造不立即连接（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；按init(host,user,pwd,charset)顺序传入的连接设置；构造不立即连接（位置参数，由func_get_args读取） |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -250,7 +248,6 @@ $result = $instance->safeValue($value);
 ### MSSQL::execute
 
 功能说明：原生参数化执行 T-SQL，不经过旧 MySQL 方言转换、不自动重试或使用共享缓存
-
 
 参数结构：普通值按位置绑定；数组项为SQLSRV原生[值,方向,PHP类型,SQL类型]描述符，后3项可按扩展约定省略。结果由驱动持有，后续用getRS读取或free释放。
 

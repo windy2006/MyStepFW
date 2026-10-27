@@ -1,6 +1,6 @@
-# myUploader：HTTP上传
+# 上传工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myUploader`。
 
 ## 职责与调用位置
 
@@ -193,7 +193,6 @@ private function uploadFile();
 ### myUploader::result
 
 功能说明：取得结构化上传结果或HTML结果表
-
 
 调用示例：
     $uploader->do();

@@ -1,6 +1,6 @@
-# myFile：本地文件、路径和远程读取
+# 文件工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myFile`。
 
 ## 职责与调用位置
 
@@ -188,7 +188,6 @@ public function __toString();
 
 功能说明：构建远程连接配置
 
-
 资源所有权：返回的是流上下文，不是已打开的网络连接；无需把它作为文件流传给fclose。
 
 ```text
@@ -310,7 +309,6 @@ $result = myFile::mkdir($dir);
 ### myFile::getMime
 
 功能说明：获取文件类型
-
 
 兼容行为：未知扩展名可能直接作为返回文本，而非application/octet-stream；此入口不能仅靠返回值证明文件真实内容格式。
 
@@ -589,7 +587,6 @@ $result = $instance->save($content);
 
 功能说明：保存文件
 
-
 调用示例：
     $written = myFile::saveFile($file, '');
     if ($written === false) {
@@ -642,7 +639,6 @@ $result = $instance->get();
 ### myFile::getLocal
 
 功能说明：获取本地文件（可为部分）
-
 
 length=0且offset=0时读全文件；存在偏移且length=0时读取8192字节。长度/偏移采用字节，不是字符位置。
 
@@ -942,7 +938,6 @@ $result = myFile::judgeChild($dir, $only_dir);
 ### myFile::getTree
 
 功能说明：获取文件树
-
 
 记录以文件/目录名为键，每项含name、格式化size、rwx权限attr及Y/m/d H:i:s时间time；目录size为---，递归时仅非链接目录增加sub子树。
 

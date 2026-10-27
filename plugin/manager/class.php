@@ -41,6 +41,13 @@
  *   回调 2：递归校验更新配置，拒绝对象或资源值。
  *   回调 3：按日志表字段宽度写入一行升级记录，兼容旧版日期列。
  *
+ *   public static plugin_manager::runtimeRequirements($data = null) — 读取并校验运行环境声明
+ *   private static plugin_manager::assertRuntime(array $runtime) — 校验本机PHP及更新通道
+ *   private static plugin_manager::updateRequest($url, array $parameters = []) — 附加客户端运行信息
+ *   private static plugin_manager::clientRuntime() — 校验更新请求方PHP环境
+ *   private static plugin_manager::assertUpdateRuntime(array $detail) — 替换前检查框架包运行要求
+ *   private static plugin_manager::wrapComponentPackage($file, $type, $idx) — 包装组件声明及负载摘要
+ *   private static plugin_manager::componentPayload($file, $type, $idx) — 校验组件包并释放临时负载
  * 使用说明：
  *   1. 显式加载主类并由管理流程调用 check/install/uninstall；业务方法的使用见方法目录。
  *   2. main 为后台管理分派器，remote 为受开关限制的更新服务入口；两者权限边界不同。
@@ -166,10 +173,16 @@ class plugin_manager implements interface_plugin {
             case 'check':
                 $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
                 $ver = require(CONFIG.'version.php');
-                $ver_remote = myString::fromJson(myFile::getRemote($url.'check/version?v='.$ver, $header));
+                $ver_remote = myString::fromJson(myFile::getRemote(self::updateRequest($url.'check/version',['v'=>$ver]), $header));
                 if(!is_array($ver_remote) || !isset($ver_remote['version']) || !is_string($ver_remote['version']) || !is_array($ver_remote['info'] ?? null) || !is_array($ver_remote['app'] ?? null) || !is_array($ver_remote['plugin'] ?? null)) {
                     echo json_encode(['error'=>1,'version'=>'','message'=>'Cannot read update server version']);
                     break;
+                }
+                try {
+                    if(($ver_remote['compatible']??false)!==true) throw new RuntimeException($ver_remote['message']??'更新源未提供有效运行环境信息，请使用对应PHP通道。');
+                    self::assertRuntime($ver_remote['runtime']??[]);
+                } catch(Throwable $error) {
+                    echo json_encode(['error'=>1,'version'=>'','message'=>$error->getMessage()]);break;
                 }
                 $component_versions = [];
                 $component_updates = [];
@@ -210,7 +223,7 @@ class plugin_manager implements interface_plugin {
                 break;
             case 'check_server':
                 $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
-                $check_info=json_decode(myFile::getRemote($url.'check',$header),true);
+                $check_info=json_decode(myFile::getRemote(self::updateRequest($url.'check'),$header),true);
                 if(!is_array($check_info) || !isset($check_info['list_file'],$check_info['list_file_md5']) || !is_array($check_info['list_file']) || !is_array($check_info['list_file_md5'])) {
                     echo json_encode(['code'=>1,'error'=>'Cannot parse update manifest']);
                 } else echo myString::toJson(self::checkFile(ROOT,false,0,$check_info),$ms_setting->gen->charset);
@@ -266,7 +279,7 @@ class plugin_manager implements interface_plugin {
                     if(!in_array($mode, [0,1,'0','1'],true)) throw new InvalidArgumentException('Invalid update mode');
                     $url = self::updateBase(self::updateServer()).'/api/plugin_manager/';
                     $ver = require(CONFIG.'version.php');
-                    $detail = self::decodeUpdate(myFile::getRemote($url.'download?v='.rawurlencode($ver), $header));
+                    $detail = self::decodeUpdate(myFile::getRemote(self::updateRequest($url.'download',['v'=>$ver]), $header));
                     if((int)$mode===1) {
                         self::applyUpdate($detail);
                         $result['info'] = sprintf($mystep->getLanguage('plugin_manager_file'), count($detail['file']));
@@ -289,7 +302,7 @@ class plugin_manager implements interface_plugin {
                 $idx = self::identifier(end($info_app['path']));
                 $base = $type === 'app' ? APP : PLUGIN;
                 $info = is_file($base.$idx.'/info.php') ? include($base.$idx.'/info.php') : [];
-                $url .= $type.'?'.http_build_query([$type === 'app' ? 'a' : 'p'=>$idx,'v'=>$info['ver'] ?? '0'],'','&',PHP_QUERY_RFC3986);
+                $url = self::updateRequest($url.$type,[$type === 'app' ? 'a' : 'p'=>$idx,'v'=>$info['ver'] ?? '0']);
                 $file = CACHE.'tmp/'.$type.'_'.bin2hex(random_bytes(8)).'.pack';
                 $success = false;
                 try {
@@ -314,6 +327,7 @@ class plugin_manager implements interface_plugin {
                 $mypacker->addIgnore(self::IGNORE);
                 if(!$mypacker->pack()) myStep::info('plugin_manager_update_fail');
                 myFile::del($dir.'/config_new.php');
+                self::wrapComponentPackage($file,$type,$idx);
                 myStep::file($file);
                 break;
             default:
@@ -380,6 +394,10 @@ class plugin_manager implements interface_plugin {
         $setting = new myConfig(__DIR__.'/config.php');
         if(!$setting->update && !$ms_setting->gen->debug) myStep::header('404');
         $method = end($info_app['path']);
+        $negotiation=self::clientRuntime();$runtime=self::runtimeRequirements();
+        if(!in_array($method,['version','artifact'],true) && !$negotiation['compatible']) {
+            http_response_code(409);echo json_encode(['error'=>1,'message'=>$negotiation['message'],'runtime'=>$runtime]);return;
+        }
         switch($method) {
             case 'artifact':
                 $file = self::publicArtifact(myReq::get('name','!'),myReq::get('token','!'));
@@ -391,6 +409,8 @@ class plugin_manager implements interface_plugin {
                 $detail = require(__DIR__.'/version.php');
                 uksort($detail, 'version_compare');
                 $result = ['version'=>'', 'server_version'=>(string)require(CONFIG.'version.php'), 'info'=>[]];
+                $result+=['runtime'=>$runtime,'compatible'=>$negotiation['compatible'],'message'=>$negotiation['message']];
+                if(!$negotiation['compatible']) {$result['app']=[];$result['plugin']=[];echo myString::toJson($result,$ms_setting->gen->charset);return;}
                 foreach($detail as $k => $v) {
                     if(version_compare($k, $ver)>0) {
                         $result['info'][$k] = $v['info'];
@@ -424,7 +444,7 @@ class plugin_manager implements interface_plugin {
                 $v_remote = $info_app['para']['v'] ?? '0';
                 $version = require(__DIR__.'/version.php');
                 uksort($version, 'version_compare');
-                $fingerprint = serialize($version);
+                $fingerprint = serialize([$version,$runtime]);
                 foreach($version as $release => $changes) {
                     if(version_compare($release,$v_remote)<=0) continue;
                     foreach($changes['file'] as $name) {
@@ -448,6 +468,7 @@ class plugin_manager implements interface_plugin {
                     }
                     $list_file = array_values(array_unique($list_file));
                     $result = array('file'=>$list_file, 'content'=>array(), 'kind'=>array(), 'setting'=>$list_setting, 'code'=>$list_code);
+                    $result['runtime']=$runtime;
                     for($i=0,$m=count($result['file']); $i<$m; $i++) {
                         if(file_exists(self::sourcePath($result['file'][$i]))) {
                             if(is_dir(self::sourcePath($result['file'][$i]))) {
@@ -516,7 +537,7 @@ class plugin_manager implements interface_plugin {
                 if(is_file($file)) {
                     $info = include($file);
                     if(version_compare($ver, $info['ver'])===-1) {
-                        $file = __DIR__.'/pack/plugin_'.$idx.'_'.$info['ver'].'.pack';
+                        $file = __DIR__.'/pack/plugin_'.$idx.'_'.$info['ver'].'_'.$runtime['channel'].'.pack';
                         if(!file_exists($file)) {
                             self::checkConfig(PLUGIN.$idx);
                             $mypacker = $mystep->getInstance('myPacker', PLUGIN.$idx, $file);
@@ -524,6 +545,7 @@ class plugin_manager implements interface_plugin {
                             if(!$mypacker->pack()) myStep::info('plugin_manager_update_fail');
                             myFile::del(PLUGIN.$idx.'/config_new.php');
                         }
+                        self::wrapComponentPackage($file,'plugin',$idx);
                         myController::file($file);
                     } else {
                         myController::header('404');
@@ -540,7 +562,7 @@ class plugin_manager implements interface_plugin {
                 if(is_file($file)) {
                     $info = include($file);
                     if(version_compare($ver, $info['ver'])==-1) {
-                        $file = __DIR__.'/pack/app_'.$idx.'_'.$info['ver'].'.pack';
+                        $file = __DIR__.'/pack/app_'.$idx.'_'.$info['ver'].'_'.$runtime['channel'].'.pack';
                         if(!file_exists($file)) {
                             self::checkConfig(APP.$idx);
                             $mypacker = $mystep->getInstance('myPacker', APP.$idx, $file);
@@ -548,6 +570,7 @@ class plugin_manager implements interface_plugin {
                             if(!$mypacker->pack()) myStep::info('plugin_manager_update_fail');
                             myFile::del(APP.$idx.'/config_new.php');
                         }
+                        self::wrapComponentPackage($file,'app',$idx);
                         myController::file($file);
                     } else {
                         myController::header('404');
@@ -637,6 +660,10 @@ class plugin_manager implements interface_plugin {
      */
     public static function createSystemArchive() {
         $version=require CONFIG.'version.php';
+        $runtime=self::runtimeRequirements();self::assertRuntime($runtime);
+        $installer=file_get_contents(__DIR__.'/install.php');
+        if(!preg_match('/const MYSTEP_RUNTIME_JSON = \'([^\']+)\';/',$installer,$runtime_match) || self::runtimeRequirements($runtime_match[1])!=$runtime) throw new RuntimeException('独立安装器与框架运行环境声明不一致');
+
         if(!is_string($version) || !preg_match('/\A[0-9A-Za-z][0-9A-Za-z._-]{0,63}\z/D',$version)) throw new InvalidArgumentException('Invalid framework version');
         $base=myFile::extractionPath(CACHE,'tmp/manager');
         if($base===false || !myFile::mkdir($base) || is_link($base.'/system.lock')) throw new RuntimeException('Cannot prepare system package');
@@ -696,7 +723,7 @@ class plugin_manager implements interface_plugin {
                 }
             }
             if(is_file(__DIR__.'/menu.json') && !copy(__DIR__.'/menu.json',$tree.'app/myStep/menu.json')) throw new RuntimeException('Cannot stage default menu');
-            foreach(['index.php','lib/myStep.class.php','lib/cache/myCacheCodec.class.php','lib/session/sess_file.class.php','vendor/autoload.php','config/config_default.php','config/construction/default.php','app/myStep/config.php'] as $required) if(!is_file($tree.$required)) throw new RuntimeException('Required system package member is missing: '.$required);
+            foreach(['index.php','config/runtime.json','lib/myStep.class.php','lib/cache/myCacheCodec.class.php','lib/session/sess_file.class.php','vendor/autoload.php','config/config_default.php','config/construction/default.php','app/myStep/config.php'] as $required) if(!is_file($tree.$required)) throw new RuntimeException('Required system package member is missing: '.$required);
             foreach(['index.php'=>__DIR__.'/install.php','readme.md'=>ROOT.'readme.md','install-assets/jquery.js'=>STATICS.'js/jquery.js','install-assets/bootstrap.css'=>STATICS.'css/bootstrap.css'] as $member=>$file) {
                 if(!myFile::mkdir(dirname($release.$member)) || !copy($file,$release.$member)) throw new RuntimeException('Cannot stage installer assets');
             }
@@ -1024,7 +1051,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
     /**
      * 功能说明：校验应用/插件安装目标并发布本机下载的归档，使用解包器的完整预检及回滚。
      *
-     * 只处理指定应用或插件目录的源码归档，不替代插件安装生命周期或数据库迁移。
+     * 先校验组件包的通道、PHP要求、目标与摘要；只处理指定组件源码，不替代生命周期或数据库迁移。
      *
      * @param string $type app 或 plugin
      * @param string $idx 应用/插件目录标识
@@ -1038,8 +1065,9 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
         $target = myFile::extractionPath($type === 'app' ? APP : PLUGIN, $idx);
         if($target === false) throw new InvalidArgumentException('Invalid package target');
         if(!is_string($file) || !is_file($file) || filesize($file) === 0) return false;
-        $packer = new myPacker($target, $file);
-        return $packer->unpack(false);
+        $payload=self::componentPayload($file,$type,$idx);
+        try {$packer = new myPacker($target, $payload);return $packer->unpack(false);}
+        finally {if(is_file($payload))unlink($payload);}
     }
     /**
      * 功能说明：将已校验更新生成可离线上传的ZIP，清单保存删除、目录、配置和迁移指令。
@@ -1053,9 +1081,10 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
      */
     public static function createUpdateArchive(array $detail) {
         $detail=self::decodeUpdate(gzdeflate(serialize($detail)));
+        self::assertUpdateRuntime($detail);
         $id=bin2hex(random_bytes(8));$zipfile=self::artifactPath('update_'.$id.'.zip');
         $dir=CACHE.'tmp/manager/work_'.$id.'/';$files=[];
-        $manifest=['format'=>1,'file'=>$detail['file'],'kind'=>$detail['kind'],'setting'=>$detail['setting'],'code'=>$detail['code']];
+        $manifest=['format'=>1,'runtime'=>$detail['runtime'],'file'=>$detail['file'],'kind'=>$detail['kind'],'setting'=>$detail['setting'],'code'=>$detail['code']];
         try {
             foreach($detail['file'] as $i=>$name) {
                 $content=$detail['content'][$i];
@@ -1074,7 +1103,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
     /**
      * 功能说明：解包并检查离线ZIP，将新清单包或旧版文件包交给统一更新流程。
      *
-     * 新包不包含可执行PHP控制文件；旧包兼容_config.php与_code.php，仍须信任来源。
+     * 离线包必须包含_update.json和运行声明；不执行缺少声明的PHP控制文件。
      * 系统安装包含mystep.pack，只能用于独立安装，不能作为离线更新上传。
      * 仅忽略解包器实际生成的根锁文件；归档自带此类名称会被myZip拒绝。
      *
@@ -1101,7 +1130,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
             if(is_file($dir.'_update.json')) {
                 $meta=json_decode(file_get_contents($dir.'_update.json'),true);
                 if(!is_array($meta) || ($meta['format']??null)!==1 || !isset($meta['file'],$meta['kind'],$meta['setting'],$meta['code']) || !is_array($meta['file']) || !is_array($meta['kind']) || count($meta['file'])!==count($meta['kind']) || is_file($dir.'_config.php') || is_file($dir.'_code.php')) throw new InvalidArgumentException('Invalid offline update manifest');
-                $detail=['file'=>$meta['file'],'kind'=>$meta['kind'],'content'=>[],'setting'=>$meta['setting'],'code'=>$meta['code']];$expected=[];
+                $detail=['runtime'=>$meta['runtime']??null,'file'=>$meta['file'],'kind'=>$meta['kind'],'content'=>[],'setting'=>$meta['setting'],'code'=>$meta['code']];$expected=[];
                 foreach($meta['file'] as $i=>$name) {
                     $name=self::relativePath($name);$kind=$meta['kind'][$i]??null;
                     if($kind==='file') {
@@ -1112,9 +1141,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 }
                 foreach($actual as $name=>$content) if(!is_dir($dir.$name) && !isset($expected[$name])) throw new InvalidArgumentException('Unexpected offline update member');
             } else {
-                $detail=['file'=>array_keys($actual),'content'=>array_values($actual),'kind'=>$actualKind,'setting'=>[],'code'=>[]];
-                if(is_file($dir.'_config.php')) $detail['setting']=include $dir.'_config.php';
-                if(is_file($dir.'_code.php')) $detail['code'][]='include '.var_export($dir.'_code.php',true).';';
+                throw new InvalidArgumentException('离线更新包必须包含_update.json及运行环境声明，请从对应PHP通道重新下载。');
             }
             self::applyUpdate($detail);
         } finally {myFile::del($dir);}
@@ -1128,7 +1155,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
      * 按PHP当前进程身份检查成员、备份、配置锁、清单及本地缓存目录；不自动chmod/chown。
      * 预检不能代替操作结果检查，也不能预知迁移副作用、并发权限变化或外部缓存服务故障。
      *
-     * @param array $detail 包含file/content/setting/code的受信更新数据，可选kind区分文件/目录/删除
+     * @param array $detail 包含runtime及file/content/setting/code的受信更新数据，可选kind区分操作
      * @return void 发布与缓存/校验刷新完成后返回
      * @throws InvalidArgumentException 成员冲突、路径或数据格式非法
      * @throws RuntimeException 锁定、备份、文件/配置发布、迁移或缓存刷新失败
@@ -1137,6 +1164,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
     public static function applyUpdate(array $detail) {
         $detail=self::decodeUpdate(gzdeflate(serialize($detail)));
         if(!$detail['file'] && !$detail['setting'] && !$detail['code']) return;
+        self::assertUpdateRuntime($detail);
         $lockfile=CACHE.'tmp/manager/upgrade.lock';
         self::assertUpdateAccess($lockfile);
         if(!myFile::mkdir(dirname($lockfile)) || is_link($lockfile)) throw new RuntimeException('Cannot prepare update lock');
@@ -1405,6 +1433,133 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
          * @throws InvalidArgumentException 配置节点包含对象或资源
          */
         function($value) use (&$check) {if(is_object($value)||is_resource($value)) throw new InvalidArgumentException('Object in update setting');if(is_array($value))foreach($value as $item)$check($item);};$check($data['setting']);
+        if(isset($data['runtime']))$data['runtime']=self::runtimeRequirements($data['runtime']);
         return $data;
+    }
+    /**
+     * 功能说明：读取并验证框架运行环境声明，供更新检查、打包和安装共用。
+     * @param array|string|null $data 声明数组或JSON；null读取config/runtime.json
+     * @return array format/channel/php_min/php_max；php_max为不包含的上界
+     * @throws RuntimeException 本地声明缺失或不可读取
+     * @throws InvalidArgumentException 声明结构、通道或版本范围无效
+     */
+    public static function runtimeRequirements($data = null) {
+        if($data === null) {
+            $file=CONFIG.'runtime.json';
+            if(!is_file($file) || is_link($file) || filesize($file)>8192) throw new RuntimeException('缺少有效运行环境声明：config/runtime.json');
+            $data=file_get_contents($file);
+        }
+        if(is_string($data)) {
+            if(strlen($data)>8192) throw new InvalidArgumentException('运行环境声明过大');
+            $data=json_decode($data,true,16);
+        }
+        if(!is_array($data) || count($data)!==4 || ($data['format']??null)!==1
+            || !is_string($data['channel']??null) || !preg_match('/\Aphp[0-9]{2,4}\z/D',$data['channel'])
+            || !is_string($data['php_min']??null) || !is_string($data['php_max']??null)) throw new InvalidArgumentException('运行环境声明格式无效');
+        foreach(['php_min','php_max'] as $field) if(!preg_match('/\A(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\z/D',$data[$field])) throw new InvalidArgumentException('PHP版本要求无效');
+        if(version_compare($data['php_min'],$data['php_max'],'>=')) throw new InvalidArgumentException('PHP版本范围无效');
+        return $data;
+    }
+    /**
+     * 功能说明：按本机实际PHP版本和固定通道检查目标运行环境，失败时停止更新。
+     * @param array $runtime 更新源或更新包的运行环境声明
+     * @return void 通道及PHP范围均匹配才返回
+     * @throws RuntimeException 跨通道或本机PHP不满足要求
+     * @throws InvalidArgumentException 目标声明无效
+     */
+    private static function assertRuntime(array $runtime) {
+        $runtime=self::runtimeRequirements($runtime);$local=self::runtimeRequirements();
+        if($runtime['channel']!==$local['channel']) throw new RuntimeException('升级通道不匹配：本站为'.$local['channel'].'，更新源/包为'.$runtime['channel'].'。请使用对应PHP通道。');
+        if(version_compare(PHP_VERSION,$runtime['php_min'],'<') || version_compare(PHP_VERSION,$runtime['php_max'],'>=')) throw new RuntimeException('PHP运行环境不满足要求：需要>='.$runtime['php_min'].'且<'.$runtime['php_max'].'，当前为'.PHP_VERSION.'。未替换网站文件。');
+    }
+    /**
+     * 功能说明：为更新服务请求附加当前固定通道和PHP版本，不修改站点更新网址。
+     * @param string $url 已校验的更新服务端点
+     * @param array $parameters 版本、组件标识等查询值
+     * @return string 完整更新请求URL
+     * @throws Throwable 运行环境或URL参数校验失败
+     */
+    private static function updateRequest($url, array $parameters = []) {
+        $runtime=self::runtimeRequirements();self::assertRuntime($runtime);
+        return pluginQueryURL($url,array_merge($parameters,['channel'=>$runtime['channel'],'php'=>PHP_VERSION]));
+    }
+    /**
+     * 功能说明：更新源校验请求方声明的PHP环境，未声明时不提供更新成员或组件包。
+     * 参数说明：无显式参数；从当前请求读取channel和php，不执行客户端提供的代码。
+     * @return array compatible布尔值与可向后台展示的message
+     */
+    private static function clientRuntime() {
+        $runtime=self::runtimeRequirements();$channel=myReq::get('channel','!');$php=myReq::get('php','!');
+        if(!is_string($channel) || !preg_match('/\Aphp[0-9]{2,4}\z/D',$channel) || !is_string($php) || !preg_match('/\A[0-9]+\.[0-9]+\.[0-9]+[-+A-Za-z0-9.]*\z/D',$php)) return ['compatible'=>false,'message'=>'请先安装对应PHP通道的manager防护更新，再检查在线更新。'];
+        if($channel!==$runtime['channel']) return ['compatible'=>false,'message'=>'更新源通道为'.$runtime['channel'].'，本站请求通道为'.$channel.'；请选择对应更新网址。'];
+        if(version_compare($php,$runtime['php_min'],'<') || version_compare($php,$runtime['php_max'],'>=')) return ['compatible'=>false,'message'=>'更新源要求PHP>='.$runtime['php_min'].'且<'.$runtime['php_max'].'，请求方为'.$php.'。'];
+        return ['compatible'=>true,'message'=>''];
+    }
+    /**
+     * 功能说明：在写锁、备份和文件替换之前检查框架更新的通道及运行要求。
+     * @param array $detail 已经过结构校验的更新数据，必须包含runtime
+     * @return void 本机环境及包内声明一致才返回
+     * @throws RuntimeException 通道不匹配、PHP版本不符合或缺少声明
+     * @throws InvalidArgumentException 包内运行声明或Composer要求矛盾
+     */
+    private static function assertUpdateRuntime(array $detail) {
+        if(!isset($detail['runtime']) || !is_array($detail['runtime'])) throw new RuntimeException('更新包缺少运行环境声明，请从对应PHP通道重新下载。未替换网站文件。');
+        $runtime=self::runtimeRequirements($detail['runtime']);self::assertRuntime($runtime);
+        foreach($detail['file'] as $i=>$member) {
+            $name=self::relativePath($member);
+            if($name==='config/runtime.json') {
+                if($detail['kind'][$i]!=='file' || self::runtimeRequirements($detail['content'][$i])!=$runtime) throw new InvalidArgumentException('包内运行环境声明与更新清单不一致');
+            }
+            if($name==='composer.json' && $detail['kind'][$i]==='file') {
+                $composer=json_decode($detail['content'][$i],true);$php=$composer['require']['php']??null;
+                if(!is_string($php) || !preg_match('/\A\^([0-9]+)\.([0-9]+)(?:\.([0-9]+))?\z/D',$php,$m)
+                    || version_compare($runtime['php_min'],$m[1].'.'.$m[2].'.'.($m[3]??'0'))!==0
+                    || version_compare($runtime['php_max'],((int)$m[1]+1).'.0.0')!==0) throw new InvalidArgumentException('Composer的PHP要求与更新运行环境声明不一致');
+            }
+        }
+    }
+    /**
+     * 功能说明：为应用或插件归档添加不执行代码的运行声明和负载摘要，原子替换生成包。
+     * @param string $file 本机生成的原生myPacker归档路径
+     * @param string $type app或plugin
+     * @param string $idx 对应组件标识
+     * @return void 成功后文件为manager组件包；不修改组件源码
+     * @throws RuntimeException 负载读取、完整写入或原子替换失败
+     * @throws InvalidArgumentException 包类型、标识或大小不合法
+     */
+    private static function wrapComponentPackage($file, $type, $idx) {
+        self::identifier($idx);if(!in_array($type,['app','plugin'],true) || !is_file($file) || is_link($file)) throw new InvalidArgumentException('Invalid component package');
+        $size=filesize($file);if($size<1 || $size>67108864) throw new InvalidArgumentException('Component package size limit exceeded');
+        $in=fopen($file,'rb');if(!$in)throw new RuntimeException('Cannot read component package');
+        $magic="MYSTEP-COMPONENT-1\n";$first=fread($in,strlen($magic));
+        if($first===$magic) {fclose($in);return;}
+        rewind($in);$meta=['format'=>1,'type'=>$type,'idx'=>$idx,'runtime'=>self::runtimeRequirements(),'bytes'=>$size,'sha256'=>hash_file('sha256',$file)];
+        $header=$magic.json_encode($meta,JSON_UNESCAPED_SLASHES)."\n";$temp=tempnam(dirname($file),'.component-');$out=null;
+        try {
+            if($temp===false || !($out=fopen($temp,'wb')) || fwrite($out,$header)!==strlen($header) || stream_copy_to_stream($in,$out)!==$size) throw new RuntimeException('Cannot write component package');
+            fclose($out);$out=null;fclose($in);$in=null;chmod($temp,fileperms($file)&0777);
+            if(!rename($temp,$file))throw new RuntimeException('Cannot publish component package');
+        } finally {if(is_resource($in))fclose($in);if(is_resource($out))fclose($out);if(is_string($temp)&&is_file($temp))unlink($temp);}
+    }
+    /**
+     * 功能说明：校验组件包的通道、目标及摘要，仅在通过运行检查后释放原生负载到临时文件。
+     * @param string $file 本机组件包路径
+     * @param string $type 预期app或plugin
+     * @param string $idx 预期组件标识
+     * @return string 已校验的临时myPacker负载；调用方必须在finally中删除
+     * @throws InvalidArgumentException 包头、目标、大小或摘要无效
+     * @throws RuntimeException PHP运行要求不匹配或临时负载写入失败
+     */
+    private static function componentPayload($file, $type, $idx) {
+        $in=fopen($file,'rb');if(!$in)throw new RuntimeException('Cannot read component package');$out=null;$temp=null;$complete=false;
+        try {
+            if(fgets($in,64)!=="MYSTEP-COMPONENT-1\n")throw new InvalidArgumentException('组件包缺少运行环境声明，请从对应PHP通道重新下载。');
+            $line=fgets($in,8193);if($line===false || substr($line,-1)!=="\n")throw new InvalidArgumentException('Invalid component metadata');
+            $meta=json_decode($line,true,16);if(!is_array($meta)||($meta['format']??null)!==1||($meta['type']??null)!==$type||($meta['idx']??null)!==$idx||!is_array($meta['runtime']??null)||!is_int($meta['bytes']??null)||$meta['bytes']<1||$meta['bytes']>67108864||!is_string($meta['sha256']??null)||!preg_match('/\A[a-f0-9]{64}\z/D',$meta['sha256']))throw new InvalidArgumentException('Invalid component target or payload');
+            self::assertRuntime($meta['runtime']);if(fstat($in)['size']-ftell($in)!==$meta['bytes'])throw new InvalidArgumentException('Invalid component length');
+            if(!myFile::mkdir(CACHE.'tmp/manager'))throw new RuntimeException('Cannot prepare component workspace');$temp=tempnam(CACHE.'tmp/manager','payload_');if($temp===false||!($out=fopen($temp,'wb')))throw new RuntimeException('Cannot create component payload');
+            if(stream_copy_to_stream($in,$out,$meta['bytes'])!==$meta['bytes'])throw new RuntimeException('Cannot copy component payload');fclose($out);$out=null;
+            if(!hash_equals($meta['sha256'],hash_file('sha256',$temp)))throw new InvalidArgumentException('Component checksum mismatch');$complete=true;return$temp;
+        } finally {fclose($in);if(is_resource($out))fclose($out);if(!$complete&&is_string($temp)&&is_file($temp))unlink($temp);}
     }
 }

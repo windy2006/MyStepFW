@@ -1,6 +1,6 @@
-# myReq：请求、Cookie和Session
+# 请求读取
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myReq`。
 
 ## 职责与调用位置
 
@@ -162,7 +162,6 @@ $result = myReq::check($idx);
 ### myReq::getValue
 
 功能说明：获取相关相应值
-
 
 参数约定：空format对id或以_id结尾的字符串字段采用数值转换；ALL分支除!外使用递归HTML转义，不执行单项回调。GLOBAL分支将值导入$GLOBALS并返回true。
 
@@ -594,7 +593,6 @@ $result = myReq::cookie($para, $pre);
 
 功能说明：设置SESSION选项；缺失name时使用当前原生名称，不读取未定义键。
 
-
 单位约定：expire为分钟，启动时乘60交给gc_maxlifetime及Cookie生命周期；数据库/缓存的TTL仍采用各自方法说明中的秒。
 
 ```text
@@ -620,7 +618,6 @@ $result = myReq::setSessionOpt($setting);
 ### myReq::sessionStart
 
 功能说明：启动SESSION，启用严格ID校验并接入可选validateId/updateTimestamp回调。
-
 
 资源生命周期：成功后PHP在请求结束时写回并关闭会话；需要提前释放同ID请求锁时由调用方使用session_write_close。
 处理器结构：字符串可为内置files或静态处理器类名；数组前6项依次为open/close/read/write/destroy/gc，9项模式追加create_sid/validate_sid/update_timestamp；空数组使用原生files。
@@ -693,7 +690,7 @@ $result = myReq::sessionEnd();
 
 功能说明：读取SESSION
 
-沿用历史空键和null语义：session()返回序列化文本；session($key,null)读取该键。需要批量恢复会话源串时使用setSessions。
+空键和null的调用约定：session()返回序列化文本；session($key,null)读取该键。需要批量恢复会话源串时使用setSessions。
 
 ```text
 public static function session($key='', $value=null);

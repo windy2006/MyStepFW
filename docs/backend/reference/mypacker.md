@@ -1,6 +1,6 @@
-# myPacker：框架包打包与安装
+# 系统打包
 
-修订日期：2026-10-24。功能详解。
+接口说明：`myPacker`。
 
 ## 职责与调用位置
 
@@ -138,7 +138,7 @@ public function addIgnore();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | string\|array；排除项列表，或一个包含排除项的数组（历史位置参数，由func_get_args读取） |
+| `...$args` | string\|array；排除项列表，或一个包含排除项的数组（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -186,7 +186,7 @@ public function addFile();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | string\|array；待打包的路径列表，或一个路径数组（历史位置参数，由func_get_args读取） |
+| `...$args` | string\|array；待打包的路径列表，或一个路径数组（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 

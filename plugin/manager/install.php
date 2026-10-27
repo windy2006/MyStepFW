@@ -27,9 +27,12 @@
  */
 
 // 源码中的安装模板不得在已运行网站上直接执行。
-if(is_file(__DIR__.'/config/config.php') || (is_file(__DIR__.'/class.php') && is_file(__DIR__.'/../../config/config.php'))) {http_response_code(404);exit;}
-if(version_compare(PHP_VERSION, '7.4.0', '<'))
-    die('MyStep Framework can only run under PHP 7.4 or upper version!');
+if(!function_exists('json_decode')) die('The JSON extension is required.');
+const MYSTEP_RUNTIME_JSON = '{"format":1,"channel":"php74","php_min":"7.4.0","php_max":"8.0.0"}';
+$mystep_install_runtime=json_decode(MYSTEP_RUNTIME_JSON,true);
+if(version_compare(PHP_VERSION,$mystep_install_runtime['php_min'],'<') || version_compare(PHP_VERSION,$mystep_install_runtime['php_max'],'>='))
+    die('MyStep Framework '.$mystep_install_runtime['channel'].' requires PHP >='.$mystep_install_runtime['php_min'].' and <'.$mystep_install_runtime['php_max'].'; current '.PHP_VERSION);
+unset($mystep_install_runtime);
 
 chdir(__DIR__);
 set_time_limit(60*10);

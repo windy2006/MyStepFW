@@ -1,6 +1,4 @@
-# 主要变量与公开设置
-
-修订日期：2026-10-23。浏览器脚本用法。
+# 前端变量
 
 ## 本篇目标与调用场景
 
@@ -39,7 +37,6 @@ if (logo) logo.src = global.root + 'static/images/logo.png';
 
 不要把 `global.root_fix + 'static/...'` 当作公共资源路径；root_fix 常包含应用或模块路由。setLocation 修改浏览器历史地址后，不会自动重新计算 global.root_fix 或重新初始化应用。
 
-
 ## 4. setting：允许公开的前端设置
 
 框架从 `index.php?ms_setting/应用名` 返回 JavaScript 定义，再请求 `index.php?ms_language/应用名/语言`。通常使用框架自动加载，不必自行拼接或重复请求接口。
@@ -51,17 +48,16 @@ if (logo) logo.src = global.root + 'static/images/logo.png';
 | `setting.app` | string | 当前配置所属应用名称 |
 | `setting.path_root` | string | 网站 Web 根路径，与当前 ROOT_WEB 对应 |
 | `setting.path_app` | string | 应用实际资源目录的 Web 路径，通常形如 `/sub/app/Hello`；不是业务路由 |
-| `setting.max_size` | number | 供现有上传组件使用的MB数，可为小数；先将PHP post_max_size与upload_max_filesize按单位转为字节，再取正限制的较小值；两项均无限制时保留32MB兼容默认值 |
+| `setting.max_size` | number | 供现有上传组件使用的MB数，可为小数；先将PHP post_max_size与upload_max_filesize按单位转为字节，再取正限制的较小值；两项均无限制时保留32MB默认值 |
 | `setting.max_size_bytes` | number | 上述两项正限制的最小字节数；0表示这两项均未限制，不代表应用自身无上传限制 |
 | `setting.url_fix` | string | 域名绑定带来的路由前缀标识，可为空，通常不带首斜杠 |
 | `setting.url_prefix` | string | 当前路由模式的入口前缀，如 `/sub/`、`/sub/index.php/`、`/sub/index.php?` |
 | `setting.url_prefix_app` | string | 面向当前应用的前缀，含域名绑定处理；JS 接口的值不保证有尾斜杠 |
 | `setting.自定义项` | 由配置决定 | PHP 配置的 js 分组会合并到此对象，也可能覆盖同名默认项 |
 
-例如 `upload_max_filesize=512K`、`post_max_size=2M` 时，max_size为0.5，max_size_bytes为524288；一项为0时不把它当作更小的上限。max_size的MB单位兼容当前CMS编辑器和框架上传示例。上传是否允许以及真实大小、扩展名和权限仍由服务端myUploader和应用配置决定，POST请求的表单开销也会占用post_max_size。
+例如 `upload_max_filesize=512K`、`post_max_size=2M` 时，max_size为0.5，max_size_bytes为524288；一项为0时不把它当作更小的上限。max_size的MB单位用于CMS编辑器和框架上传示例。上传是否允许以及真实大小、扩展名和权限仍由服务端myUploader和应用配置决定，POST请求的表单开销也会占用post_max_size。
 
 js 分组仅存放可以向所有页面访问者公开的数据；不要在其中放数据库密码、服务端密钥或认证凭据。
-
 
 ## 5. language：前端语言字典
 
@@ -75,7 +71,6 @@ checkNrun(function () {
 ```
 
 checkForm 自带中文后备提示，即使 language 尚未加载，也可以校验表单。不要把 DOM 中的文字直接拼成 HTML；普通文案用 textContent 或 jQuery.text。
-
 
 ## 明确调用示例
 

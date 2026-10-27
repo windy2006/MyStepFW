@@ -1,6 +1,6 @@
-# sess_mysql：sess_mysql 会话处理器
+# MySQL会话
 
-修订日期：2026-10-23。功能详解。
+接口说明：`sess_mysql`。
 
 ## 职责与调用位置
 
@@ -118,7 +118,6 @@ $result = sess_mysql::getLastError();
 
 功能说明：执行原生参数化语句并关闭statement；SQL参数不经字符串拼接。
 
-
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 
 ```text
@@ -160,7 +159,6 @@ protected static function connection();
 功能说明：建立有限超时的独立连接，校验表名及字符集；连接失败不泄露认证信息。
 
 参数说明：无显式参数。
-
 
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 

@@ -1,6 +1,6 @@
-# myZip：ZIP归档
+# 归档工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myZip`。
 
 ## 职责与调用位置
 
@@ -160,7 +160,7 @@ public function zip($file);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$file` | string\|array；待压缩的文件/目录路径或列表；兼容多个位置参数 |
-| `...$args` | string；额外的待压缩文件/目录路径；与首项一起处理（历史位置参数，由func_get_args读取） |
+| `...$args` | string；额外的待压缩文件/目录路径；与首项一起处理（位置参数，由func_get_args读取） |
 
 **返回值**：bool 临时ZIP完整构建并发布成功为true，否则为false
 
@@ -176,7 +176,6 @@ $result = $instance->zip($file);
 ### myZip::unzip
 
 功能说明：验证ZIP路径、大小及CRC，在暂存目录解包后统一发布
-
 
 调用示例：
     $ok = (new myZip($zipFile))->setLimits(67108864, 1000)->unzip($destination);

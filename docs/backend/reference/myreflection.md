@@ -1,6 +1,6 @@
-# myReflection：声明和注释反射
+# 反射工具
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myReflection`。
 
 ## 职责与调用位置
 
@@ -164,7 +164,7 @@ public function get();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；函数调用或类构造的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；函数调用或类构造的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：mixed 函数的返回值或新类实例；未初始化为false，其他目标类别为null
 
@@ -251,7 +251,6 @@ $result = $instance->getFunc($mode);
 ### myReflection::getComment
 
 功能说明：读取目标/指定方法的注释，或返回全部方法注释映射
-
 
 调用示例：
     $doc = (new myReflection('myFile'))->getComment('getLocal');

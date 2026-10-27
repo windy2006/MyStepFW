@@ -1,6 +1,6 @@
-# myRedis：Redis连接、业务键及租约锁
+# Redis连接
 
-修订日期：2026-10-24。适用于系统2.5.0 / Redis插件1.0.0、PHP7.4。
+接口说明：`myRedis`。
 
 ## 功能与调用位置
 
@@ -169,3 +169,17 @@ public myRedis::close()
 ## 边界
 
 Redis单实例锁具有有限租约；`lock_ttl`须大于最长受保护操作。缓存清理保留会话和业务键；会话故障不会回退其他存储。跨服务器共享数据时显式配置相同的`site_id`、前缀和逻辑库。
+
+## 原生业务能力
+
+队列、计数器、集合、排行榜等使用`myRedis::client()`返回的原生Redis客户端；用`key('business',...)`生成业务键，与框架缓存和会话区分。不要把原生客户端改成持久连接或修改框架驱动持有连接的序列化、前缀和数据库状态。
+
+```php
+$redis = new myRedis(plugin_redis::options());
+$key = $redis->key('business', 'article:42:views');
+$views = $redis->client()->incr($key);
+$redis->client()->expire($key, 3600);
+$redis->close();
+```
+
+原生客户端可以直接操作该账号允许访问的Redis数据；用途前缀不是权限隔离。需要账号级隔离时，在服务端配置ACL和独立凭据。

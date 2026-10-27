@@ -1,6 +1,4 @@
-# checkForm整体流程
-
-修订日期：2026-10-23。浏览器脚本用法。
+# 表单校验
 
 ## 本篇目标与调用场景
 
@@ -35,7 +33,6 @@
 
 `novalidate` 只让 checkForm 跳过原生有效性检查，need／len 和密码确认仍执行；浏览器自身也会根据该属性决定是否弹出原生提示。只有 type="email" 而没有 need="email" 的控件，仍可能由其原生类型约束拒绝非法邮箱。
 
-
 ## 4. 一个完整表单
 
 模板中的 profile_url 应由应用 PHP 的框架 URL 工具赋值，指向业务自己的 POST 接口：
@@ -65,7 +62,6 @@ ms_func_reg(function () {
 
 不需要业务事件逻辑时，也可以使用框架原有的 `onsubmit="return checkForm(this)"`。两种绑定方式选一种，不重复校验。Admin 已为 `.adm-shell form` 统一绑定校验，新后台模板无需再次绑定。
 
-
 ## 5. 单选、复选与多选下拉框
 
 ```html
@@ -83,7 +79,6 @@ ms_func_reg(function () {
 
 同名 radio／checkbox 的 `need=""` 要求组内至少有一项选中。给某个 checkbox 单独加原生 required 时，那一项本身必须选中，与“组内任选”不同。多选 select 的已选值逐个检查；未选择且使用非可选格式规则时不通过。
 
-
 ## 6. 密码与确认密码
 
 ```html
@@ -98,7 +93,6 @@ ms_func_reg(function () {
 确认关系按 id 判断：确认框 id 为原密码框 id + `_r`，且必须属于同一个表单。name 仍由后端接收约定决定，不用 name 判断配对。
 
 编辑密码时不设 need／required，允许两框同时为空；首次设置密码需必填时，在相应框上加 `need="" required`。只要确认框存在，找不到原密码框或两值不同都会失败。密码中的首尾空格保留，显示为明文后仍通过 data-ms-password 标记参与确认检查。成功验证不会删除确认框。
-
 
 ## 7. 自定义同步检查与提示
 
@@ -120,7 +114,6 @@ console.log(formCheckMessage('checkform_lenth_limit1', ['80']));
 ```
 
 myChecker 在普通字段格式检查之前执行，自定义逻辑应自行判断可用值。异步唯一性检查需要在业务提交处理器中明确 await，再决定提交，不把 async 函数直接当作同步 myChecker。
-
 
 ## 9. 与安全和服务端校验的关系
 

@@ -1,6 +1,6 @@
-# interface_cache_lock：interface_cache_lock 缓存驱动／协议
+# 计算锁协议
 
-修订日期：2026-10-23。功能详解。
+接口说明：`interface_cache_lock`。
 
 ## 职责与调用位置
 

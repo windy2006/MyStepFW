@@ -1,6 +1,6 @@
-# myMinify：JS/CSS整合
+# 资源压缩
 
-修订日期：2026-10-23。功能详解。
+接口说明：`myMinify`。
 
 ## 职责与调用位置
 
@@ -173,7 +173,7 @@ protected function signature($code, $pack);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$code` | string；待压缩源码，空串用于引擎指纹 |
-| `$pack` | bool；历史兼容参数，已不影响输出或缓存身份 |
+| `$pack` | bool；保留参数，已不影响输出或缓存身份 |
 
 **返回值**：string SHA-256摘要
 
@@ -212,7 +212,7 @@ public function get($pack = false);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$pack` | bool；历史兼容参数，true/false均普通压缩，不再执行旧eval打包（默认：false） |
+| `$pack` | bool；保留参数，true/false均普通压缩，不执行eval打包（默认：false） |
 
 **返回值**：string 压缩代码
 
@@ -237,7 +237,7 @@ public function show($pack = false);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$pack` | bool；历史兼容参数，不再启用eval打包（默认：false） |
+| `$pack` | bool；保留参数，不启用eval打包（默认：false） |
 
 **返回值**：void 无返回值。
 
