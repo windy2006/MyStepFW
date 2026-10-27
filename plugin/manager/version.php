@@ -3178,4 +3178,15 @@ if(is_file(PLUGIN.\'plugin.db\')) {
     } finally {$mystep_release_plugins->close();}
 }',
   ),
+  '2.6.1' => array (
+    'info' => '修复完整安装包遗漏social插件的白名单，确保第三方登录的类、配置、模板及资源随包提供。',
+    'file' => array (
+      0 => '/config/version.php',
+      1 => '/plugin/allow',
+      2 => '/plugin/manager/version.php',
+      3 => '/readme.md',
+    ),
+    'setting' => array(),
+    'code' => '',
+  ),
 );
