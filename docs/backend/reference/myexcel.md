@@ -1,7 +1,5 @@
 # myExcel：XML Spreadsheet导出
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 是Excel可读取的XML，不是XLSX。getContent返回文本，writeTo写流，make产生下载并结束请求。
@@ -35,14 +33,14 @@ assert(strpos($xml, '中文') !== false);
   3. 大量数据可使用流式方式，避免一次性在内存组装完整工作簿。
 
 补充说明：
-XML Spreadsheet 2003 工作簿生成器，保留旧 .xls 下载入口（不是二进制 XLS/XLSX）
+XML Spreadsheet 2003 工作簿生成器，下载文件扩展名为.xls，内容为XML，不是二进制XLS/XLSX
 
     $xls = new myExcel('export', 'sheet1');
     $xls->addRow(); $xls->addCells(['标题', '0012']);
     $xls->addCells('补充', 0);          // 显式第 0 行不再被当作缺省
     $xls->writeTo($stream);            // 分块写入调用方提供的流，不关闭它
     $xml = $xls->getContent();          // 取完整文本，默认 UTF-8
-    $xls->make();                      // 下载并结束请求，文件名保留 .xls 兼容
+    $xls->make();                      // 下载并结束请求，文件名保留 .xls 支持
 
 单元格保留文本类型，不把以 =/+/-/@ 开头的文本自动转换为公式；不添加尾空格。
 工作表名称按 Excel 规则验证、大小写不敏感地去重。输入文本要求有效 UTF-8，移除
@@ -75,7 +73,7 @@ protected $sheet_columns = [];
 | `myExcel::addRow` | 在当前表追加空行，无当前表时自动创建 sheet1 |
 | `myExcel::cellText` | 转为有效 XML 文本，保留文本内容及前导零，拒绝无效 UTF-8 |
 | `myExcel::addCells` | 向指定行末尾追加单元格，整批验证成功后才更新行内容 |
-| `myExcel::outputCharset` | 规范导出字符集，限定为无需 BOM 的 ASCII 兼容 XML 编码 |
+| `myExcel::outputCharset` | 规范导出字符集，限定为无需 BOM 的 ASCII 支持 XML 编码 |
 | `myExcel::xmlText` | 转义 XML 文本/属性并按旧编码需要生成 Unicode 数值实体 |
 | `myExcel::contentChunks` | 按头部、工作表及行生成 XML 块，避免循环拼接完整文档 |
 | `myExcel::writeTo` | 将 XML 分块写入可写流，处理部分写入，不关闭调用方流 |
@@ -256,7 +254,7 @@ $result = $instance->chgSheet($sheet_name);
 public function addRow();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int 新行的零起始索引
 
@@ -319,7 +317,7 @@ $result = $instance->addCells($cells, $idx);
 
 ### myExcel::outputCharset
 
-功能说明：规范导出字符集，限定为无需 BOM 的 ASCII 兼容 XML 编码
+功能说明：规范导出字符集，限定为无需 BOM 的 ASCII 支持 XML 编码
 
 ```text
 protected function outputCharset($charset);
@@ -410,7 +408,7 @@ public function getContent($charset='UTF-8');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$charset` | string；输出编码，默认 UTF-8，保留旧无参数调用（默认：'UTF-8'） |
+| `$charset` | string；输出编码，默认 UTF-8，省略时使用默认值（默认：'UTF-8'） |
 
 **返回值**：string 完整 XML；大导出优先 writeTo()，避免同时保留完整结果副本
 
@@ -433,9 +431,9 @@ public function make($charset='UTF-8');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$charset` | string；输出编码，默认 UTF-8；显式 GBK 等通过数值实体无损兼容（默认：'UTF-8'） |
+| `$charset` | string；输出编码，默认 UTF-8；显式 GBK 等通过数值实体无损支持（默认：'UTF-8'） |
 
-**返回值**：void 输出 XML 内容并 exit；兼容 .xls 扩展名，不生成二进制 XLS/XLSX
+**返回值**：void 输出 XML 内容并 exit；支持 .xls 扩展名，不生成二进制 XLS/XLSX
 
 **异常与失败**：RuntimeException 已发送头部、输出缓冲非空、无法创建/写入临时流；InvalidArgumentException 字符集不受支持
 

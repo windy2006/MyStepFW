@@ -1,7 +1,5 @@
 # jquery.addon插件与资源加载
 
-修订日期：2026-10-23。浏览器脚本用法。
-
 ## 本篇目标与调用场景
 
 本篇所有JavaScript示例在浏览器运行。先加载所需本地脚本，不把PHP变量或磁盘路径直接当成浏览器变量。
@@ -11,12 +9,12 @@
 | 变量 | 用途与约束 |
 | --- | --- |
 | `root_web/global.root` | 网站Web根前缀，用于公开资源 |
-| `setting/language` | 异步装入的公开设置和语言，须等待就绪 |
+| `setting/language` | 完整框架页面在脚本前预置公开设置和语言；独立页面用checkNrun等待 |
 | `document/window` | 当前浏览器页面上下文，不是PHP的全局变量 |
 
 ## 1. jquery.addon.js 概览
 
-[jquery.addon.js](../../../static/js/jquery.addon.js) 包含旧 JSON 辅助、鼠标滚轮事件、Cookie、资源加载器及几个 jQuery 实例扩展。先加载 jQuery；$.vendor 运行时需要 global，$.setCSS 运行时需要 md5，因此这些调用应发生在 global.js 已加载之后。
+[jquery.addon.js](../../../static/js/jquery.addon.js) 包含JSON 辅助、鼠标滚轮事件、Cookie、资源加载器及几个 jQuery 实例扩展。先加载 jQuery；$.vendor 运行时需要 global，$.setCSS 运行时需要 md5，因此这些调用应发生在 global.js 已加载之后。
 
 ### JSON 工具
 
@@ -24,7 +22,7 @@
 | --- | --- | --- |
 | `$.toJSON(value)` | 序列化值，有原生 JSON.stringify 时优先使用 | JSON string，部分不可序列化值为 undefined |
 | `$.evalJSON(text)` | 解析 JSON，有原生 JSON.parse 时优先使用 | 解析后的值；非法输入抛异常 |
-| `$.secureEvalJSON(text)` | 优先原生 JSON.parse；旧环境后备先检查基本语法再 eval | 解析后的值或异常 |
+| `$.secureEvalJSON(text)` | 优先原生 JSON.parse；未提供JSON.parse时先检查基本语法再eval | 解析后的值或异常 |
 | `$.quoteString(text)` | 给字符串增加 JSON 引号及必要转义 | 带双引号的 string，不是 HTML 转义 |
 
 ```js
@@ -33,7 +31,7 @@ const data = $.secureEvalJSON(text);
 console.log(data.title, $.quoteString('带有"引号"的文字'));
 ```
 
-这些接口保留现有调用兼容。现代页面可直接使用 JSON.stringify／JSON.parse；旧后备路径中的 eval 不应被当成受信脚本执行接口，JSON 解析也不替代数据结构校验。
+这些接口保留现有调用支持。现代页面可直接使用 JSON.stringify／JSON.parse；后备路径中的 eval 不应被当成受信脚本执行接口，JSON 解析也不替代数据结构校验。
 
 ### Cookie
 
@@ -52,7 +50,7 @@ console.log($.cookie('preferred_view'));
 // $.cookie('preferred_view', null, {path: global.root});
 ```
 
-删除时路径／域须和写入时一致。该旧接口没有 SameSite 参数，前端也不能设置 HttpOnly。登录身份和会话 Cookie 使用服务器机制，不用此接口代替。
+删除时路径／域须和写入时一致。该接口没有 SameSite 参数，前端也不能设置 HttpOnly。登录身份和会话 Cookie 使用服务器机制，不用此接口代替。
 
 ### 批量加载脚本
 
@@ -77,7 +75,7 @@ $.setJS([
 });
 ```
 
-此旧加载器没有统一错误回调，内部没有完整衔接 $.getScript 的网络失败分支，加载失败时不保证调用最终回调，也不保证有准确的失败状态。不要传空数组，也不要写 `await $.setJS(...)` 并据此认为文件已经可用。核心依赖仍优先通过框架 addJS 收集。
+此加载器没有统一错误回调，内部没有完整衔接 $.getScript 的网络失败分支，加载失败时不保证调用最终回调，也不保证有准确的失败状态。不要传空数组，也不要写 `await $.setJS(...)` 并据此认为文件已经可用。核心依赖仍优先通过框架 addJS 收集。
 
 ### 动态加载 CSS
 
@@ -111,17 +109,17 @@ $.vendor('jquery.showImage', {
 });
 ```
 
-它不是任意 npm／Composer 包的通用解析器，也不会安装缺少的组件。使用前确认 vendor 中确有对应文件；错误处理和 CSS 就绪同样遵循旧加载器边界。
+它不是任意 npm／Composer 包的通用解析器，也不会安装缺少的组件。使用前确认 vendor 中确有对应文件；错误处理和 CSS 就绪同样遵循加载器边界。
 
 ### jQuery 实例扩展
 
 | 接口 | 参数和功能 | 返回值／说明 |
 | --- | --- | --- |
-| `$(...).serializeObject()` | 用 serializeArray 汇总表单字段，同名多值尝试转数组 | 普通对象；不会自动把 PHP 方括号字段名解析成嵌套结构；旧实现对空值重复字段和特殊对象键有边界，不用作可信数据转换器 |
+| `$(...).serializeObject()` | 用 serializeArray 汇总表单字段，同名多值尝试转数组 | 普通对象；不会自动把 PHP 方括号字段名解析成嵌套结构；实现对空值重复字段和特殊对象键有边界，不用作可信数据转换器 |
 | `$(...).outerHTML()` | 克隆集合首元素并取得其外层 HTML | string |
 | `$(...).outerHTML(html)` | 在原元素前插入新 HTML 后移除原元素 | 被移除的原 jQuery 集合，不是新元素集合；只能传受信 HTML |
 | `$(...).cssText(css)` | 解析分号分隔、单个冒号的简单样式声明并调用 css | 原 jQuery 集合；不是完整 CSS 解析器，复杂值优先使用 css 对象 |
-| `$(...).disableSelection()` | 添加旧浏览器选择禁用属性、样式及 selectstart 处理 | 原 jQuery 集合 |
+| `$(...).disableSelection()` | 添加选择禁用属性、样式及 selectstart 处理 | 原 jQuery 集合 |
 | `$(...).mousewheel(handler)` | 登记规范化的滚轮事件；无参数时触发事件 | jQuery 集合 |
 | `$(...).unmousewheel(handler)` | 解绑滚轮处理器 | jQuery 集合 |
 
@@ -140,7 +138,6 @@ panel.mousewheel(onWheel);
 ```
 
 处理任意表单提交数据时，可优先使用 FormData 或按业务白名单读取字段；框架查询 GET 路由转换使用自己的安全参数字典，不依赖 serializeObject。
-
 
 ## 明确调用示例
 
@@ -169,4 +166,4 @@ $.vendor('highlight', {callback: function () { highlight(0); }});
 
 `highlight(0)`处理 SyntaxHighlighter 的 `brush:...` 代码块；`highlight(1)`处理 highlight.js 的 `pre code` 代码块，第二个参数为已有的本地主题名，默认 `default`。依赖脚本、语法和样式从网站本地加载，不需要 CDN。
 
-`setting` 和 `language` 由异步请求提供，适配器必须使用 `checkSetting(100, highlight, [mode, style])`，在配置就绪后保留原参数继续执行。仅调用 `checkSetting()`只检查状态，不会自动重试；首次加载时可能导致整个高亮初始化提前结束。框架等待最多15秒，加载失败不会永久轮询。
+`setting`和`language`在完整框架页中同步预置；适配器仍应使用 `checkSetting(100, highlight, [mode, style])`，在配置就绪后保留原参数继续执行。仅调用 `checkSetting()`只检查状态，不会自动重试；首次加载时可能导致整个高亮初始化提前结束。框架等待最多15秒，加载失败不会永久轮询。

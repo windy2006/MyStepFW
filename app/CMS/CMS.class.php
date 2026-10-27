@@ -3,6 +3,51 @@ class CMS extends myStep {
     public static $log = '';
 
     /**
+     * 功能说明：构造CMS普通会员适配器；使用独立、抛异常的会员连接，避免认证事务失败进入页面错误回调。
+     * 参数说明：无显式参数。
+     * @return interface_user 普通会员适配器，不创建另一个控制器或自动迁移表
+     * @throws LogicException 不支持的数据库方言
+     * @throws RuntimeException 会员专用连接无法建立
+     */
+    public static function userProvider(): interface_user {
+        class_exists(myDb::class); // 数据库驱动使用myDb文件声明的共享trait。
+        require_once __DIR__.'/lib.php';
+        global $db,$S,$info_app;
+        if(($info_app['app']??'')==='CMS' && isset($S->db))$settings=$S;
+        else{$settings=new myConfig(CONFIG.'config.php');$settings->merge(__DIR__.'/config.php');}
+        $options=(array)$settings->db;$kind=strtolower((string)$options['type']);
+        if($kind==='mysql'){
+            $driver=new class($options['host'],$options['user'],$options['password'],$options['charset']) extends MySQL {
+                /**
+                 * 功能说明：会员专用连接失败时抛异常，以便事务回滚。
+                 * @param string $str 内部说明，不向浏览器输出
+                 * @param bool $exit 默认false；继承占位，本实现始终抛异常
+                 * @return never 始终抛异常
+                 * @throws RuntimeException 会员数据库连接或操作失败
+                 */
+                protected function error($str,$exit=false){throw new RuntimeException('会员数据库操作失败，请稍后重试。');}
+            };$driver->connect(false,$options['name']);
+        }
+        elseif($kind==='sqlite')$driver=new class($options['host']) extends SQLite {
+            /**
+                 * 功能说明：会员专用连接失败时抛异常，以便事务回滚。
+                 * @param string $str 内部说明，不向浏览器输出
+                 * @param bool $exit 默认false；继承占位，本实现始终抛异常
+                 * @return never 始终抛异常
+                 * @throws RuntimeException 会员数据库连接或操作失败
+                 */
+            protected function error($str,$exit=false){throw new RuntimeException('会员数据库操作失败，请稍后重试。');}
+        };
+        else throw new LogicException('普通会员接口只支持MySQL或SQLite。');
+        $connection=new myDb($driver);
+        $pre=(string)$settings->db->pre;$driver=strtolower((string)$settings->db->type);
+        // 数据和映射同在适配器连接内；作用域不依赖主机/库名，数据库搬迁后仍可使用原绑定。
+        $realm='CMS:'.$pre;
+        return new \app\CMS\MemberProvider($connection,$pre,$driver,$realm);
+    }
+
+
+    /**
      * 登录
      * @param string $usr
      * @param string $pwd
@@ -23,12 +68,18 @@ class CMS extends myStep {
         try {
             foreach([['sys_op','ms_cms_op','ms_cms_group',1], ['users','ms_cms_user','ms_cms_user_group',2]] as $type) {
                 list($table, $cookie, $group, $result) = $type;
+                if($table==='users' && $explicit && in_array('password_enabled',$db->getFields($S->db->pre.'users'),true)) {
+                    return $this->users()->passwordLogin((string)$usr,(string)$pwd,max(0,(int)$remember))===null?0:2;
+                }
+
+
                 $token = $explicit ? false : myAuth::readToken(r::cookie($cookie));
                 $name = $explicit ? $usr : ($token['u'] ?? r::s($cookie));
                 if(!is_string($name) || $name === '') continue;
                 $db->build($S->db->pre.$table)->where('username', '=', $name);
                 $record = $db->record();
                 if(!$record) continue;
+                if($table==='users' && $explicit && isset($record['password_enabled']) && !(bool)$record['password_enabled'])continue;
                 $scope = 'cms:'.$S->db->name.':'.$S->db->pre.$table;
                 $version = hash('sha256', $record['password']);
                 $active = !$explicit && r::s($cookie) === $name && r::s($cookie.'_version') === $version;
@@ -119,7 +170,57 @@ class CMS extends myStep {
     }
 
     /**
-     * 预执行程序
+     * 功能说明：显式安装/迁移所有已配置子站的文章别名，保留原文章、正文及历史别名。
+     *
+     * 使用独立数据库连接，借用应用辅助函数所需上下文后在finally还原，不在浏览请求自动执行DDL。
+     * 参数说明：无显式参数；仅在安装后、manager代码迁移或本机维护脚本中调用。
+     * @return array 处理站点数、文章数及同步的独立栏目数
+     * @throws RuntimeException 子站配置/文章表不存在、别名分配失败或连接失败
+     */
+    public static function upgradeArticleAliases(): array {
+        require_once __DIR__.'/lib.php';
+        $config=new myConfig(CONFIG.'config.php');$config->merge(__DIR__.'/config.php');
+        class_exists(myDb::class);
+        if(strtolower((string)$config->db->type)!=='mysql')throw new LogicException('CMS现有子站升级仅支持MySQL。');
+        $driver=new class($config->db->host,$config->db->user,$config->db->password,$config->db->charset) extends MySQL {
+            /**
+             * 功能说明：将迁移连接的数据库错误转为异常，避免更新程序误报成功。
+             * @param string $str 内部数据库操作说明，不向浏览器输出连接凭据
+             * @param bool $exit 继承占位参数；本实现始终抛异常
+             * @return never 始终抛异常
+             * @throws RuntimeException 数据库迁移失败
+             */
+            protected function error($str,$exit=false){throw new RuntimeException('CMS文章链接迁移失败，请检查数据库权限和表结构。');}
+        };
+        $driver->connect(false,$config->db->name);$local=new myDb($driver);
+        $keys=['db','S','website','web_info','news_cat_plat'];$saved=[];$present=[];
+        foreach($keys as$key){$present[$key]=array_key_exists($key,$GLOBALS);$saved[$key]=$GLOBALS[$key]??null;}
+        try{
+            $GLOBALS['db']=$local;$GLOBALS['S']=$config;
+            $GLOBALS['website']=$local->fetchAll('SELECT * FROM '.$local->quoteIdentifier($config->db->pre.'website').' ORDER BY web_id');
+            $GLOBALS['news_cat_plat']=$local->fetchAll('SELECT * FROM '.$local->quoteIdentifier($config->db->pre.'news_cat').' ORDER BY cat_id');
+            \app\CMS\installArticleAliases();$tables=$local->getTbls();$sites=$articles=$categories=0;
+            foreach($GLOBALS['website']as$web){
+                if(!preg_match('/\A[A-Za-z0-9_-]+\z/',(string)$web['idx']))throw new RuntimeException('无效的子站配置标识。');
+                $file=__DIR__.'/website/config_'.$web['idx'].'.php';if(!is_file($file))throw new RuntimeException('缺少子站配置：'.$web['idx']);
+                $site=new myConfig($file);$prefix=$site->value('db.pre',$config->db->pre);
+                if(!in_array($prefix.'news_show',$tables,true))throw new RuntimeException('缺少子站文章表：'.$web['idx']);
+                $GLOBALS['web_info']=$web;$config->db->pre_sub=$prefix;
+                $rows=$local->fetchAll('SELECT news_id,web_id,cat_id,subject FROM '.$local->quoteIdentifier($prefix.'news_show').' WHERE web_id=? ORDER BY news_id',[(int)$web['web_id']]);
+                foreach($rows as$row){$alias=\app\CMS\saveArticleAlias($row['news_id'],$row['web_id'],$row['subject']);if($alias===null)throw new RuntimeException('文章别名索引未建立。');if(\app\CMS\syncArticleCategory($row,$alias))$categories++;$articles++;}
+                $sites++;
+            }
+            \app\CMS\deleteCache('news_cat');
+            return ['sites'=>$sites,'articles'=>$articles,'categories'=>$categories];
+        }finally{
+            $local->close();foreach($keys as$key){if($present[$key])$GLOBALS[$key]=$saved[$key];else unset($GLOBALS[$key]);}
+        }
+    }
+
+    /**
+     * 功能说明：识别子站并合并当前前台配置。
+     * 参数说明：无显式参数。
+     * @return void 资源分支可直接输出并结束请求
      */
     public function preload() {
         global $S, $website, $web_info, $info_app;
@@ -148,12 +249,12 @@ class CMS extends myStep {
     }
 
     /**
-     * 末尾执行流量统计
+     * 末尾执行流量统计；缺少User-Agent时按空字符串处理，不触发PHP8空值弃用提示
      */
     public function shutdown() {
         global $info_app, $db, $S;
         if(!is_file(PATH.'config.php') || is_null($db)) return false;
-        $agent = strtolower(myReq::svr('HTTP_USER_AGENT'));
+        $agent = strtolower(myReq::svr('HTTP_USER_AGENT') ?? '');
         if(
             strpos($agent, 'spider')!==false ||
             strpos($agent, 'bot')!==false ||

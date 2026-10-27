@@ -38,7 +38,7 @@ class CssMinifier
 	 * @param array $plugins Plugin configuration [optional]
 	 * @return void
 	 */
-	public function __construct($source = null, array $filters = null, array $plugins = null)
+	public function __construct($source = null, ?array $filters = null, ?array $plugins = null)
 		{
 		$filters = array_merge(array
 			(

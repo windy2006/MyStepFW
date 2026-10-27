@@ -22,14 +22,17 @@
  *   2. 脚本检查运行环境、准备安装会话，并按 step 分派安装或清理；状态修改使用 POST 和会话令牌。
  *   3. 只阅读/提取声明不会安装；不要为查看功能而 include 整个文件。
  *
- * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码保持 PHP 7.4 兼容。
+ * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码以 PHP 8.5.12 及以上8.x为运行目标。
  *       方法目录覆盖本文件直接声明；闭包参数及捕获变量说明见各回调旁 PHPDoc。
  */
 
 // 源码中的安装模板不得在已运行网站上直接执行。
-if(is_file(__DIR__.'/config/config.php') || (is_file(__DIR__.'/class.php') && is_file(__DIR__.'/../../config/config.php'))) {http_response_code(404);exit;}
-if(version_compare(PHP_VERSION, '7.4.0', '<'))
-    die('MyStep Framework can only run under PHP 7.4 or upper version!');
+if(!function_exists('json_decode')) die('The JSON extension is required.');
+const MYSTEP_RUNTIME_JSON = '{"format":1,"channel":"php85","php_min":"8.5.12","php_max":"9.0.0"}';
+$mystep_install_runtime=json_decode(MYSTEP_RUNTIME_JSON,true);
+if(version_compare(PHP_VERSION,$mystep_install_runtime['php_min'],'<') || version_compare(PHP_VERSION,$mystep_install_runtime['php_max'],'>='))
+    die('MyStep Framework '.$mystep_install_runtime['channel'].' requires PHP >='.$mystep_install_runtime['php_min'].' and <'.$mystep_install_runtime['php_max'].'; current '.PHP_VERSION);
+unset($mystep_install_runtime);
 
 chdir(__DIR__);
 set_time_limit(60*10);
@@ -325,11 +328,11 @@ function GetFileSize($para) {
     if($filesize <1024) {
         $filesize = (string)$filesize . " Bytes";
     }else if($filesize <(1024 * 1024)) {
-        $filesize = number_format((double)($filesize / 1024), 1) . " KB";
+        $filesize = number_format((float)($filesize / 1024), 1) . " KB";
     }else if($filesize <(1024 * 1024 * 1024)) {
-        $filesize = number_format((double)($filesize / (1024 * 1024)), 1) . " MB";
+        $filesize = number_format((float)($filesize / (1024 * 1024)), 1) . " MB";
     }else {
-        $filesize = number_format((double)($filesize / (1024 * 1024 * 1024)), 1) . " GB";
+        $filesize = number_format((float)($filesize / (1024 * 1024 * 1024)), 1) . " GB";
     }
     return $filesize;
 }

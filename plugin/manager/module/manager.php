@@ -63,8 +63,12 @@ foreach($files as $k) {
 
 
 $update_server = plugin_manager::updateServer();
+$runtime=plugin_manager::runtimeRequirements();
 $paras = [
     'version' => include(CONFIG.'version.php'),
+    'runtime_channel'=>$runtime['channel'],
+    'runtime_label'=>'PHP >='.$runtime['php_min'].' 且 <'.$runtime['php_max'],
+    'runtime_query'=>http_build_query(['channel'=>$runtime['channel'],'php'=>PHP_VERSION],'','&',PHP_QUERY_RFC3986),
     'link'=> $update_server === '' ? '未设置，请在插件设置中配置' : $update_server
 ];
 $tpl_sub->assign($paras);

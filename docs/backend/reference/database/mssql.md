@@ -1,7 +1,5 @@
 # MSSQL：mssql 数据库驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
@@ -30,7 +28,7 @@ if ($db->supports(interface_db_prepared::class)) {
 
 使用说明：
   1. 通常经myDb选择MSSQL驱动，连接配置按该驱动的参数顺序传入。
-  2. 需要SQLSRV扩展；execute/fetch*支持参数绑定。
+  2. 需要SQLSRV扩展；execute/fetch*参数绑定。
   3. 不声明受管事务接口；不能以继承方法是否存在推断真实事务能力。
 
 ## 状态字段与公开变量
@@ -56,7 +54,7 @@ private
 | `MSSQL::convertSQL` | 转换mysql查询 |
 | `MSSQL::safeValue` | 按 T-SQL 单引号规则转义文本，保留反斜杠；Unicode/二进制优先参数绑定 |
 | `MSSQL::execute` | 原生参数化执行 T-SQL，不经过旧 MySQL 方言转换、不自动重试或使用共享缓存 |
-| `MSSQL::query` | 执行旧接口 SQL，仅 query 沿用有限 MySQL 兼容转换；原生 SQL 使用 execute |
+| `MSSQL::query` | 执行接口 SQL，仅 query 沿用有限 MySQL 格式转换；原生 SQL 使用 execute |
 | `MSSQL::convertLimit` | 转换最外层 MySQL LIMIT，字符串、注释和子查询中的 LIMIT 不改写 |
 | `MSSQL::getRS` | 取得结果行 |
 | `MSSQL::getDBs` | 取得所有数据库名 |
@@ -65,7 +63,7 @@ private
 | `MSSQL::getFields` | 取得所有列名 |
 | `MSSQL::getPri` | 取得主键名 |
 | `MSSQL::getCreateScript` | 取得建立数据表的脚本 |
-| `MSSQL::getDataScript` | 导出基本 INSERT，修复历史 inser 拼写，保留 NULL/Unicode/流二进制 |
+| `MSSQL::getDataScript` | 导出基本 INSERT，处理 NULL、Unicode及流二进制 |
 | `MSSQL::getIdxScript` | 取得设置索引项的脚本 |
 | `MSSQL::getStat` | 获取数据库状态 |
 | `MSSQL::file` | 执行数据文件 |
@@ -94,7 +92,7 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init(host,user,pwd,charset)顺序传入的连接设置；构造不立即连接（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；按init(host,user,pwd,charset)顺序传入的连接设置；构造不立即连接（位置参数，由func_get_args读取） |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -114,7 +112,7 @@ public function init($host, $user, $pwd, $charset='utf-8');
 | --- | --- |
 | `$host` | string；服务器主机名或地址 |
 | `$user` | string；连接使用的用户名 |
-| `$pwd` | string；账号密码，空串按调用入口的兼容约定处理 |
+| `$pwd` | string；账号密码，空串按调用入口的支持约定处理 |
 | `$charset` | string；字符编码名称，例如UTF-8；是否自动检测由具体入口决定（默认：'utf-8'） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
@@ -138,8 +136,8 @@ public function connect($the_db = '', $var = '');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$the_db` | string\|bool；数据库名称；兼容公共连接入口的首位占位参数（默认：''） |
-| `$var` | string；非空时作为实际数据库名，兼容connect($pconnect,$database)调用（默认：''） |
+| `$the_db` | string\|bool；数据库名称；支持公共连接入口的首位占位参数（默认：''） |
+| `$var` | string；非空时作为实际数据库名，支持connect($pconnect,$database)调用（默认：''） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -164,8 +162,8 @@ public function reconnect($the_db = '', $var = '');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$the_db` | string\|bool；数据库名称；兼容公共连接入口的首位占位参数（默认：''） |
-| `$var` | string；非空时作为实际数据库名，兼容connect($pconnect,$database)调用（默认：''） |
+| `$the_db` | string\|bool；数据库名称；支持公共连接入口的首位占位参数（默认：''） |
+| `$var` | string；非空时作为实际数据库名，支持connect($pconnect,$database)调用（默认：''） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -213,7 +211,7 @@ public function convertSQL($sql);
 | --- | --- |
 | `$sql` | string；待处理的SQL语句 |
 
-**返回值**：string 经有限MySQL兼容规则转换的T-SQL文本，不执行语句
+**返回值**：string 经有限MySQL支持规则转换的T-SQL文本，不执行语句
 
 调用形式：
 
@@ -251,7 +249,6 @@ $result = $instance->safeValue($value);
 
 功能说明：原生参数化执行 T-SQL，不经过旧 MySQL 方言转换、不自动重试或使用共享缓存
 
-
 参数结构：普通值按位置绑定；数组项为SQLSRV原生[值,方向,PHP类型,SQL类型]描述符，后3项可按扩展约定省略。结果由驱动持有，后续用getRS读取或free释放。
 
 ```text
@@ -278,7 +275,7 @@ $result = $instance->execute($sql, $params);
 
 ### MSSQL::query
 
-功能说明：执行旧接口 SQL，仅 query 沿用有限 MySQL 兼容转换；原生 SQL 使用 execute
+功能说明：执行接口 SQL，仅 query 沿用有限 MySQL 格式转换；原生 SQL 使用 execute
 
 ```text
 public function query($sql);
@@ -290,7 +287,7 @@ public function query($sql);
 
 **返回值**：int|false 行数或受影响行数
 
-**异常与失败**：InvalidArgumentException SQL为空/非字符串，或兼容转换不支持写入偏移分页
+**异常与失败**：InvalidArgumentException SQL为空/非字符串，或格式转换不支持写入偏移分页
 
 调用形式：
 
@@ -359,7 +356,7 @@ $result = $instance->getRS($mode);
 public function getDBs();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string[] 当前账号可见且符合驱动查询条件的数据库名列表，可能为空
 
@@ -405,7 +402,7 @@ $result = $instance->getTbls($the_db);
 public function getInsertId();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|float|string 最近的@@IDENTITY数值；SQLSRV可将数值返回为字符串，无有效值时返回0
 
@@ -490,7 +487,7 @@ $result = $instance->getCreateScript($the_tbl, $the_db);
 
 ### MSSQL::getDataScript
 
-功能说明：导出基本 INSERT，修复历史 inser 拼写，保留 NULL/Unicode/流二进制
+功能说明：导出基本 INSERT，处理 NULL、Unicode及流二进制
 
 ```text
 public function getDataScript($the_tbl);
@@ -546,7 +543,7 @@ $result = $instance->getIdxScript($the_tbl);
 public function getStat();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array|string|false 已连接时为SQLSRV服务器信息数组，底层失败为false；未连接时为空串
 
@@ -713,7 +710,7 @@ $result = $instance->check($obj, $type);
 public function free();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -736,7 +733,7 @@ $result = $instance->free();
 public function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int 本驱动累计查询次数；关闭操作本身不以此值表示成功/失败
 
@@ -782,7 +779,7 @@ $result = $instance->checkError($msg);
 public function clearError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 

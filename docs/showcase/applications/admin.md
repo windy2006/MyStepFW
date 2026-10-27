@@ -1,7 +1,5 @@
 # Admin：新管理后台
 
-修订日期：2026-10-23。现有应用介绍专栏。
-
 ## 定位和适用场景
 
 使用同一框架机制的管理应用，核心类在应用根目录，公共辅助声明在已有 lib.php，功能模块与模板分别归入 module/、template/。与原后台共用框架设置、插件注册和API策略。
@@ -42,7 +40,7 @@ Admin.class.php 使用 lib.php 中的受信页面定义选择 module/ 回调；P
 | `module/function/api.php` | `template/default/function_api.tpl` |
 | `module/guide.php` | `template/default/guide.tpl` |
 
-页面的读取、动作与模板赋值在对应模块，复用的模板片段仍保留各自文件。AdminStore、AdminService 是 lib.php 内的辅助声明，不再是根目录下的独立文件。
+页面的读取、动作与模板赋值在对应模块，复用的模板片段仍保留各自文件。AdminStore、AdminService 是 lib.php 内的辅助声明，在lib.php中声明。
 
 ## 配置、模板和资源
 

@@ -1,7 +1,5 @@
 # MySQL：mysql 数据库驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
@@ -43,7 +41,7 @@ MySQL 驱动，使用 mysqli 执行普通 SQL、参数绑定及共享构建/事�
     $mysql->transaction(function ($tx) { ... });      // 继承 base_db，支持嵌套保存点
 
 使用说明：
-1. 新连接沿用服务端 wait_timeout，不再强制改为 3 秒；初始化仍沿用历史 sql_mode 设置。
+1. 新连接使用服务端 wait_timeout；初始化应用 sql_mode 设置。
 2. query() 只在已筛选的无事务/会话依赖 SELECT 遭遇 2006 断线时重连并重试一次；
    不重放写入。execute() 不自动重试，也不使用共享查询结果缓存。
 3. 参数化结果读取需要 mysqlnd；参数只能代替数据值，标识符与 SQL 片段由应用限定。
@@ -73,7 +71,7 @@ protected
 | `MySQL::reconnect` | 关闭当前连接并重新连接，默认保留连接模式及所选数据库 |
 | `MySQL::selectDB` | 选择数据库，成功后更新当前库及清空查询构建状态 |
 | `MySQL::setCharset` | 设置字符集 |
-| `MySQL::safeValue` | 按活动连接字符集转义标量文本，未连接时采用历史独立转义规则 |
+| `MySQL::safeValue` | 按活动连接字符集转义标量文本，未连接时采用独立转义规则 |
 | `MySQL::changUser` | 通过 mysqli 切换用户及数据库，只有成功时才更新驱动身份状态 |
 | `MySQL::query` | 执行完整 SQL，保留结果集供 getRS() 使用并更新共享缓存/事务状态 |
 | `MySQL::execute` | 以原生预处理及参数绑定执行 SQL，不自动重试或使用共享结果缓存 |
@@ -115,12 +113,12 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init声明顺序传入的连接设置；构造不立即连接（历史位置参数，由func_get_args读取） |
-| `$host` | string；历史位置参数说明：可选第一参数，服务器地址，传入时须同时提供 user/pwd |
-| `$user` | string；历史位置参数说明：数据库用户名，传给 init() |
-| `$pwd` | string；历史位置参数说明：数据库密码，传给 init() |
-| `$charset` | string；历史位置参数说明：字符集，默认 utf8；建议明确使用 utf8mb4 |
-| `$options` | array；历史位置参数说明：可选 sql_mode 策略，转给 init |
+| `...$args` | mixed；按init声明顺序传入的连接设置；构造不立即连接（位置参数，由func_get_args读取） |
+| `$host` | string；位置参数说明：可选第一参数，服务器地址，传入时须同时提供 user/pwd |
+| `$user` | string；位置参数说明：数据库用户名，传给 init() |
+| `$pwd` | string；位置参数说明：数据库密码，传给 init() |
+| `$charset` | string；位置参数说明：字符集，默认 utf8；建议明确使用 utf8mb4 |
+| `$options` | array；位置参数说明：可选 sql_mode 策略，转给 init |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -142,7 +140,7 @@ public function init($host, $user, $pwd, $charset='utf8', array $options=[]);
 | `$user` | string；数据库用户名 |
 | `$pwd` | string；数据库密码 |
 | `$charset` | string；字符集名称，默认 utf8；连接时由 setCharset() 应用（默认：'utf8'） |
-| `$options` | array；sql_mode 默认空串兼容旧模式；null 保留服务器默认，字符串明确设置会话模式（默认：[]） |
+| `$options` | array；sql_mode 默认空串调用模式；null 保留服务器默认，字符串明确设置会话模式（默认：[]） |
 
 **返回值**：void 修改活动连接的初始化设置后，调用方须明确决定是否重新连接
 
@@ -255,7 +253,7 @@ $result = $instance->setCharset($charset);
 
 ### MySQL::safeValue
 
-功能说明：按活动连接字符集转义标量文本，未连接时采用历史独立转义规则
+功能说明：按活动连接字符集转义标量文本，未连接时采用独立转义规则
 
 ```text
 public function safeValue($value);
@@ -336,7 +334,6 @@ $result = $instance->query($sql, $reset);
 
 按 PHP 类型推断绑定类型，null 保持 SQL NULL；流参数使用分块 send_long_data()。
 结果集保留给 getRS()/fetch*()，预处理语句在 finally 中关闭，成功后跟踪缓存失效。
-
 
 流所有权：BLOB从当前流位置读取到末尾，不负责rewind或关闭调用方的流；statement在finally关闭，读取结果集由驱动free/后续读取入口释放。
 
@@ -516,7 +513,7 @@ $result = $instance->getIdxScript($the_tbl, $the_db);
 public function getDBs();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string[] 当前连接账号可见的数据库名称列表
 
@@ -567,7 +564,7 @@ public function getPri($the_tbl, $the_db='');
 | `$the_tbl` | string；数据表名称 |
 | `$the_db` | string；数据库名称，空串使用当前连接上下文（默认：''） |
 
-**返回值**：string 首个主键字段名；无主键时兼容回退唯一键，均不存在时为空串
+**返回值**：string 首个主键字段名；无主键时支持回退唯一键，均不存在时为空串
 
 调用形式：
 
@@ -588,7 +585,7 @@ $result = $instance->getPri($the_tbl, $the_db);
 public function getInsertId();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|string 最近自增标识，超出PHP整数表示范围时可为字符串；无有效值为0
 
@@ -611,7 +608,7 @@ public function optTabs();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | string；可选表名列表；省略时优化当前库的所有表（历史位置参数，由func_get_args读取） |
+| `...$args` | string；可选表名列表；省略时优化当前库的所有表（位置参数，由func_get_args读取） |
 
 **返回值**：void 使用正确的 getTbls() 入口；会执行数据库维护操作，调用方自行选择维护时机
 
@@ -626,7 +623,7 @@ $result = $instance->optTabs();
 
 ### MySQL::getStat
 
-功能说明：取得数据库当前状态
+功能说明：取得数据库当前状态；服务器状态来自当前连接，客户端版本采用无连接参数的`mysqli_get_client_info()`，避免PHP8弃用提示。
 
 参数说明：无显式参数。
 
@@ -634,7 +631,7 @@ $result = $instance->optTabs();
 public function getStat();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array|string 已连接时为服务器/客户端状态映射；未连接返回空串
 
@@ -799,7 +796,7 @@ $result = $instance->check($obj, $type);
 public function free();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 释放当前结果及 CALL 等语句的后续结果，避免下一条查询 commands out of sync
 
@@ -822,7 +819,7 @@ public function close(&$err_info = array());
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是历史默认占位值（默认：array()） |
+| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是默认占位值（默认：array()） |
 
 **返回值**：int 此驱动累计执行次数；重复关闭安全，不自动重连
 
@@ -845,7 +842,7 @@ public function checkError(&$err_info = array());
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是历史默认占位值（默认：array()） |
+| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是默认占位值（默认：array()） |
 
 **返回值**：int|false 当前mysqli错误编号；没有错误为false，同时刷新err_info引用文本
 
@@ -868,7 +865,7 @@ $result = $instance->checkError($err_info);
 public function clearError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 

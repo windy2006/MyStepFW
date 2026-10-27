@@ -13,6 +13,7 @@
                     <span id="info">&nbsp;</span>
                 </td>
             </tr>
+            <tr><td>运行环境</td><td><!--runtime_label|html-->；通道 <!--runtime_channel|html--></td></tr>
             <tr>
                 <td>上传更新</td>
                 <td>
@@ -256,7 +257,7 @@ $('#link_6').click(function(){
             alert("未发现改变的文件！");
         } else {
             loadingShow('获取差异文件……');
-            $.post("<!--update_url-->/api/plugin_manager/difference", {'data':JSON.stringify(list)}, function(info){
+            $.post("<!--update_url-->/api/plugin_manager/difference?<!--runtime_query-->", {'data':JSON.stringify(list)}, function(info){
                 if(info==false || typeof(info.error)!="undefined") {
                     alert("服务器校验失败 或 文件无需更新！");
                     loadingShow();

@@ -17,7 +17,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 /**
  * 功能说明：把构造参数按需转交init，并提供可恢复的错误回调策略。
@@ -79,9 +79,8 @@ abstract class myBase {
     /**
      * 功能说明：执行实例回调或框架默认错误策略，并恢复临时回调位
      *
-     * 实例回调先接收消息；随后通过 E_USER_ERROR 交给已有错误处理器记录，
-     * 此时临时关闭框架回调，避免同一错误重复展示。未安装错误处理器时仍遵循
-     * PHP 对 E_USER_ERROR 的默认行为。进程 exit 不保证执行 finally。
+     * 实例回调先接收消息；随后以 E_USER_ERROR 交给已有错误处理器记录，
+     * 此时临时关闭框架回调，避免同一错误重复展示。未安装处理器或返回false时抛出ErrorException。进程 exit 不保证执行 finally。
      *
      * @param string $msg 错误消息
      * @param bool $exit true 明确终止；false 仍遵循 myException::exit_on_error（默认：false）
@@ -90,14 +89,26 @@ abstract class myBase {
      */
     protected function error($msg, $exit = false) {
         $type = myException::$callback_type;
+        /**
+         * 功能说明：按既有PHP错误处理器分发用户错误，避免PHP8.4起弃用的trigger_error(E_USER_ERROR)。
+         * @param string $message 错误消息，不附加凭据或请求正文
+         * @return void 自定义处理器接管时返回；未接管时抛出异常
+         * @throws ErrorException 没有处理器或处理器明确返回false
+         */
+        $raise = static function($message) {
+            $handler = set_error_handler(null);
+            restore_error_handler();
+            if($handler !== null && $handler(E_USER_ERROR,$message,__FILE__,__LINE__) !== false)return;
+            throw new ErrorException($message,0,E_USER_ERROR);
+        };
         try {
             if($this->err_handler === null) {
                 myException::$callback_type = $type | E_USER_ERROR;
-                if(myException::$log_type & E_USER_ERROR) trigger_error($msg, E_USER_ERROR);
+                if(myException::$log_type & E_USER_ERROR) $raise($msg);
             } else {
                 call_user_func($this->err_handler, $msg);
                 myException::$callback_type = 0;
-                trigger_error($msg, E_USER_ERROR);
+                $raise($msg);
             }
         } finally { myException::$callback_type = $type; }
         if($exit || myException::$exit_on_error) exit;

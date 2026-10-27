@@ -1,7 +1,5 @@
 # myCache_File：myCache_File 缓存驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 myCache通过此层处理缓存存储、命中或锁；不要从驱动名称推断它实现全部可选协议。编码预算、有效false/null和失败返回按本页逐项判断。
@@ -28,7 +26,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 ### myCache_File
 
-功能说明：提供V3校验帧、旧V2兼容、原子写入、精确命中、计算锁及有限预算回收。
+功能说明：提供V3校验帧、原子写入、精确命中、计算锁及有限预算回收。
 
 使用说明：
   1. 通过new myCache('File',CACHE.'data')使用，或传入含path的选项数组。
@@ -37,7 +35,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 补充说明：
 文件缓存：稳定v2路径、V3校验帧、原子发布及有限预算GC。
-兼容旧V2序列化条目；过期判断先于对象实例化，目录须为受信私有存储。
+读取条目时先判断过期状态，再实例化对象；目录须为受信私有存储。
 fetch可区分有效false/null，synchronized提供显式防击穿锁；clean只回收过期，clear显式清空并保留锁。
 
 ## 状态字段与公开变量
@@ -59,9 +57,9 @@ protected $path = '', $codec, $error = '', $computing = [];
 | `myCache_File::filename` | 将标量键映射为分片文件，沿用空namespace的MD5布局。 |
 | `myCache_File::locked` | 分片写锁内执行操作；非阻塞方式返回null表示繁忙。 |
 | `myCache_File::set` | 写入有长度和SHA-256校验的V3帧，同目录原子替换；失败保留原值。 |
-| `myCache_File::record` | 读取帧元数据及有效负载；旧格式先禁用对象解码，过期帧不实例化对象。 |
+| `myCache_File::record` | 读取帧元数据及有效负载；数据格式先禁用对象解码，过期帧不实例化对象。 |
 | `myCache_File::fetch` | 精确读取，命中状态独立于值；过期/损坏时尽力回收，繁忙时不阻塞。 |
-| `myCache_File::get` | 兼容旧get，值false与未命中仍返回同一标记。 |
+| `myCache_File::get` | 支持旧get，值false与未命中仍返回同一标记。 |
 | `myCache_File::expire` | 非阻塞锁内复查，防止删除其他进程刚发布的新值，GC不运行对象生命周期。 |
 | `myCache_File::remove` | 删除单个键，不删除锁文件，不跟随符号链接。 |
 | `myCache_File::clean` | 全量回收过期及可识别损坏条目，保留有效值和无关文件。 |
@@ -122,7 +120,7 @@ protected function directory($path);
 protected function now();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int 当前Unix时间戳，单位秒
 
@@ -140,7 +138,7 @@ protected function now();
 public function getLastError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 最近一次安全错误摘要；无已记录错误时为空串
 
@@ -220,7 +218,7 @@ $result = $instance->set($key, $value, $ttl);
 
 ### myCache_File::record
 
-功能说明：读取帧元数据及有效负载；旧格式先禁用对象解码，过期帧不实例化对象。
+功能说明：读取帧元数据及有效负载；数据格式先禁用对象解码，过期帧不实例化对象。
 
 ```text
 protected function record($file);
@@ -262,7 +260,7 @@ $result = $instance->fetch($key, $hit);
 
 ### myCache_File::get
 
-功能说明：兼容旧get，值false与未命中仍返回同一标记。
+功能说明：支持旧get，值false与未命中仍返回同一标记。
 
 ```text
 public function get($key);
@@ -334,7 +332,7 @@ $result = $instance->remove($key);
 public function clean();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 全量回收是否成功；已有其他GC持锁时跳过并返回true，不表示实际回收数量
 
@@ -360,7 +358,7 @@ $result = $instance->clean();
 public function clear();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 所有已发现条目删除成功为true，路径/锁/删除失败为false
 

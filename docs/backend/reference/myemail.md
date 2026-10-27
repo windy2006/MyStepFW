@@ -1,7 +1,5 @@
 # myEmail：邮件组装和发送
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 buildMail只组装内容；send才涉及传输。地址、头部及附件检查不等于投递成功，SMTP凭据不得公开。
@@ -43,7 +41,7 @@ $mime = $mail->buildMail();
 
 ### SMTP
 
-功能说明：MIME邮件使用的SMTP套接字传输实现，保留原作者版权说明
+功能说明：MIME邮件使用的SMTP套接字传输实现，保留开发者版权说明
 
 使用说明：
   1. 先设置发件人、主题、正文和收件人，再传SMTP配置发送。
@@ -154,7 +152,7 @@ private $helo_rply;
 | `SMTP::Quit` | 发送QUIT并按响应及参数决定是否关闭连接 |
 | `SMTP::Recipient` | 发送RCPT TO登记一个信封收件人 |
 | `SMTP::Reset` | 发送RSET以放弃当前邮件事务 |
-| `SMTP::SendAndMail` | 发送兼容SMTP的SAML FROM命令 |
+| `SMTP::SendAndMail` | 发送支持SMTP的SAML FROM命令 |
 | `SMTP::Turn` | 记录TURN未实现错误并返回false |
 | `SMTP::getError` | 取得最近一次SMTP错误结构 |
 | `SMTP::get_lines` | 读取SMTP多行响应，直到最后一行或连接结束 |
@@ -516,7 +514,7 @@ $result = $instance->setFile($file, $embed);
 public function buildMail();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 由当前地址、正文、附件及边界构建的完整邮件内容，不执行发送
 
@@ -532,7 +530,6 @@ $result = $instance->buildMail();
 ### myEmail::send
 
 功能说明：邮件发送
-
 
 副作用：会连接SMTP并提交邮件；返回成功只表示SMTP接受该次提交，最终投递由邮件服务器处理。连接在finally中关闭。
 SMTP配置：host必填；mode为smtp/ssl/ssl/tls/tls之一，tls表示STARTTLS；port默认按模式选25/465/587，user为空时不认证，password默认空串。
@@ -568,7 +565,7 @@ $result = $instance->send($para, $single, $priority);
 public function __construct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -624,7 +621,7 @@ SMTP CODE 454 TLS not available due to temporary reason
 public function StartTLS();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool success
 
@@ -673,7 +670,7 @@ $result = $instance->Authenticate($username, $password);
 public function Connected();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 套接字存在且未结束为true；已断开时清理状态并返回false
 
@@ -699,7 +696,7 @@ first trying to use QUIT.
 public function Close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -912,7 +909,7 @@ SMTP CODE ERROR  : 500, 501, 504, 421
 public function Reset();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 服务器确认RSET为true，否则为false
 
@@ -927,7 +924,7 @@ $result = $instance->Reset();
 
 ### SMTP::SendAndMail
 
-功能说明：发送兼容SMTP的SAML FROM命令
+功能说明：发送支持SMTP的SAML FROM命令
 
 $from. Returns true if successful or false otherwise. If True
 the mail transaction is started and then one or more Recipient
@@ -979,7 +976,7 @@ SMTP CODE ERROR  : 500, 503
 public function Turn();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：false 固定返回false，同时记录未实现错误
 
@@ -1002,7 +999,7 @@ $result = $instance->Turn();
 public function getError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array|null 最近错误字段组成的数组；无错误时为null
 
@@ -1030,7 +1027,7 @@ need to read anything else.
 private function get_lines();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 读到的SMTP响应原文，可能为空或在超时/断开时只包含部分行
 

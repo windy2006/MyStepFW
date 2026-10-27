@@ -1,0 +1,7 @@
+<?php
+/** 文件：plugin/social/module/view.php (new)；功能说明：为social模板准备已转义的页面状态及表单。方法目录：无。使用说明：由page调用；只展示白名单字段，不输出身份摘要原文以外的认证内部记录。 */
+$base=$o['endpoint']??'';$csrf=mySecurity::token();
+$tpl_social->assign(['title'=>'第三方会员登录','error'=>plugin_social::escape($error),'notice'=>plugin_social::escape($notice),'csrf'=>plugin_social::escape($csrf),'email'=>plugin_social::escape($fields['email']),'display_name'=>plugin_social::escape($fields['display_name']),'complete_url'=>plugin_social::escape($base.'complete'),'verify_url'=>plugin_social::escape($base.'verify'),'cancel_url'=>plugin_social::escape($base.'cancel'),'readonly'=>$readonly?'readonly':'','verify_script'=>plugin_social::escape(ROOT_WEB.'plugin/social/asset/verify.js'),'checkform_script'=>plugin_social::escape(ROOT_WEB.'static/js/checkForm.js')]);
+foreach(['message','complete','wait','verify','connections'] as $flag)$tpl_social->setIf($flag,$page===$flag);$tpl_social->setIf('error',$error!=='');$tpl_social->setIf('notice',$notice!=='');
+$tpl_social->assign('bind_buttons',isset($o)?plugin_social::buttons($users,'bind'):'');
+foreach($bindings as $item)$tpl_social->setLoop('bindings',['provider'=>plugin_social::escape(SocialOAuth::providers()[$item['provider']]??$item['provider']),'created'=>date('Y-m-d H:i',(int)$item['created_at']),'key'=>plugin_social::escape($item['identity_key']),'unlink_url'=>plugin_social::escape($base.'unlink')]);

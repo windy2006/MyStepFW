@@ -12,12 +12,12 @@
  *   2. 由 myController::plugin 在宿主方法作用域包含，此时 $this 为当前控制器。
  *   3. 文件存在不等于已安装或启用；范围由注册状态、应用 plugin.php 和框架分支共同决定。
  *
- * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码保持 PHP 7.4 兼容。
+ * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码以 PHP 8.5.12 及以上8.x为运行目标。
  *       方法目录覆盖本文件直接声明；闭包参数及捕获变量说明见各回调旁 PHPDoc。
  */
 
 // 显式选择的Redis缓存优先，避免普通插件初始化再次覆盖框架缓存。
-if($GLOBALS['info_app']['app']=='myStep' || (isset($this->setting) && strtolower((string)$this->setting->gen->cache_mode)==='redis')) return;
+if($GLOBALS['info_app']['app']=='myStep' || (isset($this) && isset($this->setting) && strtolower((string)$this->setting->gen->cache_mode)==='redis')) return;
 if(class_exists('Memcached')) {
     global $cache, $db;
     require_once(__DIR__."/memoryCache.class.php");

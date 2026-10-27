@@ -1,34 +1,17 @@
 <?PHP
-$md = new \Parsedown();
-$guide = myFile::getLocal(ROOT.'readme.md');
-$guide = str_replace(['<','>',chr(13)],['&lt;','&gt;',''], $guide);
-$guide = $md->text($guide);
-
-preg_match_all('#<h(\d)>(.+?)</h\1>#', $guide, $matches);
-$m = count($matches[0]);
-if($m>0) {
-    $lvl_prev = $matches[1][0];
-    $lvl_cur = $matches[1][0];
-    $idx = [1];
-    $guide = str_replace($matches[0][0], '<h'.$matches[1][0].'>'.$matches[2][0].'<a id="p1"></a></h'.$matches[1][0].'>', $guide);
-    for($i=1;$i<$m;$i++) {
-        if($lvl_cur < $matches[1][$i]) {
-            array_push($idx, 1);
-        } elseif($lvl_cur > $matches[1][$i]) {
-            for($j=$lvl_cur-$matches[1][$i];$j>0;$j--) array_pop($idx);
-            $idx[count($idx)-1]++;
-        } else {
-            $idx[count($idx)-1]++;
-        }
-        $lvl_cur = $matches[1][$i];
-        $guide = str_replace($matches[0][$i], '<h'.$matches[1][$i].'>'.$matches[2][$i].'<a id="p'.join('.', $idx).'"></a></h'.$matches[1][$i].'>', $guide);
-    }
+/**
+ * 文件：app/CMS/template/guide/module/index.php
+ * 功能说明：按当前手册子站栏目生成阅读首页，不把根readme当作手册正文。
+ * 方法目录：本文件不声明方法或函数；目录读取使用app\CMS\guideContents。
+ * 使用说明：由CMS页面入口在guide风格下加载，HTML交给index.tpl和block_manual_index.tpl。
+ */
+$guide_menu = \app\CMS\guideContents();
+$t->assign('guide_article_count', count($guide_menu['articles']));
+$t->assign('guide_framework_version', include CONFIG.'version.php');
+foreach($guide_menu['groups'] as $guide_group) {
+    $guide_block_setting = $tpl_setting;
+    $guide_block_setting['name'] = 'block_manual_index';
+    $guide_block = new myTemplate($guide_block_setting, false);
+    $guide_block->setLoop('article', $guide_group['articles'], true);
+    $t->setLoop('section', ['id'=>$guide_group['id'], 'name'=>$guide_group['name'], 'content'=>$mystep->render($guide_block)]);
 }
-/*
-preg_match_all('#<h2>(.+?)</h2>#', $guide, $matches);
-for($i=0,$m=count($matches[0]);$i<$m;$i++) {
-    $guide = str_replace($matches[0][$i], '<h3>'.str_replace('：','',$matches[1][$i]).'<a id="p'.($i+1).'"></a></h3>', $guide);
-}
-*/
-$t->assign('content', $guide);
-unset($md);

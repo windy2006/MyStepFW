@@ -1,7 +1,5 @@
 # myApi：注册接口与HTTP协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 invoke返回原始值，run返回编码文本；对象注册与route.php的HTTP注册并非同一件事。
@@ -59,8 +57,8 @@ protected $methods = [];
 | --- | --- |
 | `myApi::httpDefaults` | 返回HTTP接口默认值；全局参数属于框架api分组，endpoints属于独立策略。 |
 | `myApi::httpSettings` | 补齐并验证框架api分组，供运行时及现有参数设置共同使用。 |
-| `myApi::httpConfiguration` | 合并框架api参数与config/api.php的逐接口策略，兼容旧独立参数文件。 |
-| `myApi::httpTarget` | 从框架API捕获路径定位已登记接口，兼容插件前缀和框架简写。 |
+| `myApi::httpConfiguration` | 合并框架api参数与config/api.php的逐接口策略，支持旧独立参数文件。 |
+| `myApi::httpTarget` | 从框架API捕获路径定位已登记接口，支持插件前缀和框架简写。 |
 | `myApi::httpOrigins` | 按选定接口的跨域开关返回当前合法Origin，供CORS和CSRF共同使用。 |
 | `myApi::httpURL` | 按专属域名或普通路径生成接口地址，沿用三种路由模式和子目录。 |
 | `myApi::httpError` | 输出固定JSON错误并结束HTTP请求，不暴露内部配置或异常。 |
@@ -68,10 +66,10 @@ protected $methods = [];
 | `myApi::httpCors` | 准备选定接口的CORS、统一正文预算和总开关；预检早于应用及会话启动。 |
 | `myApi::httpPolicy` | 执行逐接口额外限制，不替代原业务鉴权和CSRF。 |
 | `myApi::httpFormat` | 归一化支持的输出格式别名，未知值使用指定默认格式。 |
-| `myApi::httpArguments` | 按原有位置参数约定构造接口参数；各内容类型已先执行正文上限。 |
+| `myApi::httpArguments` | 按位置参数约定构造接口参数；各内容类型已先执行正文上限。 |
 | `myApi::init` | 初始化空接口对象；再次调用不主动清空已登记方法 |
 | `myApi::methodName` | 验证接口名称，避免非法数组键及控制字符 |
-| `myApi::regMethod` | 登记或覆盖单个接口，失败时保留原有登记 |
+| `myApi::regMethod` | 登记或覆盖单个接口，失败时保留登记 |
 | `myApi::regMethods` | 先验证整批回调，再一次性合并，避免错误批次只登记了一部分 |
 | `myApi::hasMethod` | 查询接口是否已明确登记，不进行全局函数回退 |
 | `myApi::removeMethod` | 注销接口并释放该回调的引用 |
@@ -92,7 +90,7 @@ protected $methods = [];
 public static function httpDefaults();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array enabled/default_format/body_bytes/domain/endpoints
 
@@ -130,7 +128,7 @@ $result = myApi::httpSettings($data);
 
 ### myApi::httpConfiguration
 
-功能说明：合并框架api参数与config/api.php的逐接口策略，兼容旧独立参数文件。
+功能说明：合并框架api参数与config/api.php的逐接口策略，支持旧独立参数文件。
 
 ```text
 public static function httpConfiguration($data = null);
@@ -154,7 +152,7 @@ $result = myApi::httpConfiguration($data);
 
 ### myApi::httpTarget
 
-功能说明：从框架API捕获路径定位已登记接口，兼容插件前缀和框架简写。
+功能说明：从框架API捕获路径定位已登记接口，支持插件前缀和框架简写。
 
 ```text
 public static function httpTarget($path, $apis = null);
@@ -347,7 +345,7 @@ $result = myApi::httpFormat($value, $default);
 
 ### myApi::httpArguments
 
-功能说明：按原有位置参数约定构造接口参数；各内容类型已先执行正文上限。
+功能说明：按位置参数约定构造接口参数；各内容类型已先执行正文上限。
 
 ```text
 public static function httpArguments(array $tail, array $policy, array $config, $legacy_format);
@@ -356,7 +354,7 @@ public static function httpArguments(array $tail, array $policy, array $config, 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$tail` | array；接口之后的路径段 |
-| `$policy` | array；当前接口策略；保留签名兼容，参数模式不再可配置 |
+| `$policy` | array；当前接口策略；请求参数按处理器签名的位置传入 |
 | `$config` | array；已验证配置 |
 | `$legacy_format` | mixed；旧分发器的格式候选 |
 
@@ -382,7 +380,7 @@ $result = myApi::httpArguments($tail, $policy, $config, $legacy_format);
 public function init();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -405,7 +403,7 @@ protected function methodName($method);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$method` | string\|int；接口标识，保留数字键兼容 |
+| `$method` | string\|int；接口标识，保留数字键支持 |
 
 **返回值**：string 非空规范名称；大小写仍按旧注册表区分
 
@@ -417,7 +415,7 @@ protected function methodName($method);
 
 ### myApi::regMethod
 
-功能说明：登记或覆盖单个接口，失败时保留原有登记
+功能说明：登记或覆盖单个接口，失败时保留登记
 
 ```text
 public function regMethod($method, $func);
@@ -515,7 +513,6 @@ $result = $instance->removeMethod($method);
 ### myApi::invoke
 
 功能说明：执行已登记接口并返回原始结果，不编码、不修改响应头
-
 
 调用示例：
     $api->regMethod('sum', function ($a, $b) { return $a + $b; });

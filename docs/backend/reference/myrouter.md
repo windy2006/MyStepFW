@@ -1,7 +1,5 @@
 # myRouter：规则、格式与匹配
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 正则rule和字面literal分开；闭包只用于内存规则，持久声明使用命名回调。
@@ -82,11 +80,11 @@ protected
 | 方法／函数 | 可见性及用途 |
 | --- | --- |
 | `myRouter::init` | 初始化路由设置并解析当前请求，清空已注册规则及 API 列表 |
-| `myRouter::parseQuery` | 统一解析重写路径、PATH_INFO 及旧式 index.php?route 请求 |
+| `myRouter::parseQuery` | 统一解析重写路径、PATH_INFO 及 index.php?route 请求 |
 | `myRouter::hasPrefix` | 按完整路径段判断前缀，避免 /app 错误匹配 /application |
 | `myRouter::format` | 注册或覆盖一个命名占位符格式，每个占位符只占一个参数位置 |
 | `myRouter::setFormats` | 批量注册占位符格式，可递归处理多组格式数组 |
-| `myRouter::rule` | 注册保持历史正则语义的路径规则 |
+| `myRouter::rule` | 注册保持正则语义的路径规则 |
 | `myRouter::literal` | 注册字面路径模板，只把已定义的命名占位符展开为正则 |
 | `myRouter::compilePattern` | 为已展开的规则选择无冲突分隔符，并编译为完整匹配正则 |
 | `myRouter::setRules` | 批量注册规则或加载可信 PHP 路由注册文件 |
@@ -128,7 +126,7 @@ $result = $instance->init($setting);
 
 ### myRouter::parseQuery
 
-功能说明：统一解析重写路径、PATH_INFO 及旧式 index.php?route 请求
+功能说明：统一解析重写路径、PATH_INFO 及 index.php?route 请求
 
 显式传入时按第一个 ? 或 & 分离路径与查询；空字符串表示读取当前服务器变量。
 规范化前导斜杠，纯单词路径沿用尾斜杠约定。覆盖 GET 和 QUERY_STRING，并依照
@@ -232,7 +230,7 @@ $result = $instance->setFormats($formats);
 
 ### myRouter::rule
 
-功能说明：注册保持历史正则语义的路径规则
+功能说明：注册保持正则语义的路径规则
 
 已知 [name] 展开为对应格式；未知 [name] 沿用旧行为，成为捕获该名称的分组。
 整条规则由 compilePattern() 统一添加完整匹配边界，不修改处理器执行顺序。
@@ -402,7 +400,7 @@ protected function routeArguments($handler, array $captures);
 public function parse();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 结果写入实例 info，不执行路由处理器
 

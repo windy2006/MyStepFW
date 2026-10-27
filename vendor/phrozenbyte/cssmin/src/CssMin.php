@@ -89,7 +89,7 @@ class CssMin
 	 * @param array $plugins Plugin configuration [optional]
 	 * @return string Minified CSS
 	 */
-	public static function minify($source, array $filters = null, array $plugins = null)
+	public static function minify($source, ?array $filters = null, ?array $plugins = null)
 		{
 		self::$errors = array();
 		$minifier = new CssMinifier($source, $filters, $plugins);
@@ -102,7 +102,7 @@ class CssMin
 	 * @param array $plugins Plugin configuration [optional]
 	 * @return array Array of aCssToken
 	 */
-	public static function parse($source, array $plugins = null)
+	public static function parse($source, ?array $plugins = null)
 		{
 		self::$errors = array();
 		$parser = new CssParser($source, $plugins);
@@ -116,7 +116,7 @@ class CssMin
 	 */
 	public static function setVerbose($to)
 		{
-		self::$isVerbose = (boolean) $to;
+		self::$isVerbose = (bool) $to;
 		return self::$isVerbose;
 		}
 	/**

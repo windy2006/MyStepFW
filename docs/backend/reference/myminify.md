@@ -1,7 +1,5 @@
 # myMinify：JS/CSS整合
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 使用内容指纹与原子缓存，输入是受信资源。压缩不负责检测恶意脚本，也不保证任意第三方语法都可转换。
@@ -29,12 +27,11 @@ $javascript = $builder->get();
 
 使用说明：
   1. add可接收同类型文件或源码，get返回结果，show发送响应并结束请求。
-  2. 旧pack参数保留调用兼容，true/false均采用普通压缩。
+  2. pack参数取true或false均采用普通压缩。
   3. 组件或本文件内容变化会使引擎指纹失效，调用方需按原约定保留源输入。
 
 补充说明：
-生成js或css的压缩代码，使用JSMin/CssMin；旧pack参数仅保留调用兼容。
-不再依赖JavaScriptPacker或生成eval打包代码，组件变化会使缓存指纹失效。
+使用JSMin/CssMin生成js或css压缩代码，组件变化会使缓存指纹失效。
 
 ## 状态字段与公开变量
 
@@ -152,7 +149,7 @@ $result = $instance->add($code);
 protected function source();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 源码及文件路径到SHA-256摘要的映射
 
@@ -173,7 +170,7 @@ protected function signature($code, $pack);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$code` | string；待压缩源码，空串用于引擎指纹 |
-| `$pack` | bool；历史兼容参数，已不影响输出或缓存身份 |
+| `$pack` | bool；参数，已不影响输出或缓存身份 |
 
 **返回值**：string SHA-256摘要
 
@@ -212,7 +209,7 @@ public function get($pack = false);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$pack` | bool；历史兼容参数，true/false均普通压缩，不再执行旧eval打包（默认：false） |
+| `$pack` | bool；参数，true/false均普通压缩，不再执行旧eval打包（默认：false） |
 
 **返回值**：string 压缩代码
 
@@ -237,7 +234,7 @@ public function show($pack = false);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$pack` | bool；历史兼容参数，不再启用eval打包（默认：false） |
+| `$pack` | bool；参数，不再启用eval打包（默认：false） |
 
 **返回值**：void 无返回值。
 
@@ -283,7 +280,7 @@ $result = myMinify::minify($code, $mode);
 public function __toString();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前保存的压缩结果
 

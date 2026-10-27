@@ -1,7 +1,5 @@
 # sess_mysql：sess_mysql 会话处理器
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 此文件实现PHP会话保存或查询相关能力，通常由框架按session.mode选择。应用内使用会话门面，不重复启动处理器；底层回调由PHP引擎调用。
@@ -102,7 +100,7 @@ $result = sess_mysql::set($setting);
 public static function getLastError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 最近一次安全错误摘要；无已记录错误时为空串
 
@@ -117,7 +115,6 @@ $result = sess_mysql::getLastError();
 ### sess_mysql::execute
 
 功能说明：执行原生参数化语句并关闭statement；SQL参数不经字符串拼接。
-
 
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 
@@ -147,7 +144,7 @@ protected static function execute($sql, array $values = [], $row = false);
 protected static function connection();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：mysqli|null 当前处理器专属连接，尚未建立或已关闭为null；借用者不得关闭连接或开启业务事务
 
@@ -161,14 +158,13 @@ protected static function connection();
 
 参数说明：无显式参数。
 
-
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 
 ```text
 private static function connect();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 独立连接和字符集设置成功为true；配置或连接失败为false，摘要见getLastError
 
@@ -211,7 +207,7 @@ $result = sess_mysql::open($sess_path, $sess_name);
 public static function upgradeSchema();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 表不存在或连接活动时失败；新表由open创建
 
@@ -251,7 +247,7 @@ private static function lock($sid);
 private static function unlock();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 当前锁释放结果；没有持锁时按实现视为已释放
 
@@ -269,7 +265,7 @@ private static function unlock();
 public static function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 连接及锁释放后的结果；内置实现允许重复关闭
 

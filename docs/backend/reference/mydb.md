@@ -1,7 +1,5 @@
 # myDb：数据库代理与SQL构建
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 prepared和transaction由真实驱动声明；supports不建立连接或证明服务器健康。表名仍须白名单。
@@ -49,8 +47,8 @@ assert($db->fetchValue('SELECT title FROM items WHERE id=?',[1]) === 'World');
 使用说明：
 1. 初始化遵循 myProxy：驱动存在构造函数时不重复调用 init()；支持直接代理现有驱动。
 2. 参数占位符只代替数据值，不代替表名、字段、排序方向或 SQL 片段。
-3. 旧 query()/build()/record()/records()/result() 保留。新增读取及受管事务的实现
-   以 MySQL/SQLite 为准；MySQL 参数化读取需要 mysqlnd，事务表须支持事务。
+3. query()/build()/record()/records()/result() 用于SQL构造和结果读取；参数化读取及受管事务
+   由 MySQL/SQLite 实现；MySQL 参数化读取需要 mysqlnd，事务表须支持事务。
 4. 代理事务回调接收当前 myDb；直接驱动入口接收驱动自身。异常交给调用方处理。
 5. supports(接口名)检查驱动声明的API能力；代理本身不充当具体驱动的接口实例。
 
@@ -70,7 +68,7 @@ SQL 结构扫描辅助类，记录关键字位置及括号层级
     SQLStatement::tokens($sql, true);   // 忽略引号和注释中的内容，取得词及层级
     SQLStatement::unpaged($sql, true);  // 去掉最外层排序、分页及锁定子句
 
-供计数查询、只读缓存判定及 SQLite 兼容转换使用；它不是完整 SQL 解析器，
+供计数查询、只读缓存判定及 SQLite 格式转换使用；它不是完整 SQL 解析器，
 不负责数据库语法验证或处理任意方言，也不能把不可信 SQL 变成安全语句。
 
 ### base_db
@@ -136,6 +134,10 @@ record()/records()/result() 可按策略缓存普通查询，空值保留其语�
    不可信数据和二进制值优先使用驱动 execute()/fetchAll/One/Value 参数绑定。
 4. field()/where()/order()/limit() 无参数读取当前片段，group() 无参数返回分组设置；
    不会执行 SQL，实际执行由数据库驱动完成。
+
+## PHP8.5空值条件
+
+`where('expire', 'is', null)`及`where('expire', 'is not', null)`分别生成IS NULL与IS NOT NULL，直接接受PHP的null值；无需先转成字符串。
 
 ## 状态字段与公开变量
 
@@ -256,7 +258,7 @@ protected
 | `base_sql::select` | 依据当前一张或多张表的构建状态生成 SELECT，或立即执行 |
 | `base_sql::update` | 将单表或关联表的字段及条件构建为UPDATE并预览或执行 |
 | `base_sql::delete` | 依据当前构建条件生成DELETE并预览或执行 |
-| `base_sql::record` | 读取查询第一条记录，兼容可空记录缓存并清理结果和构建状态 |
+| `base_sql::record` | 读取查询第一条记录，支持可空记录缓存并清理结果和构建状态 |
 | `base_sql::records` | 读取全部记录，按数据库缓存策略复用查询结果，保留空数组 |
 | `base_sql::result` | 通过 record() 的数字下标模式读取第一行第一列 |
 | `base_sql::count` | 统计原查询的结果行数，保留 DISTINCT、GROUP/HAVING 和 UNION 语义 |
@@ -265,10 +267,10 @@ protected
 | `base_sql::fetchValue` | 绑定参数读取第一行第一列，保留 SQL NULL、0 及空字符串 |
 | `base_sql::correctDelimiter` | 转换引号和注释之外的 MySQL 简单标识符定界符，保留用户文本 |
 | `SQLBuilder::__construct` | 初始化表名、关联设置、别名、定界符及驱动值转义器 |
-| `SQLBuilder::safeValue` | 使用驱动提供的值转义回调，未提供时使用历史 MySQL 转义 |
+| `SQLBuilder::safeValue` | 使用驱动提供的值转义回调，未提供时使用 MySQL 转义 |
 | `SQLBuilder::reset` | 清空字段、值、条件、排序、分组、分页及 SELECT 前缀 |
 | `SQLBuilder::exists` | 追加 EXISTS/NOT EXISTS 子查询条件，沿用当前驱动转义器 |
-| `SQLBuilder::condition` | 按历史操作符规则原地规范化一个条件的字段、操作符和值 |
+| `SQLBuilder::condition` | 按操作符规则原地规范化一个条件的字段、操作符和值 |
 | `SQLBuilder::condition_multi` | 递归生成带括号的复合条件，保留每层逻辑连接方式 |
 | `SQLBuilder::where` | 追加条件、读取条件 SQL，或清空条件 |
 | `SQLBuilder::field` | 设置查询列或写入字段，读取时使用局部副本避免重复预览改写状态 |
@@ -296,8 +298,8 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；myProxy::init的驱动类名/对象及其初始化参数（历史位置参数，由func_get_args读取） |
-| `$module` | string\|object；历史位置参数说明：第一个可选位置参数：驱动类名或现有驱动实例，省略时不初始化 |
+| `...$args` | mixed；myProxy::init的驱动类名/对象及其初始化参数（位置参数，由func_get_args读取） |
+| `$module` | string\|object；位置参数说明：第一个可选位置参数：驱动类名或现有驱动实例，省略时不初始化 |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -342,7 +344,6 @@ $result = $instance->supports($interface);
 
 正常返回（包括 false）提交；异常回滚并继续抛出，嵌套事务由驱动使用保存点。
 回调不可自行提交或执行隐式提交 DDL；文件、邮件等外部副作用不受回滚保障。
-
 
 调用示例：
     if ($db->supports(interface_db_transaction::class)) {
@@ -591,7 +592,7 @@ public function safeValue($val);
 | --- | --- |
 | `$val` | mixed；需要按当前数据库连接规则转义的数据值 |
 
-**返回值**：string|array 标量按历史规则返回转义文本，传入数组时逐项替换并保留键；不执行SQL
+**返回值**：string|array 标量按规则返回转义文本，传入数组时逐项替换并保留键；不执行SQL
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
@@ -644,7 +645,7 @@ public function setCache($cache, $ttl = 600);
 public function hasCache();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 后端不为 null 时为 true；不检测后端健康或网络连通性
 
@@ -662,7 +663,7 @@ public function hasCache();
 protected function cacheNamespace();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string SHA-256 摘要，涵盖驱动类、主机、用户、库、字符集及 SQLite 路径；
                每次打开独立内存库时使用不同身份，并隔离 MySQL sql_mode 策略；不把密码作为缓存键的一部分
@@ -701,7 +702,7 @@ public function cacheKey($key);
 public function invalidateCache();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 不逐条删除旧查询结果；旧代次条目随后按各自 TTL 过期
 
@@ -896,7 +897,7 @@ protected function transactionBoundary($method);
 public function begin();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 开启事务或保存点成功为 true；驱动以 false 报错时为 false
 
@@ -916,7 +917,7 @@ public function begin();
 public function commit();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 对应语句成功为 true；驱动以 false 报错时为 false，层级只在成功后减少
 
@@ -936,7 +937,7 @@ public function commit();
 public function rollback();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 对应语句成功为 true；驱动以 false 报错时为 false；不会发布未提交查询结果
 
@@ -1106,7 +1107,7 @@ public function delete($show = false);
 
 ### base_sql::record
 
-功能说明：读取查询第一条记录，兼容可空记录缓存并清理结果和构建状态
+功能说明：读取查询第一条记录，支持可空记录缓存并清理结果和构建状态
 
 无最外层 LIMIT 的普通 SELECT 会补 LIMIT 1，且放在锁定子句前；已有 LIMIT 不改写。
 
@@ -1234,7 +1235,6 @@ public function fetchOne($sql, array $params = [], $mode = 2);
 
 功能说明：绑定参数读取第一行第一列，保留 SQL NULL、0 及空字符串
 
-
 调用示例：
     $value = $db->fetchValue('SELECT value FROM items WHERE id=?', [1]);
     if ($value === false) {
@@ -1300,7 +1300,7 @@ public function __construct($tbl, $join = array(), $idx='', $delimiter='', $esca
 
 ### SQLBuilder::safeValue
 
-功能说明：使用驱动提供的值转义回调，未提供时使用历史 MySQL 转义
+功能说明：使用驱动提供的值转义回调，未提供时使用 MySQL 转义
 
 ```text
 public function safeValue($value);
@@ -1372,7 +1372,7 @@ $result = $instance->exists($para, $condition, $not, $mode);
 
 ### SQLBuilder::condition
 
-功能说明：按历史操作符规则原地规范化一个条件的字段、操作符和值
+功能说明：按操作符规则原地规范化一个条件的字段、操作符和值
 
 处理普通比较、数值/日期/原始表达式、LIKE/REGEXP、IN 及 NULL 等。
 原始表达式及函数形式须来自可信代码；本辅助方法不替代参数绑定。
@@ -1454,8 +1454,8 @@ public function field($field = null);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$field` | string\|array\|null；列字符串/列表、含别名的列、写入字段映射；可传多个位置参数；<br>                               null 读取片段，[reset] 清空，all/distinct/distinctrow 设置前缀（默认：null） |
-| `...$args` | mixed；兼容入口的附加字段参数，按field内部规则组合（历史位置参数，由func_get_args读取） |
-| `$fields` | mixed；历史位置参数说明：多位置参数形式的补充列，存在时与第一个参数一起作为列列表 |
+| `...$args` | mixed；入口的附加字段参数，按field内部规则组合（位置参数，由func_get_args读取） |
+| `$fields` | mixed；位置参数说明：多位置参数形式的补充列，存在时与第一个参数一起作为列列表 |
 
 **返回值**：$this|string 设置/重置返回当前构建器，无参返回列清单或赋值片段
 
@@ -1498,7 +1498,7 @@ public function values();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；一行的位置值列表，或若干行数组；与field列顺序对应（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；一行的位置值列表，或若干行数组；与field列顺序对应（位置参数，由func_get_args读取） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -1570,7 +1570,7 @@ public function group($group=null);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$group` | string\|array\|null；分组字段，或含 field/having 的数组，也可传 [字段, 条件]；<br>                               null 返回当前结构，字段列表可为逗号字符串或数组（默认：null） |
-| `...$args` | mixed；兼容第二位置参数：HAVING条件（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；第二位置参数：HAVING条件（位置参数，由func_get_args读取） |
 
 **返回值**：$this|array 设置返回当前构建器；读取返回结构数组，SQL 生成时不改写其内容
 
@@ -1593,7 +1593,7 @@ $result = $instance->group($group);
 public function select();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string SQL 文本，不执行查询；分组及字段预览不消耗已有构建状态
 
@@ -1639,7 +1639,7 @@ $result = $instance->insert($replace);
 public function update();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 根据当前字段/条件/排序/分页生成的UPDATE文本，不执行SQL
 
@@ -1662,7 +1662,7 @@ $result = $instance->update();
 public function delete();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 根据当前条件生成的DELETE/TRUNCATE文本，不执行SQL
 

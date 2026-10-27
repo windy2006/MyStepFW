@@ -175,6 +175,9 @@ function showTpl() {
 }
 $(function(){
     let web_id = '<!--web_id-->';
+    // 列表筛选与分类所属网站是两回事；将前者传给保存动作，返回时恢复原列表。
+    const filter = new URLSearchParams(location.search).get('web_id');
+    if (filter !== null) $('form[action]').each(function () { $(this).attr('action', queryURL(this.getAttribute('action'), {web_id:filter})); });
     let cat_show = <!--cat_show-->;
     let i = 1, n = 1;
     while(n <= cat_show) {

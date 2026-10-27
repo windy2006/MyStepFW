@@ -1,7 +1,5 @@
 # myArchive：解包暂存与发布
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 在受信根下暂存，检查完整后commit；不允许归档路径越界。此类是资源安装辅助，不是整站事务。
@@ -149,7 +147,7 @@ protected function directory($path);
 public function commit();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 全部发布成功为true；失败并尝试回滚后为false
 
@@ -172,7 +170,7 @@ $result = $instance->commit();
 public function __destruct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 

@@ -1,7 +1,5 @@
 # function：PHP公共函数
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 由框架基础引入；时间、数组、缓冲和调试函数有不同副作用。myEval只处理受信代码。
@@ -21,8 +19,6 @@ assert(is_numeric($milliseconds));
 $merged = arrayMerge(['a'=>1], ['b'=>2]);
 assert($merged['a'] === 1 && $merged['b'] === 2);
 ```
-
-## 声明与类职责
 
 ## 方法目录
 
@@ -131,7 +127,7 @@ function formatDate($date='', $format='Y-m-d');
 | `$date` | string\|int；待解析的日期文本或时间戳，空串采用当前日期（默认：''） |
 | `$format` | string；输出或输入处理的格式规则（默认：'Y-m-d'） |
 
-**返回值**：string 按format格式化的日期；格式不符合历史要求时回退Y-m-d
+**返回值**：string 按format格式化的日期；格式不符合格式要求时回退Y-m-d
 
 调用形式：
 
@@ -196,7 +192,7 @@ $result = tinyUrl($url);
 function isMobile();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 请求头命中移动终端启发式规则为true，否则为false；不是可靠设备身份认证
 
@@ -218,7 +214,7 @@ $result = isMobile();
 function isHttps();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 原生HTTPS标记或可信代理的HTTPS转发标记成立为true，否则为false
 
@@ -291,7 +287,7 @@ function arrayMerge($arr_1, $arr_2);
 | `$arr_1` | array；用于合并的基础数组 |
 | `$arr_2` | mixed；递归合并的数组；非数组值追加到第一个数组 |
 
-**返回值**：array|false 按历史递归覆盖/追加规则合并的新数组；第一个参数不是数组为false
+**返回值**：array|false 按递归覆盖/追加规则合并的新数组；第一个参数不是数组为false
 
 调用形式：
 
@@ -356,7 +352,7 @@ function debug_show();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；需要依次输出的任意个调试值（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；需要依次输出的任意个调试值（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -378,7 +374,7 @@ function debug();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；需要依次展示的调试值，展示后结束请求（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；需要依次展示的调试值，展示后结束请求（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -400,7 +396,7 @@ $result = debug();
 function debug_set();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -422,7 +418,7 @@ function debug_check();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；条件调试开启时交给debug的值（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；条件调试开启时交给debug的值（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 

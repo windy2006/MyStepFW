@@ -1,7 +1,5 @@
 # checkForm整体流程
 
-修订日期：2026-10-23。浏览器脚本用法。
-
 ## 本篇目标与调用场景
 
 本篇所有JavaScript示例在浏览器运行。先加载所需本地脚本，不把PHP变量或磁盘路径直接当成浏览器变量。
@@ -11,7 +9,7 @@
 | 变量 | 用途与约束 |
 | --- | --- |
 | `root_web/global.root` | 网站Web根前缀，用于公开资源 |
-| `setting/language` | 异步装入的公开设置和语言，须等待就绪 |
+| `setting/language` | 完整框架页面在脚本前预置公开设置和语言；独立页面用checkNrun等待 |
 | `document/window` | 当前浏览器页面上下文，不是PHP的全局变量 |
 
 ## 3. len、原生属性与空值
@@ -23,7 +21,7 @@
 <input name="age" type="number" need="digital" min="0" max="150">
 ```
 
-第三行允许留空；填写后须满足长度范围。数字规则本身不限定数值大小，需要时配合 min、max 或服务端业务约束。len 的中文计数是框架历史规则，和 HTML maxlength 的计数方式不同。
+第三行允许留空；填写后须满足长度范围。数字规则本身不限定数值大小，需要时配合 min、max 或服务端业务约束。len 的中文计数是框架计数规则，和 HTML maxlength 的计数方式不同。
 
 执行过程为：
 
@@ -34,7 +32,6 @@
 5. 检查同表单内的确认密码；全部通过返回 true。
 
 `novalidate` 只让 checkForm 跳过原生有效性检查，need／len 和密码确认仍执行；浏览器自身也会根据该属性决定是否弹出原生提示。只有 type="email" 而没有 need="email" 的控件，仍可能由其原生类型约束拒绝非法邮箱。
-
 
 ## 4. 一个完整表单
 
@@ -63,8 +60,7 @@ ms_func_reg(function () {
 });
 ```
 
-不需要业务事件逻辑时，也可以使用框架原有的 `onsubmit="return checkForm(this)"`。两种绑定方式选一种，不重复校验。Admin 已为 `.adm-shell form` 统一绑定校验，新后台模板无需再次绑定。
-
+不需要业务事件逻辑时，也可以使用框架 `onsubmit="return checkForm(this)"`。两种绑定方式选一种，不重复校验。Admin 已为 `.adm-shell form` 统一绑定校验，新后台模板无需再次绑定。
 
 ## 5. 单选、复选与多选下拉框
 
@@ -83,7 +79,6 @@ ms_func_reg(function () {
 
 同名 radio／checkbox 的 `need=""` 要求组内至少有一项选中。给某个 checkbox 单独加原生 required 时，那一项本身必须选中，与“组内任选”不同。多选 select 的已选值逐个检查；未选择且使用非可选格式规则时不通过。
 
-
 ## 6. 密码与确认密码
 
 ```html
@@ -98,7 +93,6 @@ ms_func_reg(function () {
 确认关系按 id 判断：确认框 id 为原密码框 id + `_r`，且必须属于同一个表单。name 仍由后端接收约定决定，不用 name 判断配对。
 
 编辑密码时不设 need／required，允许两框同时为空；首次设置密码需必填时，在相应框上加 `need="" required`。只要确认框存在，找不到原密码框或两值不同都会失败。密码中的首尾空格保留，显示为明文后仍通过 data-ms-password 标记参与确认检查。成功验证不会删除确认框。
-
 
 ## 7. 自定义同步检查与提示
 
@@ -120,7 +114,6 @@ console.log(formCheckMessage('checkform_lenth_limit1', ['80']));
 ```
 
 myChecker 在普通字段格式检查之前执行，自定义逻辑应自行判断可用值。异步唯一性检查需要在业务提交处理器中明确 await，再决定提交，不把 async 函数直接当作同步 myChecker。
-
 
 ## 9. 与安全和服务端校验的关系
 

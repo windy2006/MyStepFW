@@ -104,7 +104,10 @@ $(function(){
     $.get("<!--url_prefix-->api/CMS/user", function(user_info){
         if(user_info.name!=='') {
             let objs = $('#user_info').find('li');
-            $(objs[1]).attr('title', user_info.group).html('<a class="nav-link text-white" href="<!--url_prefix_app-->user/profile"><span class="glyphicon glyphicon-user"></span> '+user_info.name+'</a>');
+            let account_link = $('<a class="nav-link text-white"><span class="glyphicon glyphicon-user"></span></a>')
+                .attr('href', '<!--url_prefix_app-->' + (user_info.profile_path || 'user/profile'))
+                .append(document.createTextNode(' ' + user_info.name));
+            $(objs[1]).attr('title', user_info.group).empty().append(account_link);
             $(objs[2]).html('<a class="nav-link text-white" href="<!--url_prefix_app-->user/logout"><span class="glyphicon glyphicon-log-out"></span> 退出</a>');
         };
     },'json');

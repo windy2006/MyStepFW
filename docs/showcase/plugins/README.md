@@ -10,6 +10,7 @@
 - [frontend · 前端组件版本选择](frontend.md)
 - [memcached · 应用缓存后端替换](memcached.md)
 - [redis · 缓存、会话与业务连接](redis.md)
+- [social · 第三方会员登录](social.md)
 - [sample · 插件机制演示](sample.md)
 
 [文档总览](../../README.md)

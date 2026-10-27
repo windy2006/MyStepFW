@@ -6,6 +6,8 @@
             </div>
             <div class="card-body">
                 <form method="post" class="p-3" onsubmit="return checkForm(this)">
+                    <!--if:start key="member_name"--><div class="input-group mb-3"><div class="input-group-prepend"><span class="input-group-text">昵称</span></div><input type="text" name="display_name" value="<!--display_name-->" class="form-control" maxlength="60" required></div><!--if:end-->
+
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">登录名称</span>
@@ -36,6 +38,7 @@
                         <button class="btn btn-warning" type="reset"> 清 空 </button>
                     </div>
                 </form>
+                <!--social_login-->
             </div>
         </div>
     </div>

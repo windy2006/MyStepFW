@@ -1,7 +1,5 @@
 # myController：控制器基础资源
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 普通应用通过myStep继承；钩子、模块、语言和响应共用此层。run显式第三参是管道，省略时传控制器。
@@ -32,7 +30,11 @@ assert($mystep->run('hello-data', false, 0) === 1);
 使用说明：
   1. 由myStep及应用控制器继承；先登记资源和回调，再执行生命周期。
   2. show/end可能输出或结束请求；需要字符串时使用相应非输出入口。
-  3. 本文件包含可继承公共接口，注释描述实际兼容行为，不改变签名。
+  3. 本文件包含可继承公共接口，注释描述实际支持行为，不改变签名。
+
+## PHP8.5运行说明
+
+OPcache开关、内存和重验周期由服务器php.ini管理，框架启动不再逐请求覆盖。`setOp()`保留为显式维护入口；业务请求无需重复调用。域名和插件绑定等可变PHP配置在加载前主动失效旧字节码，保存后下一请求即可读取新值。
 
 ## 状态字段与公开变量
 
@@ -120,7 +122,7 @@ protected
 public function __clone();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 单例模式下触发错误并返回false，否则为true；PHP的clone表达式仍返回克隆对象
 
@@ -162,7 +164,7 @@ public static function getInstance($calledClass);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$calledClass` | string；待创建或获取实例的类名 |
-| `...$args` | mixed；传给目标类init或构造函数的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；传给目标类init或构造函数的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：object 新实例优先执行真实构造，所需参数缺省时延迟初始化；已有单例无参复用，显式传参重新初始化
 
@@ -211,7 +213,7 @@ public function pushAddedContent(myTemplate $tpl);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$tpl` | myTemplate；已经初始化的模板实例 |
-| `...$args` | string；可选页面位置名称列表；省略时一次赋值全部位置（历史位置参数，由func_get_args读取） |
+| `...$args` | string；可选页面位置名称列表；省略时一次赋值全部位置（位置参数，由func_get_args读取） |
 
 **返回值**：void 将内容写入模板变量，不返回拼接结果
 
@@ -379,7 +381,7 @@ $result = $instance->regPlugin($plugin, $info);
 public function plugin();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -497,7 +499,7 @@ public function url($mode);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$mode` | string；已登记的URL生成策略；附加参数传给该策略回调 |
-| `...$args` | mixed；依顺序转交已登记URL回调的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；依顺序转交已登记URL回调的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：mixed 已登记URL回调的原始返回值；未登记模式返回#
 
@@ -515,7 +517,6 @@ $result = $instance->url($mode);
 ### myController::regLog
 
 功能说明：注册登录接口
-
 
 回调签名：login($usr,$pwd)、logout()、chg_psw($id,$psw_org,$psw_new)；原始返回值由对应登录入口直接返回。
 
@@ -551,7 +552,7 @@ public function login($usr='', $pwd='');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$usr` | string；登录用户名（默认：''） |
-| `$pwd` | string；账号密码，空串按调用入口的兼容约定处理（默认：''） |
+| `$pwd` | string；账号密码，空串按调用入口的支持约定处理（默认：''） |
 
 **返回值**：mixed 登录回调的原始返回值；未登记回调时返回false
 
@@ -576,7 +577,7 @@ $result = $instance->login($usr, $pwd);
 public function logout();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：mixed 退出回调的原始结果；未登记回调时返回false
 
@@ -674,7 +675,7 @@ $result = $instance->removeCSS($idx);
 public function clearCSS();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -768,7 +769,7 @@ $result = $instance->removeJS($idx);
 public function clearJS();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -809,7 +810,6 @@ $result = $instance->JS($show, $cache_path, $expires);
 ### myController::etag
 
 功能说明：检测过期标签
-
 
 输出约定：写入缓存响应头；GET/HEAD的If-None-Match命中时发送304并exit，支持列表、弱标签及星号；其他方法不返回304。空etag直接返回。
 
@@ -871,7 +871,7 @@ public static function guid($para = '');
 | --- | --- |
 | `$para` | string；参与GUID摘要生成的附加文本（默认：''） |
 
-**返回值**：string 32位十六进制GUID摘要，供兼容标识使用，不作为认证令牌
+**返回值**：string 32位十六进制GUID摘要，供标识使用，不作为认证令牌
 
 调用形式：
 
@@ -884,7 +884,6 @@ $result = myController::guid($para);
 ### myController::setFunction
 
 功能说明：添加钩子代码
-
 
 回调签名取决于run：显式传入第三参数时按管道传递，保留空串、0、false及null；省略第三参数时只传当前控制器。
 
@@ -963,7 +962,6 @@ $result = $instance->start($charset, $set_plugin);
 
 功能说明：显示页面
 
-
 输出约定：渲染并echo页面，可能开启缓冲；本方法本身不结束请求，生命周期收尾由调用方负责。
 
 ```text
@@ -974,7 +972,7 @@ public function show(myTemplate $tpl, $minify = false);
 | --- | --- |
 | `$tpl` | myTemplate；已经初始化的模板实例 |
 | `$minify` | bool；是否压缩最终HTML输出（默认：false） |
-| `...$args` | string；兼容第三位置参数：传给模板render的子模板名称（历史位置参数，由func_get_args读取） |
+| `...$args` | string；支持第三位置参数：传给模板render的子模板名称（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -993,14 +991,13 @@ $result = $instance->show($tpl, $minify);
 
 参数说明：无显式参数。
 
-
 生命周期：执行end钩子及可调用shutdown；通常返回调用方，只有满足预设goto跳转条件时才结束请求。
 
 ```text
 public function end();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -1068,7 +1065,7 @@ public static function regClass($setting);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$setting` | array；加载规则列表；path相对于ROOT，运行时兼容历史绝对路径；ext逗号分隔，idx文件相对于该path |
+| `$setting` | array；加载规则列表；path相对于ROOT，运行时支持绝对路径；ext逗号分隔，idx文件相对于该path |
 
 **返回值**：void 登记自动加载回调，不立即创建实例
 

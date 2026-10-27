@@ -1,7 +1,5 @@
 # interface_db：interface_db 数据库驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
@@ -29,18 +27,18 @@ if ($db->supports(interface_db_prepared::class)) {
 功能说明：声明连接、CRUD、结果读取及字段查询的基础入口，并加载SQL与可选能力接口。
 
 使用说明：
-  1. 由MySQL/MSSQL/SQLite/simpleDB实现，保留旧方法签名。
+  1. 由MySQL/MSSQL/SQLite/simpleDB实现，实现接口声明的方法。
   2. SQL驱动和文件驱动对部分参数/返回值的解释不同，应查阅具体实现。
   3. 参数绑定、受管事务等能力通过独立接口及myDb::supports()检查。
 
 补充说明：
-兼容SQL驱动和simpleDB的历史数据库入口协议。
+支持SQL驱动和simpleDB的数据库入口协议。
 
 保留原方法、参数个数及无类型签名，允许已有第三方驱动继续实现；这不是统一的
 SQL语义协议：simpleDB使用文件、条件数组及行号，SQL驱动使用连接与构建器。
 驱动可提供更多可选参数，具体格式见其方法说明。参数化查询和受管事务分别由
-interface_db_prepared、interface_db_transaction表达，不强加给所有旧驱动。
-历史上载入本文件会同时定义interface_sql，该加载方式继续有效。
+interface_db_prepared、interface_db_transaction表达，不强加给所有驱动。
+上载入本文件会同时定义interface_sql，该加载方式继续有效。
 
 ## 方法目录
 
@@ -52,7 +50,7 @@ interface_db_prepared、interface_db_transaction表达，不强加给所有旧�
 | `interface_db::select` | 查询当前表；SQL驱动执行/预览构建的SELECT，simpleDB返回筛选记录。 |
 | `interface_db::update` | 更新记录；SQL驱动使用当前构建条件，simpleDB额外接收条件和字段数据。 |
 | `interface_db::delete` | 删除匹配记录；空条件、事务和预览行为以具体驱动说明为准。 |
-| `interface_db::query` | 执行历史查询入口；不提供跨驱动参数绑定或统一行数语义。 |
+| `interface_db::query` | 执行查询入口；不提供跨驱动参数绑定或统一行数语义。 |
 | `interface_db::record` | 读取单条记录；SQL驱动可用当前构建器，simpleDB按行号读取。 |
 | `interface_db::records` | 读取全部记录；SQL执行查询，simpleDB读取当前文件的全部数据。 |
 | `interface_db::result` | 读取单个字段；SQL驱动取第一行第一列，simpleDB使用条件及可选字段参数。 |
@@ -73,7 +71,7 @@ interface_db_prepared、interface_db_transaction表达，不强加给所有旧�
 public function connect();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool|object 内置MySQL/SQLite/simpleDB返回bool，MSSQL成功返回自身
 
@@ -113,7 +111,7 @@ public function selectDB($the_db);
 public function insert();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|bool|string 执行结果；SQL驱动的可选预览模式返回SQL文本
 
@@ -133,7 +131,7 @@ public function insert();
 public function select();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|array|false|string 行数、记录、失败或预览SQL，依驱动及模式决定
 
@@ -153,7 +151,7 @@ public function select();
 public function update();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|bool|string 受影响数、匹配结果或预览SQL；0不等于失败
 
@@ -173,7 +171,7 @@ public function update();
 public function delete();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|bool|string 执行结果或预览SQL；空条件可能删除整表数据
 
@@ -185,7 +183,7 @@ public function delete();
 
 ### interface_db::query
 
-功能说明：执行历史查询入口；不提供跨驱动参数绑定或统一行数语义。
+功能说明：执行查询入口；不提供跨驱动参数绑定或统一行数语义。
 
 ```text
 public function query($sql);
@@ -233,7 +231,7 @@ public function records($sql);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$sql` | string；SQL或表名；simpleDB仅保留该兼容占位参数 |
+| `$sql` | string；SQL或表名；simpleDB仅保留该保留参数 |
 
 **返回值**：array|false 空结果为数组，失败为false
 
@@ -293,7 +291,7 @@ public function getFields($the_tbl);
 public function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|null 内置SQL驱动返回累计执行次数，simpleDB无返回值
 

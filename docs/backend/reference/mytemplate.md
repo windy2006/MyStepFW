@@ -1,7 +1,5 @@
 # myTemplate：模板实例和编译
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 name/path/style决定模板，编译缓存与页面缓存不同。渲染字符串返回与直接输出显式区分。
@@ -33,11 +31,11 @@ $html = $template->render('', false);
 使用说明：
   1. 传模板路径/名称/编译目录初始化，通过assign/setLoop填充再render。
   2. 模板及标签回调是受信程序资源；不把用户任意文本作为可执行模板。
-  3. 继承、编译指纹、页面缓存及旧标签兼容规则见docs/framework/templates.md。
+  3. 继承、编译指纹、页面缓存及旧标签支持规则见docs/framework/templates.md。
 
 补充说明：
 前台模板引擎：独立变量空间、嵌套块、可信标签扩展及按内容校验的编译/页面缓存。
-普通占位符兼容原样输出；<!--name|html--> 用于 HTML 文本或引号属性，
+普通占位符支持原样输出；<!--name|html--> 用于 HTML 文本或引号属性，
 <!--name|url--> 用于 URL 组件。模板、标签回调及编译目录必须由可信应用控制。
 页面缓存不会自动区分用户，请使用 cache.vary 或按用户/语言分目录。
 
@@ -85,14 +83,14 @@ protected $cache = ['use'=>false, 'file'=>'', 'expire'=>300];
 | `myTemplate::assignEscaped` | 将变量按 HTML 文本/引号属性上下文转义后赋值；不要再叠加 \|html |
 | `myTemplate::loadSet` | 加载可信 PHP 返回数组、INI 或 JSON 配置，支持重复调用 |
 | `myTemplate::attributes` | 解析引号属性，完整保留等号、反斜杠、空串及相反种类的引号 |
-| `myTemplate::parseBlock` | 解析旧扩展接口使用的块属性，正文不再 stripslashes |
+| `myTemplate::parseBlock` | 解析扩展标签的块属性，按原始内容处理正文 |
 | `myTemplate::regTag` | 登记可信的编译期标签回调，扩展结果可包含 PHP |
 | `myTemplate::identity` | 计算基础编译身份，模板值不写入编译文件 |
 | `myTemplate::tagIdentity` | 计算已登记标签的实现身份；闭包和对象回调按模板实例隔离；具名回调的外部状态变化请更新 compile_version |
 | `myTemplate::dependenciesValid` | 校验元数据中所有依赖的内容摘要，同时检查原先不存在的模板是否已出现 |
 | `myTemplate::metadata` | 读取缓存元数据，损坏文件作为未命中处理 |
 | `myTemplate::atomicWrite` | 在目标目录写临时文件后原子替换，避免读到半个 PHP/HTML 文件 |
-| `myTemplate::compiledFile` | 取得旧接口使用的编译入口位置，风格目录总是正确连接 |
+| `myTemplate::compiledFile` | 取得接口使用的编译入口位置，风格目录总是正确连接 |
 | `myTemplate::protectPHP` | 用 PHP 词法器隔离脚本，防止模板正文被编译器当成 PHP 字符串插值 |
 | `myTemplate::literalCode` | 将正文编译为安全的字面量输出，内部脚本标记恢复为可信代码 |
 | `myTemplate::templateTokens` | 将模板分隔标签转为词元，PHP 部分已经隔离 |
@@ -107,7 +105,7 @@ protected $cache = ['use'=>false, 'file'=>'', 'expire'=>300];
 | `myTemplate::minifyHTML` | 保守压缩 HTML，去除普通标签行首缩进；特殊内容整段保护 |
 | `myTemplate::tagPlaceholders` | 在自定义标签返回文本中按 PHP 词法上下文输出属性占位符 |
 | `myTemplate::parseTag` | 编译自定义标签，保留既有 PHP 代码生成及 split 标记约定 |
-| `myTemplate::getBlock` | 提取首个完整块，兼容可信扩展生成 PHP 时使用的历史返回格式 |
+| `myTemplate::getBlock` | 提取首个完整块，支持可信扩展生成 PHP 时使用的返回格式 |
 
 ## 逐方法参数、返回与示例
 
@@ -116,7 +114,6 @@ protected $cache = ['use'=>false, 'file'=>'', 'expire'=>300];
 ### myTemplate::init
 
 功能说明：初始化模板、静态页面缓存和标签分隔符
-
 
 调用示例：
     $tpl = new myTemplate(['path' => $views, 'path_compile' => $compiled, 'name' => 'home']);
@@ -171,8 +168,7 @@ protected function relativeName($value, $empty = false);
 
 功能说明：设置模板位置并建立当前对象的数据空间，同一对象切换模板会清空赋值
 
-
-设置结构：name默认main，style默认空串，path默认./，path_compile默认./complied（沿用历史拼写），ext默认tpl，compile_version默认空串；路径名必须来自受信配置。
+设置结构：name默认main，style默认空串，path默认./，path_compile默认./complied（使用拼写），ext默认tpl，compile_version默认空串；路径名必须来自受信配置。
 
 ```text
 public function setTplPara($setting);
@@ -205,7 +201,7 @@ $result = $instance->setTplPara($setting);
 public function __destruct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -223,7 +219,7 @@ public function __destruct();
 public function __clone();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -241,7 +237,7 @@ public function __clone();
 public function __serialize();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 包含子类私有属性的实例状态和模板数据；闭包/资源限制仍遵循 PHP 原生行为
 
@@ -270,7 +266,6 @@ public function __unserialize(array $data);
 ### myTemplate::setCacheMode
 
 功能说明：启用或关闭页面缓存；登录态/语言等差异必须由调用方通过 vary 或独立路径区分
-
 
 缓存结构：name默认当前模板名，path默认模板目录/cache/风格，ext默认html，expire默认300秒；expire非正不复用页面，vary用于区分用户/语言等上下文。
 
@@ -383,7 +378,7 @@ public function setSwitch($key, $value);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$key` | string；分支名称 |
-| `$value` | mixed；保留旧 switch 的宽松比较规则 |
+| `$value` | mixed；比较时使用宽松规则 |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -407,7 +402,7 @@ public function assign($name, $value = '');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$name` | string\|array\|object；名称或无前缀批量变量 |
-| `$value` | mixed；值；非字符串标量保留 myString::fromAny 的历史表示（默认：''） |
+| `$value` | mixed；值；非字符串标量保留 myString::fromAny 的表示（默认：''） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -495,7 +490,7 @@ protected function attributes($text);
 
 ### myTemplate::parseBlock
 
-功能说明：解析旧扩展接口使用的块属性，正文不再 stripslashes
+功能说明：解析扩展标签的块属性，按原始内容处理正文
 
 ```text
 protected function parseBlock($attrib, $content, &$block_attrib, &$block_content);
@@ -517,7 +512,6 @@ protected function parseBlock($attrib, $content, &$block_attrib, &$block_content
 ### myTemplate::regTag
 
 功能说明：登记可信的编译期标签回调，扩展结果可包含 PHP
-
 
 回调签名：function (myTemplate &$tpl, array &$attrs): string；两项按引用传入，允许回调忽略不需要的形参。attrs以解析值为基础并含unit/unit_blank/class，回调可补充占位参数；在编译期执行，返回的PHP仅在渲染时按所处模板分支执行。
 
@@ -558,7 +552,7 @@ $result = $instance->regTag($tag_name, $tag_func);
 protected function identity();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 包含引擎、文件路径、脚本开关、分隔符及显式版本的摘要
 
@@ -576,7 +570,7 @@ protected function identity();
 protected function tagIdentity();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 名称、源码文件摘要及定义位置的摘要；闭包和对象回调包含实例身份
 
@@ -643,7 +637,7 @@ protected function atomicWrite($file, $content);
 
 ### myTemplate::compiledFile
 
-功能说明：取得旧接口使用的编译入口位置，风格目录总是正确连接
+功能说明：取得接口使用的编译入口位置，风格目录总是正确连接
 
 参数说明：无显式参数。
 
@@ -651,7 +645,7 @@ protected function atomicWrite($file, $content);
 protected function compiledFile();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 编译入口的本地绝对路径
 
@@ -786,7 +780,7 @@ protected function templateValue($name, array $data, array $rows, $filter = '');
 protected function compileTemplate();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前版本的 PHP 文件路径；旧 name.php 保留为最新版本入口
 
@@ -806,7 +800,7 @@ public function removeCache($html = false);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$html` | bool；true 连同当前 vary 对应的静态页面一起删除，默认保持历史行为（默认：false） |
+| `$html` | bool；true 连同当前 vary 对应的静态页面一起删除，默认保持处理规则（默认：false） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -829,7 +823,7 @@ $result = $instance->removeCache($html);
 public function checkCache();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 空串及字符串 0 也是有效缓存；无元数据的旧页面会重新生成
 
@@ -852,7 +846,7 @@ $result = $instance->checkCache();
 public function getCache();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 未命中返回空串；需区分空页面时先调用 checkCache
 
@@ -953,7 +947,7 @@ protected function parseTag($content);
 
 ### myTemplate::getBlock
 
-功能说明：提取首个完整块，兼容可信扩展生成 PHP 时使用的历史返回格式
+功能说明：提取首个完整块，支持可信扩展生成 PHP 时使用的返回格式
 
 ```text
 public function getBlock($tpl_content, $tag = '', $idx = '');

@@ -66,7 +66,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -843,16 +843,7 @@ class myController extends myBase {
         mb_regex_encoding($charset);
         header('Content-Type: text/html; charset=' . $charset);
 
-        self::setOp(array(
-            'enable_cli' => 1,
-            'memory_consumption' => 128,
-            'interned_strings_buffer' => 8,
-            'max_accelerated_files' => 4000,
-            'fast_shutdown' => 1,
-            'validate_timestamps' => 1,
-            'revalidate_freq' => !empty($this->setting->gen->debug) ? 0 : 120,
-            'huge_code_pages' => 1
-        ));
+        // OPcache由服务器统一管理，请求启动不覆盖php.ini的内存、开关及重验频率。
         if(count(ob_list_handlers()) == 0 && !headers_sent()) ob_start();
 
         if ($set_plugin) $this->plugin();

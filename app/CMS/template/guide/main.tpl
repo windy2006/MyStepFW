@@ -1,175 +1,104 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<title><!--web_title--></title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta http-equiv="windows-Target" content="_top" />
+<title><!--web_title|html--></title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=<!--charset-->" />
+<meta name="description" content="<!--web_description|html-->">
 <base href="<!--path_root-->" />
 <link rel="Shortcut Icon" href="favicon.ico" />
 <!--page_start-->
 </head>
 <body class="py-5">
-<header class="navbar navbar-expand-md navbar-dark bd-navbar fixed-top">
-    <a class="btn navbar-brand d-inline-block mr-3" href="#" onclick="return false;"><b>迈思指南</b></a>
-    <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav" aria-expanded="false">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+<header class="navbar navbar-expand-xl navbar-dark bd-navbar fixed-top">
+    <a class="navbar-brand mr-3" href="<!--url_prefix_app-->"><b>迈思手册</b></a>
+    <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="展开手册导航"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="nav">
-        <ul id="top_nav" class="navbar-nav mr-auto mt-2 mt-lg-0">
-            <li class="nav-item"><a class="nav-link" href="<!--url_prefix_app-->"><span class="glyphicon glyphicon-home"></span> <!--lng_page_main--></a></li>
+        <ul id="top_nav" class="navbar-nav mr-auto">
             <!--loop:start key="news_cat"-->
-            <li class="nav-item">
-                <a class="nav-link" href="<!--news_cat_link-->" idx="<!--news_cat_idx-->">
-                    <span class="glyphicon glyphicon-info-sign"></span> <!--news_cat_name-->
-                </a>
-            </li>
+            <li class="nav-item"><a class="nav-link" href="<!--news_cat_link|html-->" data-guide-index="<!--news_cat_idx-->"><!--news_cat_name|html--></a></li>
             <!--loop:end-->
         </ul>
-        <form action="<!--url_prefix_app-->search">
-            <input id="search_input" type="text" name="k" class="form-control search-query" placeholder="检索" />
+        <form action="<!--url_prefix_app-->search" role="search" class="guide-search">
+            <label class="sr-only" for="search_input">搜索手册</label>
+            <div class="input-group"><input id="search_input" type="search" name="k" class="form-control" placeholder="搜索手册" minlength="2" required><div class="input-group-append"><button class="btn btn-outline-light" type="submit">搜索</button></div></div>
         </form>
     </div>
 </header>
 <div class="container-fluid">
-    <div class="row" style="min-height:570px;">
-        <div id="list">
-            <div class="position-fixed" style="top:60px;width:200px;">
+    <div class="row guide-layout">
+        <aside id="list" aria-label="手册栏目">
+            <nav class="guide-sidebar">
                 <ul id="side_nav" class="navbar-nav list-group">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<!--url_prefix_app-->"><span class="glyphicon glyphicon-home"></span> 首页</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="<!--url_prefix_app-->">手册目录</a></li>
                     <!--loop:start key="news_cat"-->
-                    <li class="nav-item" idx="<!--news_cat_idx-->" cat="<!--news_cat_cat_id-->">
-                        <a class="nav-link" href="<!--news_cat_link-->">
-                            <span class="glyphicon glyphicon-info-sign"></span> <!--news_cat_name-->
-                        </a>
-                    </li>
+                    <li class="nav-item" data-guide-index="<!--news_cat_idx-->" data-category="<!--news_cat_cat_id-->"><a class="nav-link" href="<!--news_cat_link|html-->"><!--news_cat_name|html--></a></li>
                     <!--loop:end-->
                 </ul>
-            </div>
-        </div>
+            </nav>
+        </aside>
         <!--main-->
     </div>
 </div>
-<footer class="border-top text-center fixed-bottom bg-light pt-2" style="max-height:60px;overflow:hidden;">
-    <!--info idx="copyright"-->
-</footer>
+<footer class="border-top text-center bg-light"><!--info idx="copyright"--></footer>
 <script type="application/javascript">
-if(self!==top) top.location.href = location.href;
-let news_cat = <!--news_cat-->;
-if(typeof cat_id === 'undefined') cat_id = 0;
-$(function(){
-    $(document).off('click.bs.dropdown.data-api');
-    let objs = $('#top_nav>li>a[idx]');
-    for(let i=0,m=objs.length;i<m;i++) {
-        let obj = $(objs[i]);
-        let idx = obj.attr('idx');
-        if(typeof news_cat[idx].sub != 'undefined') {
-            let list = $('<div class="dropdown-menu"></div>').css('margin-top',1);
-            obj.addClass('dropdown-toggle').attr('data-toggle','dropdown').attr('href', 'javascript:').parent().addClass('dropdown');
-            obj = obj.parent();
-            let obj2 = $('#side_nav li[idx="'+idx+'"]');
-            let list2 = $('<div class="collapse mb-2"></div>').attr('id', 'cat_'+idx);
-            obj2.find('a').attr('data-toggle','collapse').attr('href', '#cat_'+idx);
-            obj2.append('<i class="nav-arrow" data-toggle="collapse" href="#cat_'+idx+'"></i>');
-            for(let j=0,n=news_cat[idx].sub.length;j<n;j++) {
-                if((news_cat[idx].sub[j].show & 1) === 0) continue;
-                if(news_cat[idx].sub[j].link.length===0) news_cat[idx].sub[j].link = 'catalog/' + news_cat[idx].sub[j].idx;
-                list.append('<a class="dropdown-item" data-id="'+news_cat[idx].sub[j].cat_id+'" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
-                list2.append('<a class="dropdown-item" data-id="'+news_cat[idx].sub[j].cat_id+'" href="'+news_cat[idx].sub[j].link+'">'+news_cat[idx].sub[j].name+'</a>');
-            }
-            obj.append(list);
-            obj2.append(list2);
-            setURL('<!--url_prefix_app-->', obj);
-            setURL('<!--url_prefix_app-->', obj2);
-        }
+/** 手册栏目只用本地jQuery/Bootstrap，名称用文本节点装配，左侧只展开一个栏目，并在当前标签页保留状态。 */
+$(function () {
+    const categories = <!--news_cat-->;
+    const current = typeof cat_id === 'undefined' ? 0 : Number(cat_id);
+    const stateKey = 'mystep:cms-guide:' + location.host + ':' + setting.path_root;
+    let saved = {};
+    try { saved = JSON.parse(sessionStorage.getItem(stateKey) || '{}'); } catch (error) { saved = {}; }
+    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) saved = {};
+    let activeGroup = '', savedGroup = '';
+    /** 保存唯一展开栏目；空字符串表示全部收起，旧的多项记录在初始化时归并。
+     * @param {string} id 合法栏目面板id或空字符串。
+     * @returns {void} 存储不可用时仍维持当前页面的手风琴行为。
+     */
+    function rememberOpen(id) {
+        saved = id ? {[id]: true} : {};
+        try { sessionStorage.setItem(stateKey, JSON.stringify(saved)); } catch (error) { /* 存储不可用时仍可正常阅读。 */ }
     }
-    let sub_cat = $('a[data-id="'+cat_id+'"]');
-    if(sub_cat.length>0) {
-        sub_cat.addClass('active');
-        sub_cat.last().parent().collapse('show');
-        sub_cat.last().parent().parent().addClass('active');
-    } else {
-        sub_cat = $('li[cat="'+cat_id+'"]');
-        if(sub_cat.length>0) {
-            sub_cat.addClass('active');
-        } else {
-            $('#side_nav > li').first().addClass('active');
-        }
-    }
-    $('body').click(function(e){
-        if($(e.target).parents('header').length) return;
-        $('header > .collapse').collapse('hide');
-        $('#top_nav>li.dropdown').removeClass('show')
-            .find('div.dropdown-menu').removeClass('show');
-    });
-    $('#top_nav>li.dropdown>div.dropdown-menu>.dropdown-item').click(function(e) {
-        e.stopPropagation();
-        return true;
-    });
-    $('#list').mousewheel(function(e){
-        let obj = $('#list > div');
-        let top = parseInt(obj.css('top'));
-        let step = 8;
-        if(e.deltaY<0) {
-            if(obj.height()+top>$(window).height()-$('header').height()) {
-                obj.css('top', top-step);
-            }
-        } else {
-            if(top<60) {
-                if(top-60>-step) step = -top;
-                obj.css('top', top+step);
-            }
-        }
-        e.stopPropagation();
-        return false;
-    });
-    $('#list .collapse').on('show.bs.collapse', function () {
-        $('.nav-arrow[aria-expanded=true]').each(function(){
-            $(this).attr('aria-expanded','false');
-            $(this).next().collapse('hide');
+    $('#top_nav a[data-guide-index]').each(function () {
+        const group = categories[Number(this.dataset.guideIndex)];
+        if (!group) return;
+        if (Number(group.cat_id) === current) $(this).addClass('active').attr('aria-current','page');
+        if (!Array.isArray(group.sub) || !group.sub.length) return;
+        const button = $(this).addClass('dropdown-toggle').attr({'data-toggle':'dropdown','aria-haspopup':'true','aria-expanded':'false'});
+        const menu = $('<div class="dropdown-menu"></div>');
+        const side = $('#side_nav > li').filter(function () { return this.dataset.guideIndex === String(button[0].dataset.guideIndex); });
+        const collapseId = 'guide-group-' + Number(group.cat_id);
+        const sideList = $('<div class="collapse guide-submenu"></div>').attr({'id':collapseId,'data-parent':'#side_nav'});
+        side.children('a').attr({'data-toggle':'collapse','href':'#'+collapseId,'aria-controls':collapseId,'aria-expanded':'false','data-parent':'#side_nav'});
+        group.sub.forEach(function (entry) {
+            if ((Number(entry.show) & 1) === 0) return;
+            const url = entry.link || 'catalog/' + encodeURIComponent(entry.idx);
+            $('<a class="dropdown-item"></a>').attr({'href':url,'data-id':entry.cat_id}).text(entry.name).appendTo(menu);
+            $('<a class="dropdown-item"></a>').attr({'href':url,'data-id':entry.cat_id}).text(entry.name).appendTo(sideList);
         });
-    })
-    setURL();
-    resizeMain();
-    $('#search_input').click(function(e){
-        e.cancelBubble = true;
-        e.stopPropagation();
+        button.parent().addClass('dropdown').append(menu);
+        side.addClass('guide-has-children').append(sideList);
+        setURL('<!--url_prefix_app-->', menu);
+        setURL('<!--url_prefix_app-->', sideList);
+        const active = sideList.find('a').filter(function () { return Number(this.dataset.id) === current; });
+        if (active.length) { active.addClass('active').attr('aria-current','page'); side.addClass('active'); button.addClass('active'); }
+        if (active.length || Number(group.cat_id) === current) activeGroup = collapseId;
+        if (!savedGroup && saved[collapseId] === true) savedGroup = collapseId;
     });
+    $('#side_nav > li').filter(function () { return Number(this.dataset.category) === current; }).addClass('active');
+    const opened = activeGroup || savedGroup;
+    $('#side_nav .guide-submenu').each(function () {
+        const expanded = this.id === opened;
+        $(this).toggleClass('show', expanded).siblings('a').toggleClass('collapsed', !expanded).attr('aria-expanded', expanded ? 'true' : 'false');
+    }).on('show.bs.collapse', function (event) {
+        if (event.target === this) rememberOpen(this.id);
+    }).on('hide.bs.collapse', function (event) {
+        // 展开新项先保存新id，再收起旧项；旧项的hide不能抹去新项状态。
+        if (event.target === this && saved[this.id] === true) rememberOpen('');
+    });
+    rememberOpen(opened);
+    setURL('<!--url_prefix_app-->');
 });
-function resizeMain() {
-    $('#main').css('min-height', 0);
-    $('#main').css('min-height', $(document).height()-80);
-    if(navigator.userAgent.indexOf(".NET") != -1) {
-        let top = ($('#list').css('display')=='none') ? '0px' : '65px';
-        $('#main').parent().css('padding-top', top);
-    }
-    $('body').trigger('click');
-    if($('header > button.navbar-toggler').is(":visible")) {
-        $('#top_nav>li.dropdown').unbind('mouseenter mouseleave click').click(function(e){
-            if($(this).hasClass('show')) {
-                $(this).removeClass('show');
-                $(this).find('div.dropdown-menu').removeClass('show');
-            } else {
-                $(this).parent().find('li').removeClass('show');
-                $(this).parent().find('div.dropdown-menu').removeClass('show');
-                $(this).addClass('show');
-                $(this).find('div.dropdown-menu').addClass('show');
-            }
-            return false;
-        });
-    } else {
-        $('#top_nav>li.dropdown').unbind('mouseenter mouseleave click').hover(function(){
-            $(this).addClass('show');
-            $(this).find('div.dropdown-menu').addClass('show');
-        }, function(){
-            $(this).removeClass('show');
-            $(this).find('div.dropdown-menu').removeClass('show');
-        });
-    }
-}
-$(window).resize(resizeMain);
 </script>
 <!--page_end-->
 </body>

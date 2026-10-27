@@ -1,7 +1,5 @@
 # myException：错误处理与日志
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 启动期及完整应用使用不同初始化设置；异常显示由debug和回调控制，不能在API正文中输出调试堆栈。
@@ -181,7 +179,7 @@ $result = myException::exceptionHandle($e);
 public static function shutdownCheck();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -203,7 +201,7 @@ $result = myException::shutdownCheck();
 public static function log();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -225,7 +223,7 @@ $result = myException::log();
 public static function clear();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -247,7 +245,7 @@ $result = myException::clear();
 public static function check();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 当前是否记录了框架错误，具体基于静态错误状态
 
@@ -269,7 +267,7 @@ $result = myException::check();
 public static function show();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 无待显示错误为false，已输出通用错误/详情为true；本方法本身不执行exit
 

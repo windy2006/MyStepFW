@@ -1,7 +1,5 @@
 # 公共函数逐项用法
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 仅讲PHP全局函数；JavaScript同名debug或setURL属于不同运行环境。
@@ -16,7 +14,7 @@
 | 日期 | `getDate_cn()`、`formatDate()` | 中文日期或格式化日期；业务自行验证输入含义 |
 | 环境 | `isHttps()`、`isMobile()` | 当前请求判断，不构成身份或权限验证 |
 | 文本链接 | `shortUrl()`、`tinyUrl()` | 链接显示／短地址辅助，具体协议和输入仍需校验 |
-| 数组／递归 | `arrayMerge()`、`recursionFunction()` | 依据原有规则递归合并或处理，不能套用所有框架的同名语义 |
+| 数组／递归 | `arrayMerge()`、`recursionFunction()` | 依据规则递归合并或处理，不能套用所有框架的同名语义 |
 | 缓冲 | `getOB()` | 取得缓冲内容，默认清理；注意当前缓冲的归属 |
 | 调试 | `debug_show()`、`debug()`、`debug_set()`、`debug_check()` | 展示、结束或条件调试；不得混进正常 JSON、下载或生产响应 |
 | 受信表达式 | `myEval()`、`checkPara()` | 仅用于受信程序与框架约定，不能运行用户提交代码 |
@@ -28,7 +26,6 @@ $milliseconds = getTimeDiff($started, 2, true);
 ```
 
 日志只记录必要的耗时及业务标识，不记录数据库密码、完整请求头、CSRF 或记住登录凭据。各方法完整参数与返回说明以源码 PHPDoc 为准，定位入口见[功能设置](../../basics/03-management.md)。
-
 
 ## 主要方法：参数、返回和失败约定
 
@@ -89,7 +86,7 @@ function formatDate($date='', $format='Y-m-d');
 | string\|int $date 待解析的日期文本或时间戳，空串采用当前日期（默认：''） |
 | string $format 输出或输入处理的格式规则（默认：'Y-m-d'） |
 
-**返回**：string 按format格式化的日期；格式不符合历史要求时回退Y-m-d
+**返回**：string 按format格式化的日期；格式不符合格式要求时回退Y-m-d
 
 ### shortUrl
 
@@ -189,7 +186,7 @@ function arrayMerge($arr_1, $arr_2);
 | array $arr_1 用于合并的基础数组 |
 | mixed $arr_2 递归合并的数组；非数组值追加到第一个数组 |
 
-**返回**：array|false 按历史递归覆盖/追加规则合并的新数组；第一个参数不是数组为false
+**返回**：array|false 按递归覆盖/追加规则合并的新数组；第一个参数不是数组为false
 
 ### recursionFunction
 
@@ -230,7 +227,7 @@ function debug_show();
 
 | 参数说明 |
 | --- |
-| mixed ...$args 需要依次输出的任意个调试值（历史位置参数，由func_get_args读取） |
+| mixed ...$args 需要依次输出的任意个调试值（位置参数，由func_get_args读取） |
 
 **返回**：void 无返回值。
 
@@ -244,7 +241,7 @@ function debug();
 
 | 参数说明 |
 | --- |
-| mixed ...$args 需要依次展示的调试值，展示后结束请求（历史位置参数，由func_get_args读取） |
+| mixed ...$args 需要依次展示的调试值，展示后结束请求（位置参数，由func_get_args读取） |
 
 **返回**：void 无返回值。
 
@@ -270,7 +267,7 @@ function debug_check();
 
 | 参数说明 |
 | --- |
-| mixed ...$args 条件调试开启时交给debug的值（历史位置参数，由func_get_args读取） |
+| mixed ...$args 条件调试开启时交给debug的值（位置参数，由func_get_args读取） |
 
 **返回**：void 无返回值。
 

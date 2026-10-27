@@ -14,9 +14,10 @@ if(($web_cur = \app\CMS\checkVal($website, 'web_id', $web_id))!==false) {
 if(empty($id)) $id = r::r('news_id')??0;
 if(!empty($id)) {
     $db->build($web_cur['setting']->db->pre.'news_show')
-        ->field('web_id')
+        ->field('news_id,web_id,cat_id,subject')
         ->where('news_id', 'n=', $id);
-    $web_id_news = $db->result();
+    $original_article = $db->record();
+    $web_id_news = $original_article['web_id'] ?? false;
     if($web_id_news===false || !checkPower('web', $web_id_news)) {
         myStep::info('admin_art_content_nopower');
     }
@@ -33,6 +34,7 @@ if(!empty($id)) {
         }
     }
 }
+$refresh_categories = false;
 switch($method) {
     case 'add':
     case 'edit':
@@ -92,6 +94,7 @@ switch($method) {
             $data['cat_id'] = $db->getInsertId();
             \app\CMS\deleteCache('news_cat');
             $cache->func('\app\CMS\setCatList', [$news_cat], 0);
+            $refresh_categories = true;
             unset($data['independent_article']);
         }
 
@@ -176,9 +179,12 @@ switch($method) {
             $db->insert();
             $id = $db->getInsertId();
             $data['news_id'] = $id;
+            \app\CMS\saveArticleAlias($id,(int)$data['web_id'],$data['subject']);
             if(isset($cat)) {
+                // 别名读取会执行查询；必须在建立栏目UPDATE构造器前取得地址。
+                $article_link=\app\CMS\getLink($data);
                 $db->build($S->db->pre.'news_cat')
-                    ->field(['link'=>\app\CMS\getLink($data)])
+                    ->field(['link'=>$article_link])
                     ->where('cat_id', 'n=', $data['cat_id']);
                 $db->update();
             }
@@ -192,6 +198,8 @@ switch($method) {
                 ->field($data)
                 ->where('news_id', 'n=', $id);
             $db->update();
+            $alias=\app\CMS\saveArticleAlias($id,(int)$original_article['web_id'],$data['subject']);
+            if($alias!==null&&\app\CMS\syncArticleCategory($original_article,$alias,$web_cur['setting']->db->pre)){\app\CMS\deleteCache('news_cat');$refresh_categories=true;}
             \app\CMS\removeNewsCache($id, $web_cur['web_id']);
         }
 
@@ -230,9 +238,11 @@ switch($method) {
                 $db->build($web_cur['setting']->db->pre.'news_show')
                     ->field($data);
                 $db->insert();
+                \app\CMS\saveArticleAlias($db->getInsertId(),(int)$data['web_id'],$data['subject']);
             }
         }
         myStep::$goto_url = !empty($back_url)?$back_url:\app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/article/content/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
+        if($refresh_categories) myStep::$goto_url = \app\CMS\queryURL(myStep::$goto_url, ['Refresh'=>1]);
         break;
     default:
         $content = build_page('list');
@@ -244,6 +254,8 @@ function build_page($method) {
 
     $tpl_setting['name'] = 'art_content_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
+    // 编辑器JS与iframe CSS共用修改时间版本，避免浏览器沿用旧标记逻辑或旧样式。
+    $tpl->assign('editor_asset_version', (string)max(filemtime(PATH.'asset/admin/tinymce_init.js'), filemtime(STATICS.'css/tinymce.css')));
 
     $pos = explode(',', $S->content->push_pos);
     for($i=0,$m=count($pos); $i<$m; $i++) {
@@ -316,8 +328,10 @@ function build_page($method) {
                 'mode' => 'left',
                 'field' => 'cat_id'
             ])->field('idx','name as cat_name');
-        $db->select();
-        while($record = $db->getRS()) {
+        // 批量取得列表并预读地址，避免别名查询替换正在遍历的数据库结果集。
+        $article_list=$db->records();
+        \app\CMS\primeArticleAliases($article_list);
+        foreach($article_list as $record) {
             s::htmlTrans($record);
             if(empty($record['link'])) {
                 $record['link'] = \app\CMS\getLink($record);

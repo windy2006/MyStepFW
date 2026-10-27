@@ -47,6 +47,7 @@
                         <button class="btn btn-warning" type="reset"> 清 空 </button>
                     </div>
                 </form>
+                <!--social_login-->
             </div>
         </div>
     </div>

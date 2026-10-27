@@ -1,6 +1,6 @@
-<div id="main" class="border-left">
+<main id="main" class="border-left">
     <div class="mb-3 h-100">
-        <div class="title"><!--record_subject--></div>
+        <h1 class="title"><!--record_subject|html--></h1>
         <nav aria-label="breadcrumb" class="w-100">
             <ol class="breadcrumb">
                 <!--loop:start key="cat_list"-->
@@ -8,7 +8,7 @@
                 <!--loop:end-->
             </ol>
         </nav>
-        <div class="w-100 h-100">
+        <div class="guide-columns">
             <div id="content" class="py-3 h-100">
                 <div class="mb-3 font-weight-bold font-md <!--multi_page-->">
                     文章分页：
@@ -18,15 +18,15 @@
                         <!--loop:end-->
                     </select>
                 </div>
-                <div>
+                <div id="guide-body">
                     <!--record_content-->
                 </div>
                 <div class="row">
                     <div class="col">
-                        上一篇：<!--news_next id='$id' cat_id='$cat_id' mode='prev'-->
+                        上一篇：<a id="article_prev" href="<!--guide_previous_url|html-->"><!--guide_previous_title|html--></a>
                     </div>
                     <div class="col text-right">
-                        下一篇：<!--news_next id='$id' cat_id='$cat_id'-->
+                        下一篇：<a id="article_next" href="<!--guide_next_url|html-->"><!--guide_next_title|html--></a>
                     </div>
                 </div>
                 <nav class="w-100 mb-3 mx-auto <!--multi_page-->">
@@ -37,17 +37,10 @@
                     </ul>
                 </nav>
             </div>
-            <div id="side_cat" class="pt-4 h-100">
-                <div id="cat_list" class="position-sticky">
-                    <div class="side-bar">
-                        <span class="fa fa-circle start"></span>
-                        <span class="fa fa-circle end"></span>
-                    </div>
-                </div>
-            </div>
+            <aside id="side_cat" class="pt-4" aria-label="本页章节"><nav id="cat_list" class="position-sticky"></nav></aside>
         </div>
     </div>
-</div>
+</main>
 <script type="application/javascript">
 let cat_id = '<!--cat_id-->';
 </script>

@@ -1,7 +1,5 @@
 # myConfig：配置读取、合并和保存
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 构造时提供实际配置文件；value无副作用读取，merge按分组覆盖；保存前进行权限、字段及并发检查。
@@ -31,14 +29,14 @@ assert((include $file)['web']['title'] === '新名');
 
 使用说明：
   1. 初始化时传配置文件路径，value只读访问，get(true)导出数组。
-  2. set用于兼容设置表单，merge递归覆盖；save默认检查加载版本避免覆盖并发编辑。
+  2. set用于支持设置表单，merge递归覆盖；save默认检查加载版本避免覆盖并发编辑。
   3. PHP配置会被执行，路径和配置内容必须来自受信来源。
 
 补充说明：
 配置信息加载、分组合并、设置表单及原子保存
 
     $config = new myConfig($file);                 // 加载并记录原文件内容版本
-    $config->catalog->item = 'somevalue';          // 兼容链式读写，缺失分组自动创建
+    $config->catalog->item = 'somevalue';          // 支持链式读写，缺失分组自动创建
     $value = $config->value('db.port', 3306);       // 无副作用地读取点分隔路径
     $config->merge($overlay);                     // 递归覆盖分组
     $config->set($_POST['setting']);              // 依据结构处理设置表单
@@ -76,7 +74,7 @@ protected $schema = [], $revision = null;
 | --- | --- |
 | `myConfig::init` | 绑定配置文件、读取内容版本，并寻找相邻的设置结构定义 |
 | `myConfig::get` | 获取全部配置，可选择递归数组或当前内部对象 |
-| `myConfig::__get` | 读取顶层配置，缺失时自动创建空分组以兼容链式赋值 |
+| `myConfig::__get` | 读取顶层配置，缺失时自动创建空分组以支持链式赋值 |
 | `myConfig::__set` | 直接设置顶层配置，不套用表单列表及密码转换 |
 | `myConfig::__isset` | 检查顶层配置是否存在且值非 null |
 | `myConfig::__unset` | 删除顶层配置项，仅修改内存，持久化需另行 save() |
@@ -85,7 +83,7 @@ protected $schema = [], $revision = null;
 | `myConfig::__toString` | 将当前设置递归转换后编码为 JSON，便于展示及与脚本交互 |
 | `myConfig::a2o` | 递归将数组及对象的可遍历属性复制到新的分组对象 |
 | `myConfig::o2a` | 递归将分组对象及数组复制为数组，不猜测标量内容类型 |
-| `myConfig::recover` | 兼容历史表单/INI 的简单类型恢复，不用于 PHP/JSON 类型推断 |
+| `myConfig::recover` | 支持表单/INI 的简单类型恢复，不用于 PHP/JSON 类型推断 |
 | `myConfig::setParser` | 登记自定义扩展名的加载及保存回调 |
 | `myConfig::makeConstruction` | 编译并缓存表单结构元数据，只有生成内容改变时才原子写入 |
 | `myConfig::load` | 按文件格式读取配置，并返回本次稳定读取的内容摘要 |
@@ -153,7 +151,7 @@ $result = $instance->get($arr);
 
 ### myConfig::__get
 
-功能说明：读取顶层配置，缺失时自动创建空分组以兼容链式赋值
+功能说明：读取顶层配置，缺失时自动创建空分组以支持链式赋值
 
 ```text
 public function __get($idx);
@@ -234,7 +232,7 @@ public function __unset($idx);
 public function __clone();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 文件路径、原内容版本及结构元数据仍沿用被克隆实例
 
@@ -245,7 +243,6 @@ public function __clone();
 ### myConfig::value
 
 功能说明：无副作用地读取点分隔配置路径，保留已存在的 null
-
 
 调用示例：
     $port = $config->value('db.port', 3306); // 不创建缺失分组
@@ -282,7 +279,7 @@ $result = $instance->value($path, $default);
 public function __toString();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string myString::toJson() 生成的文本；文件保存使用 save() 的编码流程
 
@@ -336,7 +333,7 @@ $result = myConfig::o2a($obj);
 
 ### myConfig::recover
 
-功能说明：兼容历史表单/INI 的简单类型恢复，不用于 PHP/JSON 类型推断
+功能说明：支持表单/INI 的简单类型恢复，不用于 PHP/JSON 类型推断
 
 ```text
 public static function recover($v);
@@ -414,7 +411,7 @@ $result = $instance->makeConstruction($file);
 功能说明：按文件格式读取配置，并返回本次稳定读取的内容摘要
 
 读取前后比较文件摘要，最多重试三次；PHP 在独立作用域 include，JSON 严格解码，
-INI 保留兼容类型恢复。首次发现文件不存在返回空配置，不自动保存或替换实例设置。
+INI 保留类型恢复。首次发现文件不存在返回空配置，不自动保存或替换实例设置。
 
 ```text
 public function load($file='', $return_object=false, &$snapshot = null);
@@ -480,7 +477,7 @@ public function set($setting, $idx = '', $check = true);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$setting` | array\|object；旧式 setting 表单结构；嵌套映射表示分组，列表表示多选 |
+| `$setting` | array\|object； setting 表单结构；嵌套映射表示分组，列表表示多选 |
 | `$idx` | string；目标分组的点分隔路径；空字符串从根开始，缺失分组自动创建（默认：''） |
 | `$check` | bool；是否补齐本次提交范围内缺失的复选框/开关，递归调用时为 false（默认：true） |
 
@@ -524,7 +521,6 @@ protected function formValue($value, $current);
 
 先编码后写入，编码失败保留原文件。保存原文件时比较加载摘要，成功后更新本实例
 版本；显式导出其他路径不套用原文件版本检查。新文件权限 0600，既有权限保留。
-
 
 调用示例：
     try {

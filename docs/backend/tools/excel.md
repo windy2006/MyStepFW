@@ -1,7 +1,5 @@
 # XML Excel工作簿与流式导出
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 是Excel可读取的XML，不是XLSX。getContent返回文本，writeTo写流，make产生下载并结束请求。

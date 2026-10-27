@@ -12,6 +12,7 @@
                 <input name="username_org" type="hidden" value="<!--username-->" />
                 <input name="username" class="form-control" type="text" maxlength="20" value="<!--username-->" required />
             </div>
+            <!--if:start key="member_name"--><div class="input-group mb-2"><div class="input-group-prepend"><span class="input-group-text item-name">用户昵称</span></div><input name="display_name" class="form-control" maxlength="60" value="<!--display_name-->" required></div><!--if:end-->
             <div class="input-group mb-2">
                 <div class="input-group-prepend">
                     <span class="input-group-text item-name">用户密码</span>
@@ -28,7 +29,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text item-name">电子邮件</span>
                 </div>
-                <input name="email" type="email" class="form-control" maxlength="50" value="<!--email-->" />
+                <input name="email" type="email" class="form-control" maxlength="<!--email_max-->" value="<!--email-->" />
             </div>
             <div class="input-group mb-2">
                 <div class="input-group-prepend">

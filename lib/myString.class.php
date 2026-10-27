@@ -55,7 +55,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -342,9 +342,9 @@ class myString {
         if(!is_array($value) && !is_object($value)) return $value;
         $object = is_object($value) ? $value : null;
         if($object !== null) {
-            if($active->contains($object)) { if($json) { $json->error = new JsonException('Recursive charset object', JSON_ERROR_RECURSION); throw $json->error; } throw new RuntimeException('Recursive charset object'); }
-            if($copies->contains($object)) return $copies[$object];
-            $active->attach($object);
+            if($active->offsetExists($object)) { if($json) { $json->error = new JsonException('Recursive charset object', JSON_ERROR_RECURSION); throw $json->error; } throw new RuntimeException('Recursive charset object'); }
+            if($copies->offsetExists($object)) return $copies[$object];
+            $active->offsetSet($object);
             try {
                 if($json && $value instanceof JsonSerializable) {
                     $result = self::charsetTree($value->jsonSerialize(), $to, $from, $options, $copies, $active, $depth+1, $json);
@@ -375,7 +375,7 @@ class myString {
                 }
                 if(!$json && $value instanceof stdClass && $options['convert_keys']) foreach($entries as $key => $part) if(!array_key_exists($key, $converted)) unset($result->$key);
                 return $result;
-            } finally { $active->detach($object); }
+            } finally { $active->offsetUnset($object); }
         }
         $result = [];
         foreach($value as $key => $part) {

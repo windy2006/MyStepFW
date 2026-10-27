@@ -1,7 +1,5 @@
 # myImg：图片处理与绘图
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 先检查原始字节、尺寸及像素预算再解码；使用结束后释放GD资源。远程图片仍需受控下载和大小限制。
@@ -30,7 +28,7 @@ $image->destroy();
 功能说明：基于GD管理画布、图像转换、绘制、验证码、水印及缩略图
 
 使用说明：
-  1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+  1. 需要GD及对应图片格式支持；PHP8.5图像为GdImage对象，最后一个引用释放后由引擎回收。
   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
 
@@ -43,9 +41,13 @@ $image->destroy();
 功能说明：继承myImg的坐标换算及折线、柱状、饼图绘制工具
 
 使用说明：
-  1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+  1. 需要GD及对应图片格式支持；PHP8.5图像为GdImage对象，最后一个引用释放后由引擎回收。
   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
+
+## PHP8.5绘图约定
+
+GD图像使用GdImage对象；像素坐标、尺寸和需要整数的绘图参数在调用原生函数前显式向零取整。多边形点数由坐标数组推导。字体大小及旋转角度等允许浮点数的参数继续保留浮点精度。
 
 ## 状态字段与公开变量
 
@@ -224,7 +226,7 @@ public function init();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；图片路径，或宽度、高度、create参数数组[真彩,背景]（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；图片路径，或宽度、高度、create参数数组[真彩,背景]（位置参数，由func_get_args读取） |
 
 **返回值**：$this|false 返回当前实例；图像加载失败为false
 
@@ -338,8 +340,7 @@ $result = $instance->randomColor($rand, $alpha);
 
 功能说明：读取图片文件，并返回图片信息
 
-
-资源所有权：直接调用load得到独立句柄，调用方负责imagedestroy；经init加载时由当前图像实例管理，destroy可显式释放。
+资源所有权：直接调用load得到独立句柄，调用方通过unset释放自身图像引用；经init加载时由当前图像实例管理，destroy可显式释放。
 
 ```text
 public function load($image, &$data = array());
@@ -350,7 +351,7 @@ public function load($image, &$data = array());
 | `$image` | string；待加载的图片文件路径 |
 | `&$data` | array；引用输出的图片格式/尺寸等getimagesize信息（默认：array()） |
 
-**返回值**：resource|false 新GD图像句柄；格式、资源预算或解码失败为false；独立句柄由调用方释放
+**返回值**：GdImage|false 新GD图像句柄；格式、资源预算或解码失败为false；独立句柄由调用方释放
 
 调用形式：
 
@@ -365,12 +366,11 @@ $result = $instance->load($image, $data);
 
 功能说明：旋转画布
 
-
 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
 
 调用示例：
     $rotated = $image->rotate(90, $source);
-    if ($rotated !== false) { imagedestroy($rotated); } // 独立返回句柄由调用方释放
+    if ($rotated !== false) { unset($rotated); } // 独立返回句柄由调用方释放
 
 ```text
 public function rotate($angle, $img = NULL);
@@ -379,9 +379,9 @@ public function rotate($angle, $img = NULL);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$angle` | int\|float；旋转或文字倾斜角度，单位度 |
-| `$img` | resource\|string\|null；GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL） |
+| `$img` | GdImage\|string\|null；GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL） |
 
-**返回值**：$this|resource|false img为null时替换当前画布并返回自身；传入图像时返回新句柄；无效/超限为false
+**返回值**：$this|GdImage|false img为null时替换当前画布并返回自身；传入图像时返回新句柄；无效/超限为false
 
 调用形式：
 
@@ -396,7 +396,6 @@ $result = $instance->rotate($angle, $img);
 
 功能说明：按比例缩放画布（可选择返回图像源）
 
-
 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
 
 ```text
@@ -406,9 +405,9 @@ public function resize($rate, $img = NULL);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$rate` | int\|float\|array；正缩放倍率，或目标边界[宽,高]；边界模式保持比例且不放大 |
-| `$img` | resource\|string\|null；GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL） |
+| `$img` | GdImage\|string\|null；GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL） |
 
-**返回值**：$this|resource|false img为null时替换当前画布；传入图像时返回新句柄；比例/尺寸/加载无效为false
+**返回值**：$this|GdImage|false img为null时替换当前画布；传入图像时返回新句柄；比例/尺寸/加载无效为false
 
 调用形式：
 
@@ -423,7 +422,6 @@ $result = $instance->resize($rate, $img);
 
 功能说明：截取画布的一部分（可选择返回图像源）
 
-
 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
 
 ```text
@@ -435,9 +433,9 @@ public function crop($point, $width, $height, $img = NULL);
 | `$point` | array；坐标数组[x,y]，具体原点/方向由当前绘图入口决定 |
 | `$width` | int\|float；宽度，图像/画布场景以像素为单位 |
 | `$height` | int\|float；高度，图像/画布场景以像素为单位 |
-| `$img` | resource\|string\|null；GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL） |
+| `$img` | GdImage\|string\|null；GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL） |
 
-**返回值**：$this|resource|false img为null时替换当前画布；指定图像时返回裁剪句柄；坐标/尺寸/加载无效为false
+**返回值**：$this|GdImage|false img为null时替换当前画布；指定图像时返回裁剪句柄；坐标/尺寸/加载无效为false
 
 调用形式：
 
@@ -458,7 +456,7 @@ public function paste($img, $point = array(0, 0), $alpha = 100);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$img` | resource\|string；待粘贴的GD图像句柄或图片路径 |
+| `$img` | GdImage\|string；待粘贴的GD图像句柄或图片路径 |
 | `$point` | array；坐标数组[x,y]，具体原点/方向由当前绘图入口决定（默认：array(0, 0)） |
 | `$alpha` | int；1至100执行透明合成，非正值执行灰阶合成，大于100直接拷贝（默认：100） |
 
@@ -485,7 +483,7 @@ public function setLine($thickness = 1, $style = NULL, $brush = NULL);
 | --- | --- |
 | `$thickness` | int；绘线厚度，单位像素（默认：1） |
 | `$style` | array\|null；GD线条样式颜色序列，null不设置（默认：NULL） |
-| `$brush` | resource\|null；GD画笔图像句柄，null不设置（默认：NULL） |
+| `$brush` | GdImage\|null；GD画笔图像句柄，null不设置（默认：NULL） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -532,7 +530,7 @@ public function getSize($img = NULL);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$img` | resource\|null；GD图像句柄；null使用当前画布（默认：NULL） |
+| `$img` | GdImage\|null；GD图像句柄；null使用当前画布（默认：NULL） |
 
 **返回值**：array [宽,高]像素二元组；当前/指定句柄无效时返回[0,0]
 
@@ -580,7 +578,7 @@ public function setColor($idx = '');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$idx` | string；颜色索引名，空串自动分配；附加参数指定RGB及透明度（默认：''） |
-| `...$args` | mixed；[R,G,B]及可选透明度，或R/G/B及可选透明度；GD透明度0至127（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；[R,G,B]及可选透明度，或R/G/B及可选透明度；GD透明度0至127（位置参数，由func_get_args读取） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -965,9 +963,9 @@ public function destroy($img = NULL);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$img` | resource\|null；GD图像句柄；null使用当前画布（默认：NULL） |
+| `$img` | GdImage\|null；GD图像句柄；null使用当前画布（默认：NULL） |
 
-**返回值**：bool 指定或当前GD句柄的释放结果；无有效句柄为false
+**返回值**：bool 有效图像为true，无有效图像为false；省略参数时清空实例画布。显式传入对象时只释放方法内引用，调用方应unset自身变量；其他别名不受影响
 
 调用形式：
 
@@ -991,7 +989,7 @@ public function transString($str, $charset = 'gbk');
 | `$str` | string；待处理的字符串 |
 | `$charset` | string；无myString时后备分支使用的字符编码提示；正常myString分支固定转为UTF-8（默认：'gbk'） |
 
-**返回值**：string|false 通常转换为UTF-8；兼容后备分支可能沿用检测编码，iconv失败可为false
+**返回值**：string|false 通常转换为UTF-8；支持后备分支可能沿用检测编码，iconv失败可为false
 
 调用形式：
 
@@ -1012,7 +1010,7 @@ public function checkPoint();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | array；需要逐个校验的[x,y]数值坐标数组，至少一个（历史位置参数，由func_get_args读取） |
+| `...$args` | array；需要逐个校验的[x,y]数值坐标数组，至少一个（位置参数，由func_get_args读取） |
 
 **返回值**：bool 至少一个参数且所有参数均为两个数值组成的数组时为true，否则为false
 
@@ -1035,7 +1033,7 @@ public function check($img = NULL);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$img` | resource\|null；GD图像句柄；null使用当前画布（默认：NULL） |
+| `$img` | GdImage\|null；GD图像句柄；null使用当前画布（默认：NULL） |
 
 **返回值**：bool 目标为有效GD资源时为true；null检查当前画布
 

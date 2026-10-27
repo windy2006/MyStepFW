@@ -63,7 +63,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -242,7 +242,7 @@ class myTemplate extends myBase {
                 $name = $property->getName();
                 $key = $property->isPrivate() ? "\0".$property->getDeclaringClass()->getName()."\0".$name : ($property->isProtected() ? "\0*\0".$name : $name);
                 if(!array_key_exists($key, $data['state'] ?? [])) continue;
-                $property->setAccessible(true); $property->setValue($this, $data['state'][$key]);
+                $property->setValue($this, $data['state'][$key]);
             }
         } while($class = $class->getParentClass());
         $this->hash = 't'.bin2hex(random_bytes(16));
@@ -481,7 +481,7 @@ class myTemplate extends myBase {
         $tags = []; $this->tag_dependencies = [];
         foreach($this->tags as $name => $func) {
             if(is_array($func)) $r = new ReflectionMethod($func[0], $func[1]);
-            elseif(is_string($func) && strpos($func, '::')!==false) $r = new ReflectionMethod($func);
+            elseif(is_string($func) && strpos($func, '::')!==false) $r = ReflectionMethod::createFromMethodName($func);
             elseif(is_object($func) && !($func instanceof Closure)) $r = new ReflectionMethod($func, '__invoke');
             else $r = new ReflectionFunction($func);
             $file = $r->getFileName();

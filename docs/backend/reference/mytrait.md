@@ -1,7 +1,5 @@
 # myTrait：类的通用扩展
 
-修订日期：2026-10-24。
-
 ## 职责与调用位置
 
 addMethod绑定受信回调；别名只改变方法调度，不建立HTTP接口或权限。
@@ -38,7 +36,7 @@ assert($object->upper('hello') === 'HELLO');
     ClassName::regAlias(['short' => 'fullName']); // 多级别名会先校验循环
     $fresh = $object->instance;                 // 新建实际调用类，不复制当前状态
 
-扩展方法优先于历史全局函数回退，别名优先于扩展方法；全局函数回退为兼容保留，
+扩展方法优先于全局函数回退，别名优先于扩展方法；全局函数回退
 不能把未知方法名直接视为 API 白名单。序列化只保存实例状态，恢复时不重跑构造；
 闭包及资源仍受 PHP 原生序列化限制，含这些内容的对象不承诺可持久化。
 
@@ -69,12 +67,12 @@ protected static $extension_aliases = [];
 | `myTrait::__unset` | 移除辅助属性，不删除对象自身受保护成员 |
 | `myTrait::extensionAliases` | 汇总实例/静态默认别名与实际类的扩展别名，统一为小写索引 |
 | `myTrait::resolveExtensionMethod` | 解析多级别名并拒绝循环，避免魔术分发无限递归 |
-| `myTrait::__call` | 按别名、实例扩展、历史全局函数回退的顺序处理未知方法 |
-| `myTrait::__callStatic` | 解析静态别名或历史全局函数回退，不创建实例、不调用实例方法 |
+| `myTrait::__call` | 按别名、实例扩展、全局函数回退的顺序处理未知方法 |
+| `myTrait::__callStatic` | 解析静态别名或全局函数回退，不创建实例、不调用实例方法 |
 | `myTrait::__sleep` | 返回全部实际实例属性，包含父类私有状态，不包含静态表 |
 | `myTrait::__wakeup` | 恢复序列化状态，不重新调用构造函数或 init() |
-| `myTrait::__toString` | 兼容旧对象文本快照，无法序列化调试状态时回退类名 |
-| `myTrait::__invoke` | 兼容对象函数式调用：文本生成扰动摘要，数值生成确定整数，映射批量赋值 |
+| `myTrait::__toString` | 支持当前对象文本快照，无法序列化调试状态时回退类名 |
+| `myTrait::__invoke` | 支持对象函数式调用：文本生成扰动摘要，数值生成确定整数，映射批量赋值 |
 | `myTrait::__set_state` | 从 var_export() 状态重建实际调用类，不触发构造及初始化副作用 |
 | `myTrait::__debugInfo` | 返回可供 var_dump() 使用的实例快照，不读取静态属性或再次触发魔术 getter |
 | `myTrait::addMethod` | 登记实例扩展方法，支持闭包、函数名、方法数组及可调用对象 |
@@ -131,7 +129,7 @@ public function __set($para, $value);
 public function __destruct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -218,7 +216,7 @@ protected static function resolveExtensionMethod($func, array $aliases);
 
 ### myTrait::__call
 
-功能说明：按别名、实例扩展、历史全局函数回退的顺序处理未知方法
+功能说明：按别名、实例扩展、全局函数回退的顺序处理未知方法
 
 ```php
 public function __call($func, array $args);
@@ -239,7 +237,7 @@ public function __call($func, array $args);
 
 ### myTrait::__callStatic
 
-功能说明：解析静态别名或历史全局函数回退，不创建实例、不调用实例方法
+功能说明：解析静态别名或全局函数回退，不创建实例、不调用实例方法
 
 ```php
 public static function __callStatic($func, $args);
@@ -268,7 +266,7 @@ public static function __callStatic($func, $args);
 public function __sleep();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 原始属性键列表；闭包仍由原生 serialize() 明确拒绝，不静默丢弃
 
@@ -286,7 +284,7 @@ public function __sleep();
 public function __wakeup();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 需要恢复连接等外部资源的类应自行覆盖本方法
 
@@ -296,7 +294,7 @@ public function __wakeup();
 
 ### myTrait::__toString
 
-功能说明：兼容旧对象文本快照，无法序列化调试状态时回退类名
+功能说明：支持当前对象文本快照，无法序列化调试状态时回退类名
 
 参数说明：无显式参数。
 
@@ -304,7 +302,7 @@ public function __wakeup();
 public function __toString();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 序列化的 name/vars/methods 信息，或类名；不会因闭包抛出转换异常
 
@@ -314,7 +312,7 @@ public function __toString();
 
 ### myTrait::__invoke
 
-功能说明：兼容对象函数式调用：文本生成扰动摘要，数值生成确定整数，映射批量赋值
+功能说明：支持对象函数式调用：文本生成扰动摘要，数值生成确定整数，映射批量赋值
 
 ```php
 public function __invoke($para);
@@ -363,7 +361,7 @@ public static function __set_state($para_arr);
 public function __debugInfo();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 包含 name、当前作用域可见的实例 vars、可见 methods；不要记录秘密数据
 
@@ -377,7 +375,6 @@ public function __debugInfo();
 
 未绑定的非静态普通闭包绑定到当前实例及其作用域；静态/已绑定闭包及其他回调保持身份，
 不把函数名/数组传入 Closure::bind()，也不强制改绑其他对象的方法。
-
 
 回调参数由扩展方法自身定义，__call按调用位置顺序传入并返回原值。普通未绑定闭包可读取当前$this，其他可调用对象保持原绑定。
 
@@ -410,7 +407,7 @@ public static function regAlias($alias = []);
 | --- | --- |
 | `$alias` | array；别名到目标方法名的非空字符串映射；空数组读取当前别名（默认：[]） |
 
-**返回值**：array 合并后的完整别名表；原有静态表继续同步，否则保存到实际类覆盖表
+**返回值**：array 合并后的完整别名表；静态表继续同步，否则保存到实际类覆盖表
 
 **异常与失败**：InvalidArgumentException 映射或名称非法、存在循环；失败保留原表
 

@@ -1,7 +1,5 @@
 # myPath：路径规范化
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 持久配置用网站根相对路径；运行时才组合为磁盘绝对路径。本类不代替目录访问权限或文件存在检查。
@@ -24,7 +22,7 @@ assert($relative === 'app/Hello/template/');
 
 ### myPath
 
-功能说明：分离项目根相对配置与运行时绝对路径，兼容项目内历史绝对路径。
+功能说明：分离项目根相对配置与运行时绝对路径，支持项目内绝对路径。
 
 本类负责路径表达和边界规范化，不检查文件访问权限。
 对外文件操作仍须使用 myFile 的路径边界及文件类型检查。
@@ -52,7 +50,7 @@ assert($relative === 'app/Hello/template/');
 public static function root();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 以/结尾的绝对项目根，不取DOCUMENT_ROOT或当前工作目录
 
@@ -74,7 +72,7 @@ public static function absolute($path);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$path` | string；项目根相对路径；兼容历史绝对路径，运行时绝对路径原样规范分隔符 |
+| `$path` | string；项目根相对路径；支持绝对路径，运行时绝对路径原样规范分隔符 |
 
 **返回值**：string 绝对路径，不依赖getcwd；目录尾部/按输入保留
 
@@ -98,7 +96,7 @@ public static function relative($path);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$path` | string；相对路径或项目内历史绝对路径；根目录可写.或空串 |
+| `$path` | string；相对路径或项目内绝对路径；根目录可写.或空串 |
 
 **返回值**：string 不以/开头的根相对路径；目录尾部/按输入保留
 
@@ -123,7 +121,7 @@ public static function settings(array $data, $app = 'myStep');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$data` | array；配置数组，其他字段原样保留 |
-| `$app` | string；当前应用目录名，默认myStep；仅用于兼容旧template路径 |
+| `$app` | string；当前应用目录名，默认myStep；仅用于支持template路径 |
 
 **返回值**：array 路径规范后的配置；旧template/...转换为app/当前应用/template/...
 

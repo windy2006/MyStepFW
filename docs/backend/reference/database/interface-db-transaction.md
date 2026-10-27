@@ -1,7 +1,5 @@
 # interface_db_transaction：interface_db_transaction 数据库驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
@@ -55,7 +53,7 @@ MySQL 表是否支持事务取决于存储引擎；本协议不接管已有原�
 public function begin();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 开启成功为true，驱动执行失败可为false
 
@@ -75,7 +73,7 @@ public function begin();
 public function commit();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 成功为true，驱动执行失败可为false
 
@@ -95,7 +93,7 @@ public function commit();
 public function rollback();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 成功为true，驱动执行失败可为false
 

@@ -1,7 +1,5 @@
 # 资源整合、压缩与依赖指纹
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 使用内容指纹与原子缓存，输入是受信资源。压缩不负责检测恶意脚本，也不保证任意第三方语法都可转换。
@@ -66,7 +64,7 @@ public function get($pack = false);
 
 | 参数说明 |
 | --- |
-| bool $pack 历史兼容参数，true/false均普通压缩，不再执行旧eval打包（默认：false） |
+| bool $pack 参数，true/false均普通压缩，不再执行旧eval打包（默认：false） |
 
 **返回**：string 压缩代码
 
@@ -82,7 +80,7 @@ public function show($pack = false);
 
 | 参数说明 |
 | --- |
-| bool $pack 历史兼容参数，不再启用eval打包（默认：false） |
+| bool $pack 参数，不再启用eval打包（默认：false） |
 
 **返回**：void 无返回值。
 

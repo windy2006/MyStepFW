@@ -40,7 +40,7 @@
  *   2. 菜单、路由、优先脚本修改由已验证身份、POST 和 CSRF 的管理流程调用。
  *   3. 页面装配与资源发布的参数和失败约定详见各函数说明。
  *
- * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码保持 PHP 7.4 兼容。
+ * 说明：PHPDoc 类型用于说明，不增加原生类型约束；源码以 PHP 8.5.12 及以上8.x为运行目标。
  *       方法目录覆盖本文件直接声明；闭包参数及捕获变量说明见各回调旁 PHPDoc。
  */
 /**
@@ -637,7 +637,7 @@ function renderPluginPage($idx, $page='', $app=null, $tpl=null) {
         if($tpl===null) $tpl=new myTemplate($GLOBALS['tpl_setting'],false);
         $tpl_sub=new myTemplate(['name'=>$page,'path'=>$path_plugin.'template/','style'=>'','path_compile'=>CACHE.'template/plugin/'.$idx.'/'.$app.'/'],false);
         $tpl_sub->assign('root_web',ROOT_WEB);
-        $tpl_sub->assign('path_admin',$app==='myStep'?$S->gen->path_admin:$app);
+        $tpl_sub->assign('path_admin',$app==='myStep'?($S instanceof myConfig?$S:$ms_setting)->value('gen.path_admin','console'):$app);
         $tpl_sub->assign('plugin_setting_url',pluginAdminURL('function/plugin/setting/',['idx'=>$idx],$app));
         $tpl_sub->assign('plugin_page_url',pluginPageURL('',[],$app));
         /**

@@ -1,7 +1,5 @@
 # simpleDB：本地小型数据库
 
-修订日期：2026-10-24。
-
 ## 职责与调用位置
 
 管理固定记录格式的本地小表。删除使用destroy；不能把文件级锁视为多表事务。
@@ -34,7 +32,7 @@ $db->destroy(); // 仅删除本例独占的demo.db，生产环境须先完成权
   3. 使用destroy删除当前表文件。
 
 补充说明：
-兼容旧固定长度 .db 格式的本地小表，读写在同一个文件锁内完成。
+读写固定长度 .db 格式的本地小表，读写在同一个文件锁内完成。
 字段按字节宽度保存，尾部空格作为填充；不支持 NUL/换行及事务 SQL。
 超长值明确报错，避免覆盖后续记录。默认文件预算 32 MiB，可在 init 第四参调整。
 
@@ -56,12 +54,12 @@ public $pos=0, $row=0;
 | --- | --- |
 | `simpleDB::__construct` | 按可选位置参数初始化，不立即创建文件 |
 | `simpleDB::init` | 关闭旧句柄并设置本地数据文件 |
-| `simpleDB::connect` | 打开现有数据文件；write/w 不再隐式截断，清空数据使用 empty |
+| `simpleDB::connect` | 打开现有数据文件；write/w 不隐式截断，清空数据使用 empty |
 | `simpleDB::selectDB` | 切换本地表并打开只读句柄 |
 | `simpleDB::check` | 检查文件是否存在，不隐式创建或修复 |
 | `simpleDB::close` | 安全关闭公开 connect 打开的句柄 |
 | `simpleDB::__destruct` | 析构只释放当前对象句柄 |
-| `simpleDB::decode` | 校验表头及固定记录边界，读取旧格式；损坏文件明确失败 |
+| `simpleDB::decode` | 校验表头及固定记录边界，读取数据格式；损坏文件明确失败 |
 | `simpleDB::encode` | 在任何写入之前验证所有记录并编码固定长度内容 |
 | `simpleDB::access` | 在共享/排他锁内取得快照并执行操作，写前完成全部编码 |
 | `simpleDB::mutate` | 在单个排他锁内读取、变更及保存整个记录集，避免empty/insert多次操作的空表窗口。 |
@@ -79,7 +77,7 @@ public $pos=0, $row=0;
 | `simpleDB::random` | 无重复随机抽取记录，不通过反复碰撞重试 |
 | `simpleDB::getData` | 读取某行或指定字段 |
 | `simpleDB::result` | 读取首个匹配项的字段，未指定字段时返回第一列 |
-| `simpleDB::getFields` | 取得旧格式字段设置及最新长度元数据 |
+| `simpleDB::getFields` | 取得数据格式字段设置及最新长度元数据 |
 | `simpleDB::setOrder` | 排序结果，随机模式使用 shuffle，不使用不满足传递性的随机比较器 |
 
 ## 逐方法参数、返回与示例
@@ -96,7 +94,7 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init声明顺序传入的数据文件等设置（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；按init声明顺序传入的数据文件等设置（位置参数，由func_get_args读取） |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -116,7 +114,7 @@ public function init($name,$path='./',$tlen=500,$max_bytes=33554432);
 | --- | --- |
 | `$name` | string；单个表名，不含路径分隔符、上级目录或 NUL |
 | `$path` | string；文件目录，默认当前目录（默认：'./'） |
-| `$tlen` | int；兼容旧表头字节数，范围 32..1048576，已有表须使用原值（默认：500） |
+| `$tlen` | int；支持旧表头字节数，范围 32..1048576，已有表须使用原值（默认：500） |
 | `$max_bytes` | int；文件内存预算，默认 32 MiB（默认：33554432） |
 
 **返回值**：void 无返回值。
@@ -134,7 +132,7 @@ $result = $instance->init($name, $path, $tlen, $max_bytes);
 
 ### simpleDB::connect
 
-功能说明：打开现有数据文件；write/w 不再隐式截断，清空数据使用 empty
+功能说明：打开现有数据文件；write/w 不隐式截断，清空数据使用 empty
 
 ```php
 public function connect($mode='r');
@@ -142,7 +140,7 @@ public function connect($mode='r');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$mode` | string；read/r/rb 只读，其余历史 write/append/r+ 形式读写（默认：'r'） |
+| `$mode` | string；read/r/rb 只读，其余 write/append/r+ 形式读写（默认：'r'） |
 
 **返回值**：bool 成功 true，文件不存在或不能打开 false
 
@@ -190,7 +188,7 @@ $result = $instance->selectDB($name, $path, $tlen);
 public function check();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 目标数据文件存在为true；不会创建、打开或验证文件格式
 
@@ -213,7 +211,7 @@ $result = $instance->check();
 public function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -236,7 +234,7 @@ $result = $instance->close();
 public function __destruct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -246,7 +244,7 @@ public function __destruct();
 
 ### simpleDB::decode
 
-功能说明：校验表头及固定记录边界，读取旧格式；损坏文件明确失败
+功能说明：校验表头及固定记录边界，读取数据格式；损坏文件明确失败
 
 ```php
 private function decode($content);
@@ -369,7 +367,7 @@ $result = $instance->create($setting);
 public function destroy();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 当前表文件存在且成功删除时为true，否则false
 
@@ -392,7 +390,7 @@ $result = $instance->destroy();
 public function empty();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 文件存在并写入成功 true
 
@@ -581,7 +579,7 @@ public function records($tmp='');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$tmp` | string；接口兼容占位参数，不使用（默认：''） |
+| `$tmp` | string；接口保留参数，不使用（默认：''） |
 
 **返回值**：array|false 文件不存在 false，空表 []
 
@@ -667,7 +665,7 @@ $result = $instance->result($condition, $field);
 
 ### simpleDB::getFields
 
-功能说明：取得旧格式字段设置及最新长度元数据
+功能说明：取得数据格式字段设置及最新长度元数据
 
 ```php
 public function getFields($tmp='');

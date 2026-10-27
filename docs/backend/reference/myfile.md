@@ -1,7 +1,5 @@
 # myFile：本地文件、路径和远程读取
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 只在受控目录操作；resolveWithin仅返回根内已存在文件；网络方法保持TLS验证，超时及响应大小由业务配套。
@@ -176,7 +174,7 @@ public function __get($para);
 public function __toString();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前文件内容文本；读取行为与get相同
 
@@ -187,7 +185,6 @@ public function __toString();
 ### myFile::buildContext
 
 功能说明：构建远程连接配置
-
 
 资源所有权：返回的是流上下文，不是已打开的网络连接；无需把它作为文件流传给fclose。
 
@@ -261,7 +258,7 @@ $result = myFile::resolveWithin($root, $relative);
 
 功能说明：获取文件真实绝对路径或相对于根的路径
 
-声明ROOT时相对路径固定从网站根解析，与工作目录和调用文件无关；独立使用类库时保留历史规则。本入口不是访问权限检查。读取公开文件或解包时使用resolveWithin/extractionPath。
+声明ROOT时相对路径固定从网站根解析，与工作目录和调用文件无关；独立使用类库时保留规则。本入口不是访问权限检查。读取公开文件或解包时使用resolveWithin/extractionPath。
 
 ```text
 public static function realPath($file, $relative = false, $mode = false);
@@ -311,8 +308,7 @@ $result = myFile::mkdir($dir);
 
 功能说明：获取文件类型
 
-
-兼容行为：未知扩展名可能直接作为返回文本，而非application/octet-stream；此入口不能仅靠返回值证明文件真实内容格式。
+支持行为：未知扩展名可能直接作为返回文本，而非application/octet-stream；此入口不能仅靠返回值证明文件真实内容格式。
 
 ```text
 public static function getMime($file='', $use_finfo = false);
@@ -589,7 +585,6 @@ $result = $instance->save($content);
 
 功能说明：保存文件
 
-
 调用示例：
     $written = myFile::saveFile($file, '');
     if ($written === false) {
@@ -626,7 +621,7 @@ $result = myFile::saveFile($file, $content, $mode);
 public function get();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string|false 当前文件正文；远程读取失败通常为空串，本地不可用按读取入口约定返回
 
@@ -642,7 +637,6 @@ $result = $instance->get();
 ### myFile::getLocal
 
 功能说明：获取本地文件（可为部分）
-
 
 length=0且offset=0时读全文件；存在偏移且length=0时读取8192字节。长度/偏移采用字节，不是字符位置。
 
@@ -703,7 +697,7 @@ $result = myFile::setTLSOptions($options);
 protected static function tlsOptions();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 用于流上下文的TLS选项，始终验证证书及主机名
 
@@ -729,7 +723,7 @@ public static function getRemote($url, $header=array(), $data='', $method='GET',
 | `$method` | string；GET/POST等HTTP请求方法（默认：'GET'） |
 | `$timeout` | int\|float；最长等待/执行时间，单位秒（默认：10） |
 
-**返回值**：string 响应正文，失败或空响应为兼容约定的空串
+**返回值**：string 响应正文，失败或空响应为支持约定的空串
 
 **异常与失败**：InvalidArgumentException 请求方法不支持或请求头非法；传输失败仍按空串返回约定处理
 
@@ -797,7 +791,7 @@ protected static function remoteRequest($url, $data, $method);
 
 功能说明：使用cURL读取HTTP正文并输出实际请求头；无cURL时回退流读取
 
-return_header是历史参数名，实际输出发出的请求头，不是响应头。仅支持GET/POST，其他方法在规范化阶段抛InvalidArgumentException。
+return_header是参数名，实际输出发出的请求头，不是响应头。仅支持GET/POST，其他方法在规范化阶段抛InvalidArgumentException。
 
 ```text
 public static function getRemote_curl($url, $header=array(), $data='', &$return_header=array(), $method=null, $timeout=30);
@@ -942,7 +936,6 @@ $result = myFile::judgeChild($dir, $only_dir);
 ### myFile::getTree
 
 功能说明：获取文件树
-
 
 记录以文件/目录名为键，每项含name、格式化size、rwx权限attr及Y/m/d H:i:s时间time；目录size为---，递归时仅非链接目录增加sub子树。
 

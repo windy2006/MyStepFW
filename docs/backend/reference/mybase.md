@@ -1,7 +1,5 @@
 # myBase：基础抽象类
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 业务类不要直接实例化myBase；构造函数把位置参数交给init，统一错误处理及子类初始化约定。
@@ -31,7 +29,7 @@ assert($object->value === '示例');
 
 使用说明：
   1. 具体类继承myBase并按需实现init；必需参数缺失时保留延迟初始化约定。
-  2. 构造和init签名保持兼容，不在此处统一强制参数类型。
+  2. 构造和init签名保持支持，不在此处统一强制参数类型。
   3. 错误回调及终止行为受myException配置影响，不能假设所有错误都会返回。
 
 补充说明：
@@ -78,7 +76,7 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按具体子类init的位置顺序传入；无参数时遵守延迟初始化规则（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；按具体子类init的位置顺序传入；无参数时遵守延迟初始化规则（位置参数，由func_get_args读取） |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -112,9 +110,7 @@ protected function setErrHandler($func);
 
 功能说明：执行实例回调或框架默认错误策略，并恢复临时回调位
 
-实例回调先接收消息；随后通过 E_USER_ERROR 交给已有错误处理器记录，
-此时临时关闭框架回调，避免同一错误重复展示。未安装错误处理器时仍遵循
-PHP 对 E_USER_ERROR 的默认行为。进程 exit 不保证执行 finally。
+实例回调先接收消息；随后临时关闭框架回调，将消息以E_USER_ERROR级别分发给已安装的PHP错误处理器。没有处理器或返回false时抛出`ErrorException`（severity为E_USER_ERROR）。临时回调位在异常时恢复，进程exit不保证执行finally。
 
 ```text
 protected function error($msg, $exit = false);

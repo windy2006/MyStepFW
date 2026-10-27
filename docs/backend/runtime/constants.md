@@ -1,7 +1,5 @@
 # 目录常量与路径
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 区分网站根磁盘目录与部署Web前缀，说明常量形成时间和相对路径转换。
@@ -23,7 +21,7 @@ $file = APP.'Hello/template/main.tpl';
 $assetURL = ROOT_WEB.'static/images/loading_img.gif';
 ```
 
-框架页面使用URL生成器；查询连接符依据结果选择，兼容三种路由模式和子目录部署。磁盘地址、静态资源URL和框架页面URL分别生成。
+框架页面使用URL生成器；查询连接符依据结果选择，支持三种路由模式和子目录部署。磁盘地址、静态资源URL和框架页面URL分别生成。
 
 ```php
 $url = myStep::setURL('Hello/detail');
@@ -32,7 +30,6 @@ $url .= (strpos($url, '?') === false ? '?' : '&')
 ```
 
 不要将服务器的绝对目录写入可发布配置。配置存相对路径，运行时可使用 `myPath::absolute()` 转换；用户提供的相对文件名仍需 `myFile::resolveWithin()` 等进行目录边界检查。单纯在字符串前添加 `ROOT` 不会阻止 `../` 越界。
-
 
 ## 主要方法：参数、返回和失败约定
 
@@ -58,7 +55,7 @@ public static function absolute($path);
 
 | 参数说明 |
 | --- |
-| string $path 项目根相对路径；兼容历史绝对路径，运行时绝对路径原样规范分隔符 |
+| string $path 项目根相对路径；支持绝对路径，运行时绝对路径原样规范分隔符 |
 
 **返回**：string 绝对路径，不依赖getcwd；目录尾部/按输入保留
 
@@ -74,7 +71,7 @@ public static function relative($path);
 
 | 参数说明 |
 | --- |
-| string $path 相对路径或项目内历史绝对路径；根目录可写.或空串 |
+| string $path 相对路径或项目内绝对路径；根目录可写.或空串 |
 
 **返回**：string 不以/开头的根相对路径；目录尾部/按输入保留
 
@@ -91,7 +88,7 @@ public static function settings(array $data, $app = 'myStep');
 | 参数说明 |
 | --- |
 | array $data 配置数组，其他字段原样保留 |
-| string $app 当前应用目录名，默认myStep；仅用于兼容旧template路径 |
+| string $app 当前应用目录名，默认myStep；仅用于支持template路径 |
 
 **返回**：array 路径规范后的配置；旧template/...转换为app/当前应用/template/...
 

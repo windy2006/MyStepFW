@@ -12,7 +12,7 @@
 
 /**
  * 功能说明：框架公共浏览器工具、字符串/日期扩展、路由地址、就绪回调和页面交互。
- * 使用说明：先加载 jQuery，root_web 可由框架注入；language/setting 异步就绪后再调用路由工具。
+ * 使用说明：先加载 jQuery，root_web 可由框架注入；框架完整页面预置 language/setting；独立页面先通过 checkNrun 等待配置，再调用路由工具。
  * 方法目录：
  *   DOM：getPath、$id、$name、$tag、$class、isArray。
  *   扩展：String.blen/printf（旧环境补 trim）、Date.format、Array.append、Number.formatMoney（均不可枚举）。
@@ -664,10 +664,12 @@ function queryURL(url, params={}) {
  * 将应用相对链接转换为当前路由模式的地址，查询值和锚点保持原样。
  * @param {string} url 相对路径或查询串；完整 URL、根路径及锚点直接保留。
  * @param {string} prefix 当前模块路径，默认 global.root_fix；可为已转换的路由地址。
- * @returns {string} 可直接用于 href、action 或 location 的地址；可重复转换。
+ * @returns {string} 可直接用于 href、action 或 location 的地址；可重复转换。配置缺失时原样保留url，应通过checkNrun等待后再转换。
  */
 function routeURL(url, prefix=global.root_fix) {
     if(/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(url)) return url;
+    // 独立页面尚未提供路由配置时保留原链接；不猜测应用或URL模式。
+    if(typeof setting !== 'object' || !setting || typeof setting.url_prefix !== 'string') return url;
     const base = setting.url_prefix;
     if(prefix === undefined) prefix = setting.url_prefix_app || (setting.app + '/');
     const entry=(setting.path_root || global.root || '/').replace(/\/?$/, '/')+'index.php';
@@ -759,9 +761,10 @@ function ms_func_reg(func) {
 }
 
 /**
- * @returns {void} 绑定本脚本事件并执行当前回调快照；重复调用不叠加事件监听器。
+ * @returns {void} 配置/语言就绪后绑定事件并执行回调快照；独立页面未就绪时有限等待，重复调用不叠加监听器。
  */
 function ms_func_run() {
+    if(!checkSetting(100, ms_func_run)) return;
     // 只管理本脚本的离页标记，不清除其他模块的 beforeunload 监听器。
     $(document).off('submit.msLeave','form').on('submit.msLeave','form',function(event) {
         if(event.isDefaultPrevented()) return;

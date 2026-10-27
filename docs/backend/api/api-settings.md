@@ -1,16 +1,14 @@
 # API全局参数与逐接口行内管理
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
-HTTP分发仅调用已登记处理器。当前接口只有启用、方法、跨域、仅限后台四项额外设置；参数统一沿用兼容位置模式。
+HTTP分发仅调用已登记处理器。接口提供启用、允许方法、跨域、仅限后台四项设置；参数按处理器签名的位置传入。
 
 ## 2. 全局参数统一放入框架设置
 
-新后台进入`/Admin/setting`，选择“主框架”，查看“API设置”；原后台进入`/console/setting/`，不选择具体应用。原独立`setting/api`入口仅保留GET跳转，过期独立表单不再写配置。
+新后台进入`/Admin/setting`，选择“主框架”，查看“API设置”；原后台进入`/console/setting/`，不选择具体应用。
 
-字段由`config/construction/chs.php`、`en.php`及`default.php`生成，沿用原有`myConfig`表单和checkForm校验；默认值写在`config/config_default.php`中。保存到`config/config.php`的`api`分组：
+字段由`config/construction/chs.php`、`en.php`及`default.php`生成，沿用`myConfig`表单和checkForm校验；默认值写在`config/config_default.php`中。保存到`config/config.php`的`api`分组：
 
 ```php
 $setting['api'] = array(
@@ -28,8 +26,7 @@ $setting['api'] = array(
 | body_bytes | 请求正文上限，单位字节，范围1至33554432，默认32 MiB；适用于全部内容类型 |
 | domain | 专属主机名及可选端口，如api.mystep.com；不含协议、路径或通配符，留空生成普通路径 |
 
-接口统一沿用兼容参数模式，JSON正文由业务按需读取并校验；跨域开关属于各接口设置。旧主配置缺少api分组时运行时补齐，参数页显示可保存的正确类型和值，不会为了读取页面直接重写主配置。
-
+接口统一沿用保留参数模式，JSON正文由业务按需读取并校验；跨域开关属于各接口设置。主配置未设置api分组时使用默认值，参数页显示可保存的正确类型和值，不会为了读取页面直接重写主配置。
 
 ## 5. 逐接口功能管理
 
@@ -44,7 +41,7 @@ $setting['api'] = array(
 | 允许跨域 cors | 布尔开关，默认关闭；开启后允许任意合法HTTP/HTTPS来源，无需维护域名名单；不放行null、账号密码、路径或控制字符 |
 | 仅限后台 admin | 要求框架管理员ms_user与sysop校验同时通过；不等于普通CMS用户登录；仍保留原接口业务权限 |
 
-恢复默认会移除该接口覆盖，恢复启用、方法不额外限制、跨域关闭和不额外要求管理员。未登记的历史接口只能清理设置，不能在后台新增可执行回调。
+恢复默认会移除该接口覆盖，恢复启用、方法不额外限制、跨域关闭和不额外要求管理员。未登记的接口只能清理设置，不能在后台新增可执行回调。
 
 `config/api.php`仅保存接口设置：
 
@@ -64,9 +61,6 @@ return array(
 ```
 
 策略文件使用版本比较、锁和原子替换；保存不改全局参数。文件属于站点私有数据，Git与系统发布包排除。无需清缓存或重启PHP。
-
-旧formats、mode和cors_origins字段兼容读取但不再参与运行，下一次设置保存时规范化为四项。旧来源名单不会自动扩大为允许任意来源，跨域需明确开启。旧独立文件中的enabled/default_format/json_bytes仍在主配置无对应字段时兼容回退；通过统一参数设置保存后清理旧全局字段。
-
 
 ## 主要方法：参数、返回和失败约定
 
@@ -88,7 +82,7 @@ public static function httpSettings(array $data = []);
 
 ### myApi::httpConfiguration
 
-功能说明：合并框架api参数与config/api.php的逐接口策略，兼容旧独立参数文件。
+功能说明：合并框架api参数与config/api.php的逐接口策略，支持旧独立参数文件。
 
 ```text
 public static function httpConfiguration($data = null);

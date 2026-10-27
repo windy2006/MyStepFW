@@ -1,7 +1,5 @@
 # 输入预算、请求体积与启动保护
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 会话与凭据是框架辅助能力，业务仍独立校验身份、数据归属及操作权限。代码预算不替代PHP解析前的补丁与服务器限制。
@@ -55,7 +53,6 @@ define('MYSTEP_REQUEST_LIMITS', [
 
 开关缺省不启用，沿用既有 `gen.memory` 或脚本值。开关本身不改变内存额度，也不会给网站解除限制。仅在实际服务器已制定内存策略时启用；新增应用和插件也应遵循这一约定。若需禁止任何应用覆盖，使用 FPM 的 `php_admin_value` 锁定，而不是单靠约定。
 
-
 ## 3. 需要部署后才生效的启动配置
 
 提供两份示例，文件存在于网站并不表示生效：
@@ -71,7 +68,6 @@ define('MYSTEP_REQUEST_LIMITS', [
 
 FPM 示例另保留注释的 `pm.max_requests=1` 应急选项，需评估进程创建成本和吞吐量，不默认启用，也不是完整修复。
 
-
 ## 4. Web 服务器及业务额度
 
 仓库的 `NginX` 参考配置、Apache `.htaccess`、IIS `web.config` 加入 32 MiB 请求体限制；Nginx 参考配置同时指定请求读取超时并保持 FastCGI 请求缓冲。实际站点应将参考配置合并到当前使用的虚拟主机。Apache 需允许相应目录指令；各平台语法及作用域参见 [Nginx](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)、[Apache](https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestbody)、[IIS](https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/requestfiltering/requestlimits/)。
@@ -79,7 +75,6 @@ FPM 示例另保留注释的 `pm.max_requests=1` 应急选项，需评估进程�
 32 MiB 会影响大文件上传、离线升级包和数据导入。需要更大包时应评估处理过程的内存开销，并协调前置限制、PHP 的 `post_max_size`、`upload_max_filesize`、应用预算及业务上传设置；单文件额度需小于 POST 总额度，给表单与 multipart 元数据留空间。下载大小不受请求体预算限制。
 
 应用还应继续使用有预算的图片解码、归档解包和流式文件处理；错误处理器、shutdown 或 try/catch 无法代替 PHP 对内存不足的正确处理。不要通过隐藏警告、关闭错误日志或取消超时来假定问题消失。
-
 
 ## 主要方法：参数、返回和失败约定
 

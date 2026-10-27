@@ -1,7 +1,5 @@
 # myCache_MySQL：myCache_MySQL 缓存驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 myCache通过此层处理缓存存储、命中或锁；不要从驱动名称推断它实现全部可选协议。编码预算、有效false/null和失败返回按本页逐项判断。
@@ -37,7 +35,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 补充说明：
 MySQL缓存：专用连接、参数化UPSERT、容量保护及精确命中。
-兼容旧TEXT/原始序列化和MS_CACHE2编码；普通请求不ALTER已有表。
+支持TEXT/原始序列化和MS_CACHE2编码；普通请求不ALTER已有表。
 可选table和namespace隔离业务键，synchronized用同一写实例的命名锁；需要mysqli/mysqlnd。
 
 ## 状态字段与公开变量
@@ -56,9 +54,9 @@ protected $cnt = null, $owned = false, $codec = null, $table = 'my_cache', $erro
 | `myCache_MySQL::codec` | 取得当前编解码策略，未初始化时采用默认配置。 |
 | `myCache_MySQL::getLastError` | 返回最近错误摘要，不含SQL、凭据或正文。 |
 | `myCache_MySQL::run` | 执行内部参数化模板；关闭连接/SQL错误均转换为false，及时释放statement。 |
-| `myCache_MySQL::set` | 原子覆盖条目，拒绝超出配置/旧表列容量或时间列范围的写入，保留旧值。 |
+| `myCache_MySQL::set` | 原子覆盖条目，拒绝超出配置或表列容量或时间列范围的写入，保留原值。 |
 | `myCache_MySQL::fetch` | 读取有效条目，SQL过滤过期记录后才解码对象。 |
-| `myCache_MySQL::get` | 兼容旧读取入口。 |
+| `myCache_MySQL::get` | 读取缓存值，未命中时返回false。 |
 | `myCache_MySQL::remove` | 删除单个键。 |
 | `myCache_MySQL::clean` | 全量回收过期条目，不清空有效值。 |
 | `myCache_MySQL::clear` | 显式删除当前缓存表全部条目，包含各namespace；不修改表结构或命名锁。 |
@@ -101,7 +99,7 @@ public function __construct($setting);
 protected function codec();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：myCacheCodec 本驱动当前使用的编解码策略实例，缺失时创建默认实例
 
@@ -119,7 +117,7 @@ protected function codec();
 public function getLastError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 最近一次安全错误摘要；无已记录错误时为空串
 
@@ -135,7 +133,6 @@ $result = $instance->getLastError();
 ### myCache_MySQL::run
 
 功能说明：执行内部参数化模板；关闭连接/SQL错误均转换为false，及时释放statement。
-
 
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 
@@ -156,7 +153,7 @@ protected function run($sql, array $params);
 
 ### myCache_MySQL::set
 
-功能说明：原子覆盖条目，拒绝超出配置/旧表列容量或时间列范围的写入，保留旧值。
+功能说明：原子覆盖条目，拒绝超出配置或表列容量或时间列范围的写入，保留原值。
 
 ```text
 public function set($key, $value = '', $ttl = 600);
@@ -207,7 +204,7 @@ $result = $instance->fetch($key, $hit);
 
 ### myCache_MySQL::get
 
-功能说明：兼容旧读取入口。
+功能说明：读取缓存值，未命中时返回false。
 
 ```text
 public function get($key);
@@ -261,7 +258,7 @@ $result = $instance->remove($key);
 public function clean();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 过期记录删除语句是否成功；有效记录继续保留
 
@@ -286,7 +283,7 @@ $result = $instance->clean();
 public function clear();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool DELETE执行成功为true，连接或SQL失败为false
 
@@ -361,7 +358,7 @@ $result = $instance->synchronized($key, $operation, $timeout);
 public function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -384,7 +381,7 @@ $result = $instance->close();
 public function __destruct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 

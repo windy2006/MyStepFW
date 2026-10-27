@@ -67,3 +67,10 @@
         </div>
     </div>
 </div>
+<script type="application/javascript">
+$(function () {
+    if (document.querySelector('#content pre code, #content pre.highlight[data-lng]')) {
+        $.vendor('highlight', {callback:function () { highlight(1, 'vs2015'); }});
+    }
+});
+</script>

@@ -89,7 +89,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -1660,7 +1660,7 @@ class SQLBuilder {
                 break;
             case 'is':
             case 'is not':
-                if(strtolower($value)!='null') $value = 'null';
+                $value = 'null'; // IS/IS NOT固定用于NULL，不将null传入字符串函数。
                 break;
             case '!':
                 $condition = '';

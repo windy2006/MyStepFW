@@ -1,7 +1,5 @@
 # mySecurity：输入预算和CSRF
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 inspectRequest可对合成输入做只读检查；guardRequest属于入口；会话令牌校验不代替业务授权。
@@ -129,7 +127,7 @@ private static function requestShape($value, $depth, array &$remaining, array $l
 public static function guardRequest();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 合法请求返回；400/413响应后结束请求，HEAD不输出正文
 
@@ -157,7 +155,7 @@ $_SESSION['_ms_csrf'] 中。有效令牌在同一会话内复用，不自行设�
 public static function token();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前会话的 64 位 CSRF 令牌
 
@@ -210,7 +208,7 @@ $result = mySecurity::valid($token);
 public static function origins();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string[] 允许的来源列表，格式为“协议://主机[:端口]”
 
@@ -265,7 +263,7 @@ Sec-Fetch-Site 明确为 cross-site 才拒绝。两者都缺失时返回 true，
 public static function originAllowed();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 当前请求的来源信息是否通过检查
 
@@ -281,7 +279,7 @@ $result = mySecurity::originAllowed();
 
 功能说明：获取用于识别内置后台入口的路径前缀
 
-合并 gen.path_admin（缺省 console）、当前应用的 web.path_admin 和兼容入口
+合并 gen.path_admin（缺省 console）、当前应用的 web.path_admin 和入口
 admin_cms，移除空值及重复项。返回配置中的前缀原值，匹配时再处理首尾斜杠。
 
 参数说明：无显式参数。
@@ -290,7 +288,7 @@ admin_cms，移除空值及重复项。返回配置中的前缀原值，匹配�
 public static function adminPaths();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string[] 去重后的后台路径前缀列表
 
@@ -318,7 +316,7 @@ $result = mySecurity::adminPaths();
 public static function administrativeContext();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 当前路由是否位于已知后台入口
 
@@ -369,7 +367,7 @@ $result = mySecurity::mutates($url);
 其余 GET、HEAD、OPTIONS 请求直接放行；其他方法必须同时通过来源和令牌校验。
 令牌优先取 X-CSRF-Token 请求头，否则取 _ms_csrf 表单字段；失败返回 403
 及禁止缓存的 JSON 错误并结束请求。成功后移除 POST/REQUEST 中的保留字段，
-防止旧业务把令牌作为普通数据入库。放行后仍需执行登录及业务权限检查。
+防止业务把令牌作为普通数据入库。放行后仍需执行登录及业务权限检查。
 
 参数说明：无显式参数。
 
@@ -377,11 +375,11 @@ $result = mySecurity::mutates($url);
 public static function guard();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 检查通过时返回；拒绝请求时输出响应并 exit
 
-**上下文变量**：array $info_app 当前应用信息，使用 route 字段兼容绑定域名的路径改写
+**上下文变量**：array $info_app 当前应用信息，使用 route 字段支持绑定域名的路径改写
 
 调用形式：
 
@@ -406,7 +404,7 @@ Vary: Cookie, Origin 响应头。本方法不自行设置跨域允许头，API �
 public static function respond();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 始终结束请求，成功时输出令牌 JSON，失败时输出对应错误响应
 
@@ -428,7 +426,7 @@ $result = mySecurity::respond();
 script/style/textarea 内容及 HTML 注释，为普通 POST 表单追加隐藏令牌；
 显式指向未允许来源或非 HTTP(S) 协议的表单不注入令牌。
 在首个 head 标签之后注入 window.msSecurity 配置和带内容版本号的 security.js，
-由脚本适配动态表单、Ajax 及旧式后台操作链接。
+由脚本适配动态表单、Ajax 及后台操作链接。
 必须在页面缓存读取或模板渲染之后调用，避免把会话令牌存入共享缓存；输入应为
 框架生成的可信页面，本方法不是 HTML 净化器或浏览器级的完整 HTML 解析器。
 

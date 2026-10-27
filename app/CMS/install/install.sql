@@ -117,6 +117,18 @@ CREATE TABLE `{pre}news_show` (
 
 # ---------------------------------------------------------------------------------------------------------------
 
+
+# 文章中文规范地址及历史别名；普通阅读不执行DDL。
+CREATE TABLE `{pre}news_alias` (
+    `web_id` INTEGER NOT NULL,
+    `alias_hash` CHAR(64) NOT NULL,
+    `alias` VARCHAR(255) NOT NULL,
+    `news_id` INTEGER NOT NULL,
+    `current_news_id` INTEGER NULL,
+    PRIMARY KEY (`web_id`,`alias_hash`),
+    UNIQUE KEY `current_article` (`web_id`,`current_news_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
 # 新闻内容
 CREATE TABLE `{pre}news_detail` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -253,12 +265,15 @@ CREATE TABLE `{pre}users` (
     `group_id` TINYINT UNSIGNED NOT NULL Default 0 COMMENT '用户组',
     `username` varchar(15) UNIQUE COMMENT '用户名',
     `password` varchar(255)  COMMENT '密码',
-    `email` varchar(60)  COMMENT '电子邮件',
+    `email` varchar(254)  COMMENT '电子邮件',
+    `display_name` varchar(100) CHARACTER SET utf8mb4 NOT NULL DEFAULT '',
+    `email_verified_at` bigint NOT NULL DEFAULT 0,
+    `password_enabled` tinyint NOT NULL DEFAULT 1,
     `reg_date` int(10) unsigned Default "0"  COMMENT '注册日期',
     `hash` varchar(32)  COMMENT '哈希码',
     INDEX (`username`),
     PRIMARY KEY (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET={charset} COMMENT='网站用户';
+) ENGINE=InnoDB DEFAULT CHARSET={charset} COMMENT='网站用户';
 
 # ---------------------------------------------------------------------------------------------------------------
 

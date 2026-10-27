@@ -1,7 +1,5 @@
 # myReflection：声明和注释反射
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 只对受信类或对象反射；用于说明和辅助调用，不把用户输入当待加载类名。
@@ -118,7 +116,7 @@ public function __get($para);
 public function info();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 当前目标的反射元信息映射；尚未初始化时为空数组
 
@@ -141,7 +139,7 @@ $result = $instance->info();
 public function export();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 底层Reflection对象的字符串描述，不是可执行导出脚本
 
@@ -164,7 +162,7 @@ public function get();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；函数调用或类构造的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；函数调用或类构造的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：mixed 函数的返回值或新类实例；未初始化为false，其他目标类别为null
 
@@ -212,7 +210,7 @@ $result = $instance->getName($mode);
 public function getVariants();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array|null 含constant/variant的常量和默认属性映射；非类或未初始化为null
 
@@ -251,7 +249,6 @@ $result = $instance->getFunc($mode);
 ### myReflection::getComment
 
 功能说明：读取目标/指定方法的注释，或返回全部方法注释映射
-
 
 调用示例：
     $doc = (new myReflection('myFile'))->getComment('getLocal');

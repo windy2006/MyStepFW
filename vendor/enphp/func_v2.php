@@ -1368,7 +1368,7 @@ function find_left_quote(&$list, $index, $left = 0) {
             case 'private':
             case 'public':
             case 'static':
-            case 'var';
+            case 'var':
             case 'function':
             case 'if':
             case 'use':

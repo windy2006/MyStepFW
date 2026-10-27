@@ -1,7 +1,5 @@
 # myEncrypt：字符串与文件认证加密
 
-修订日期：2026-10-24。
-
 ## 职责与调用位置
 
 字符串使用seal/open，文件使用sealFile/openFile。两者都校验完整性；错误密钥和损坏文件不发布明文。密码摘要由myAuth管理。
@@ -39,7 +37,7 @@ if (!myEncrypt::openFile($file, $key)) throw new RuntimeException('文件认证�
 | 方法／函数 | 可见性及用途 |
 | --- | --- |
 | `myEncrypt::seal` | 使用随机盐、随机nonce及AES-256-GCM生成字符串认证封装。 |
-| `myEncrypt::open` | 校验并解密MSENC1字符串封装，不接受未知或历史异或格式。 |
+| `myEncrypt::open` | 校验并解密MSENC1字符串封装，不接受未知或异或格式。 |
 | `myEncrypt::sealFile` | 使用Secretstream逐块加密文件，成功后原子替换原文件。 |
 | `myEncrypt::openFile` | 逐块认证MSFILE1文件，确认FINAL及文件尾后原子发布明文。 |
 | `myEncrypt::transformFile` | 持有非阻塞排他锁，将结果写入同目录暂存文件后校验目标并发布。 |
@@ -82,7 +80,7 @@ $result = myEncrypt::seal($plaintext, $key);
 
 ### myEncrypt::open
 
-功能说明：校验并解密MSENC1字符串封装，不接受未知或历史异或格式。
+功能说明：校验并解密MSENC1字符串封装，不接受未知或异或格式。
 
 ```php
 public static function open($envelope, $key);

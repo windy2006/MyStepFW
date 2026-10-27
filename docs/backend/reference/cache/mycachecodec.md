@@ -1,7 +1,5 @@
 # myCacheCodec：myCacheCodec 缓存驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 myCache通过此层处理缓存存储、命中或锁；不要从驱动名称推断它实现全部可选协议。编码预算、有效false/null和失败返回按本页逐项判断。
@@ -30,7 +28,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 功能说明：集中处理内置缓存驱动共用的键、TTL 和序列化规则。
 
-默认保留受信对象兼容性，可通过 allowed_classes 禁用或限制对象实例化。
+默认允许保存受信对象，可通过 allowed_classes 禁用或限制对象实例化。
 字节预算约束序列化结果和存储读取量，不代替业务输入的内存预算。
 
 ## 状态字段与公开变量
@@ -46,7 +44,7 @@ protected $max_bytes = 8388608, $depth = 128, $allowed = true, $namespace = '';
 | 方法／函数 | 可见性及用途 |
 | --- | --- |
 | `myCacheCodec::__construct` | 验证公共选项。 |
-| `myCacheCodec::key` | 转换逻辑键；保持无namespace时原有MD5布局，namespace不是访问权限边界。 |
+| `myCacheCodec::key` | 转换逻辑键；保持无namespace时MD5布局，namespace不是访问权限边界。 |
 | `myCacheCodec::expires` | 规范化TTL，防止NAN/INF、浮点转整数和到期加法溢出。 |
 | `myCacheCodec::timeout` | 验证锁等待时间。 |
 | `myCacheCodec::maxBytes` | 返回原始序列化字节预算。 |
@@ -54,7 +52,7 @@ protected $max_bytes = 8388608, $depth = 128, $allowed = true, $namespace = '';
 | `myCacheCodec::inspect` | 拒绝PHP会静默编码为0的资源，并对数组引用/对象循环去重。 |
 | `myCacheCodec::pack` | 编码受信数据，超限或不可序列化时不发布新条目。 |
 | `myCacheCodec::unpack` | 解码已确认未过期的受信数据，不执行超出预算的数据。 |
-| `myCacheCodec::sqlUnpack` | 读取SQL缓存的MS_CACHE2 Base64封装或旧原始序列化值。 |
+| `myCacheCodec::sqlUnpack` | 读取SQL缓存的MS_CACHE2 Base64封装或原始序列化值。 |
 
 ## 逐方法参数、返回与示例
 
@@ -82,7 +80,7 @@ public function __construct(array $options = []);
 
 ### myCacheCodec::key
 
-功能说明：转换逻辑键；保持无namespace时原有MD5布局，namespace不是访问权限边界。
+功能说明：转换逻辑键；保持无namespace时MD5布局，namespace不是访问权限边界。
 
 ```text
 public function key($key);
@@ -164,7 +162,7 @@ $result = myCacheCodec::timeout($timeout);
 public function maxBytes();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int 允许序列化/解码的原始字节上限，单位字节
 
@@ -187,7 +185,7 @@ $result = $instance->maxBytes();
 public function maxDepth();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int 允许数组/对象嵌套的最大深度
 
@@ -274,7 +272,7 @@ $result = $instance->unpack($data, $valid);
 
 ### myCacheCodec::sqlUnpack
 
-功能说明：读取SQL缓存的MS_CACHE2 Base64封装或旧原始序列化值。
+功能说明：读取SQL缓存的MS_CACHE2 Base64封装或原始序列化值。
 
 ```text
 public function sqlUnpack($data, &$valid);

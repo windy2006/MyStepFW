@@ -30,6 +30,21 @@ switch($method) {
             }
         }
         CMS::$log = $mystep->getLanguage($method=='add_ok'?'admin_user_detail_add':'admin_user_detail_edit');
+        // 普通会员扩展存在时，同步本地密码开关；邮箱改动必须重新完成本站验证。
+        $standardMember=in_array('password_enabled',$db->getFields($S->db->pre.'users'),true);
+        unset($data['email_verified_at'],$data['password_enabled']);
+        if($standardMember){
+            $oldMember=$method==='edit_ok'?$db->fetchOne('SELECT email,display_name FROM '.$db->quoteIdentifier($S->db->pre.'users').' WHERE user_id=?',[$id]):null;
+            try{
+                $rawEmail=r::p('email','!')??'';$rawName=r::p('display_name','!')??($oldMember['display_name']??$data['username']);
+                if(!is_string($rawEmail)||!is_string($rawName))throw new InvalidArgumentException('会员资料格式无效。');
+                $data['email']=myUser::email($rawEmail);$data['display_name']=myUser::displayName($rawName);
+            }catch(InvalidArgumentException){myStep::info('error_para');}
+            if($method==='add_ok'||strcasecmp((string)($oldMember['email']??''),$data['email'])!==0)$data['email_verified_at']=0;
+            if($data['password']!=='')$data['password_enabled']=1;
+            elseif($method==='add_ok')$data['password_enabled']=0;
+        }else unset($data['display_name']);
+
         if($data['password'] === '') {
             unset($data['password']);
         } else {
@@ -56,6 +71,8 @@ function build_page($method) {
     $tpl_setting['name'] = 'user_detail_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
     $user_group = \app\CMS\getCache('user_group');
+    $standardMember=in_array('display_name',$db->getFields($S->db->pre.'users'),true);
+    $tpl->setIf('member_name',$standardMember);$tpl->assign('email_max',$standardMember?254:60);
 
     if($method == 'list') {
         global $page, $query, $count, $page_size;
@@ -104,6 +121,8 @@ function build_page($method) {
             myStep::info('admin_user_detail_error');
         }
         $group_id = $record['group_id'];
+        $record['display_name']=$record['display_name']??$record['username'];
+        foreach(['username','email','display_name'] as $field)$record[$field]=htmlspecialchars((string)($record[$field]??''),ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8',false);
         $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage('admin_user_detail_edit'));
     } else {
@@ -111,6 +130,8 @@ function build_page($method) {
         $record['user_id'] = 0;
         $record['username'] = '';
         $record['email'] = '';
+        $record['display_name'] = '';
+        foreach(['username','email','display_name'] as $field)$record[$field]=htmlspecialchars((string)($record[$field]??''),ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8',false);
         $tpl->assign($record);
         $tpl->assign('title', $mystep->getLanguage('admin_user_detail_add'));
     }

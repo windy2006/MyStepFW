@@ -1,10 +1,8 @@
 # myReq：请求、Cookie和Session
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
-格式标记影响转换，原生数组与历史HTML转义读取并不相同。会话由框架启动，应用内不要重复初始化。
+格式标记影响转换，原生数组与HTML转义读取并不相同。会话由框架启动，应用内不要重复初始化。
 
 源码：`lib/myReq.class.php`。本页列出该文件直接声明的全部类、接口、trait和具名函数；继承及trait导入方法按原声明页查询，不重复伪装成另一次声明。
 
@@ -162,7 +160,6 @@ $result = myReq::check($idx);
 ### myReq::getValue
 
 功能说明：获取相关相应值
-
 
 参数约定：空format对id或以_id结尾的字符串字段采用数值转换；ALL分支除!外使用递归HTML转义，不执行单项回调。GLOBAL分支将值导入$GLOBALS并返回true。
 
@@ -357,7 +354,7 @@ $result = myReq::globals($name, $value);
 public static function ip();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 验证后的客户端IP；来自可信代理时检查转发链，REMOTE_ADDR无效时返回空串
 
@@ -403,7 +400,7 @@ $result = myReq::setTrustedProxies($addresses);
 public static function trustedProxy();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool REMOTE_ADDR与可信代理列表中的IP完全相同为true
 
@@ -594,7 +591,6 @@ $result = myReq::cookie($para, $pre);
 
 功能说明：设置SESSION选项；缺失name时使用当前原生名称，不读取未定义键。
 
-
 单位约定：expire为分钟，启动时乘60交给gc_maxlifetime及Cookie生命周期；数据库/缓存的TTL仍采用各自方法说明中的秒。
 
 ```text
@@ -620,7 +616,6 @@ $result = myReq::setSessionOpt($setting);
 ### myReq::sessionStart
 
 功能说明：启动SESSION，启用严格ID校验并接入可选validateId/updateTimestamp回调。
-
 
 资源生命周期：成功后PHP在请求结束时写回并关闭会话；需要提前释放同ID请求锁时由调用方使用session_write_close。
 处理器结构：字符串可为内置files或静态处理器类名；数组前6项依次为open/close/read/write/destroy/gc，9项模式追加create_sid/validate_sid/update_timestamp；空数组使用原生files。
@@ -654,8 +649,8 @@ public static function sessionRestart($id = '', $delete_old_session = true);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$id` | string；兼容指定目标ID；须有效且满足PHP严格模式，不保证采用未知ID（默认：''） |
-| `$delete_old_session` | bool；是否删除旧ID存储，默认true（默认：true） |
+| `$id` | string；指定目标ID；须有效且满足PHP严格模式，不保证采用未知ID（默认：''） |
+| `$delete_old_session` | bool；是否删除轮换前的ID存储，默认true（默认：true） |
 
 **返回值**：string|false 非活动会话、非法ID或轮换失败返回false
 
@@ -677,7 +672,7 @@ $result = myReq::sessionRestart($id, $delete_old_session);
 public static function sessionEnd();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 非活动会话视为已关闭；存储或Cookie删除失败返回false
 
@@ -693,7 +688,7 @@ $result = myReq::sessionEnd();
 
 功能说明：读取SESSION
 
-沿用历史空键和null语义：session()返回序列化文本；session($key,null)读取该键。需要批量恢复会话源串时使用setSessions。
+沿用空键和null规则：session()返回序列化文本；session($key,null)读取该键。需要批量恢复会话源串时使用setSessions。
 
 ```text
 public static function session($key='', $value=null);
@@ -768,7 +763,7 @@ $result = myReq::setSessions($data);
 public static function sessionId();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前PHP Session ID，未分配时为空串
 
@@ -790,7 +785,7 @@ $result = myReq::sessionId();
 public static function sessionCheck();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool PHP会话状态为PHP_SESSION_ACTIVE时为true
 

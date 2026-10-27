@@ -46,7 +46,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -80,6 +80,9 @@
  * @example ../../app/Document/module/SQLite.php 框架现有演示，仅作为文档引用，不在检查时执行
  */
 class SQLite extends myBase implements interface_db, interface_db_prepared, interface_db_transaction {
+    /** @var bool 原生连接总是启用异常；此标志决定错误是否继续抛出给调用方。 */
+    protected $exception_mode = false;
+
     use base_db, base_sql { base_sql::record as protected sqlRecord; base_sql::result as protected sqlResult; }
     protected $active_statement = null;
 
@@ -97,7 +100,7 @@ class SQLite extends myBase implements interface_db, interface_db_prepared, inte
      * @param string $file 历史位置参数说明：可选文件路径或 :memory:，转给 init()
      * @param int $flag 历史位置参数说明：可选 SQLite3 打开标志，默认 -1 自动判断
      * @param string|null $key 历史位置参数说明：可选加密密钥，须由 SQLite 构建提供加密支持
-     * @param bool $exception 历史位置参数说明：可选是否让 SQLite3 抛异常，默认 false
+     * @param bool $exception 历史位置参数说明：可选是否向调用方抛出SQLite3Exception；原生连接始终启用异常，默认 false
      * @param int $timeout 历史位置参数说明：可选忙等待毫秒数，默认 5000
      * @return void 初始化或释放资源，无返回值。
      */
@@ -111,7 +114,7 @@ class SQLite extends myBase implements interface_db, interface_db_prepared, inte
      * @param string $file 文件路径或 :memory:，默认独立内存库（默认：':memory:'）
      * @param int $flag SQLite3 打开标志；-1 自动选择读写，文件不存在时加 CREATE（默认：-1）
      * @param string|null $key 可选数据库加密密钥，是否支持由 SQLite 构建决定（默认：null）
-     * @param bool $exception 是否启用 SQLite3 异常，默认 false（默认：false）
+     * @param bool $exception 是否向调用方抛出SQLite3Exception；原生连接始终启用异常，默认 false（默认：false）
      * @param int $timeout busyTimeout 等待毫秒数，默认 5000（默认：5000）
      * @return void 打开失败由 SQLite3/框架错误策略处理
      */
@@ -123,9 +126,10 @@ class SQLite extends myBase implements interface_db, interface_db_prepared, inte
         $this->delimiter = ['[',']'];
         if($flag==-1) $flag = (is_file($file) || $file==':memory:') ? SQLITE3_OPEN_READWRITE : (SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
         $this->file_db = $file;
-        $this->obj = new SQLite3($file, $flag, $key);
+        $this->obj = new SQLite3($file, $flag, $key ?? '');
         $this->obj->busyTimeout($timeout);
-        $this->obj->enableExceptions($exception);
+        $this->exception_mode = (bool)$exception;
+        $this->obj->enableExceptions(true);
     }
 
     /**
@@ -197,7 +201,7 @@ class SQLite extends myBase implements interface_db, interface_db_prepared, inte
      * @return int|false 读查询成功为 0，写查询为受影响行数，无连接或执行失败为 false
      * @throws InvalidArgumentException SQL、参数个数/名称/类型非法或浮点数非有限
      * @throws RuntimeException 无法读取二进制流
-     * @throws BadMethodCallException 写入 RETURNING 在执行前拒绝，避免 PHP 7.4 SQLite 结果读取重复执行写入
+     * @throws BadMethodCallException 写入 RETURNING 在执行前拒绝，避免 SQLite3结果读取重复执行写入
      * @throws Throwable SQLite3 或框架错误策略产生的异常继续传递
      * @phpstan-param array<array-key,scalar|null|resource> $params
      */
@@ -214,9 +218,10 @@ class SQLite extends myBase implements interface_db, interface_db_prepared, inte
             $dollar_names[$key]=$prefix.count($dollar_names);
         }
         if($dollar_names)$binding_sql=SQLStatement::mapCode($sql,function($code)use($dollar_names){return preg_replace_callback('/(?<![\w$])\$[\w\x80-\xff]+/',function($m)use($dollar_names){return $dollar_names[$m[0]]??$m[0];},$code);},false);
-        $statement = @$this->obj->prepare($binding_sql);
-        if(!$statement) { $this->checkError(); $this->error('Cannot prepare SQLite query'); return false; }
+        $statement = null;
         try {
+            $statement = $this->obj->prepare($binding_sql);
+            if(!$statement) { $this->checkError(); $this->error('Cannot prepare SQLite query'); return false; }
             if($statement->paramCount() !== count($params)) throw new InvalidArgumentException('SQL parameter count mismatch');
             $position = 0; $seen=[];$kind=null;
             foreach(array_keys($params) as $key) {
@@ -240,13 +245,18 @@ class SQLite extends myBase implements interface_db, interface_db_prepared, inte
                 if(!@$statement->bindValue($name, $value, $type)) throw new InvalidArgumentException('Invalid SQLite parameter');
             }
             $rows = $statement->readOnly();
-            if(!$rows)foreach(SQLStatement::tokens($sql,false) as $token)if($token['depth']===0&&$token['word']==='RETURNING')throw new BadMethodCallException('SQLite RETURNING is unsafe with this PHP 7.4 result API; use getInsertId or a separate SELECT');
+            if(!$rows)foreach(SQLStatement::tokens($sql,false) as $token)if($token['depth']===0&&$token['word']==='RETURNING')throw new BadMethodCallException('SQLite RETURNING is unsafe with this SQLite3 result API; use getInsertId or a separate SELECT');
             $result = @$statement->execute();
             if($result === false) { $this->checkError(); $this->error('Cannot execute SQLite query'); return false; }
             $this->noteStatement($sql, $rows);
             if($rows) { $this->result = $result; $this->active_statement = $statement; $statement = null; return 0; }
             $result->finalize();
             return $this->obj->changes();
+        } catch(SQLite3Exception $error) {
+            $this->checkError();
+            if($this->exception_mode) throw $error;
+            $this->error('Cannot execute SQLite query');
+            return false;
         } finally { if($statement instanceof SQLite3Stmt) $statement->close(); }
     }
 

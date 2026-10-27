@@ -7,16 +7,16 @@ namespace Composer\Autoload;
 class ComposerStaticInitb8fd4a8bf717ff767980a4df4d00f548
 {
     public static $prefixesPsr0 = array (
-        'P' => 
+        'P' =>
         array (
-            'Parsedown' => 
+            'Parsedown' =>
             array (
                 0 => __DIR__ . '/..' . '/erusev/parsedown',
             ),
         ),
-        'J' => 
+        'J' =>
         array (
-            'JSMin\\' => 
+            'JSMin\\' =>
             array (
                 0 => __DIR__ . '/..' . '/mrclay/jsmin-php/src',
             ),

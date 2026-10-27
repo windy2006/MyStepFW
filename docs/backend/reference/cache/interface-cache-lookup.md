@@ -1,7 +1,5 @@
 # interface_cache_lookup：interface_cache_lookup 缓存驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 myCache通过此层处理缓存存储、命中或锁；不要从驱动名称推断它实现全部可选协议。编码预算、有效false/null和失败返回按本页逐项判断。
@@ -31,7 +29,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 功能说明：为缓存读取提供独立的引用命中状态。
 
 fetch() 在一次读取中取得值和命中标志，避免先判断存在再读取的并发窗口。
-该接口不改变历史 get() 的返回约定。
+该接口不改变 get() 的返回约定。
 
 ## 方法目录
 

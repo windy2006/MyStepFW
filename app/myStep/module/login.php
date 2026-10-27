@@ -7,7 +7,8 @@ if(myReq::server('REQUEST_METHOD') === 'POST' && (myReq::get('out') !== null || 
 } elseif(myReq::session('ms_user')!='') {
     myStep::redirect($app_root);
 } elseif(!is_null($captcha = myReq::post('captcha'))) {
-    if(strtolower($captcha) == strtolower(myReq::session('captcha'))) {
+    $expectedCaptcha = myReq::session('captcha');
+    if(is_string($captcha) && $captcha !== '' && is_string($expectedCaptcha) && $expectedCaptcha !== '' && strcasecmp($captcha, $expectedCaptcha) === 0) {
         $usr = myReq::post('username');
         $pwd = myReq::post('password', '!');
         if(($result = $mystep->ms_login($usr, $pwd))===true) {

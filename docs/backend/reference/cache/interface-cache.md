@@ -1,7 +1,5 @@
 # interface_cache：interface_cache 缓存驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 myCache通过此层处理缓存存储、命中或锁；不要从驱动名称推断它实现全部可选协议。编码预算、有效false/null和失败返回按本页逐项判断。
@@ -28,7 +26,7 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 ### interface_cache
 
-功能说明：声明set/get/remove/clean四个历史入口，并加载精确命中和计算锁可选接口。
+功能说明：声明set/get/remove/clean四个入口，并加载精确命中和计算锁可选接口。
 
 使用说明：
   1. 供内置与第三方缓存驱动实现；应用通常通过myCache代理调用。
@@ -36,7 +34,7 @@ if ($cache->supports(interface_cache_lock::class)) {
   3. clean沿用驱动语义，内置实现用于过期回收；全量清空使用显式clear入口。
 
 补充说明：
-历史缓存协议，保持原四个方法及必需参数签名，兼容第三方适配器。
+缓存协议，保持原四个方法及必需参数签名，支持第三方适配器。
 内置驱动TTL为秒，非正数删除；clean只回收过期数据，不代表flush。
 第三方get返回false仍可能表示有效值，精确命中检查采用可选lookup接口。
 
@@ -85,7 +83,7 @@ public function get($key);
 | --- | --- |
 | `$key` | string\|int；缓存键 |
 
-**返回值**：mixed 不存在/过期/故障为false，旧协议不能区分有效false
+**返回值**：mixed 不存在/过期/故障为false，回调协议不能区分有效false
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
@@ -119,7 +117,7 @@ public function remove($key);
 public function clean();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 是否成功；框架不自动把本方法当成GC调用
 

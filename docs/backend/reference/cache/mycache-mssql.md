@@ -1,7 +1,5 @@
 # myCache_MSSQL：myCache_MSSQL 缓存驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 myCache通过此层处理缓存存储、命中或锁；不要从驱动名称推断它实现全部可选协议。编码预算、有效false/null和失败返回按本页逐项判断。
@@ -32,13 +30,13 @@ if ($cache->supports(interface_cache_lock::class)) {
 
 使用说明：
   1. 通过myCache的MSSQL驱动传入host/user/password/name等数据库配置。
-  2. 需要SQLSRV扩展及兼容的SQL Server服务；表结构在初始化时检查。
+  2. 需要SQLSRV扩展及支持的SQL Server服务；表结构在初始化时检查。
   3. 支持lookup协议，不声明计算锁；clear范围是选定缓存表的全部数据。
 
 补充说明：
 SQL Server缓存（SQL Server 2012+）：原生参数化读写、独立连接及精确命中。
-新表为BIGINT/VARCHAR(MAX)，旧TEXT格式可读，不自动ALTER旧表；不声明计算锁接口。
-本地无SQLSRV时明确报错，不静默切换后端；SQL Server实库兼容性须在目标环境验证。
+使用BIGINT/VARCHAR(MAX)保存期限与数据；不声明计算锁接口。
+本地无SQLSRV时明确报错，不静默切换后端；SQL Server的连接、字段类型及查询结果须在目标环境验证。
 
 ## 状态字段与公开变量
 
@@ -55,11 +53,11 @@ protected $cnt = null, $codec, $table = '[dbo].[my_cache]', $error = '', $capaci
 | `myCache_MSSQL::__construct` | 建立专用连接，检查/创建表；CHARSET仅接受UTF-8或char。 |
 | `myCache_MSSQL::columns` | 读取系统列说明并释放statement。 |
 | `myCache_MSSQL::getLastError` | 返回安全错误摘要，不含SQL和认证信息。 |
-| `myCache_MSSQL::query` | 兼容旧原始查询入口，新增可选参数绑定；调用者负责释放返回statement。 |
+| `myCache_MSSQL::query` | 执行原始查询或参数绑定查询；调用者负责释放返回的statement。 |
 | `myCache_MSSQL::writeStatement` | 完整消费写批次，确认TRY/CATCH及COMMIT已执行；不忽略后续结果中的错误。 |
 | `myCache_MSSQL::set` | 事务内UPDATE/INSERT覆盖同键；显式空值正常缓存，参数化数据不经字符串转义。 |
-| `myCache_MSSQL::fetch` | SQL过滤过期条目后再解码，兼容原始序列化及MS_CACHE2。 |
-| `myCache_MSSQL::get` | 兼容旧get。 |
+| `myCache_MSSQL::fetch` | SQL过滤过期条目后再解码，支持原始序列化及MS_CACHE2。 |
+| `myCache_MSSQL::get` | 读取缓存值，未命中时返回false。 |
 | `myCache_MSSQL::remove` | 参数化删除指定条目，始终引用[key]标识符。 |
 | `myCache_MSSQL::clean` | 删除所有已过期条目，使用PHP实际Unix时间而非MySQL函数。 |
 | `myCache_MSSQL::clear` | 显式删除当前缓存表全部条目，包含各namespace；保留表结构。 |
@@ -120,7 +118,7 @@ protected function columns($sql, array $params);
 public function getLastError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 最近一次安全错误摘要；无已记录错误时为空串
 
@@ -135,8 +133,7 @@ $result = $instance->getLastError();
 
 ### myCache_MSSQL::query
 
-功能说明：兼容旧原始查询入口，新增可选参数绑定；调用者负责释放返回statement。
-
+功能说明：执行原始查询或参数绑定查询；调用者负责释放返回的statement。
 
 异常处理：内部捕获连接/SQL执行异常并返回false，错误摘要保存在对应getLastError状态；调用方不应仅依赖catch判断失败。
 
@@ -206,7 +203,7 @@ $result = $instance->set($key, $value, $ttl);
 
 ### myCache_MSSQL::fetch
 
-功能说明：SQL过滤过期条目后再解码，兼容原始序列化及MS_CACHE2。
+功能说明：SQL过滤过期条目后再解码，支持原始序列化及MS_CACHE2。
 
 ```text
 public function fetch($key, &$hit = null);
@@ -230,7 +227,7 @@ $result = $instance->fetch($key, $hit);
 
 ### myCache_MSSQL::get
 
-功能说明：兼容旧get。
+功能说明：读取缓存值，未命中时返回false。
 
 ```text
 public function get($key);
@@ -284,7 +281,7 @@ $result = $instance->remove($key);
 public function clean();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 过期数据删除语句是否成功，不表示实际删除了多少条
 
@@ -309,7 +306,7 @@ $result = $instance->clean();
 public function clear();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool DELETE及全部结果成功为true，连接或SQL失败为false
 
@@ -357,7 +354,7 @@ $result = $instance->collectGarbage($limit);
 public function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -380,7 +377,7 @@ $result = $instance->close();
 public function __destruct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 

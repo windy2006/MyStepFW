@@ -67,7 +67,7 @@ switch($method) {
         \app\CMS\deleteCache('news_cat');
         $cache->func('\app\CMS\setCatList', [$news_cat], 0);
         $id = '';
-        CMS::redirect();
+        CMS::redirect(\app\CMS\queryURL(myReq::svr('referer') ?: \app\CMS\getURL($S->web->path_admin.'/article/catalog/'), ['Refresh'=>1]));
         break;
     case 'add_ok':
     case 'edit_ok':
@@ -179,7 +179,7 @@ switch($method) {
             \app\CMS\deleteCache('news_cat');
             $cache->func('\app\CMS\setCatList', [$news_cat], 0);
         }
-        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/article/catalog/', array_diff_key($_GET, ['id'=>true, 'news_id'=>true]));
+        myStep::$goto_url = \app\CMS\getURL(($S->web->path_admin ?? 'admin_cms').'/article/catalog/', array_merge(array_diff_key($_GET, ['id'=>true, 'news_id'=>true]), ['Refresh'=>myReq::check('post')?1:null]));
         break;
     default:
         $content = build_page('list');

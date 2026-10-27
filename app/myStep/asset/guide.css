@@ -78,3 +78,19 @@
     .guide-directory nav { max-height:230px; min-height:0; }
     .guide-results { max-height:38%; }
 }
+
+/* 代码在首次与局部加载时使用同一套本地高亮，复制始终读取原文本。 */
+.guide-document pre.guide-code { position: relative; padding-top: 46px; }
+.guide-document .guide-copy { position: absolute; top: 8px; right: 10px; padding: 4px 9px; border: 1px solid #b9cbe3; border-radius: 4px; background: #fff; color: #234f83; font: inherit; font-size: 12px; cursor: pointer; }
+.guide-document .guide-copy:disabled { opacity: .55; cursor: wait; }
+.guide-document .guide-copy:focus-visible { outline: 2px solid #2465c5; outline-offset: 2px; }
+.guide-document .hljs-keyword, .guide-document .hljs-selector-tag, .guide-document .hljs-literal { color: #0049a8; font-weight: 600; }
+.guide-document .hljs-string, .guide-document .hljs-attr, .guide-document .hljs-template-variable { color: #9b2b42; }
+.guide-document .hljs-comment, .guide-document .hljs-quote { color: #527444; }
+.guide-document .hljs-title, .guide-document .hljs-section, .guide-document .hljs-built_in { color: #734b9b; }
+.guide-document .hljs-number, .guide-document .hljs-symbol { color: #8b4b12; }
+.guide-document .hljs-tag { color: #29445f; }
+.guide-group > summary { position: relative; }
+.guide-group:has(a[aria-current="page"]) > summary { color: #164d88; background: #e2edfc; box-shadow: inset 3px 0 #397acb; font-weight: 700; }
+.guide-group a[aria-current="page"] { color: #fff; background: #1557a6; box-shadow: inset 3px 0 #083a77; }
+.guide-group a[aria-current="page"]::before { content: "➤"; margin-right: .45rem; }

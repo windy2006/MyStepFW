@@ -30,7 +30,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 /**
  * 功能说明：提供辅助属性、扩展方法登记、别名解析和可恢复调用状态。
@@ -118,7 +118,7 @@ trait myTrait {
         $class = $instance === null ? get_called_class() : get_class($instance);
         $aliases = [];
         if(property_exists($class, 'func_alias')) {
-            $property = new ReflectionProperty($class, 'func_alias'); $property->setAccessible(true);
+            $property = new ReflectionProperty($class, 'func_alias');
             if($property->isStatic()) $aliases = $property->getValue();
             elseif($instance !== null) $aliases = $property->getValue($instance);
             else $aliases = (new ReflectionClass($class))->getDefaultProperties()['func_alias'] ?? [];
@@ -252,7 +252,7 @@ trait myTrait {
             if(!is_string($key)) throw new InvalidArgumentException('Object state keys must be property names');
             $scope = $reflection; $property = null;
             do { if($scope->hasProperty($key)) { $property = $scope->getProperty($key); break; } } while($scope = $scope->getParentClass());
-            if($property !== null) { if(!$property->isStatic()) { $property->setAccessible(true); $property->setValue($instance, $value); } }
+            if($property !== null) { if(!$property->isStatic()) { $property->setValue($instance, $value); } }
             else $instance->$key = $value;
         }
         return $instance;
@@ -323,7 +323,7 @@ trait myTrait {
         catch(LogicException $error) { throw new InvalidArgumentException('Cyclic method alias', 0, $error); }
         $class = get_called_class();
         if(property_exists($class, 'func_alias')) {
-            $property = new ReflectionProperty($class, 'func_alias'); $property->setAccessible(true);
+            $property = new ReflectionProperty($class, 'func_alias');
             if($property->isStatic()) { $property->setValue(null, $next); return $next; }
         }
         self::$extension_aliases[$class] = $next;

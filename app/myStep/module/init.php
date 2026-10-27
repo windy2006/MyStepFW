@@ -1,4 +1,11 @@
 <?PHP
+/**
+ * 文件：app/myStep/module/init.php
+ * 功能说明：首次安装的框架配置表单及保存；在应用上下文和历史别名建立前执行。
+ * 方法目录：本文件不直接声明具名方法或函数。
+ * 使用说明：由myStep::init在全局配置缺失时包含，配合template/init.tpl。
+ *   后台入口从myStep应用配置读取并与ROOT_WEB组合，不依赖尚未建立的app_root全局变量。
+ */
 if(myReq::check('post')) {
     $setting = myReq::post('setting');
     if(!empty($setting['db']['host']) && !empty($setting['db']['user']) && !empty($setting['db']['password'])) {
@@ -53,6 +60,8 @@ foreach($list as $v) {
     }
 }
 $t->assign('server', myReq::server('SERVER_SOFTWARE'));
+$admin_config = new myConfig(APP.'myStep/config.php');
+$app_root = ROOT_WEB.trim((string)$admin_config->value('gen.path_admin','console'),'/');
 $t->assign('path_admin', $app_root);
 $t->assign('path_root', ROOT_WEB);
 $t->render();

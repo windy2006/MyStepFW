@@ -24,7 +24,7 @@
     ]
   },
   "lib/cache/myCacheCodec.class.php": {
-    "sha256": "18fdbc777c29db7f57e00c00b857c36eb228b879720892e1f9b2d3425f345e4c",
+    "sha256": "75f6d53946b8207123112a27345f2088ae6d841fa70eb5f036bce3bcfe26baeb",
     "document": "docs/backend/reference/cache/mycachecodec.md",
     "methods": [
       "myCacheCodec::__construct",
@@ -205,7 +205,7 @@
     ]
   },
   "lib/database/mysql.class.php": {
-    "sha256": "976b30c59cc0419956ce5c7c99dbb34570bf5896fda392c407e605fe6c236311",
+    "sha256": "eacab82bbbd079dbf349daaf53eda894ccc3b6807358d9072e83a9e95c75d39c",
     "document": "docs/backend/reference/database/mysql.md",
     "methods": [
       "MySQL::__construct",
@@ -277,7 +277,7 @@
     ]
   },
   "lib/database/sqlite.class.php": {
-    "sha256": "19e15a4b00c3f40d507c29a5c9505dc512949ad1486b7ed98b7fe83764492866",
+    "sha256": "e43a14722f1557820d940f2fc35461a037cbdd182ed1d8f47831ab388d196ba1",
     "document": "docs/backend/reference/database/sqlite.md",
     "methods": [
       "SQLite::__construct",
@@ -327,8 +327,29 @@
       "debug_check"
     ]
   },
+  "lib/interface_user.class.php": {
+    "document": "docs/backend/reference/interface-user.md",
+    "sha256": "9e14a9614622808e8f754300aecf982e8e32d4f4ac89c74978321bbe638a1204",
+    "methods": [
+      "interface_user::scope",
+      "interface_user::database",
+      "interface_user::prefix",
+      "interface_user::dialect",
+      "interface_user::ready",
+      "interface_user::prepare",
+      "interface_user::allowsLogin",
+      "interface_user::find",
+      "interface_user::findByEmail",
+      "interface_user::create",
+      "interface_user::verifyEmail",
+      "interface_user::authenticate",
+      "interface_user::login",
+      "interface_user::current",
+      "interface_user::logout"
+    ]
+  },
   "lib/myApi.class.php": {
-    "sha256": "67343fd6630ba624bde3ef85fe51056eeb3563ed237509f8774f6cfb24cf108d",
+    "sha256": "405fe28aa07b035c282e6ae24e734bfb38351ef7280a535ddcf8ff49c242baf7",
     "document": "docs/backend/reference/myapi.md",
     "methods": [
       "myApi::httpDefaults",
@@ -393,7 +414,7 @@
     ]
   },
   "lib/myBase.class.php": {
-    "sha256": "f04579a7a59239bbe4f72a4c01dc50c0a7de7e3e658831465015a33ee4f59ee1",
+    "sha256": "1ff11f4716c5c287f3273e23d5cd864334c566814e72afe6a5a50f3ebad70095",
     "document": "docs/backend/reference/mybase.md",
     "methods": [
       "myBase::__construct",
@@ -458,7 +479,7 @@
     ]
   },
   "lib/myController.class.php": {
-    "sha256": "2777248386a5d44f72815f437cb9e9e619380f34bc3b0ce50bd65d3263ffe6fd",
+    "sha256": "29d80db50f7deebc42b47c084baab3eb3ba9ef6bc79994e9810c2ea82ac916a2",
     "document": "docs/backend/reference/mycontroller.md",
     "methods": [
       "myController::__clone",
@@ -506,7 +527,7 @@
     ]
   },
   "lib/myDb.class.php": {
-    "sha256": "02503c7d1a8e426dc3dcf0846c130ebcbc72bb28b9a6d0df5627547f8ac369cb",
+    "sha256": "842e55027da5662536d6f5ef4d778313406262bdbd37d3e2d695581d9d64e2a2",
     "document": "docs/backend/reference/mydb.md",
     "methods": [
       "myDb::__construct",
@@ -576,7 +597,7 @@
     ]
   },
   "lib/myEmail.class.php": {
-    "sha256": "cdae095d0333486496a225219aa6261762737b502b28031a8acd4e1b869663c0",
+    "sha256": "e18fa56e4c21c0fdca1ec7fd3451164c79acf6699706337d5933a1b3c6136f19",
     "document": "docs/backend/reference/myemail.md",
     "methods": [
       "myEmail::init",
@@ -652,7 +673,7 @@
     ]
   },
   "lib/myException.class.php": {
-    "sha256": "3f9b8bedeee2bb4917948d84a63eb351b42a51ae0f191bcb9b80a5b2553fd2ca",
+    "sha256": "f4fe34347ddf1e1df5d9a75d3e59dac061ef99a9ffdc8070b50bdde6b4288c0e",
     "document": "docs/backend/reference/myexception.md",
     "methods": [
       "myException::__construct",
@@ -668,7 +689,7 @@
     ]
   },
   "lib/myFile.class.php": {
-    "sha256": "a090437506e11d6842b73bb251a12fa87204cd853dc1a87ff64211798a2698fe",
+    "sha256": "3d28aac1e8bf13ce02c7aa77a06a67804a801bb65692d41cffa87ce6c9e96c65",
     "document": "docs/backend/reference/myfile.md",
     "methods": [
       "myFile::__construct",
@@ -716,7 +737,7 @@
     ]
   },
   "lib/myImg.class.php": {
-    "sha256": "f820836278c927ae2fee5fe2ba5b542b63aab049a0821ccc631637340dcdb674",
+    "sha256": "be8ad84372dbe46723384a93fcfc7969e60e3eb4efa509c688d5d4844f5cdf95",
     "document": "docs/backend/reference/myimg.md",
     "methods": [
       "myImg::setLimits",
@@ -849,7 +870,7 @@
     ]
   },
   "lib/myReq.class.php": {
-    "sha256": "cd119f1b2ff72993e154965f22435d843d919e758094d8c3278e8047a47ac167",
+    "sha256": "e9cd7163f444ed19d9f35017b141e50a3decc47b1355202329a75c7306eef539",
     "document": "docs/backend/reference/myreq.md",
     "methods": [
       "myReq::init",
@@ -929,7 +950,7 @@
     ]
   },
   "lib/myStep.class.php": {
-    "sha256": "e21476669943598f10bff1a3c10ba2c56b450d010175f96d34ccafd47f4b4ac1",
+    "sha256": "434365268f6f0491cb49612865cd43f96fb31917123b4d50316ef8a04cc095ea",
     "document": "docs/backend/reference/mystep.md",
     "methods": [
       "myStep::__construct",
@@ -955,6 +976,8 @@
       "myStep::captcha",
       "myStep::language",
       "myStep::setting",
+      "myStep::browserSetting",
+      "myStep::browserBootstrap",
       "myStep::apiOriginAllowed",
       "myStep::api",
       "myStep::module",
@@ -966,6 +989,10 @@
       "myStep::setURL",
       "myStep::redirect",
       "myStep::init",
+      "myStep::userProvider",
+      "myStep::users",
+      "myStep::storagePlugin",
+      "myStep::configureStorage",
       "myStep::activePlugins",
       "myStep::refreshRoutes",
       "myStep::go",
@@ -976,13 +1003,11 @@
       "myStep::vendor",
       "myStep::segment",
       "myStep::checkPower",
-      "myStep::getCore",
-      "myStep::storagePlugin",
-      "myStep::configureStorage"
+      "myStep::getCore"
     ]
   },
   "lib/myString.class.php": {
-    "sha256": "28d8ddb0a6e8ffd57db8dc02041a342bed669566a3b954fdac5c6069d699aec2",
+    "sha256": "c2cfe79750fcb7ef43368284c7d0ab951e92232431b9cac7acdf7980b594a775",
     "document": "docs/backend/reference/mystring.md",
     "methods": [
       "myString::__construct",
@@ -1019,7 +1044,7 @@
     ]
   },
   "lib/myTemplate.class.php": {
-    "sha256": "8b98139e467601d10dba95f9eb320dd4c79c303901b7e7342aa72d6b9429ecb4",
+    "sha256": "c37c3d35e490c3a63f1f3e75974f553cb0595def34cc5c403291d1063e886b70",
     "document": "docs/backend/reference/mytemplate.md",
     "methods": [
       "myTemplate::init",
@@ -1064,7 +1089,7 @@
     ]
   },
   "lib/myTrait.class.php": {
-    "sha256": "69e636e0ba572d6f5807d94ae748535db7e054720e940e1c3320bb892eea69bb",
+    "sha256": "bc9b1136482317dcac54a3e4fb2bb293388207ce8707bf69c48ce84cfacae8be",
     "document": "docs/backend/reference/mytrait.md",
     "methods": [
       "myTrait::__get",
@@ -1098,6 +1123,26 @@
       "myUploader::result"
     ]
   },
+  "lib/myUser.class.php": {
+    "document": "docs/backend/reference/myuser.md",
+    "sha256": "845a1d283fd0f6d15ae931a164349770a879dee5c70d8191918147450aabbe6e",
+    "methods": [
+      "myUser::__construct",
+      "myUser::forApplication",
+      "myUser::provider",
+      "myUser::email",
+      "myUser::displayName",
+      "myUser::profile",
+      "myUser::current",
+      "myUser::find",
+      "myUser::findByEmail",
+      "myUser::register",
+      "myUser::passwordLogin",
+      "myUser::verifyEmail",
+      "myUser::loginVerified",
+      "myUser::logout"
+    ]
+  },
   "lib/myZip.class.php": {
     "sha256": "f6ffb5c528b31a58374103f9cd8ad669ac1caa0dc0253be6b45dbe77293179bc",
     "document": "docs/backend/reference/myzip.md",
@@ -1128,6 +1173,22 @@
       "interface_session::write",
       "interface_session::destroy",
       "interface_session::gc"
+    ]
+  },
+  "lib/session/mySessionHandler.class.php": {
+    "sha256": "880c7c946ff48869dc2633d6305979887cb407caac717786976c674a62154bf9",
+    "document": "docs/backend/reference/session/mysessionhandler.md",
+    "methods": [
+      "mySessionHandler::__construct",
+      "mySessionHandler::open",
+      "mySessionHandler::close",
+      "mySessionHandler::read",
+      "mySessionHandler::write",
+      "mySessionHandler::destroy",
+      "mySessionHandler::gc",
+      "mySessionHandler::create_sid",
+      "mySessionHandler::validateId",
+      "mySessionHandler::updateTimestamp"
     ]
   },
   "lib/session/sess_file.class.php": {
@@ -1191,7 +1252,7 @@
     ]
   },
   "plugin/interface_plugin.class.php": {
-    "sha256": "a78c39512249eb602c44ddaa804e2853df487ceb052c596cdfded6f68229ce81",
+    "sha256": "fd609051a527edc28353a64c51ce0dba1b6ec5ef1f60056e557f412e46a775e5",
     "document": "docs/development/plugins/reference/interface-plugin.md",
     "methods": [
       "interface_plugin::check",
@@ -1220,6 +1281,20 @@
       "removePriority"
     ]
   },
+  "plugin/redis/myCache_Redis.class.php": {
+    "sha256": "20feaa675b3b0156056b1ce685699b69889e43b7a0ce6ac711c8e1af27729d95",
+    "document": "docs/showcase/plugins/redis/mycache-redis.md",
+    "methods": [
+      "myCache_Redis::__construct",
+      "myCache_Redis::set",
+      "myCache_Redis::fetch",
+      "myCache_Redis::get",
+      "myCache_Redis::remove",
+      "myCache_Redis::clean",
+      "myCache_Redis::clear",
+      "myCache_Redis::synchronized"
+    ]
+  },
   "plugin/redis/myRedis.class.php": {
     "sha256": "e6a33def1b5a519a3bdb78660f1af59f4169f87fd881f6522f51c873869de1d9",
     "document": "docs/showcase/plugins/redis/myredis.md",
@@ -1233,20 +1308,6 @@
       "myRedis::acquire",
       "myRedis::release",
       "myRedis::close"
-    ]
-  },
-  "plugin/redis/myCache_Redis.class.php": {
-    "sha256": "20feaa675b3b0156056b1ce685699b69889e43b7a0ce6ac711c8e1af27729d95",
-    "document": "docs/showcase/plugins/redis/mycache-redis.md",
-    "methods": [
-      "myCache_Redis::__construct",
-      "myCache_Redis::set",
-      "myCache_Redis::fetch",
-      "myCache_Redis::get",
-      "myCache_Redis::remove",
-      "myCache_Redis::clean",
-      "myCache_Redis::clear",
-      "myCache_Redis::synchronized"
     ]
   },
   "plugin/redis/sess_redis.class.php": {

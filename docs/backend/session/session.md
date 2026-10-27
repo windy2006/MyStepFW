@@ -1,7 +1,5 @@
 # Session生命周期、锁和并发
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 会话与凭据是框架辅助能力，业务仍独立校验身份、数据归属及操作权限。代码预算不替代PHP解析前的补丁与服务器限制。
@@ -11,18 +9,17 @@
 1. PHP 调用 open；处理器准备目录或独立数据库连接。
 2. myReq 注册的 validateId 在严格模式下只接受现有且未过期的 ID，未知客户端 ID 改用 24 字节随机数的十六进制新 ID。
 3. read 对当前 ID 持锁，锁覆盖读取、业务代码及 write/updateTimestamp。
-4. 数据未变化时，文件处理器只刷新 mtime；存在旧目录迁移数据时仍完整保存。MySQL 对已有行只更新 expiration，不覆盖 BLOB；缺失行用 PHP 提供的数据恢复。
-5. write 保存完整原始字节；destroy 清除旧身份及迁移副本；close 释放锁和连接。
+4. 数据未变化时，文件处理器只刷新 mtime；MySQL 对已有行只更新 expiration，不覆盖 BLOB；缺失行用 PHP 提供的数据恢复。
+5. write 保存完整原始字节；destroy清除会话存储；close 释放锁和连接。
 6. PHP 按 gc_probability/gc_divisor 调用 GC。文件回收使用非阻塞锁，跳过活跃会话；MySQL 使用 expiration 索引。
 
 no_log 的语言包/设置等公开端点由 myReq 跳过整个会话启动，不发送或轮换会话 Cookie，此时 sessionStart 返回 false。
 
 较慢的业务在完成所有会话写入后可尽早 `session_write_close()`，释放同用户请求的串行锁；关闭后对 `$_SESSION` 的修改不会自动保存。只读 `read_and_close` 不执行续期回调，不能用于需要延长登录寿命的请求。
 
-文件格式仍为 `sess_<ID>` 的原始 PHP 会话字节串，保留旧日期目录的首次迁移；不承诺断电/磁盘写失败时的原子保存。目录须由可信账号管理、不可通过 HTTP 下载；符号链接检查不替代目录访问控制。文件锁采用本机 flock，分布式文件系统语义须另行验证。
+文件格式仍为 `sess_<ID>` 的原始 PHP 会话字节串；不承诺断电/磁盘写失败时的原子保存。目录须由可信账号管理、不可通过 HTTP 下载；符号链接检查不替代目录访问控制。文件锁采用本机 flock，分布式文件系统语义须另行验证。
 
-MySQL 命名锁最长等待默认为 10 秒，失败返回 false，不退回文件存储。严格 ID 校验中的锁/查询失败会使随后的 read 明确失败，防止 PHP 误将故障解释为不存在的 ID 并启动空会话。锁按数据库、表及区分大小写的 ID 隔离；数据库/表名保守转小写后参与锁命名，以兼容大小写不敏感的服务器。适用于全部请求连接同一 MySQL 写实例的部署，不承诺跨独立数据库节点的锁一致性。连接为专用非持久连接，业务事务不会提交/回滚会话。
-
+MySQL 命名锁最长等待默认为 10 秒，失败返回 false，不退回文件存储。严格 ID 校验中的锁/查询失败会使随后的 read 明确失败，防止 PHP 误将故障解释为不存在的 ID 并启动空会话。锁按数据库、表及区分大小写的 ID 隔离；数据库/表名保守转小写后参与锁命名，以支持大小写不敏感的服务器。适用于全部请求连接同一 MySQL 写实例的部署，不承诺跨独立数据库节点的锁一致性。连接为专用非持久连接，业务事务不会提交/回滚会话。
 
 ## 配置和错误接口
 
@@ -38,17 +35,15 @@ MySQL 命名锁最长等待默认为 10 秒，失败返回 false，不退回文�
 
 myReq 的 expire 单位仍为分钟，处理器 TTL 单位是秒；gc=false 只禁止概率清理，不延长过期数据的可用时间。trans_sid 默认关闭；关闭时只从 Cookie 接受原生客户端 ID，防止 URL 参数注入身份。
 
-`interface_session` 不增加必需方法；第三方六回调处理器可继续使用。类提供 validateId/updateTimestamp 时会自动注册；九回调数组须全部可调用。PHP 7.4 的扩展回调位置要求实际 callable，不能按新版文档签名直接传 null。旧六回调如果未实现 ID 存在性校验，不能仅靠开启 use_strict_mode 获得同等保护。参见 [PHP 回调文档](https://www.php.net/manual/en/function.session-set-save-handler.php) 和 [严格模式说明](https://www.php.net/manual/en/session.security.ini.php)。
+`interface_session` 不增加必需方法；第三方六回调处理器可继续使用。类提供 validateId/updateTimestamp 时会自动注册；九回调数组须全部可调用。PHP8.5由mySessionHandler转换为原生SessionHandlerInterface；框架的六/九回调回调协议仍要求对应项为实际callable，不能传null。旧六回调如果未实现 ID 存在性校验，不能仅靠开启 use_strict_mode 获得同等保护。参见 [PHP 回调文档](https://www.php.net/manual/en/function.session-set-save-handler.php) 和 [严格模式说明](https://www.php.net/manual/en/session.security.ini.php)。
 
-`sessionRestart()` 无参数保留内存数据并轮换 ID；明确传目标 ID 沿用历史“切换会话”语义，目标不存在时严格模式会分配其他 ID，不能将该参数作为任意指定新 ID 的接口。`sessionEnd()` 现在返回 bool。`setSessions()` 成功返回原数组并轮换 ID；常用 php/php_serialize 编码先做不实例化对象的合法性检查，坏数据保留原状态；输入仍应来自可信内部来源。
-
+`sessionRestart()` 无参数保留内存数据并轮换 ID；明确传目标 ID 使用“切换会话”语义，目标不存在时严格模式会分配其他 ID，不能将该参数作为任意指定新 ID 的接口。`sessionEnd()` 现在返回 bool。`setSessions()` 成功返回原数组并轮换 ID；常用 php/php_serialize 编码先做不实例化对象的合法性检查，坏数据保留原状态；输入仍应来自可信内部来源。
 
 ## 主要方法：参数、返回和失败约定
 
 ### myReq::sessionStart
 
 功能说明：启动SESSION，启用严格ID校验并接入可选validateId/updateTimestamp回调。
-
 
 资源生命周期：成功后PHP在请求结束时写回并关闭会话；需要提前释放同ID请求锁时由调用方使用session_write_close。
 处理器结构：字符串可为内置files或静态处理器类名；数组前6项依次为open/close/read/write/destroy/gc，9项模式追加create_sid/validate_sid/update_timestamp；空数组使用原生files。
@@ -74,8 +69,8 @@ public static function sessionRestart($id = '', $delete_old_session = true);
 
 | 参数说明 |
 | --- |
-| string $id 兼容指定目标ID；须有效且满足PHP严格模式，不保证采用未知ID（默认：''） |
-| bool $delete_old_session 是否删除旧ID存储，默认true（默认：true） |
+| string $id 指定目标ID；须有效且满足PHP严格模式，不保证采用未知ID（默认：''） |
+| bool $delete_old_session 是否删除轮换前的ID存储，默认true（默认：true） |
 
 **返回**：string|false 非活动会话、非法ID或轮换失败返回false
 
@@ -95,7 +90,7 @@ public static function sessionEnd();
 
 功能说明：读取SESSION
 
-沿用历史空键和null语义：session()返回序列化文本；session($key,null)读取该键。需要批量恢复会话源串时使用setSessions。
+沿用空键和null规则：session()返回序列化文本；session($key,null)读取该键。需要批量恢复会话源串时使用setSessions。
 
 ```text
 public static function session($key='', $value=null);

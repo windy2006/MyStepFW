@@ -1,16 +1,30 @@
 <?PHP
+// 会员资料、授权草稿和CSRF均属于当前会话，不读写共享页面内容缓存。
+header('Cache-Control: private, no-store');
+if(isset($tpl) && $tpl instanceof myTemplate)$tpl->setCacheMode(false);
 $db->cache(0);
 $tpl_setting['name'] = $info_app['path'][1] ?? 'login';
+if($tpl_setting['name'] === 'social') {
+    if(!isset(myController::$modules['user_social']))myStep::header('404');
+    $content='';myController::module('user_social','mystep,info_app,content');return;
+}
+
 if($tpl_setting['name']=='logout') {
     $mystep->logout();
     myStep::info('login_logout', ROOT_APP);
+}
+// 管理员和会员使用不同账号表；管理员的旧资料链接进入CMS后台，不落回前台首页。
+$operator = r::s('ms_cms_op');
+$hasOperator = is_string($operator) && $operator !== '';
+if($tpl_setting['name'] === 'profile' && $hasOperator) {
+    myStep::redirect(\app\CMS\getURL(\app\CMS\getProfilePath()), myReq::server('REQUEST_METHOD') === 'POST' ? '303' : '302');
 }
 if($tpl_setting['name']=='profile' && is_null(r::s('ms_cms_user'))) {
     $tpl_setting['name']='login';
 }
 if(!in_array($tpl_setting['name'],['login','register','profile'])
     ||
-    !is_null(r::s('ms_cms_op'))
+    $hasOperator
     ||
     ($tpl_setting['name']!=='profile' && (!is_null(r::s('ms_cms_user_group'))))
 ) {
@@ -69,8 +83,22 @@ if(myReq::check('post')) {
         case 'profile':
             if($data['password'] !== '' && $data['password'] !== r::p('password_r', '!')) myStep::info('checkform_err_password');
             $data = array_intersect_key($data, array_flip(['email', 'password']));
+            // 标准会员扩展就绪后，昵称按文本存储；邮箱改变须重新验证第三方关联。
+            $standardMember = in_array('password_enabled',$db->getFields($S->db->pre.'users'),true);
+            if($standardMember) {
+                $oldMember=$db->fetchOne('SELECT email,display_name FROM '.$db->quoteIdentifier($S->db->pre.'users').' WHERE username=?',[r::s('ms_cms_user')]);
+                try {
+                    $rawEmail=r::p('email','!')??'';$rawName=r::p('display_name','!')??($oldMember['display_name']?:r::s('ms_cms_user'));
+                    if(!is_string($rawEmail)||!is_string($rawName))throw new InvalidArgumentException('邮箱或昵称类型无效。');
+                    $data['email']=myUser::email($rawEmail);
+                    $data['display_name']=myUser::displayName($rawName);
+                } catch(InvalidArgumentException){myStep::info('error_para');}
+                if(strcasecmp((string)$oldMember['email'],$data['email'])!==0)$data['email_verified_at']=0;
+            }
+
             if($data['password'] !== '') {
                 $data['password'] = myAuth::hashPassword($data['password']);
+                if($standardMember)$data['password_enabled']=1;
             } else {
                 unset($data['password']);
             }
@@ -86,7 +114,7 @@ if(myReq::check('post')) {
     }
 }
 $mystep->checkCache($tpl);
-$t = new myTemplate($tpl_setting);
+$t = new myTemplate($tpl_setting, false);
 $t->assign('captcha_url', myStep::setURL('captcha/?core=CMS'));
 if($tpl_setting['name']=='login' && isset($info_app['path'][2])) {
     $db->build($S->db->pre.'users')->where('hash','=', $info_app['path'][2]);
@@ -95,12 +123,19 @@ if($tpl_setting['name']=='login' && isset($info_app['path'][2])) {
         \r::s('ms_cms_user_version', hash('sha256', $record['password']));
         myAuth::renewSession();
         \r::s('ms_cms_user_group', $record['group_id']);
-        $db->build($S->db->pre.'users')->field(['hash'=>''])->where('hash','=', $info_app['path'][2]);
+        $activation=['hash'=>''];if(isset($record['email_verified_at']))$activation['email_verified_at']=time();
+        $db->build($S->db->pre.'users')->field($activation)->where('hash','=', $info_app['path'][2]);
         $db->update();
         myStep::info('page_user_activate', ROOT_APP);
     }
 }
 if($tpl_setting['name']=='profile') {
     $db->build($S->db->pre.'users')->where('username','=', r::s('ms_cms_user'));
-    $t->assign($db->record());
+    $profile=$db->record();if(!$profile)myStep::info('error_para');
+    $t->setIf('member_name',array_key_exists('display_name',$profile));
+    foreach(['username','email','display_name'] as $key)$t->assign($key,htmlspecialchars((string)($profile[$key]??($key==='display_name'?$profile['username']:'')),ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8',false));
+
 }
+
+$t->assign('social_login','');
+if(isset(myController::$modules['user_social']) && class_exists('plugin_social',false))$t->assign('social_login',plugin_social::buttons($mystep->users(),$tpl_setting['name']==='profile'?'bind':'login'));

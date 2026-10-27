@@ -406,6 +406,7 @@ let setting_tinymce_ext = {
     }
 };
 let setting_tinymce_btn = 'pagebreak subtitle highlight';
+let setting_tinymce_revision = '<!--editor_asset_version-->';
 </script>
 <script type="application/javascript" src="<!--path_root-->vendor/tinymce/tinymce.min.js"></script>
-<script type="application/javascript" src="<!--path_app-->asset/admin/tinymce_init.js"></script>
+<script type="application/javascript" src="<!--path_app-->asset/admin/tinymce_init.js?v=<!--editor_asset_version-->"></script>

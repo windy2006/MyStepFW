@@ -34,7 +34,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -180,7 +180,7 @@ class myException extends ErrorException {
             E_USER_ERROR => 'User-generated error',
             E_USER_WARNING => 'User-generated warning',
             E_USER_NOTICE => 'User-generated notice',
-            E_STRICT => 'Suggestion notice',
+
             E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
             E_DEPRECATED => 'Will not work Notice',
             E_USER_DEPRECATED => 'User-generated Deprecated',
@@ -329,7 +329,7 @@ class myException extends ErrorException {
     public static function show() {
         if(empty(self::$err_last)) return false;
         if(!self::$display_details) {
-            http_response_code(500);
+            if(!headers_sent()) http_response_code(500);
             if(!headers_sent()) header('Content-Type: text/plain; charset=utf-8');
             echo 'Internal server error';
             return true;

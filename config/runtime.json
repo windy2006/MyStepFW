@@ -1,0 +1,6 @@
+{
+  "format": 1,
+  "channel": "php85",
+  "php_min": "8.5.12",
+  "php_max": "9.0.0"
+}

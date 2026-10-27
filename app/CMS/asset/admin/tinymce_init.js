@@ -1,3 +1,11 @@
+/**
+ * 文件：app/CMS/asset/admin/tinymce_init.js
+ * 功能说明：CMS富文本编辑器配置、上传及myStep_cms扩展；代码段仅保存文本与语言标记。
+ * 代码段方法目录：blockAt、languageOf、nodeText、codeText、selectedCodeText、normalize、normalizeAll、apply、paste、update。
+ * 使用说明：保留框架myStep与CMS专用扩展的加载顺序；highlight按钮在本文件登记，前台单独高亮。
+ */
+// 页面提供资源版本，使编辑器脚本和iframe样式同步刷新。
+const cmsEditorCSSRevision = typeof setting_tinymce_revision === 'string' ? '?v=' + encodeURIComponent(setting_tinymce_revision) : '';
 let setting_tinymce = {
         language:'zh_CN',
         selector:'#content',
@@ -24,7 +32,30 @@ let setting_tinymce = {
         },
 
         // Custom settings
-        content_css : [global.root + "static/css/bootstrap.css"],
+        content_css : [global.root + "static/css/bootstrap.css", global.root + "static/css/tinymce.css" + cmsEditorCSSRevision],
+        // 标题字号由tinymce.css控制，选择标题只使用语义标签，不写入行内字号。
+        block_formats: '段落=p;标题一=h1;标题二=h2;标题三=h3;标题四=h4;标题五=h5;预格式化=pre',
+        // 格式菜单与段落下拉框保持一致，不再提供标题六；其余原生格式仍然保留。
+        style_formats: [
+            {title:'Headings', items:[
+                {title:'标题一',format:'h1'}, {title:'标题二',format:'h2'},
+                {title:'标题三',format:'h3'}, {title:'标题四',format:'h4'}, {title:'标题五',format:'h5'}
+            ]},
+            {title:'Inline', items:[
+                {title:'Bold',icon:'bold',format:'bold'}, {title:'Italic',icon:'italic',format:'italic'},
+                {title:'Underline',icon:'underline',format:'underline'}, {title:'Strikethrough',icon:'strikethrough',format:'strikethrough'},
+                {title:'Superscript',icon:'superscript',format:'superscript'}, {title:'Subscript',icon:'subscript',format:'subscript'},
+                {title:'Code',icon:'code',format:'code'}
+            ]},
+            {title:'Blocks', items:[
+                {title:'Paragraph',format:'p'}, {title:'Blockquote',format:'blockquote'},
+                {title:'Div',format:'div'}, {title:'Pre',format:'pre'}
+            ]},
+            {title:'Alignment', items:[
+                {title:'Left',icon:'alignleft',format:'alignleft'}, {title:'Center',icon:'aligncenter',format:'aligncenter'},
+                {title:'Right',icon:'alignright',format:'alignright'}, {title:'Justify',icon:'alignjustify',format:'alignjustify'}
+            ]}
+        ],
         convert_urls: false,
         remove_script_host: false,
         preformatted : false,
@@ -49,33 +80,11 @@ let setting_tinymce = {
         flash_quality : "high",
         flash_menu : "false",
         add_unload_trigger : false,
-        fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",
+        fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt 36pt",
         font_formats: "微软雅黑='微软雅黑';宋体='宋体';黑体='黑体';仿宋='仿宋';楷体='楷体';隶书='隶书';幼圆='幼圆';Arial='Arial';Arial Black='Arial Black';Times New Roman='Times New Roman';Impact='Impact';Webdings='Webdings';Wingdings='Wingdings';",
 };
 function insertContent(str) {
     tinyMCE.activeEditor.execCommand("mceInsertContent", false, str);
-}
-function setHighlight(editor, brush) {
-    let str = editor.selection.getContent({format:'html'});
-    if(str.length===0) return;
-    if(/^<pre class="highlight".+?><code.+?>(.+?)<\/code><\/pre>$/ism.test(str)) {
-        str = RegExp.$1;
-    }
-    let symbol = '　　';
-    str = str.replace(new RegExp(symbol, 'g'), '');
-    str = str.replace(/<br.*?>/g, '\n');
-    str = str.replace(/\r/g, '\n');
-    str = str.replace(/<.+?>/g, '');
-    str = str.replace(/[\n]+/g, symbol+'\n');
-    str = str.replace(/ /g, '&nbsp;');
-    str = str.replace(/\t/g, '&nbsp; &nbsp; ');
-    if(brush!=='') {
-        str = '<pre class="highlight" data-lng="'+brush+'"><code class="language-'+brush+'">'+str+'<\/code></pre>';
-    } else {
-        str = str.replace(new RegExp(symbol, 'g'), '<br />\n');
-        str = '<div>' + str + '</div>';
-    }
-    insertContent(str);
 }
 function uploadInit() {
     if(!checkSetting(100, uploadInit)) return;
@@ -179,8 +188,170 @@ $(function(){
     });
     tinyMCE.create('tinyMCE.plugins.myStep_cms', {
         init : function(editor, url) {
+            (function () {
+                'use strict';
+                const labels = {auto:'自动识别（前台）',php:'PHP',html:'HTML',css:'CSS',javascript:'JavaScript',sql:'SQL',json:'JSON',python:'Python',bash:'Shell',plaintext:'普通代码'};
+                /** 找到当前编辑器内的pre祖先，兼容光标落在code/span/text节点。@param {Node} node 起点 @returns {Element|null} 代码容器 */
+                function blockAt(node) {
+                    const body = editor.getBody();
+                    while (node && node !== body) { if (node.nodeType === 1 && node.nodeName === 'PRE') return node; node = node.parentNode; }
+                    return null;
+                }
+                /** 读取语言元数据；缺失时默认前台自动识别，保留合法但未列入菜单的语言。@param {Element} pre 代码容器 @returns {string} 规范语言名 */
+                function languageOf(pre) {
+                    const code = pre.querySelector('code');
+                    const match = ((code && code.className) || pre.className || '').match(/(?:^|\s)(?:language-|lang-)([a-z0-9_+-]+)/i);
+                    const declared = pre.getAttribute('data-lng');
+                    let value = String(declared || (match && match[1]) || 'auto').toLowerCase();
+                    // 旧手册的language-text是未分类占位；明确选择的data-lng=plaintext仍保留。
+                    if (!declared && /^(?:text|plain|none)$/.test(value)) value = 'auto';
+                    value = ({js:'javascript',jscript:'javascript',xml:'html',htm:'html',sh:'bash',shell:'bash',text:'plaintext',plain:'plaintext',none:'plaintext'})[value] || value;
+                    return /^[a-z0-9_+-]{1,30}$/.test(value) ? value : 'auto';
+                }
+                /**
+                 * 功能说明：从DOM片段提取代码原文，以真实换行表达br和段落边界。
+                 * @param {Node} root 编辑器节点或Range.cloneContents产生的片段
+                 * @returns {string} 保留缩进、空行及文本节点中的原始换行；不二次解码实体
+                 */
+                function nodeText(root) {
+                    const parts = [];
+                    const blockNames = /^(?:P|DIV|PRE|LI|UL|OL|DL|DT|DD|BLOCKQUOTE|H[1-6]|TR|TABLE|THEAD|TBODY|TFOOT|SECTION|ARTICLE|ADDRESS|HR)$/;
+                    /** 判断元素是否产生段落边界。@param {Node} node 节点 @returns {boolean} 是否为块级结构 */
+                    function isBlock(node) { return node && node.nodeType === 1 && blockNames.test(node.nodeName); }
+                    /** 追加文本或结构换行，记录来源以免裁掉用户的真实换行。@param {string} value 内容 @param {boolean} [structural=false] 是否结构换行 @returns {void} */
+                    function append(value, structural = false) { if (value) parts.push({value:value, structural:structural}); }
+                    /** 检查已提取内容是否位于行尾。@returns {boolean} 无显式参数 */
+                    function atLineEnd() { return parts.length > 0 && /\n$/.test(parts[parts.length - 1].value); }
+                    /** 递归读取文本并跳过编辑器占位/前台按钮。@param {Node} node 节点 @param {boolean} preformatted 是否处于pre @returns {void} */
+                    function visit(node, preformatted) {
+                        if (node.nodeType === 3) {
+                            // HTML排版用的块间空白不形成额外空行；pre中的真实空白始终保留。
+                            if (!preformatted && /^[\t\r\n ]*$/.test(node.nodeValue)
+                                && (isBlock(node.previousSibling) || isBlock(node.nextSibling))) return;
+                            append(node.nodeValue.replace(/\r\n?/g, '\n')); return;
+                        }
+                        if (node.nodeType !== 1 && node.nodeType !== 11) return;
+                        if (node.nodeType === 1) {
+                            if (node.classList.contains('btn-copy') || node.getAttribute('data-mce-bogus') === 'all'
+                                || node.getAttribute('data-mce-type') === 'bookmark') return;
+                            if (node.nodeName === 'BR') { if (!node.hasAttribute('data-mce-bogus')) append('\n'); return; }
+                        }
+                        const block = isBlock(node);
+                        if (block && parts.length && !atLineEnd()) append('\n', true);
+                        const start = parts.length;
+                        const children = Array.from(node.childNodes);
+                        // TinyMCE的空段落通常只有一个br；它代表一条空行，不能重复计算两次。
+                        const placeholder = block && children.length === 1 && children[0].nodeName === 'BR';
+                        if (!placeholder) children.forEach(function (child) { visit(child, preformatted || node.nodeName === 'PRE'); });
+                        if (block && (parts.length === start || !atLineEnd())) append('\n', true);
+                    }
+                    // 容器自身不额外引入段落；仅读取其内容，避免完整pre末尾平白多出一行。
+                    Array.from(root.childNodes).forEach(function (node) { visit(node, root.nodeName === 'PRE'); });
+                    if (parts.length && parts[parts.length - 1].structural) parts.pop();
+                    return parts.map(function (part) { return part.value; }).join('');
+                }
+                /** 读取完整代码段，兼容旧span、br和段落布局，不丢弃code之外的文本。@param {Element} pre 容器 @returns {string} 原始代码 */
+                function codeText(pre) { return nodeText(pre); }
+                /**
+                 * 功能说明：提取当前选择的DOM片段，保留TinyMCE纯文本接口会丢失的段落/软换行。
+                 * 参数说明：无显式参数，使用当前编辑器Selection；不修改选择范围。
+                 * @returns {string} 选中代码文本；旧Selection实现回退到HTML片段解析
+                 */
+                function selectedCodeText() {
+                    const range = typeof editor.selection.getRng === 'function' ? editor.selection.getRng() : null;
+                    if (range && typeof range.cloneContents === 'function') return nodeText(range.cloneContents());
+                    const container = editor.getDoc().createElement('div');
+                    container.innerHTML = editor.selection.getContent({format:'html'});
+                    return nodeText(container);
+                }
+                /** 规范化为单个纯文本code节点；已规范的节点不重写文本，避免影响光标。@param {Element} pre 容器 @param {string} [language] 指定语言 @returns {Element} 代码节点 */
+                function normalize(pre, language) {
+                    const value = language || languageOf(pre);
+                    let code = pre.querySelector('code');
+                    const clean = code && code.parentNode === pre && pre.childNodes.length === 1 && code.children.length === 0;
+                    if (!clean) {
+                        const text = codeText(pre);
+                        code = editor.getDoc().createElement('code'); code.textContent = text;
+                        while (pre.firstChild) pre.removeChild(pre.firstChild);
+                        pre.appendChild(code);
+                    }
+                    pre.classList.add('highlight'); pre.setAttribute('data-lng', value);
+                    if (value === 'auto') code.removeAttribute('class');
+                    else code.setAttribute('class', 'language-' + value);
+                    return code;
+                }
+                /** 整理已有代码标记；仅处理明确的代码段，不改普通预格式化文本。@returns {void} 无显式参数 */
+                function normalizeAll() {
+                    const body = editor.getBody(); if (!body) return;
+                    Array.from(body.querySelectorAll('pre')).forEach(function (pre) {
+                        if (pre.classList.contains('highlight') || pre.querySelector('code')) normalize(pre);
+                    });
+                }
+                /** 插入、设置语言或取消当前代码段，全部操作进入同一撤销步骤。@param {string} language 语言名，空字符串转换为正文 @returns {void} 不猜测后台语言 */
+                function apply(language) {
+                    if (language !== '' && !Object.prototype.hasOwnProperty.call(labels, language)) return;
+                    const pre = blockAt(editor.selection.getNode()) || blockAt(editor.selection.getStart());
+                    editor.undoManager.transact(function () {
+                        if (pre) {
+                            if (language === '') {
+                                const p = editor.getDoc().createElement('p');
+                                codeText(pre).split('\n').forEach(function (line, index) {
+                                    if (index) p.appendChild(editor.getDoc().createElement('br'));
+                                    p.appendChild(editor.getDoc().createTextNode(line));
+                                });
+                                editor.dom.replace(p, pre); editor.selection.select(p, true); editor.selection.collapse(false);
+                            } else {
+                                const code = normalize(pre, language); editor.selection.select(code, true); editor.selection.collapse(false);
+                            }
+                        } else if (language !== '') {
+                            const text = selectedCodeText();
+                            const block = editor.getDoc().createElement('pre'), code = editor.getDoc().createElement('code');
+                            block.className = 'highlight'; block.setAttribute('data-lng', language);
+                            if (language !== 'auto') code.className = 'language-' + language;
+                            code.textContent = text || '\n'; block.appendChild(code);
+                            editor.insertContent(block.outerHTML);
+                        }
+                        editor.nodeChanged();
+                    });
+                }
+                /** 粘贴到代码段时只取纯文本，避免原正文粘贴器把换行和空格改成HTML。@param {ClipboardEvent} event 粘贴事件 @returns {void} 非代码/图片粘贴保留原流程 */
+                function paste(event) {
+                    const pre = blockAt(editor.selection.getNode()); if (!pre) return;
+                    const clipboard = (event.originalEvent || event).clipboardData;
+                    if (!clipboard || typeof clipboard.getData !== 'function') return;
+                    const text = clipboard.getData('text/plain'); if (text === '') return;
+                    event.preventDefault();
+                    if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+                    const node = editor.getDoc().createElement('div'); node.textContent = text.replace(/\r\n?/g, '\n');
+                    editor.insertContent(node.innerHTML);
+                }
+                editor.addCommand('msCodeBlock', function (ui, language) { apply(typeof language === 'string' ? language : 'auto'); });
+                editor.addButton('highlight', {
+                    text:'代码段', title:'代码段及前台语言识别设置', type:'listbox',
+                    values:Object.keys(labels).map(function (key) { return {text:labels[key],value:key}; }).concat([{text:'取消代码段',value:''}]),
+                    onselect:function () { apply(this.value()); },
+                    onPostRender:function () {
+                        const control = this;
+                        /** 根据实际光标位置更新菜单，缺语言标记不抛错。@returns {void} 无显式参数 */
+                        function update() {
+                            const pre = blockAt(editor.selection.getNode());
+                            if (!pre) { control.value(null); control.text('代码段'); return; }
+                            const language = languageOf(pre); control.value(labels[language] ? language : null);
+                            control.text(labels[language] || '代码段');
+                        }
+                        editor.on('NodeChange SetContent', update);
+                    }
+                });
+                editor.on('init SetContent BeforeGetContent', normalizeAll);
+                editor.on('paste', paste, true);
+            }());
+
             editor.addCommand("ms_format", function() {
                 let content = editor.getContent();
+                const codeBlocks = [], marker = 'MSCODE' + Date.now() + Math.random().toString(36).slice(2);
+                content = content.replace(/<pre\b[^>]*>[\s\S]*?<\/pre>/gi, function (html) {
+                    return '<!--' + marker + '-' + (codeBlocks.push(html)-1) + '-->';
+                });
                 let tag = 'p';
                 if(/<(p|div)/i.test(content)) {
                     tag = RegExp.$1;
@@ -205,6 +376,7 @@ $(function(){
                 content = content.replace(/  /g, String.fromCharCode(160)+" ");
                 content = content.replace(/(<(\w+)>[\s]*<\/\2>[\r\n]*)+$/g, "");
                 content += "<"+tag+"></"+tag+">";
+                content = content.replace(new RegExp('<!--' + marker + '-(\\d+)-->', 'g'), function (all, index) { return codeBlocks[Number(index)]; });
                 editor.setContent(content);
             });
             editor.addCommand("ms_change", function() {
@@ -298,46 +470,6 @@ $(function(){
                     $('#attachment').modal("show");
                 }
             });
-            editor.addButton('highlight', {
-                text: '高亮代码',
-                title : '代码高亮显示',
-                type: 'listbox',
-                values: [
-                    { text: 'PHP', value: 'php' },
-                    { text: 'HTML', value: 'html' },
-                    { text: 'CSS', value: 'css' },
-                    { text: 'JAVASCRIPT', value: 'javascript' },
-                    { text: 'SQL', value: 'sql' },
-                    { text: '取消高亮', value: '' },
-                ],
-                onselect: function(e) {
-                    let brush = this.value();
-                    let obj = editor.selection.getNode();
-                    if(obj.tagName==='CODE') {
-                        editor.selection.select(obj.parentNode);
-                    }
-                    setHighlight(editor, brush);
-                    this.text('高亮代码');
-                },
-                onPostRender: function() {
-                    let ctrl = this;
-                    editor.on('click', function(e) {
-                        e.cancelBubble = true;
-                        e.stopPropagation();
-                        e = e.target;
-                        if(e.nodeName === 'CODE') e = e.parentNode;
-                        if (e.nodeName === 'PRE' && editor.dom.hasClass(e, "highlight")) {
-                            let type = e.getAttribute('data-lng').toLocaleLowerCase();
-                            //editor.selection.select(e);
-                            ctrl.value(type);
-                            ctrl.text(type.toUpperCase());
-                        } else {
-                            ctrl.value(null);
-                            ctrl.text('高亮代码');
-                        }
-                    });
-                }
-            });
             editor.addButton('alert', {
                 text: '提示文字',
                 title : '突出显示提示文字',
@@ -391,10 +523,10 @@ $(function(){
                 $('#cover').show().text('松开鼠标以上传！');
             });
             editor.on('init', function(){
-                editor.dom.loadCSS(global.root + "static/css/tinymce.css");
                 uploadInit();
             });
             editor.on('paste',function(e){
+                if(e.defaultPrevented || editor.dom.getParent(editor.selection.getNode(), 'pre.highlight')) return;
                 let cd = (e.originalEvent || e).clipboardData || window.clipboardData;
                 let content = cd.getData('text/html');
                 let re = null;

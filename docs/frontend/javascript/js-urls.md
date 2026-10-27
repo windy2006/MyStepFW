@@ -1,7 +1,5 @@
 # 路由地址、参数和批量链接
 
-修订日期：2026-10-23。浏览器脚本用法。
-
 ## 本篇目标与调用场景
 
 本篇所有JavaScript示例在浏览器运行。先加载所需本地脚本，不把PHP变量或磁盘路径直接当成浏览器变量。
@@ -11,14 +9,14 @@
 | 变量 | 用途与约束 |
 | --- | --- |
 | `root_web/global.root` | 网站Web根前缀，用于公开资源 |
-| `setting/language` | 异步装入的公开设置和语言，须等待就绪 |
+| `setting/language` | 完整框架页面在脚本前预置公开设置和语言；独立页面用checkNrun等待 |
 | `document/window` | 当前浏览器页面上下文，不是PHP的全局变量 |
 
 ## 4. 路由与查询参数
 
 | 函数 | 功能及参数 | 返回值 |
 | --- | --- | --- |
-| `routeURL(url, prefix=global.root_fix)` | 把应用／模块相对路径与 prefix 合成当前路由地址；结合 setting.url_prefix、url_fix 等归一化 | string；依赖 setting 已就绪。完整协议地址、以 `/` 开头的地址和 `#` 锚点原样保留 |
+| `routeURL(url, prefix=global.root_fix)` | 把应用／模块相对路径与 prefix 合成当前路由地址；结合 setting.url_prefix、url_fix 等归一化 | string；配置缺失时保留原url，不猜测路由。需要转换时先等待配置就绪。完整协议地址、以 `/` 开头的地址和 `#` 锚点原样保留 |
 | `queryURL(url, params={})` | 只合并查询参数并保留锚点、index.php 的首段路由；null／undefined 删除参数；数组生成同名重复参数 | string；使用 URLSearchParams 编码，空格通常为 + |
 | `setURL(prefix=global.root_fix, context=document.body)` | 批量调整容器内 a.href、form.action、img.src；带 keep-url 的元素跳过；为查询串路由 GET 表单登记适配 | 已完成返回 true；配置未就绪时安排重试并返回 undefined |
 
@@ -66,7 +64,6 @@ checkNrun(function () {
 prefix 应包含需要的尾部分隔符，函数按 prefix + url 组合，不会替任意业务前缀补斜杠。显式 `''` 表示不给 url 添加模块路径；使用时需确认当前路由含义。根路径 `/article/` 会原样保留，不会自动补应用。
 
 setURL 会修改整个指定容器的链接、表单和图片；动态插入的内容需在插入后再次调用，建议限定容器。GET 表单适配尊重取消事件和提交按钮的 formmethod／formaction／formtarget，非查询串路由不额外接管导航。
-
 
 ## 明确调用示例
 

@@ -50,8 +50,8 @@
 ## 会话与安全
 
 - [Session生命周期、锁和并发](session/session.md)
-- [Session驱动、表结构与兼容](session/session-drivers.md)
-- [密码、旧散列迁移与记住登录](security/auth.md)
+- [Session驱动、表结构与支持](session/session-drivers.md)
+- [密码校验与登录凭据](security/auth.md)
 - [会话CSRF、来源、方法与后台判定](security/security.md)
 - [输入预算、请求体积与启动保护](security/input-budget.md)
 - [附件落盘索引、下载与删除](security/attachments.md)
@@ -83,7 +83,7 @@
 - [打包、暂存、解包和失败处理](tools/archives.md)
 - [ZIP创建与受控解包](tools/zip.md)
 - [邮件组装、附件和SMTP](tools/email.md)
-- [认证加密与旧格式兼容](tools/encrypt.md)
+- [认证加密与数据格式支持](tools/encrypt.md)
 - [XML Excel工作簿与流式导出](tools/excel.md)
 - [资源整合、压缩与依赖指纹](tools/minify.md)
 - [类、方法及注释反射](tools/reflection.md)
@@ -99,7 +99,7 @@
 - [myAuth · 密码和登录凭据](reference/myauth.md)
 - [myBase · 基础抽象类](reference/mybase.md)
 - [myCache · 缓存代理与能力](reference/mycache.md)
-- [myRedis · Redis连接与键隔离](../showcase/plugins/redis/myredis.md)
+- [myRedis · Redis连接](../showcase/plugins/redis/myredis.md)
 - [myClassLoader · 类加载声明](reference/myclassloader.md)
 - [myConfig · 配置读取、合并和保存](reference/myconfig.md)
 - [myController · 控制器基础资源](reference/mycontroller.md)
@@ -128,32 +128,39 @@
 
 ## 数据库驱动
 
-- [interface_db · interface_db 数据库驱动／协议](reference/database/interface-db.md)
-- [interface_db_prepared · interface_db_prepared 数据库驱动／协议](reference/database/interface-db-prepared.md)
-- [interface_db_transaction · interface_db_transaction 数据库驱动／协议](reference/database/interface-db-transaction.md)
-- [interface_sql · interface_sql 数据库驱动／协议](reference/database/interface-sql.md)
-- [MSSQL · mssql 数据库驱动／协议](reference/database/mssql.md)
-- [MySQL · mysql 数据库驱动／协议](reference/database/mysql.md)
-- [simpleDB · simpleDB 数据库驱动／协议](reference/database/simpledb.md)
-- [SQLite · sqlite 数据库驱动／协议](reference/database/sqlite.md)
+- [interface_db · 数据库协议](reference/database/interface-db.md)
+- [interface_db_prepared · 参数绑定协议](reference/database/interface-db-prepared.md)
+- [interface_db_transaction · 事务协议](reference/database/interface-db-transaction.md)
+- [interface_sql · SQL构造协议](reference/database/interface-sql.md)
+- [MSSQL · MSSQL数据库](reference/database/mssql.md)
+- [MySQL · MySQL数据库](reference/database/mysql.md)
+- [simpleDB · 本地文件数据库](reference/database/simpledb.md)
+- [SQLite · SQLite数据库](reference/database/sqlite.md)
 
 ## 缓存驱动
 
-- [interface_cache · interface_cache 缓存驱动／协议](reference/cache/interface-cache.md)
-- [interface_cache_lock · interface_cache_lock 缓存驱动／协议](reference/cache/interface-cache-lock.md)
-- [interface_cache_lookup · interface_cache_lookup 缓存驱动／协议](reference/cache/interface-cache-lookup.md)
-- [myCacheCodec · myCacheCodec 缓存驱动／协议](reference/cache/mycachecodec.md)
-- [myCache_File · myCache_File 缓存驱动／协议](reference/cache/mycache-file.md)
-- [myCache_MSSQL · myCache_MSSQL 缓存驱动／协议](reference/cache/mycache-mssql.md)
-- [myCache_MySQL · myCache_MySQL 缓存驱动／协议](reference/cache/mycache-mysql.md)
-- [myCache_Redis · Redis缓存驱动](../showcase/plugins/redis/mycache-redis.md)
+- [interface_cache · 缓存协议](reference/cache/interface-cache.md)
+- [interface_cache_lock · 计算锁协议](reference/cache/interface-cache-lock.md)
+- [interface_cache_lookup · 命中协议](reference/cache/interface-cache-lookup.md)
+- [myCacheCodec · 缓存编码](reference/cache/mycachecodec.md)
+- [myCache_File · 文件缓存](reference/cache/mycache-file.md)
+- [myCache_MSSQL · MSSQL缓存](reference/cache/mycache-mssql.md)
+- [myCache_MySQL · MySQL缓存](reference/cache/mycache-mysql.md)
+- [myCache_Redis · Redis缓存](../showcase/plugins/redis/mycache-redis.md)
 
 ## Session处理器
 
-- [interface_session · interface_session 会话处理器](reference/session/interface-session.md)
-- [sess_file · sess_file 会话处理器](reference/session/sess-file.md)
-- [sess_mysql · sess_mysql 会话处理器](reference/session/sess-mysql.md)
-- [sess_mystep · sess_mystep 会话处理器](reference/session/sess-mystep.md)
-- [sess_redis · Redis会话处理器](../showcase/plugins/redis/sess-redis.md)
+- [interface_session · 会话协议](reference/session/interface-session.md)
+- [mySessionHandler · 会话桥接](reference/session/mysessionhandler.md)
+- [sess_file · 文件会话](reference/session/sess-file.md)
+- [sess_mysql · MySQL会话](reference/session/sess-mysql.md)
+- [sess_mystep · 框架会话](reference/session/sess-mystep.md)
+- [sess_redis · Redis会话](../showcase/plugins/redis/sess-redis.md)
 
 [文档总览](../README.md)
+
+## 普通会员
+
+- [普通会员接口、邮箱验证及第三方登录](security/members.md)
+- [myUser逐方法说明](reference/myuser.md)
+- [interface_user适配协议](reference/interface-user.md)

@@ -67,13 +67,13 @@
  *   public coordinateMaker::drawPie($data, $point, $width, $height, $data_str = '', $mode = 1, $legend = 0, $mask = 20, $ext_value = 0, $distance = 0, $start_angle = 0) — 绘制饼图，并标注数值/百分比及可选图例
  *
  * 使用说明：
- *   1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+ *   1. GD采用GdImage对象；像素坐标显式向零取整，多边形采用三参数原生接口。
  *   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
  *   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -81,7 +81,7 @@
  * 功能说明：基于GD管理画布、图像转换、绘制、验证码、水印及缩略图
  *
  * 使用说明：
- *   1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+ *   1. GD采用GdImage对象；像素坐标显式向零取整，多边形采用三参数原生接口。
  *   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
  *   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
  *
@@ -203,7 +203,7 @@ class myImg extends myBase {
         if(!self::validDimensions($this->width, $this->height)) return false;
         $this->destroy();
         $this->color_lst = [];
-        $this->img = $trueImage ? imagecreatetruecolor($this->width, $this->height) : imagecreate($this->width, $this->height);
+        $this->img = $trueImage ? imagecreatetruecolor((int)($this->width), (int)($this->height)) : imagecreate((int)($this->width), (int)($this->height));
         $this->setColor('red', 255, 0, 0);
         $this->setColor('green', 0, 255, 0);
         $this->setColor('blue', 0, 0, 255);
@@ -260,7 +260,7 @@ class myImg extends myBase {
             if(is_null($width)) $width = $this->width;
             if(is_null($height)) $height = $this->height;
             imagesettile($this->img, $tile);
-            imageFilledRectangle($this->img, $point[0], $point[1], $point[0] + $width, $point[1] + $height, IMG_COLOR_TILED);
+            imageFilledRectangle($this->img, (int)($point[0]), (int)($point[1]), (int)($point[0] + $width), (int)($point[1] + $height), IMG_COLOR_TILED);
             $this->destroy($tile);
         }
         return $this;
@@ -299,7 +299,7 @@ class myImg extends myBase {
         if(count($this->color_lst)>0 && $rand) {
             return $this->color_lst[array_rand($this->color_lst)];
         } else {
-            return $alpha ? imagecolorallocatealpha($this->img, rand(0, 255), rand(0, 255), rand(0, 255), rand(0, 127)) : imagecolorallocate($this->img, rand(0, 255), rand(0, 255), rand(0, 255));
+            return $alpha ? imagecolorallocatealpha($this->img, (int)(rand(0, 255)), (int)(rand(0, 255)), (int)(rand(0, 255)), (int)(rand(0, 127))) : imagecolorallocate($this->img, (int)(rand(0, 255)), (int)(rand(0, 255)), (int)(rand(0, 255)));
         }
     }
 
@@ -307,7 +307,7 @@ class myImg extends myBase {
      * 功能说明：读取图片文件，并返回图片信息
      *
      *
-     * 资源所有权：直接调用load得到独立句柄，调用方负责imagedestroy；经init加载时由当前图像实例管理，destroy可显式释放。
+     * 资源所有权：直接调用load得到独立句柄，调用方通过unset释放自身图像引用；经init加载时由当前图像实例管理，destroy可显式释放。
      *
      * @param string $image 待加载的图片文件路径
      * @param array &$data 引用输出的图片格式/尺寸等getimagesize信息（默认：array()）
@@ -342,12 +342,12 @@ class myImg extends myBase {
         if($data[2] === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
             $exif = @exif_read_data($image, 'IFD0', true, false);
             $orientation = (int)($exif['IFD0']['Orientation'] ?? 1);
-            if(in_array($orientation, [2, 4, 5, 7], true)) imageflip($img, in_array($orientation, [4, 5], true) ? IMG_FLIP_VERTICAL : IMG_FLIP_HORIZONTAL);
+            if(in_array($orientation, [2, 4, 5, 7], true)) imageflip($img, (int)(in_array($orientation, [4, 5], true) ? IMG_FLIP_VERTICAL : IMG_FLIP_HORIZONTAL));
             $angle = [3=>180, 5=>-90, 6=>-90, 7=>-90, 8=>90][$orientation] ?? 0;
             if($angle) {
                 $rotated = imagerotate($img, $angle, 0);
-                if(!$rotated) { imagedestroy($img); return false; }
-                imagedestroy($img); $img = $rotated;
+                if(!$rotated) { unset($img); return false; }
+                unset($img); $img = $rotated;
             }
             $data[0] = imagesx($img); $data[1] = imagesy($img);
         }
@@ -365,11 +365,11 @@ class myImg extends myBase {
      *
      * 调用示例：
      *     $rotated = $image->rotate(90, $source);
-     *     if ($rotated !== false) { imagedestroy($rotated); } // 独立返回句柄由调用方释放
+     *     if ($rotated !== false) { unset($rotated); } // 独立返回句柄由调用方释放
      *
      * @param int|float $angle 旋转或文字倾斜角度，单位度
-     * @param resource|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
-     * @return $this|resource|false img为null时替换当前画布并返回自身；传入图像时返回新句柄；无效/超限为false
+     * @param GdImage|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
+     * @return $this|GdImage|false img为null时替换当前画布并返回自身；传入图像时返回新句柄；无效/超限为false
      */
     public function rotate($angle, $img = NULL) {
         if(!is_numeric($angle) || !is_finite((float)$angle)) return false;
@@ -383,14 +383,14 @@ class myImg extends myBase {
             $width = ceil(round(abs($w*cos($radians))+abs($h*sin($radians)), 6));
             $height = ceil(round(abs($w*sin($radians))+abs($h*cos($radians)), 6));
             if(!self::validDimensions($width, $height)) return false;
-            $rotated = imagerotate($source, $angle, imagecolorallocatealpha($source, 0, 0, 0, 127));
+            $rotated = imagerotate($source, $angle, (int)(imagecolorallocatealpha($source, 0, 0, 0, 127)));
             if(!$rotated) return false;
             imagesavealpha($rotated, true);
             if(!$own) return $rotated;
             $this->destroy(); $this->img = $rotated;
             list($this->width, $this->height) = $this->getSize();
             return $this;
-        } finally { if($loaded) imagedestroy($source); }
+        } finally { if($loaded) unset($source); }
     }
 
     /**
@@ -400,8 +400,8 @@ class myImg extends myBase {
      * 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
      *
      * @param int|float|array $rate 正缩放倍率，或目标边界[宽,高]；边界模式保持比例且不放大
-     * @param resource|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
-     * @return $this|resource|false img为null时替换当前画布；传入图像时返回新句柄；比例/尺寸/加载无效为false
+     * @param GdImage|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
+     * @return $this|GdImage|false img为null时替换当前画布；传入图像时返回新句柄；比例/尺寸/加载无效为false
      */
     public function resize($rate, $img = NULL) {
         if($return = is_null($img)) $img = $this->img;
@@ -418,13 +418,13 @@ class myImg extends myBase {
         $new_height = max(1, (int)round($height * $rate));
         if(!self::validDimensions($new_width, $new_height)) return false;
         if(function_exists('imagecopyresampled')) {
-            $new_img = imagecreatetruecolor($new_width, $new_height);
+            $new_img = imagecreatetruecolor((int)($new_width), (int)($new_height));
             imagealphablending($new_img, false);
             imagesavealpha($new_img, true);
-            imagecopyresampled($new_img, $img, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+            imagecopyresampled($new_img, $img, 0, 0, 0, 0, (int)($new_width), (int)($new_height), (int)($width), (int)($height));
         } else {
-            $new_img = imagecreate($new_width, $new_height);
-            imagecopyresized($new_img, $img, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+            $new_img = imagecreate((int)($new_width), (int)($new_height));
+            imagecopyresized($new_img, $img, 0, 0, 0, 0, (int)($new_width), (int)($new_height), (int)($width), (int)($height));
         }
         if($return) {
             $this->destroy();
@@ -443,20 +443,20 @@ class myImg extends myBase {
      *
      * 资源所有权：未传img时本实例接管新画布；显式传img时返回的新句柄归调用方，须另行释放。传入的已有GD句柄不因成功返回而自动释放。
      *
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整
      * @param int|float $width 宽度，图像/画布场景以像素为单位
      * @param int|float $height 高度，图像/画布场景以像素为单位
-     * @param resource|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
-     * @return $this|resource|false img为null时替换当前画布；指定图像时返回裁剪句柄；坐标/尺寸/加载无效为false
+     * @param GdImage|string|null $img GD图像句柄或图片路径；null修改当前画布，传入时返回新句柄（默认：NULL）
+     * @return $this|GdImage|false img为null时替换当前画布；指定图像时返回裁剪句柄；坐标/尺寸/加载无效为false
      */
     public function crop($point, $width, $height, $img = NULL) {
         if($flag = is_null($img)) $img = $this->img;
         if(!$this->check($img) && (($img=$this->load($img))===false)) return false;
         if(!$this->checkPoint($point) || !self::validDimensions($width, $height)) return false;
-        $new_img = imagecreatetruecolor($width, $height);
+        $new_img = imagecreatetruecolor((int)($width), (int)($height));
         imagealphablending($new_img, false);
         imagesavealpha($new_img, true);
-        imagecopyresampled($new_img, $img, 0, 0, $point[0], $point[1], $width, $height, $width, $height);
+        imagecopyresampled($new_img, $img, 0, 0, (int)($point[0]), (int)($point[1]), (int)($width), (int)($height), (int)($width), (int)($height));
         if(!$flag) {
             return $new_img;
         } else {
@@ -471,19 +471,19 @@ class myImg extends myBase {
     /**
      * 功能说明：将一图像源粘贴到画布的某一位置
      *
-     * @param resource|string $img 待粘贴的GD图像句柄或图片路径
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定（默认：array(0, 0)）
+     * @param GdImage|string $img 待粘贴的GD图像句柄或图片路径
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整（默认：array(0, 0)）
      * @param int $alpha 1至100执行透明合成，非正值执行灰阶合成，大于100直接拷贝（默认：100）
      * @return $this|false 粘贴后返回当前实例；源图像加载失败为false
      */
     public function paste($img, $point = array(0, 0), $alpha = 100) {
         if(!$this->check($img) && (($img=$this->load($img))===false)) return false;
         if($alpha <= 0) {
-            imagecopymergegray($this->img, $img, $point[0], $point[1], 0, 0, imagesx($img), imagesy($img), $alpha);
+            imagecopymergegray($this->img, $img, (int)($point[0]), (int)($point[1]), 0, 0, (int)(imagesx($img)), (int)(imagesy($img)), (int)($alpha));
         } elseif($alpha > 0 && $alpha <= 100) {
-            imagecopymerge($this->img, $img, $point[0], $point[1], 0, 0, imagesx($img), imagesy($img), $alpha);
+            imagecopymerge($this->img, $img, (int)($point[0]), (int)($point[1]), 0, 0, (int)(imagesx($img)), (int)(imagesy($img)), (int)($alpha));
         } else {
-            imagecopy($this->img, $img, $point[0], $point[1], 0, 0, imagesx($img), imagesy($img));
+            imagecopy($this->img, $img, (int)($point[0]), (int)($point[1]), 0, 0, (int)(imagesx($img)), (int)(imagesy($img)));
         }
         return $this;
     }
@@ -493,11 +493,11 @@ class myImg extends myBase {
      *
      * @param int $thickness 绘线厚度，单位像素（默认：1）
      * @param array|null $style GD线条样式颜色序列，null不设置（默认：NULL）
-     * @param resource|null $brush GD画笔图像句柄，null不设置（默认：NULL）
+     * @param GdImage|null $brush GD画笔图像句柄，null不设置（默认：NULL）
      * @return $this 返回当前实例，支持链式调用。
      */
     public function setLine($thickness = 1, $style = NULL, $brush = NULL) {
-        imagesetthickness($this->img, $thickness);
+        imagesetthickness($this->img, (int)($thickness));
         if(is_array($style)) {
             $style_lst = array();
             $m=count($style);
@@ -532,7 +532,7 @@ class myImg extends myBase {
     /**
      * 功能说明：返回图像源的宽、高
      *
-     * @param resource|null $img GD图像句柄；null使用当前画布（默认：NULL）
+     * @param GdImage|null $img GD图像对象；null使用当前画布（默认：NULL）
      * @return array [宽,高]像素二元组；当前/指定句柄无效时返回[0,0]
      * @phpstan-return array{int,int}
      */
@@ -545,7 +545,7 @@ class myImg extends myBase {
     /**
      * 功能说明：取得画布某点的颜色
      *
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整
      * @param bool $mode true返回GD颜色索引，false返回RGBA组成信息（默认：true）
      * @return $this|array|int|false mode为true返回颜色索引，为false返回RGBA映射；无效点/画布可返回自身，GD读取失败为false
      * @phpstan-return $this|array{red:int,green:int,blue:int,alpha:int}|int|false
@@ -553,10 +553,10 @@ class myImg extends myBase {
     public function getColor($point, $mode = true) {
         if(!$this->check()) return $this;
         if(!$this->checkPoint($point)) return $this;
-        if(($color_index = imagecolorat($this->img, $point[0], $point[1]))!==false) {
-            $color_tran = imagecolorsforindex($this->img, $color_index);
+        if(($color_index = imagecolorat($this->img, (int)($point[0]), (int)($point[1])))!==false) {
+            $color_tran = imagecolorsforindex($this->img, (int)($color_index));
             if($mode) {
-                return imagecolorallocate($this->img, $color_tran['red'], $color_tran['green'], $color_tran['blue']);
+                return imagecolorallocate($this->img, (int)($color_tran['red']), (int)($color_tran['green']), (int)($color_tran['blue']));
             } else {
                 return $color_tran;
             }
@@ -590,14 +590,14 @@ class myImg extends myBase {
         }
         imagealphablending($this->img, true);
         imagesavealpha($this->img, true);
-        if(isset($this->color_lst[$idx])) imagecolordeallocate($this->img, $this->color_lst[$idx]);
-        $this->color_lst[$idx] = imagecolorallocatealpha($this->img, $color[0], $color[1], $color[2], $alpha);
+        if(isset($this->color_lst[$idx])) imagecolordeallocate($this->img, (int)($this->color_lst[$idx]));
+        $this->color_lst[$idx] = imagecolorallocatealpha($this->img, (int)($color[0]), (int)($color[1]), (int)($color[2]), (int)($alpha));
         $color_mask = array();
         $color_mask[0] = $color[0]<50 ? 0 : $color[0]-50;
         $color_mask[1] = $color[1]<50 ? 0 : $color[1]-50;
         $color_mask[2] = $color[2]<50 ? 0 : $color[2]-50;
-        if(isset($this->color_lst[$idx.'_mask'])) imagecolordeallocate($this->img, $this->color_lst[$idx.'_mask']);
-        $this->color_lst[$idx.'_mask'] = imagecolorallocatealpha($this->img, $color_mask[0], $color_mask[1], $color_mask[2], $alpha);
+        if(isset($this->color_lst[$idx.'_mask'])) imagecolordeallocate($this->img, (int)($this->color_lst[$idx.'_mask']));
+        $this->color_lst[$idx.'_mask'] = imagecolorallocatealpha($this->img, (int)($color_mask[0]), (int)($color_mask[1]), (int)($color_mask[2]), (int)($alpha));
         return $this;
     }
 
@@ -612,9 +612,9 @@ class myImg extends myBase {
     public function fill($point = array(0, 0), $color = '', $color_border = NULL) {
         $color = isset($this->color_lst[$color]) ? $this->color_lst[$color] : $this->randomColor();
         if(is_null($color_border)) {
-            imagefill($this->img, $point[0], $point[1], $color);
+            imagefill($this->img, (int)($point[0]), (int)($point[1]), (int)($color));
         } else {
-            imagefilltoborder($this->img, $point[0], $point[1], $color_border, $color);
+            imagefilltoborder($this->img, (int)($point[0]), (int)($point[1]), (int)($color_border), (int)($color));
         }
         return    $this;
     }
@@ -637,7 +637,7 @@ class myImg extends myBase {
         } else {
             $color = isset($this->color_lst[$color]) ? $this->color_lst[$color] : $this->randomColor();
         }
-        imageline($this->img, $p_start[0], $p_start[1], $p_end[0], $p_end[1], $color);
+        imageline($this->img, (int)($p_start[0]), (int)($p_start[1]), (int)($p_end[0]), (int)($p_end[1]), (int)($color));
         return $this;
     }
 
@@ -654,15 +654,15 @@ class myImg extends myBase {
     public function drawRectangle($point, $width, $height, $color_border = '', $color_fill = '') {
         if(!empty($color_fill)) {
             $color = isset($this->color_lst[$color_fill]) ? $this->color_lst[$color_fill] : $this->randomColor();
-            imagefilledrectangle($this->img, $point[0], $point[1], $point[0]+$width, $point[1]+$height, $color);
+            imagefilledrectangle($this->img, (int)($point[0]), (int)($point[1]), (int)($point[0]+$width), (int)($point[1]+$height), (int)($color));
         }
         $color = isset($this->color_lst[$color_border]) ? $this->color_lst[$color_border] : $this->randomColor();
-        imagerectangle($this->img, $point[0], $point[1], $point[0]+$width, $point[1]+$height, $color);
+        imagerectangle($this->img, (int)($point[0]), (int)($point[1]), (int)($point[0]+$width), (int)($point[1]+$height), (int)($color));
         return $this;
     }
 
     /**
-     * 功能说明：画多边形
+     * 功能说明：画多边形；坐标向零取整并采用GD三参数接口
      *
      * @param array $points 依绘制顺序排列的二维坐标列表
      * @param string|int $color_border 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
@@ -672,7 +672,7 @@ class myImg extends myBase {
     public function drawPolygon($points, $color_border = '', $color_fill = '') {
         if(count($points)==1) {
             $color = isset($this->color_lst[$color_border]) ? $this->color_lst[$color_border] : $this->randomColor();
-            imagesetpixel($this->img, $points[0][0], $points[0][1], $color);
+            imagesetpixel($this->img, (int)($points[0][0]), (int)($points[0][1]), (int)($color));
         }    elseif(count($points)==2) {
             $this->drawLine($points[0], $points[1], $color_border);
         } else {
@@ -680,16 +680,16 @@ class myImg extends myBase {
             $count = 0;
             foreach($points as $value) {
                 if($this->checkPoint($value)) {
-                    $point_lst = array_merge($point_lst, $value);
+                    $point_lst = array_merge($point_lst, array_map('intval', $value));
                     $count++;
                 }
             }
             if(!empty($color_fill)) {
                 $color = isset($this->color_lst[$color_fill]) ? $this->color_lst[$color_fill] : $this->randomColor();
-                imagefilledpolygon($this->img, $point_lst, $count, $color);
+                imagefilledpolygon($this->img, $point_lst, (int)($color));
             }
             $color = isset($this->color_lst[$color_border]) ? $this->color_lst[$color_border] : $this->randomColor();
-            imagepolygon($this->img, $point_lst, $count, $color);
+            imagepolygon($this->img, $point_lst, (int)($color));
         }
         return $this;
     }
@@ -754,10 +754,10 @@ class myImg extends myBase {
     public function drawEllipse($point, $width, $height, $color_border = '', $color_fill = '') {
         if(!empty($color_fill)) {
             $color = isset($this->color_lst[$color_fill]) ? $this->color_lst[$color_fill] : $this->randomColor();
-            imagefilledellipse($this->img, $point[0], $point[1], $width, $height, $color);
+            imagefilledellipse($this->img, (int)($point[0]), (int)($point[1]), (int)($width), (int)($height), (int)($color));
         }
         $color = isset($this->color_lst[$color_border]) ? $this->color_lst[$color_border] : $this->randomColor();
-        imageellipse($this->img, $point[0], $point[1], $width, $height, $color);
+        imageellipse($this->img, (int)($point[0]), (int)($point[1]), (int)($width), (int)($height), (int)($color));
         return $this;
     }
 
@@ -775,10 +775,10 @@ class myImg extends myBase {
     public function drawArc($point, $width, $height, $arc = array(0, 360), $color_border = '', $color_fill = '') {
         if(!empty($color_fill)) {
             $color = isset($this->color_lst[$color_fill]) ? $this->color_lst[$color_fill] : $this->randomColor();
-            imagefilledarc($this->img, $point[0], $point[1], $width, $height, $arc[0], $arc[1], $color, IMG_ARC_PIE);
+            imagefilledarc($this->img, (int)($point[0]), (int)($point[1]), (int)($width), (int)($height), (int)($arc[0]), (int)($arc[1]), (int)($color), IMG_ARC_PIE);
         }
         $color = isset($this->color_lst[$color_border]) ? $this->color_lst[$color_border] : $this->randomColor();
-        imagearc($this->img, $point[0], $point[1], $width, $height, $arc[0], $arc[1], $color);
+        imagearc($this->img, (int)($point[0]), (int)($point[1]), (int)($width), (int)($height), (int)($arc[0]), (int)($arc[1]), (int)($color));
         return $this;
     }
 
@@ -842,7 +842,7 @@ class myImg extends myBase {
     public function drawZigzag($points, $color_line = '') {
         if(count($points)==1) {
             $color = isset($this->color_lst[$color_line]) ? $this->color_lst[$color_line] : $this->randomColor();
-            imagesetpixel($this->img, $points[0][0], $points[0][1], $color);
+            imagesetpixel($this->img, (int)($points[0][0]), (int)($points[0][1]), (int)($color));
         }    elseif(count($points)==2) {
             $this->drawLine($points[0], $points[1], $color_line);
         } else {
@@ -858,7 +858,7 @@ class myImg extends myBase {
      * 功能说明：添加文字
      *
      * @param string $text 要绘制或测量的文本
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整
      * @param string|int $color 已登记颜色的索引名；未登记时采用随机颜色（默认：''）
      * @param string $font 字体文件路径或实现支持的字体名（默认：''）
      * @param int $font_size 文字大小（默认：12）
@@ -871,9 +871,9 @@ class myImg extends myBase {
         if(empty($font) || $font=='up') $font = $this->font;
         if(empty($font)) {
             $font_size = floor($font_size/3);
-            $func($this->img, $font_size, $point[0], $point[1], $text, $color);
+            $func($this->img, (int)$font_size, (int)$point[0], (int)$point[1], $text, $color);
         } else {
-            imagettftext($this->img, $font_size, $angle, $point[0], $point[1], $color, $font, $text);
+            imagettftext($this->img, $font_size, $angle, (int)($point[0]), (int)($point[1]), (int)($color), $font, $text);
         }
         return $this;
     }
@@ -919,7 +919,7 @@ class myImg extends myBase {
      */
     public function addNoise($number) {
         for($i=0; $i<$number; $i++) {
-            imageSetPixel($this->img, rand(0, $this->width-1), rand(0, $this->height-1), $this->randomColor(true));
+            imageSetPixel($this->img, (int)(rand(0, $this->width-1)), (int)(rand(0, $this->height-1)), (int)($this->randomColor(true)));
         }
         return $this;
     }
@@ -970,14 +970,14 @@ class myImg extends myBase {
     /**
      * 功能说明：释放图像源
      *
-     * @param resource|null $img GD图像句柄；null使用当前画布（默认：NULL）
-     * @return bool 指定或当前GD句柄的释放结果；无有效句柄为false
+     * @param GdImage|null $img GD图像对象；null使用当前画布（默认：NULL）
+     * @return bool 有效图像引用已释放为true；外部别名仍可使用，无有效图像为false
      */
     public function destroy($img = NULL) {
         $own = is_null($img);
         if($own) $img = $this->img;
         if(!$this->check($img)) return false;
-        $result = imagedestroy($img);
+        $result = true; unset($img);
         if($own) $this->img = null;
         return $result;
     }
@@ -1027,7 +1027,7 @@ class myImg extends myBase {
     /**
      * 功能说明：检测图像源的有效性
      *
-     * @param resource|null $img GD图像句柄；null使用当前画布（默认：NULL）
+     * @param GdImage|null $img GD图像对象；null使用当前画布（默认：NULL）
      * @return bool 目标为有效GD资源时为true；null检查当前画布
      */
     public function check($img = NULL) {
@@ -1328,7 +1328,7 @@ class myImg extends myBase {
  * 功能说明：继承myImg的坐标换算及折线、柱状、饼图绘制工具
  *
  * 使用说明：
- *   1. 需要GD及对应图片格式支持；图像句柄在PHP 7.4中通常为resource。
+ *   1. GD采用GdImage对象；像素坐标显式向零取整，多边形采用三参数原生接口。
  *   2. 先初始化图像或画布，设置颜色/字体后绘制，make输出或保存。
  *   3. setLimits限制输入大小/尺寸/像素；调用结束后释放不再使用的句柄。
  *
@@ -1370,7 +1370,7 @@ class coordinateMaker extends myImg {
     /**
      * 功能说明：设置原点位置
      *
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整
      * @return $this 返回当前实例，支持链式调用。
      */
     public function setOrigin($point) {
@@ -1407,7 +1407,7 @@ class coordinateMaker extends myImg {
     /**
      * 功能说明：取得相对原点坐标的实际位置
      *
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整
      * @return array|$this 有效坐标返回[画布x,画布y]；无效点返回当前实例
      */
     public function getPoint($point) {
@@ -1418,7 +1418,7 @@ class coordinateMaker extends myImg {
     /**
      * 功能说明：按坐标比例换算点位置，可选择转换到画布坐标
      *
-     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定
+     * @param array $point 坐标数组[x,y]，具体原点/方向由当前绘图入口决定；GD像素坐标显式向零取整
      * @param bool $trans 是否执行坐标系方向转换（默认：true）
      * @return array|$this 有效坐标返回缩放/转换后的[x,y]；无效点返回当前实例
      */

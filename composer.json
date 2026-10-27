@@ -15,7 +15,7 @@
     }
   ],
   "require": {
-    "php": "^7.4",
+    "php": "^8.5.12",
     "erusev/parsedown": "^1.8.0",
     "mrclay/jsmin-php": "^2.4.3",
     "phrozenbyte/cssmin": "^3.0.4"
@@ -23,9 +23,42 @@
   "config": {
     "preferred-install": "dist",
     "platform": {
-      "php": "7.4.0"
+      "php": "8.5.12"
     },
     "sort-packages": true,
     "optimize-autoloader": true
+  },
+  "extra": {
+    "mystep-php85-patches": {
+      "vendor/phrozenbyte/cssmin/src/CssMin.php": {
+        "(boolean)": "(bool)",
+        ", array $filters = null": ", ?array $filters = null",
+        ", array $plugins = null": ", ?array $plugins = null",
+        ", array $configuration = null": ", ?array $configuration = null"
+      },
+      "vendor/phrozenbyte/cssmin/src/minifier/CssMinifier.php": {
+        "(boolean)": "(bool)",
+        ", array $filters = null": ", ?array $filters = null",
+        ", array $plugins = null": ", ?array $plugins = null",
+        ", array $configuration = null": ", ?array $configuration = null"
+      },
+      "vendor/phrozenbyte/cssmin/src/parser/CssParser.php": {
+        "(boolean)": "(bool)",
+        ", array $filters = null": ", ?array $filters = null",
+        ", array $plugins = null": ", ?array $plugins = null",
+        ", array $configuration = null": ", ?array $configuration = null"
+      },
+      "vendor/phrozenbyte/cssmin/src/parser/plugins/aCssParserPlugin.php": {
+        "(boolean)": "(bool)",
+        ", array $filters = null": ", ?array $filters = null",
+        ", array $plugins = null": ", ?array $plugins = null",
+        ", array $configuration = null": ", ?array $configuration = null"
+      }
+    }
+  },
+  "scripts": {
+    "php85-compat": "@php -r '$config=json_decode(file_get_contents(\"composer.json\"),true,512,JSON_THROW_ON_ERROR);foreach($config[\"extra\"][\"mystep-php85-patches\"] as $file=>$rules){if(!is_file($file))throw new RuntimeException(\"Missing dependency: \".$file);$old=file_get_contents($file);$new=strtr($old,$rules);if($new!==$old&&file_put_contents($file,$new,LOCK_EX)!==strlen($new))throw new RuntimeException(\"Cannot patch dependency: \".$file);}'",
+    "post-install-cmd": "@php85-compat",
+    "post-update-cmd": "@php85-compat"
   }
 }

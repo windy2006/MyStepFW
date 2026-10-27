@@ -1,16 +1,14 @@
 # 缓存协议、实例与命中状态
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 缓存键、后端、有效期和清理范围应明确。计算锁减少重复计算，不提供业务副作用恰好一次保证。
 
-## 兼容接口与新入口
+## 缓存接口
 
 原 `interface_cache` 的四个声明及必需参数保持不变，不强制第三方驱动修改。`set($key)` 在内置驱动中继续表示删除；显式 `set($key, false/null/'')` 正常保存。TTL非正数仍删除。`clean()` 在内置驱动中只回收过期/损坏数据，不清空有效值；第三方clean可能是flush，框架不会自动调用它。
 
-新增接口有各自的独立加载文件，旧 `interface_cache.class.php` 仍作为兼容入口加载它们：
+缓存协议各有独立加载文件，由 `interface_cache.class.php` 统一加载：
 
 | 接口/方法 | 用途 | 内置支持 |
 | --- | --- | --- |
@@ -37,10 +35,13 @@ $value = $cache->rememberLocked('tenant:42:product:7', function () {
 }, 600, 5);
 ```
 
-myCache显式转发fetch引用参数，避免魔术代理丢失hit输出。旧第三方后端没有lookup声明时，代理只能根据get是否返回false保守推断，无法恢复旧协议原本没有的信息；没有lock声明时rememberLocked/synchronized明确抛出BadMethodCallException。
+myCache显式转发fetch引用参数，避免魔术代理丢失hit输出。旧第三方后端没有lookup声明时，代理只能根据get是否返回false保守推断，无法恢复回调协议原本没有的信息；没有lock声明时rememberLocked/synchronized明确抛出BadMethodCallException。
 
-普通remember保留原行为，不增加锁开销。非正TTL直接计算，不读写缓存；getData_func保留非正TTL只删除该回调键的历史约定。两个入口都会在执行回调前验证参数。函数缓存内部键升为func:v4，使旧资源碰撞产生的条目不再被复用；该部分会冷启动一次。对象回调身份仍只在当前代理及对象生命周期内稳定；跨请求缓存应使用包含全部业务上下文的显式键。
+普通remember不使用计算锁。非正TTL直接计算，不读写缓存；getData_func保留非正TTL只删除该回调键的调用约定。两个入口都会在执行回调前验证参数。函数缓存内部键使用func:v4前缀。对象回调身份仍只在当前代理及对象生命周期内稳定；跨请求缓存应使用包含全部业务上下文的显式键。
 
+## 配套完整示例
+
+阅读[false命中、remember与清理](cache-example.md)：包含准备步骤、完整代码、预期输出及实际应用中的替换位置。先跑通示例，再查本页逐方法参数。
 
 ## 主要方法：参数、返回和失败约定
 
@@ -48,7 +49,7 @@ myCache显式转发fetch引用参数，避免魔术代理丢失hit输出。旧�
 
 功能说明：选择并初始化缓存适配器，仅登记一次目录自动加载器
 
-验证新驱动后才替换当前目标；未知类名沿用历史行为回退文件驱动。
+验证新驱动后才替换当前目标；未知类名使用行为回退文件驱动。
 自动垃圾回收仅调用 collectGarbage()，不把第三方 clean() 当成回收方法。
 
 ```text
@@ -68,7 +69,6 @@ public function init($module = '', $setting = null, $gc_rate = 0.1);
 ### myCache::remember
 
 功能说明：以显式业务键缓存回调结果，使用封装区分空值与未命中
-
 
 回调约定：producer无参数，返回原始业务值；命中时不调用。键应覆盖用户/语言/租户等影响结果的上下文；失败后重试可能再次计算。
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。
@@ -106,8 +106,7 @@ public function supports($interface);
 
 ### myCache::fetch
 
-功能说明：显式转发引用参数，避免魔术代理丢失命中输出；旧适配器按get结果保守推断。
-
+功能说明：显式转发引用参数，避免魔术代理丢失命中输出；未实现精确读取协议的适配器按get结果推断。
 
 调用示例：
     $value = $cache->fetch('counter', $hit);
@@ -122,7 +121,7 @@ public function fetch($key, &$hit = null);
 | 参数说明 |
 | --- |
 | mixed $key 缓存键 |
-| bool\|null &$hit 引用参数；精确命中；旧get返回false时无法判断是否命中（默认：null） |
+| bool\|null &$hit 引用参数；精确命中；仅通过get返回的false无法判断是否命中（默认：null） |
 
 **返回**：mixed 缓存值或false
 

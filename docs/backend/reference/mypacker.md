@@ -1,7 +1,5 @@
 # myPacker：框架包打包与安装
 
-修订日期：2026-10-24。功能详解。
-
 ## 职责与调用位置
 
 先明确包根、排除项及发布目标。安装应使用统一受管流程，避免直接覆盖在线配置和业务数据。
@@ -31,7 +29,7 @@ $report = $packer->result();
 使用说明：
   1. 通过pack_dir/pack_file选择目录和包文件；不是Composer或JS打包器。
   2. 解包接受受信包来源，并对成员路径/资源预算进行检查。
-  3. 与myArchive共同完成发布；历史包格式及编码规则按方法说明使用。
+  3. 与myArchive共同完成发布；包格式及编码规则按方法说明使用。
 
 ## 状态字段与公开变量
 
@@ -138,7 +136,7 @@ public function addIgnore();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | string\|array；排除项列表，或一个包含排除项的数组（历史位置参数，由func_get_args读取） |
+| `...$args` | string\|array；排除项列表，或一个包含排除项的数组（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -186,7 +184,7 @@ public function addFile();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | string\|array；待打包的路径列表，或一个路径数组（历史位置参数，由func_get_args读取） |
+| `...$args` | string\|array；待打包的路径列表，或一个路径数组（位置参数，由func_get_args读取） |
 
 **返回值**：void 无返回值。
 
@@ -209,7 +207,7 @@ $result = $instance->addFile();
 protected function packFileList();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -287,7 +285,7 @@ protected function unpackFile($outdir='./');
 public function pack();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 归档完整生成并发布为true；预算、输入或写入失败为false，详细状态见result
 

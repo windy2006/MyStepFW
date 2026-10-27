@@ -1,7 +1,5 @@
 # myClassLoader：类加载声明
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 类目录相对网站根，idx映射相对该搜索目录；解析的是受信映射数据，不执行用户提交PHP。
@@ -33,9 +31,9 @@ assert($mapping['interface_plugin'] === '../plugin/interface_plugin.class.php');
 
 | 方法／函数 | 可见性及用途 |
 | --- | --- |
-| `myClassLoader::load` | 读取启动类索引，兼容迁移项目内历史绝对目录；损坏索引重建默认规则。 |
+| `myClassLoader::load` | 读取启动类索引，支持迁移项目内绝对目录；损坏索引重建默认规则。 |
 | `myClassLoader::save` | 校验类加载规则，并在共享旁路锁内比较原版本后原子保存。 |
-| `myClassLoader::mapping` | 解析特别指定文本，只接受PHP数组字面量；兼容旧新版JSON对象。 |
+| `myClassLoader::mapping` | 解析特别指定文本，只接受PHP数组字面量；支持JSON对象。 |
 | `myClassLoader::normalize` | 统一类目录、扩展名和特别指定路径，持久化时只保留相对路径。 |
 
 ## 逐方法参数、返回与示例
@@ -44,7 +42,7 @@ assert($mapping['interface_plugin'] === '../plugin/interface_plugin.class.php');
 
 ### myClassLoader::load
 
-功能说明：读取启动类索引，兼容迁移项目内历史绝对目录；损坏索引重建默认规则。
+功能说明：读取启动类索引，支持迁移项目内绝对目录；损坏索引重建默认规则。
 
 ```text
 public static function load($file);
@@ -94,7 +92,7 @@ $result = myClassLoader::save($file, $rules, $version);
 
 ### myClassLoader::mapping
 
-功能说明：解析特别指定文本，只接受PHP数组字面量；兼容旧新版JSON对象。
+功能说明：解析特别指定文本，只接受PHP数组字面量；支持JSON对象。
 
 ```text
 public static function mapping($text);
@@ -102,7 +100,7 @@ public static function mapping($text);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$text` | string；array('类名'=>'相对文件')、等价[]语法或历史JSON；空串视为空数组 |
+| `$text` | string；array('类名'=>'相对文件')、等价[]语法或JSON；空串视为空数组 |
 
 **返回值**：array 类名到相对文件路径；不执行函数、变量、include或其他PHP代码
 
@@ -127,7 +125,7 @@ public static function normalize(array $rules, $check = false);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$rules` | array；含path/ext/idx的规则列表，idx为已解析数组 |
-| `$check` | bool；true时检查目录存在、非符号链接并保留首条核心目录；默认false供启动兼容转换 |
+| `$check` | bool；true时检查目录存在、非符号链接并保留首条核心目录；默认false供启动格式转换 |
 
 **返回值**：array 数字索引规则列表；path相对于ROOT，idx值相对于该path并可使用../访问项目内其他目录
 

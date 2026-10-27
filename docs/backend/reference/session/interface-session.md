@@ -1,7 +1,5 @@
 # interface_session：interface_session 会话处理器
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 此文件实现PHP会话保存或查询相关能力，通常由框架按session.mode选择。应用内使用会话门面，不重复启动处理器；底层回调由PHP引擎调用。
@@ -33,10 +31,10 @@ myReq::removeSession('editor_id');
   3. read成功返回序列化会话字节串，空串与后端失败不能随意混为同一状态。
 
 补充说明：
-框架静态SESSION处理器的兼容协议（PHP 7.4）。
+框架静态SESSION处理器的支持协议（PHP 7.4）。
 read返回原始字符串（不存在为空串，失败为false），其余回调返回bool。
 可选validateId($sid)和updateTimestamp($sid,$data)由myReq自动注册，
-不增加必需方法，保留现有第三方六回调处理器兼容性。
+第三方处理器实现open、close、read、write、destroy和gc六个回调；严格ID校验等功能通过可选方法提供。
 
 ## 方法目录
 
@@ -82,7 +80,7 @@ public static function open($sess_path, $sess_name);
 public static function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 连接及锁释放后的结果；内置实现允许重复关闭
 

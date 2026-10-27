@@ -65,6 +65,7 @@
 if(self!=top) top.location.href = location.href;
 let list_func = ',<!--list_func-->,';
 let list_web = ',<!--list_web-->,';
+let sidebarRefreshSequence = 0;
 function resizeMain() {
     let frame = $('iframe.active');
     if(frame.length) {
@@ -292,6 +293,62 @@ function getContentFrame(url) {
     }
     return idx;
 }
+/**
+ * 功能说明：按当前网站过滤左侧栏目，仅改变可见性，不展开节点或重置滚动位置。
+ * @param {string} webId 网站选择值；空字符串显示所有获授权网站。
+ * @returns {void} 不修改网站选择框、标签页或iframe内容。
+ */
+function filterSidebar(webId) {
+    $('#sidebar div[data-web]').each(function () {
+        $(this).toggle(webId === '' || this.getAttribute('data-web') === String(webId));
+    });
+}
+/**
+ * 功能说明：分类变更后局部重建栏目树，并恢复响应到达时的网站、展开状态及滚动位置。
+ * @returns {jqXHR} 当前读取请求；只应用最后一次请求，失败时保留旧树并提示。
+ */
+function refreshSidebar() {
+    const number = ++sidebarRefreshSequence;
+    return $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function (data) {
+        if (number !== sidebarRefreshSequence) return;
+        if (!Array.isArray(data)) {
+            alert(data && (data.err || data.message || data.error) || '栏目刷新失败，请稍后重试。');
+            return;
+        }
+        const obj = $('#sidebar'), expanded = new Map(), selected = new Map();
+        // 请求期间用户仍可切换网站、收起栏目；在应用响应时再取当前状态。
+        const webId = String($('#web_id').val() || '');
+        obj.find('.menu-arrow[aria-controls]').each(function () {
+            expanded.set(this.getAttribute('aria-controls'), this.getAttribute('aria-expanded') === 'true');
+        });
+        obj.find('a.hover-text').each(function () {
+            selected.set($(this).closest('[data-idx]').attr('data-idx'), {active:$(this).hasClass('active'), current:this.getAttribute('aria-current')});
+        });
+        obj.stop(true, false);
+        const top = parseFloat(obj.css('top')) || 0, scroll = obj.scrollTop();
+        const tree = getList(data).removeClass('sub-menu');
+        obj.empty().append(tree);
+        setURL('<!--path_admin-->', obj);
+        setLink();
+        obj.find('.collapse').each(function () { $(this).toggleClass('show', expanded.get(this.id) === true); });
+        obj.find('.menu-arrow[aria-controls]').each(function () {
+            const open = expanded.get(this.getAttribute('aria-controls')) === true;
+            $(this).toggleClass('collapsed', !open).attr('aria-expanded', open ? 'true' : 'false');
+        });
+        obj.find('a.hover-text').each(function () {
+            const state = selected.get($(this).closest('[data-idx]').attr('data-idx'));
+            if (!state) return;
+            $(this).toggleClass('active', state.active);
+            if (state.current !== null) this.setAttribute('aria-current', state.current);
+        });
+        filterSidebar(webId);
+        // 删除栏目后树可能变短；保留原位置并限制在仍可阅读的范围内。
+        const minimum = Math.min(0, $(window).height() - $('header').outerHeight() - tree.outerHeight(true) - $('body').height()/5);
+        obj.css('top', Math.max(Number.isFinite(minimum) ? minimum : top, Math.min(0, top))).scrollTop(scroll);
+    }).fail(function () {
+        if (number === sidebarRefreshSequence) alert('栏目刷新失败，请稍后重试。');
+    });
+}
 function getList(data) {
     let obj = $('<div class="nav sub-menu"></div>');
     let sub = null;
@@ -479,13 +536,7 @@ $(function(){
         }
     });
     $('#web_id').change(function(){
-        let idx = this.value;
-        if(idx==='') {
-            $('div[data-web]').show();
-        } else {
-            $('div[data-web]').hide();
-            $('div[data-web='+idx+']').show();
-        }
+        filterSidebar(this.value);
         $('button[name=expand]').trigger('click');
     });
     $('button[name=expand]').click(function(){

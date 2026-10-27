@@ -1,7 +1,5 @@
 # DOM查找与类型判断
 
-修订日期：2026-10-23。浏览器脚本用法。
-
 ## 本篇目标与调用场景
 
 本篇所有JavaScript示例在浏览器运行。先加载所需本地脚本，不把PHP变量或磁盘路径直接当成浏览器变量。
@@ -11,7 +9,7 @@
 | 变量 | 用途与约束 |
 | --- | --- |
 | `root_web/global.root` | 网站Web根前缀，用于公开资源 |
-| `setting/language` | 异步装入的公开设置和语言，须等待就绪 |
+| `setting/language` | 完整框架页面在脚本前预置公开设置和语言；独立页面用checkNrun等待 |
 | `document/window` | 当前浏览器页面上下文，不是PHP的全局变量 |
 
 ## 1. DOM 与类型判断
@@ -23,7 +21,7 @@
 | `$name(name, idx)` | 按 name 查找；idx 可省略、传数字／数字字符串、first、last | 不传 idx 返回 NodeList；传 idx 返回元素或 undefined |
 | `$tag(name, theOLE=document)` | 在指定 Document／Element 内按标签名查找 | HTMLCollection |
 | `$class(name, context=document)` | 在指定 Document／Element 内按 CSS 类名查找 | HTMLCollection |
-| `isArray(para)` | Array.isArray 的兼容入口，支持跨窗口数组 | boolean |
+| `isArray(para)` | Array.isArray 的入口，支持跨窗口数组 | boolean |
 
 ```js
 const panel = $id('profile');
@@ -38,7 +36,6 @@ console.log(getPath(0)); // 例如 https://example.test:8443
 ```
 
 $id 返回原生元素；需要 jQuery 方法时再用 `$(element)` 包装。$name 不会自动把带方括号的 PHP 字段名解析成对象。
-
 
 ## 明确调用示例
 

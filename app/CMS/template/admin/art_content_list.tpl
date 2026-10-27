@@ -87,24 +87,10 @@ $(function(){
     $('button[name=show_all]').click(function(e){
         location.href = global.root_fix;
     });
-    let refer = decodeURIComponent('<!--back_url|url-->');
-    if(refer.match(/content\/(\w+)/)) {
-        if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
-            $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
-                let obj = $(window.parent.document.getElementById('sidebar'));
-                if(typeof data.err==='undefined') {
-                    obj.empty();
-                    obj.append(window.parent.getList(data).removeClass('sub-menu'));
-                    setURL(global.root_fix.replace('article/content/', ''), obj);
-                    window.parent.setLink();
-                    obj.find('.collapse').addClass('show');
-                    obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-                    window.parent.$('#web_id').val(web_id).trigger('change');
-                } else {
-                    alert(data.err);
-                }
-            });
-        }
+    // 只有成功变更后携带明确标记才刷新左栏，普通打开不重建栏目树。
+    if (new URLSearchParams(location.search).get('Refresh') === '1') {
+        if (window.parent !== window && typeof window.parent.refreshSidebar === 'function') window.parent.refreshSidebar();
+        history.replaceState(history.state, '', queryURL(location.href, {Refresh:null}));
     }
     global.root_fix += 'article/content/';
 });

@@ -86,6 +86,7 @@ input.search-query {
     box-shadow:0 0 0 3px rgba(255, 228, 132, .25)
 }
 #side_nav a.nav-link{
+    padding: .65rem 1rem;
     text-decoration: none;
     color: #000000;
 }
@@ -94,7 +95,7 @@ input.search-query {
     background-color: #eeeeee;
 }
 #side_nav li.nav-item{
-    padding: 0 10px;
+    padding: 0;
     border-bottom: 1px #EEEEEE solid;
     position: relative;
 }
@@ -305,3 +306,58 @@ footer p {
         text-align:center;
     }
 }
+/* 手册长文、原生滚动目录与移动设备布局。 */
+.guide-layout { min-height: calc(100vh - 130px); }
+.guide-sidebar { position: sticky; top: 80px; max-height: calc(100vh - 100px); overflow-y: auto; padding-bottom: 1rem; }
+.guide-submenu a { white-space: normal; padding: .45rem 1rem .45rem 1.5rem; line-height: 1.5; }
+.guide-columns { display: flex; align-items: flex-start; width: 100%; gap: 1rem; }
+#content { float: none; min-width: 0; flex: 1; width: auto; overflow-wrap: anywhere; }
+#content.guide-full-width { width: 100%; }
+/* 覆盖旧侧栏的百分比高度，让容器随正文伸展，为内部sticky目录提供完整滚动范围。 */
+#side_cat { float: none; flex: 0 0 220px; width: 220px; height: auto; align-self: stretch; }
+#cat_list { position: sticky; top: 80px; right: auto; max-height: calc(100vh - 110px); overflow-y: auto; overscroll-behavior: contain; font-size: .85rem; margin-left: 0; padding: .5rem .75rem; }
+#cat_list a { font-size: .85rem; padding: .25rem .3rem; line-height: 1.5; }
+#cat_list a[data-level="3"] { padding-left: 1rem; }
+#cat_list a[data-level="4"] { padding-left: 1.8rem; }
+#content h1, #content h2, #content h3, #content h4 { scroll-margin-top: 100px; line-height: 1.5; text-align: left; }
+#content h2 { font-size: 1.55rem; margin: 1.6rem 0 .8rem; border-bottom: 1px solid #ddd; padding-bottom: .4rem; }
+#content h3 { font-size: 1.25rem; margin: 1.3rem 0 .6rem; }
+#content h4 { font-size: 1.1rem; margin-top: 1rem; }
+#content pre { overflow-x: auto; white-space: pre; padding: .75rem; background: #202020; color: #e6e6e6; border-radius: .3rem; }
+#content pre code, #content pre code * { font-size: .875rem; white-space: pre; text-align: left; }
+#content :not(pre) > code { color: #a31550; background: #f5f5f5; padding: .1rem .25rem; overflow-wrap: anywhere; }
+#content table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin: 1rem 0; }
+#content th, #content td { border: 1px solid #ddd; padding: .5rem; text-align: left; vertical-align: top; }
+#content th { background: #eee; }
+#content p { text-indent: 0; line-height: 1.85; margin-bottom: .65rem; }
+#content .guide-revision { color: #666; font-size: .875rem; }
+.guide-chapter-list { list-style: none; padding: 0; }
+.guide-chapter-list li { padding: .6rem .8rem; border-bottom: 1px solid #e7e7e7; }
+.guide-chapter-list li:nth-child(odd) { background: #f8f9fa; }
+#content .guide-chapter-list p { color: #666; font-size: .875rem; margin: .25rem 0 0; }
+.guide-search { width: 250px; }
+@media (max-width: 1199px) { #nav { max-height: calc(100vh - 85px); overflow-y: auto; } .guide-search { width: 100%; margin: .75rem 0; } }
+@media (max-width: 900px) { #side_cat { display: none; } .guide-columns { display: block; } #content { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* 当前小节与整条父级路径分别着色；横向留白放在目录项内部，使状态底色通栏。 */
+#cat_list { border: 1px solid #dbe5f1; border-radius: 8px; background: #f8fafd; padding: .65rem 0; }
+#cat_list > strong { display: block; padding: .15rem .85rem .6rem; color: #344b68; }
+#cat_list > ul, #cat_list > ul > li { margin: 0; padding: 0; }
+#cat_list a.guide-toc-link { box-sizing: border-box; width: 100%; display: flex; align-items: flex-start; gap: .5rem; margin: 3px 0; padding: .5rem .85rem; border-left: 3px solid transparent; border-radius: 0; color: #43566d; line-height: 1.5; transition: background-color .12s; }
+#cat_list a.guide-toc-link::before { content: none; }
+#cat_list a.guide-toc-link[data-level="3"] { padding-left: 1.35rem; }
+#cat_list a.guide-toc-link[data-level="4"] { padding-left: 1.9rem; }
+.guide-toc-label { min-width: 0; overflow-wrap: anywhere; }
+.guide-toc-icon { flex: 0 0 1em; color: #8494a9; line-height: 1.5; text-align: center; }
+#cat_list a.guide-toc-link:hover { color: #154d91; background: #e8f0fb; }
+#cat_list a.guide-toc-parent { color: #164d88; background: #e4eefc; border-left-color: #8ab0e2; font-weight: 600; }
+#cat_list a.guide-toc-parent .guide-toc-icon { color: #316db2; transform: rotate(90deg); }
+#cat_list a.guide-toc-link.active { background: #1557a6; color: #fff; border-left-color: #093a76; font-weight: 700; box-shadow: 0 2px 5px #17456a22; }
+#cat_list a.guide-toc-link.active .guide-toc-icon { color: #fff; }
+#cat_list a.guide-toc-link:focus-visible { outline: 2px solid #1557a6; outline-offset: 2px; }
+#side_nav > li.active > a.nav-link { color: #164d88; background: #e4eefc; font-weight: 700; box-shadow: inset 3px 0 #397acb; }
+#side_nav .dropdown-item.active { color: #fff; background: #1557a6; font-weight: 700; border-radius: 4px; }
+#side_nav .dropdown-item.active::before { content: "➤"; margin-right: .4rem; }
+#side_nav > li.active.guide-has-children > a.nav-link::after { content: "▾"; float: right; color: #2465a8; }
+#top_nav .nav-link.active { color: #fff; font-weight: 700; box-shadow: inset 0 -2px #ffe484; }

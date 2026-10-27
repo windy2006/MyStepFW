@@ -1,7 +1,5 @@
 # myStep：框架请求控制
 
-修订日期：2026-10-24。功能详解。
-
 ## 职责与调用位置
 
 index.php仅调用init；应用使用自己的同名子类。API、文件、跳转等分支可能直接退出，不一定执行页面end。
@@ -132,7 +130,7 @@ protected static $active_plugins = null, $known_plugins = [], $plugin_signature 
 public function __construct();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -151,7 +149,7 @@ public static function getInstance($calledClass = '');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$calledClass` | string；待创建或获取实例的类名（默认：''） |
-| `...$args` | mixed；传给目标类初始化入口的位置参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；传给目标类初始化入口的位置参数（位置参数，由func_get_args读取） |
 
 **返回值**：object 按父控制器规则取得并配置别名和错误回调的实例
 
@@ -173,8 +171,8 @@ public function start($charset = 'UTF-8', $set_plugin = true);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$charset` | string；继承兼容占位参数；实际使用当前setting->gen->charset（默认：'UTF-8'） |
-| `$set_plugin` | bool；继承兼容参数；执行时依据当前路由及func_ignore重新计算是否运行插件（默认：true） |
+| `$charset` | string；保留参数；实际使用当前setting->gen->charset（默认：'UTF-8'） |
+| `$set_plugin` | bool；保留参数；执行时依据当前路由及func_ignore重新计算是否运行插件（默认：true） |
 
 **返回值**：void 初始化当前应用上下文并进入控制器启动流程
 
@@ -200,7 +198,7 @@ public function ms_login($usr='', $pwd='');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$usr` | string；登录用户名（默认：''） |
-| `$pwd` | string；账号密码，空串按调用入口的兼容约定处理（默认：''） |
+| `$pwd` | string；账号密码，空串按调用入口的支持约定处理（默认：''） |
 
 **返回值**：bool 凭据/当前会话通过框架管理员认证为true，否则为false
 
@@ -246,7 +244,7 @@ public static function auth_code();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | scalar；参与SHA-256摘要的盐值片段，按顺序以竖线连接（历史位置参数，由func_get_args读取） |
+| `...$args` | scalar；参与SHA-256摘要的盐值片段，按顺序以竖线连接（位置参数，由func_get_args读取） |
 
 **返回值**：string 按盐片段顺序生成的64位SHA-256十六进制摘要
 
@@ -268,7 +266,7 @@ $result = myStep::auth_code();
 public function setInstance();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -296,7 +294,7 @@ SQLite 初始化只接收数据库文件路径或 `:memory:`，不传入 MySQL �
 public static function clearDataCache();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 本地数据目录和当前后端均清空成功为true
 
@@ -313,7 +311,6 @@ $result = myStep::clearDataCache();
 ### myStep::show
 
 功能说明：通过模板类显示页面
-
 
 输出约定：填充框架变量与资源标签后调用父类输出，并标记已展示；不自动调用end。仅需字符串时使用render。
 
@@ -365,7 +362,6 @@ $result = $instance->render($tpl, $append_pare);
 
 功能说明：检查模版缓存并输出
 
-
 命中页面缓存时输出当前会话装饰后的HTML并调用end终止；未命中时继续返回业务流程。
 
 ```text
@@ -393,14 +389,13 @@ $result = $instance->checkCache($tpl);
 
 参数说明：无显式参数。
 
-
 生命周期：关闭全局数据库、记录耗时/内存、按需压缩输出并exit；调用后不会回到业务代码。
 
 ```text
 public function end();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -474,8 +469,8 @@ public function CSS($cache='', $dummy_1='', $dummy_2='');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$cache` | string；压缩结果缓存文件路径，空串不写文件（默认：''） |
-| `$dummy_1` | mixed；继承兼容占位参数，本实现不使用（默认：''） |
-| `$dummy_2` | mixed；继承兼容占位参数，本实现不使用（默认：''） |
+| `$dummy_1` | mixed；保留参数，本实现不使用（默认：''） |
+| `$dummy_2` | mixed；保留参数，本实现不使用（默认：''） |
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -523,8 +518,8 @@ public function JS($cache='', $dummy_1='', $dummy_2='');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$cache` | string；压缩结果缓存文件路径，空串不写文件（默认：''） |
-| `$dummy_1` | mixed；继承兼容占位参数，本实现不使用（默认：''） |
-| `$dummy_2` | mixed；继承兼容占位参数，本实现不使用（默认：''） |
+| `$dummy_1` | mixed；保留参数，本实现不使用（默认：''） |
+| `$dummy_2` | mixed；保留参数，本实现不使用（默认：''） |
 
 **返回值**：$this 生成/复用整合脚本缓存后返回当前实例，不直接返回脚本文本
 
@@ -571,7 +566,7 @@ $result = $instance->editorSetPlugin($code, $btn);
 public function editorGetPlugin();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：$this 返回当前实例，支持链式调用。
 
@@ -587,7 +582,6 @@ $result = $instance->editorGetPlugin();
 ### myStep::info
 
 功能说明：信息提示，需先声明mystep类
-
 
 输出约定：清理当前缓冲并输出提示页，调用end后exit；不应把此入口当作可返回的错误字符串函数。
 
@@ -613,7 +607,6 @@ $result = myStep::info($msg, $url);
 ### myStep::captcha
 
 功能说明：生成验证码
-
 
 输出约定：需要Referer及Cookie才继续，写入当前会话captcha并输出图片；条件不满足时静默返回。
 
@@ -718,7 +711,7 @@ $result = myStep::apiOriginAllowed($origin, $current, $domains, $cookie_domain, 
 功能说明：框架API执行接口
 
 已登记插件API按需加载标准class.php，不依赖当前宿主应用绑定；不额外执行插件index.php。
-活动插件API仍由路由注册表筛选；独立外部API映射的既有可调用处理器继续兼容。
+活动插件API仍由路由注册表筛选；独立外部API映射的既有可调用处理器继续支持。
 
 未指定输出格式的插件接口默认使用JSON，避免无尾段路径被误判为非法格式。
 
@@ -753,7 +746,7 @@ public static function module($path, $dummy = '');
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$path` | string；应用模块调用路径 |
-| `$dummy` | mixed；继承兼容占位参数，本实现不使用（默认：''） |
+| `$dummy` | mixed；保留参数，本实现不使用（默认：''） |
 
 **返回值**：void 无返回值。
 
@@ -797,7 +790,7 @@ $result = myStep::appFunc($func);
 public static function upload();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 各上传项的结果，非POST请求返回错误结构
 
@@ -819,7 +812,7 @@ public static function download($idx='');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$idx` | string；附件唯一标识，允许完整存储名或框架兼容标识（默认：''） |
+| `$idx` | string；附件唯一标识，允许完整存储名或框架标识（默认：''） |
 
 **返回值**：void 无返回值。
 
@@ -841,7 +834,7 @@ public static function remove_ul($idx='');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$idx` | string；附件唯一标识，允许完整存储名或框架兼容标识（默认：''） |
+| `$idx` | string；附件唯一标识，允许完整存储名或框架标识（默认：''） |
 
 **返回值**：array 含error/message的删除结果；操作受请求方法、标识及路径验证约束
 
@@ -935,7 +928,7 @@ PHP解析器已可能处理请求，此检查不能替代运行时补丁及Web�
 public static function init();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 设置核心路径、配置、自动加载及请求上下文；超预算请求返回400/413并结束
 
@@ -961,7 +954,7 @@ $result = myStep::init();
 public static function activePlugins();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 按执行顺序排列的插件标识到 true 的字典
 
@@ -983,7 +976,7 @@ $result = myStep::activePlugins();
 public static function refreshRoutes();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -1010,7 +1003,7 @@ MYSTEP_PRESERVE_MEMORY_LIMIT=1时保留启动期memory_limit，不写入gen.memo
 public static function go();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -1036,7 +1029,7 @@ $result = myStep::go();
 public static function setPara();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -1080,7 +1073,7 @@ $result = myStep::checkBind($pattern);
 public static function checkClose();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -1124,7 +1117,7 @@ public static function vendor();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；首项为组件名或dir/file/class/namespace数组，其余为构造参数（历史位置参数，由func_get_args读取） |
+| `...$args` | mixed；首项为组件名或dir/file/class/namespace数组，其余为构造参数（位置参数，由func_get_args读取） |
 
 **返回值**：object 按组件声明创建的实例；需附加参数时再调用构造/init
 
@@ -1192,7 +1185,7 @@ $result = myStep::checkPower($idx);
 public static function getCore();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前核心应用类/目录名称，按配置及框架回退规则选择
 
@@ -1203,49 +1196,3 @@ $result = myStep::getCore();
 ```
 
 定位：`lib/myStep.class.php:1722`。
-
-## Redis插件支持（2.5.0）
-
-Redis连接、缓存及会话驱动由`plugin/redis/`提供。先安装、启用并配置插件，再在框架参数设置选择Redis缓存或Session；保存前验证插件及实际连接。框架显式选择的存储不依赖应用绑定。缓存清理只删除当前站点及namespace的缓存值，会话故障不回退文件存储。详见[Redis插件](../../showcase/plugins/redis.md)。
-
-### myStep::storagePlugin
-
-```php
-public static myStep::storagePlugin($name)
-```
-
-在缓存和Session初始化前验证插件目录、安装/启用状态及扩展，返回已加载驱动的插件主类。全局存储显式选择生效，无需应用绑定。
-
-@param string $name 插件目录标识。
-
-@return string 已校验的主类名。
-
-@throws InvalidArgumentException 插件不可用或连接检查失败。
-
-```php
-$class = myStep::storagePlugin('redis');
-$options = $class::options();
-```
-
-### myStep::configureStorage
-
-```php
-public static myStep::configureStorage(myConfig $config,$probe = false)
-```
-
-框架或应用选择Redis存储时校验插件；probe=true额外执行PING，失败抛出InvalidArgumentException，调用方不保存配置。未选Redis时不加载、不连接插件。
-
-@param myConfig $config 待保存的配置。
-
-@param bool $probe 是否执行连接检查，默认false。
-
-@return void 不保存文件。
-
-@throws InvalidArgumentException 插件不可用或连接检查失败。
-
-```php
-$config = new myConfig(CONFIG.'config.php');
-$config->gen->cache_mode = 'Redis';
-myStep::configureStorage($config, true);
-$config->save('php');
-```

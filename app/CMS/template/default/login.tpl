@@ -46,6 +46,7 @@
                         <button class="btn btn-warning" type="reset"><!--lng_link_reset--></button>
                     </div>
                 </form>
+                <!--social_login-->
             </div>
         </div>
     </div>

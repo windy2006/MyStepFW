@@ -1,7 +1,5 @@
 # 参数化查询、读取方式与返回值
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 区分代理、驱动和可选能力；检查真实声明及返回值，不能把false、null、0或空集合统一当失败。
@@ -12,10 +10,9 @@
 - 新 fetchAll 空结果为 `[]`；fetchOne 无记录为 false；fetchValue 保留 SQL NULL、0、空字符串，无记录/显式失败为 false。布尔字段 false 与无记录需要区分时，使用 fetchOne 后检查记录是否存在。
 - 绑定只替代数据值，不替代表名、字段、排序方向或 SQL 片段。MySQL/MSSQL 使用位置占位符，SQLite 支持其原生命名形式；流参数和 SQLSRV 描述数组仍遵循驱动各自约定。
 - 受管事务正常返回，包括返回 false，仍会提交；需要回滚须抛异常或使用明确的事务控制。已有外部事务、回调边界与隐式提交 DDL 的限制继续生效。
-- interface_db 仍兼容 simpleDB 的文件/条件/行号语义，不能将其参数与 SQL 驱动互换。
-- interface_sql 是历史管理能力集，不能等同所有 SQL 引擎。旧 getPri 不完整表达复合主键；getIdxScript 在 MySQL 中返回建表片段、MSSQL 返回完整语句，不能假设每项都是独立 SQL。
+- interface_db 仍支持 simpleDB 的文件/条件/行号语义，不能将其参数与 SQL 驱动互换。
+- interface_sql 是管理能力集，不能等同所有 SQL 引擎。旧 getPri 不完整表达复合主键；getIdxScript 在 MySQL 中返回建表片段、MSSQL 返回完整语句，不能假设每项都是独立 SQL。
 - 新接口不会让 SQL 方言、数据库异常、备份一致性和权限规则自动跨引擎统一。相关运行限制见 本文“数据库驱动改进记录”相关章节。
-
 
 ## 操作步骤与注意事项
 
@@ -66,7 +63,6 @@ public function fetchOne($sql, array $params = [], $mode = 2);
 ### base_sql::fetchValue
 
 功能说明：绑定参数读取第一行第一列，保留 SQL NULL、0 及空字符串
-
 
 调用示例：
     $value = $db->fetchValue('SELECT value FROM items WHERE id=?', [1]);

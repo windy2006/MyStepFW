@@ -1,7 +1,5 @@
 # myCache：缓存代理与能力
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 fetch用命中标记区分false/null；计算锁是可选接口。目录/表隔离与namespace不是同一种边界。
@@ -32,11 +30,11 @@ assert($result === 'Hello');
 使用说明：
   1. 通过new myCache('File',CACHE.'data')或数据库缓存配置初始化。
   2. fetch区分有效空值与未命中；remember/rememberLocked接收可重复计算回调。
-  3. getData遵循数据库查询缓存资格/失效规则；getData_func的非正TTL或历史null用于删除。
+  3. getData遵循数据库查询缓存资格/失效规则；getData_func的非正TTL或null用于删除。
   4. clear显式清空，clean保留驱动过期回收语义；切换后端须同步相关持有者。
 
 补充说明：
-缓存代理及数据库/回调结果缓存，兼容旧set/get/remove/clean。
+缓存代理及数据库/回调结果缓存，支持旧set/get/remove/clean。
 
     $cache->init('File', $path, 0.1);              // 选择适配器及自动回收概率
     $value = $cache->fetch($key, $hit);            // 精确区分false/null与未命中
@@ -86,14 +84,14 @@ protected
 | `myCache::init` | 选择并初始化缓存适配器，仅登记一次目录自动加载器 |
 | `myCache::change` | 切换缓存适配器，沿用 init() 的初始化及默认回收概率 |
 | `myCache::getData` | 缓存全局 myDb 查询结果，支持空记录、false 和 SQL NULL |
-| `myCache::getData_func` | 按可调用对象身份及序列化参数缓存结果，兼容旧 TTL 删除约定 |
+| `myCache::getData_func` | 按可调用对象身份及序列化参数缓存结果，支持旧 TTL 删除约定 |
 | `myCache::callableIdentity` | 取得当前对象生命周期内的唯一身份，避免对象句柄复用导致键冲突 |
 | `myCache::remember` | 以显式业务键缓存回调结果，使用封装区分空值与未命中 |
 | `myCache::clear` | 显式清空当前后端全部数据，用于管理员清理；不同于只回收过期项的clean。 |
 | `myCache::supports` | 检查当前后端是否声明指定接口，不探测远程服务或调用扩展方法。 |
-| `myCache::synchronized` | 显式转发计算锁，旧后端不支持时抛异常，不静默忽略业务回调。 |
-| `myCache::fetch` | 显式转发引用参数，避免魔术代理丢失命中输出；旧适配器按get结果保守推断。 |
-| `myCache::rememberKey` | 生成remember的兼容物理键，提前拒绝资源/数组/对象键。 |
+| `myCache::synchronized` | 显式转发计算锁，后端未实现计算锁时抛异常，不静默忽略业务回调。 |
+| `myCache::fetch` | 显式转发引用参数，避免魔术代理丢失命中输出；未实现精确读取协议的适配器按get结果推断。 |
+| `myCache::rememberKey` | 生成remember的支持物理键，提前拒绝资源/数组/对象键。 |
 | `myCache::rememberUsing` | 在同一个后端上读取、计算和写入，回调中change不会把旧上下文写进新后端。 |
 | `myCache::rememberLocked` | 防并发重建的显式入口：未命中后加锁，再次检查，成功发布后释放。 |
 
@@ -105,7 +103,7 @@ protected
 
 功能说明：选择并初始化缓存适配器，仅登记一次目录自动加载器
 
-验证新驱动后才替换当前目标；未知类名沿用历史行为回退文件驱动。
+验证新驱动后才替换当前目标；未知类名使用行为回退文件驱动。
 自动垃圾回收仅调用 collectGarbage()，不把第三方 clean() 当成回收方法。
 
 ```text
@@ -171,7 +169,7 @@ public function getData($query, $mode='all', $ttl = 600);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$query` | string；完整 SQL 查询，不能直接拼接不可信外部输入 |
-| `$mode` | string\|int；all 全部记录、record 首条、result 首值、remove 删除各模式；<br>数字时兼容为 TTL，模式按 all 处理（默认：'all'） |
+| `$mode` | string\|int；all 全部记录、record 首条、result 首值、remove 删除各模式；<br>数字时支持为 TTL，模式按 all 处理（默认：'all'） |
 | `$ttl` | int\|float；有效秒数，默认 600；非正数删除当前模式条目，不执行查询（默认：600） |
 
 **返回值**：mixed all为记录列表、record为单条/空值、result为首值；删除或无全局myDb时为空串，按驱动约定保留false/null
@@ -189,7 +187,7 @@ $result = $instance->getData($query, $mode, $ttl);
 
 ### myCache::getData_func
 
-功能说明：按可调用对象身份及序列化参数缓存结果，兼容旧 TTL 删除约定
+功能说明：按可调用对象身份及序列化参数缓存结果，支持旧 TTL 删除约定
 
 闭包/对象方法使用弱引用及随机身份，防止 PHP 复用对象句柄后误命中。
 不可序列化参数应改用 remember() 并由调用方指定包含全部上下文的稳定键。
@@ -202,7 +200,7 @@ public function getData_func($func, $args = array(), $ttl = 600);
 | --- | --- |
 | `$func` | callable；函数名、静态方法、对象方法、闭包或可调用对象 |
 | `$args` | mixed；按顺序传给回调的参数，非数组自动包装为单个参数（默认：array()） |
-| `$ttl` | int\|float\|null；有效秒数；非正数或历史null仅删除该键并返回null，不调用回调（默认：600） |
+| `$ttl` | int\|float\|null；有效秒数；非正数或null仅删除该键并返回null，不调用回调（默认：600） |
 
 **返回值**：mixed 已缓存或新计算的结果，false/null/空数组均可命中
 
@@ -238,7 +236,6 @@ protected function callableIdentity($object);
 ### myCache::remember
 
 功能说明：以显式业务键缓存回调结果，使用封装区分空值与未命中
-
 
 回调约定：producer无参数，返回原始业务值；命中时不调用。键应覆盖用户/语言/租户等影响结果的上下文；失败后重试可能再次计算。
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。
@@ -282,7 +279,7 @@ File/SQL同目录或同表的namespace均受影响；Redis仅清理当前站点�
 public function clear();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 存储清空成功为true，后端返回失败为false
 
@@ -322,7 +319,7 @@ $result = $instance->supports($interface);
 
 ### myCache::synchronized
 
-功能说明：显式转发计算锁，旧后端不支持时抛异常，不静默忽略业务回调。
+功能说明：显式转发计算锁，后端未实现计算锁时抛异常，不静默忽略业务回调。
 
 ```text
 public function synchronized($key, callable $operation, $timeout = 5);
@@ -349,8 +346,7 @@ $result = $instance->synchronized($key, $operation, $timeout);
 
 ### myCache::fetch
 
-功能说明：显式转发引用参数，避免魔术代理丢失命中输出；旧适配器按get结果保守推断。
-
+功能说明：显式转发引用参数，避免魔术代理丢失命中输出；未实现精确读取协议的适配器按get结果推断。
 
 调用示例：
     $value = $cache->fetch('counter', $hit);
@@ -365,7 +361,7 @@ public function fetch($key, &$hit = null);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$key` | mixed；缓存键 |
-| `&$hit` | bool\|null；引用参数；精确命中；旧get返回false时无法判断是否命中（默认：null） |
+| `&$hit` | bool\|null；引用参数；精确命中；仅通过get返回的false无法判断是否命中（默认：null） |
 
 **返回值**：mixed 缓存值或false
 
@@ -380,7 +376,7 @@ $result = $instance->fetch($key, $hit);
 
 ### myCache::rememberKey
 
-功能说明：生成remember的兼容物理键，提前拒绝资源/数组/对象键。
+功能说明：生成remember的支持物理键，提前拒绝资源/数组/对象键。
 
 ```text
 protected function rememberKey($key);
@@ -399,7 +395,6 @@ protected function rememberKey($key);
 ### myCache::rememberUsing
 
 功能说明：在同一个后端上读取、计算和写入，回调中change不会把旧上下文写进新后端。
-
 
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。
 
@@ -423,7 +418,6 @@ protected function rememberUsing(interface_cache $backend, $key, callable $produ
 ### myCache::rememberLocked
 
 功能说明：防并发重建的显式入口：未命中后加锁，再次检查，成功发布后释放。
-
 
 回调约定：producer无参数，返回原始业务值；命中时不调用。键应覆盖用户/语言/租户等影响结果的上下文；失败后重试可能再次计算。
 类型提示约定：TResult以同一业务键的已缓存数据与producer返回类型保持一致为前提；外部写入或业务类型改变时应变更键版本/清理该键。
@@ -456,7 +450,3 @@ $result = $instance->rememberLocked($key, $producer, $ttl, $timeout);
 ```
 
 定位：`lib/myCache.class.php:386`。
-
-## Redis插件支持（2.5.0）
-
-Redis连接、缓存及会话驱动由`plugin/redis/`提供。先安装、启用并配置插件，再在框架参数设置选择Redis缓存或Session；保存前验证插件及实际连接。框架显式选择的存储不依赖应用绑定。缓存清理只删除当前站点及namespace的缓存值，会话故障不回退文件存储。详见[Redis插件](../../showcase/plugins/redis.md)。

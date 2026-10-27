@@ -1,7 +1,5 @@
 # sess_file：sess_file 会话处理器
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 此文件实现PHP会话保存或查询相关能力，通常由框架按session.mode选择。应用内使用会话门面，不重复启动处理器；底层回调由PHP引擎调用。
@@ -55,18 +53,18 @@ protected static $handle = null, $sid = '', $legacy_files = [];
 | --- | --- |
 | `sess_file::open` | 初始化存储目录；相对路径转为绝对路径，避免关闭阶段工作目录变化。 |
 | `sess_file::validId` | 校验ID字符集和长度；不接受路径分隔符或SQL/控制字符。 |
-| `sess_file::release` | 释放当前文件锁及迁移状态；可重复调用。 |
+| `sess_file::release` | 释放当前文件锁及读取状态；可重复调用。 |
 | `sess_file::sameFile` | 判断已打开句柄仍对应原路径的普通文件，拒绝符号链接和已被删除的inode。 |
 | `sess_file::lock` | 获取当前ID的独占锁；等待者在删除/回收后重新打开路径，避免写入失联文件。 |
 | `sess_file::close` | 关闭会话并释放锁；垃圾回收统一由PHP的gc概率控制。 |
 | `sess_file::legacyFiles` | 获取旧日期目录中的同ID文件；过滤链接目录，避免越出当前存储根目录。 |
-| `sess_file::read` | 读取会话；已过期内容立即清空，不依赖概率GC；空文件可迁移有效旧日期数据。 |
+| `sess_file::read` | 读取会话；已过期内容立即清空，不依赖概率GC。 |
 | `sess_file::write` | 保存完整原始数据并刷新mtime；成功写完后截断旧尾部，处理短写和空会话。 |
 | `sess_file::destroy` | 删除当前会话及旧日期副本；先清空锁内数据，阻止排队请求读到旧登录信息。 |
 | `sess_file::validateId` | 严格模式校验现有且未过期的ID；未知ID不会生成空文件。 |
-| `sess_file::updateTimestamp` | 惰性写入的续期回调；迁移数据仍执行完整保存，避免只touch后丢失旧内容。 |
+| `sess_file::updateTimestamp` | 惰性写入的续期回调；按处理器协议保存访问时间。 |
 | `sess_file::cleanDirectory` | 非阻塞回收单目录的过期普通文件；跳过正在使用的会话和符号链接。 |
-| `sess_file::gc` | 回收稳定目录及历史日期目录；缺失目录视为无需清理。 |
+| `sess_file::gc` | 回收稳定目录及日期目录；缺失目录视为无需清理。 |
 
 ## 逐方法参数、返回与示例
 
@@ -115,7 +113,7 @@ protected static function validId($sid);
 
 ### sess_file::release
 
-功能说明：释放当前文件锁及迁移状态；可重复调用。
+功能说明：释放当前文件锁及读取状态；可重复调用。
 
 参数说明：无显式参数。
 
@@ -123,7 +121,7 @@ protected static function validId($sid);
 protected static function release();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -179,7 +177,7 @@ protected static function lock($sid, $create = true);
 public static function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 连接及锁释放后的结果；内置实现允许重复关闭
 
@@ -211,7 +209,7 @@ protected static function legacyFiles($sid);
 
 ### sess_file::read
 
-功能说明：读取会话；已过期内容立即清空，不依赖概率GC；空文件可迁移有效旧日期数据。
+功能说明：读取会话；已过期内容立即清空，不依赖概率GC。
 
 ```text
 public static function read($sid);
@@ -300,7 +298,7 @@ $result = sess_file::validateId($sid);
 
 ### sess_file::updateTimestamp
 
-功能说明：惰性写入的续期回调；迁移数据仍执行完整保存，避免只touch后丢失旧内容。
+功能说明：惰性写入的续期回调；按处理器协议保存访问时间。
 
 ```text
 public static function updateTimestamp($sid, $sess_data);
@@ -342,7 +340,7 @@ protected static function cleanDirectory($path, $maxlifetime);
 
 ### sess_file::gc
 
-功能说明：回收稳定目录及历史日期目录；缺失目录视为无需清理。
+功能说明：回收稳定目录及日期目录；缺失目录视为无需清理。
 
 ```text
 public static function gc($maxlifetime);

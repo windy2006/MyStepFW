@@ -38,7 +38,7 @@ abstract class aCssParserPlugin
 	 * @param array $configuration Plugin configuration [optional]
 	 * @return void
 	 */
-	public function __construct(CssParser $parser, array $configuration = null)
+	public function __construct(CssParser $parser, ?array $configuration = null)
 		{
 		$this->configuration	= $configuration;
 		$this->parser			= $parser;

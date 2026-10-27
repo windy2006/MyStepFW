@@ -34,7 +34,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 /**
  * 功能说明：管理接口别名、回调执行及JSON/XML/文本输出。
@@ -388,13 +388,13 @@ class myApi extends myBase {
             if($depth > 64) throw new RuntimeException('API XML nesting limit exceeded');
             if(is_object($item) || is_array($item)) {
                 $object = is_object($item) ? $item : null;
-                if($object !== null) { if($objects->contains($object)) throw new RuntimeException('Cyclic API XML result'); $objects->attach($object); }
+                if($object !== null) { if($objects->offsetExists($object)) throw new RuntimeException('Cyclic API XML result'); $objects->offsetSet($object); }
                 try {
                     foreach(is_object($item) ? get_object_vars($item) : $item as $key => $part) {
                         $tag = is_string($key) && preg_match('/\A[A-Za-z_][A-Za-z0-9_.-]*\z/D', $key) ? $key : 'item';
                         $xml->startElement($tag); $write($part, $depth+1); $xml->endElement();
                     }
-                } finally { if($object !== null) $objects->detach($object); }
+                } finally { if($object !== null) $objects->offsetUnset($object); }
             } else {
                 if(is_resource($item)) throw new InvalidArgumentException('API XML cannot encode resources');
                 $text = $item === null ? '' : (is_bool($item) ? ($item ? 'true' : 'false') : (string)$item);

@@ -1,7 +1,5 @@
 # interface_plugin：插件公共生命周期和辅助函数
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 接口约束check/install/uninstall；辅助函数用于绑定、路由、模板、优先脚本与包，均不代替入口鉴权。
@@ -31,7 +29,7 @@ class plugin_hello implements interface_plugin {
 
 使用说明：
   1. 插件主类按 plugin_目录名 命名并实现此接口；由后台管理流程显式调用生命周期。
-  2. check 用于检查与说明；install/uninstall 失败须抛异常，兼容原有无返回值实现。
+  2. check 用于检查与说明；install/uninstall 失败须抛异常，支持无返回值实现。
   3. 接口只定义生命周期，不自动提供业务授权、活动状态判断或多资源事务。
 
 ## 方法目录
@@ -47,7 +45,7 @@ class plugin_hello implements interface_plugin {
 | `pluginDirectory` | 校验插件标识并返回目录，加载资源时同时检查目录存在且不是符号链接。 |
 | `setPluginApps` | 同步插件应用绑定，按应用名顺序持有全部旁路锁后再校验和发布。 |
 | `setPluginOrder` | 校验并在同一次注册表排他读改写内保存插件运行顺序。 |
-| `buildPluginPackage` | 在隔离副本中导出指定插件，供新旧后台共用且不依赖manager已启用。 |
+| `buildPluginPackage` | 在隔离副本中导出指定插件，供两个后台共用且不依赖manager已启用。 |
 | `pluginQueryURL` | 合并 URL 查询参数，保留 index.php?路由和片段，值为 null 时删除参数。 |
 | `regPluginRoute` | 将插件 route.php 同步到编译表，并写入显式路由源映射。 |
 | `removePluginRoute` | 移除插件编译规则及显式源映射，目录已删除或重复清理时仍可执行。 |
@@ -56,11 +54,11 @@ class plugin_hello implements interface_plugin {
 | `setPluginTemplate` | 创建外层页面模板及插件内容模板，不覆盖应用全局模板配置。 |
 | `pluginPageHost` | 检查应用是否提供通用插件后台布局适配器，myStep作为内置缺省后台。 |
 | `pluginPageApplication` | 从可信Referer识别插件页面的外层后台，缺省返回myStep。 |
-| `pluginPageURL` | 生成保留插件后台展示标记的页面链接，兼容三种路由及原查询参数。 |
+| `pluginPageURL` | 生成保留插件后台展示标记的页面链接，支持三种路由及原查询参数。 |
 | `pluginAdminURL` | 生成当前展示后台中的设置、缓存等通用功能链接。 |
 | `renderPluginPage` | 统一装配已启用插件的后台模块及内容模板，返回主体HTML。 |
 | `showPluginPage` | 按当前展示后台统一输出插件管理页，保留原插件路由与业务参数。 |
-| `setPriority` | 将插件 priority.php 原子复制到框架优先脚本目录，覆盖旧版本。 |
+| `setPriority` | 将插件 priority.php 原子复制到框架优先脚本目录，覆盖本。 |
 | `removePriority` | 删除插件优先脚本并使 OPcache 失效，支持目录已删除和重复清理。 |
 
 ## 逐方法参数、返回与示例
@@ -95,9 +93,9 @@ public static function check(&$result);
 public static function install();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
-**返回值**：bool|null 兼容原有无返回值实现；管理器不以返回值判定成功，失败须抛异常
+**返回值**：bool|null 支持无返回值实现；管理器不以返回值判定成功，失败须抛异常
 
 **异常与失败**：Exception 安装失败时由实现方或辅助函数抛出
 
@@ -115,9 +113,9 @@ public static function install();
 public static function uninstall();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
-**返回值**：bool|null 兼容原有无返回值实现；管理器不以返回值判定成功，失败须抛异常
+**返回值**：bool|null 支持无返回值实现；管理器不以返回值判定成功，失败须抛异常
 
 **异常与失败**：Exception 卸载失败时由实现方或辅助函数抛出
 
@@ -281,7 +279,7 @@ $result = setPluginOrder($orders);
 
 ### buildPluginPackage
 
-功能说明：在隔离副本中导出指定插件，供新旧后台共用且不依赖manager已启用。
+功能说明：在隔离副本中导出指定插件，供两个后台共用且不依赖manager已启用。
 
 在线config.php、运行数据、锁、日志和版本库信息不入包；manager主类存在时按原规则生成脱敏配置副本。
 缺少manager时不生成配置副本，仍强制过滤在线配置；临时目录在请求结束时清理，下载需在此之前完成。
@@ -508,7 +506,7 @@ function pluginPageApplication($referer=null);
 
 **返回值**：string 通过pluginPageHost验证的展示应用名
 
-**上下文变量**：array $domain 当前域名绑定；myConfig $ms_setting 当前配置，提供旧后台路径和缺省应用
+**上下文变量**：array $domain 当前域名绑定；myConfig $ms_setting 当前配置，提供myStep后台路径和缺省应用
 
 调用形式：
 
@@ -520,7 +518,7 @@ $result = pluginPageApplication($referer);
 
 ### pluginPageURL
 
-功能说明：生成保留插件后台展示标记的页面链接，兼容三种路由及原查询参数。
+功能说明：生成保留插件后台展示标记的页面链接，支持三种路由及原查询参数。
 
 供插件自己的分页、筛选、表单和返回链接使用；app为空时读取当前插件展示上下文。
 myStep缺省布局移除标记，不将布局偏好写入会话。只接受站内地址，不改外部链接。
@@ -583,7 +581,7 @@ $result = pluginAdminURL($path, $params, $app);
 功能说明：统一装配已启用插件的后台模块及内容模板，返回主体HTML。
 
 不重新启动插件、会话或宿主控制器。模块仍在独立函数作用域中执行，保留tpl、tpl_sub、
-path_plugin、page_app以及历史全局配置别名；模块设置的content包括空串和0均原样采用。
+path_plugin、page_app以及配置别名；模块设置的content包括空串和0均原样采用。
 编译按插件及展示后台隔离，内容不缓存；展示上下文在正常返回或异常时恢复。
 
 ```text
@@ -595,13 +593,13 @@ function renderPluginPage($idx, $page='', $app=null, $tpl=null);
 | `$idx` | string；插件目录名，必须已安装且启用 |
 | `$page` | string；模块及模板同名页；空串使用插件名（默认：''） |
 | `$app` | string\|null；展示后台；null使用当前上下文或当前应用（默认：null） |
-| `$tpl` | myTemplate\|null；供历史模块使用的外层模板；null自行创建当前外层（默认：null） |
+| `$tpl` | myTemplate\|null；供模块使用的外层模板；null自行创建当前外层（默认：null） |
 
 **返回值**：string 插件内容HTML或模块显式提供的字符串
 
 **异常与失败**：InvalidArgumentException 插件未启用、页名或展示应用不合法；RuntimeException 框架管理员身份不满足，或模板缺失；Throwable 模块及模板异常继续传递
 
-**上下文变量**：myStep $mystep 当前控制器；myConfig $S 当前配置历史别名；myConfig $ms_setting 当前配置；array $info_app 当前真实请求及路由信息
+**上下文变量**：myStep $mystep 当前控制器；myConfig $S 当前配置别名；myConfig $ms_setting 当前配置；array $info_app 当前真实请求及路由信息
 
 调用形式：
 
@@ -634,7 +632,7 @@ function showPluginPage($idx, $page='', $mode=null);
 
 **异常与失败**：InvalidArgumentException 插件、页名或展示应用不合法；LogicException 布局适配器没有返回myTemplate或不是回调；Throwable 模块、布局和模板异常继续传递
 
-**上下文变量**：myStep $mystep 当前宿主控制器；myConfig $S 当前配置历史别名；array $info_app 当前实际请求及路由
+**上下文变量**：myStep $mystep 当前宿主控制器；myConfig $S 当前配置别名；array $info_app 当前实际请求及路由
 
 调用形式：
 
@@ -646,7 +644,7 @@ $result = showPluginPage($idx, $page, $mode);
 
 ### setPriority
 
-功能说明：将插件 priority.php 原子复制到框架优先脚本目录，覆盖旧版本。
+功能说明：将插件 priority.php 原子复制到框架优先脚本目录，覆盖本。
 
 目标为 CONFIG/priority/plugin_插件标识.php；源文件复制后 __DIR__ 会改变，
 引用插件资源须使用 PLUGIN 常量。调用本函数不会立即执行优先脚本。

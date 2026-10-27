@@ -49,8 +49,9 @@ $db->build($S->db->pre.'news_cat', array(
     'field' => 'cat_id'
 ))->field('name as cat_name');
 
-$db->select();
-while($record=$db->getRS()) {
+$feed_records=$db->records();
+\app\CMS\primeArticleAliases($feed_records);
+foreach($feed_records as $record) {
     $record['link'] = \app\CMS\absoluteURL(\app\CMS\getLink($record));
 	$record['add_date'] = date("r", strtotime($record['add_date']));
     if(empty($record['original'])) $record['original'] = $S->web->title;

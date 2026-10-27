@@ -1,7 +1,5 @@
 # 字符集、JSON、XML和文本处理
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 字符集转换、数据编码和HTML转义分别承担不同职责；已知编码时显式给定来源，不反复猜测。
@@ -41,7 +39,7 @@ public function get($charset='');
 | --- |
 | string $charset 空字符串返回原始字节；非空指定目标编码（默认：''） |
 
-**返回**：string 成功转换后更新实例状态；失败保留旧字符串及来源
+**返回**：string 成功转换后更新实例状态；失败保留原字符串及来源
 
 **异常**：Throwable 来源未知、不能无损转换或目标非法时明确报错
 
@@ -71,7 +69,7 @@ public static function charset($str, $encodings = null);
 
 | 参数说明 |
 | --- |
-| string $str 待检查字节串；空串及普通 ASCII 默认按 UTF-8 兼容 |
+| string $str 待检查字节串；空串及普通 ASCII 默认按 UTF-8 支持 |
 | array\|string\|null $encodings 候选列表或逗号串；默认 UTF-8、GBK、BIG5、GB18030（默认：null） |
 
 **返回**：string|false 首个严格合法候选，BOM 编码只有符合候选时使用；均不符为 false
@@ -99,7 +97,7 @@ public static function convertCharset($text, $from = null, $to = 'UTF-8', array 
 
 ### myString::setCharset
 
-功能说明：兼容批量转码入口，支持明确来源，复制对象而不原地修改
+功能说明：支持批量转码入口，支持明确来源，复制对象而不原地修改
 
 ```text
 public static function setCharset($str, $charset='UTF-8', $from_charset = null, array $options = []);

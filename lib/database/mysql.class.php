@@ -57,7 +57,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -148,11 +148,9 @@ class MySQL extends myBase implements interface_db, interface_sql, interface_db_
         if($this->connect instanceof mysqli)$this->close();
         $this->db='';
         $this->persistent = $pconnect;
-        if($pconnect) {
-            $this->connect = @mysqli_connect('p:'.$this->host, $this->user, $this->pwd);
-        } else {
-            $this->connect = @mysqli_connect($this->host, $this->user, $this->pwd);
-        }
+        try {
+            $this->connect = @mysqli_connect(($pconnect?'p:':'').$this->host, $this->user, $this->pwd);
+        } catch(mysqli_sql_exception $error) { $this->connect = false; }
         $this->sql = 'none (Connect to MySQL Server)';
         if(mysqli_connect_errno()) {
             $this->err_info = mysqli_connect_errno().' - '.mysqli_connect_error();
@@ -195,7 +193,9 @@ class MySQL extends myBase implements interface_db, interface_sql, interface_db_
     public function selectDB($the_db) {
         if(!$this->check()) return false;
         $this->clearError();
-        if(!mysqli_select_db($this->connect, $the_db)) { $this->checkError(); $this->error('Could not select the database'); return false; }
+        try { $selected = mysqli_select_db($this->connect, $the_db); }
+        catch(mysqli_sql_exception $error) { $selected = false; }
+        if(!$selected) { $this->checkError(); $this->error('Could not select the database'); return false; }
         $this->db = $the_db; $this->build('[reset]');
         $this->sql = 'none (Select Database)';
         return true;
@@ -216,9 +216,13 @@ class MySQL extends myBase implements interface_db, interface_sql, interface_db_
                 $charset = 'utf8';
             }
         }
+        try { $changed = mysqli_set_charset($this->connect, $charset); }
+        catch(mysqli_sql_exception $error) { $changed = false; }
+        if(!$changed || $this->checkError()) {
+            $this->checkError();$this->error('Unknown character set');
+            return mysqli_character_set_name($this->connect);
+        }
         $this->charset = $charset;
-        mysqli_set_charset($this->connect, $charset);
-        if($this->checkError())    $this->error('Unknow CharSet Name');
         return mysqli_character_set_name($this->connect);
     }
 
@@ -246,7 +250,9 @@ class MySQL extends myBase implements interface_db, interface_sql, interface_db_
     public function changUser($user, $pwd, $db=null) {
         if(!$this->check()) return false;
         if($db === null) $db = $this->db;
-        if(!mysqli_change_user($this->connect, $user, $pwd, $db)) return false;
+        try { $changed = mysqli_change_user($this->connect, $user, $pwd, $db); }
+        catch(mysqli_sql_exception $error) { $changed = false; }
+        if(!$changed) { $this->checkError(); return false; }
         $this->user = $user; $this->pwd = $pwd; $this->db = $db;
         $this->setCharset();
         if($this->session_sql_mode!==null)$this->execute('SET SESSION sql_mode=?',[$this->session_sql_mode]);
@@ -320,9 +326,10 @@ class MySQL extends myBase implements interface_db, interface_sql, interface_db_
         $this->guardTransaction($sql);
         $this->build('[reset]'); $this->free(); $this->clearError();
         $this->sql = $sql; $this->count++;
-        $statement = @mysqli_prepare($this->connect, $sql);
-        if(!$statement) { $this->checkError(); $this->error('Cannot prepare query'); return false; }
+        $statement = null;
         try {
+            $statement = mysqli_prepare($this->connect, $sql);
+            if(!$statement) { $this->checkError(); $this->error('Cannot prepare query'); return false; }
             $values = array_values($params);
             if(mysqli_stmt_param_count($statement) !== count($values)) throw new InvalidArgumentException('SQL parameter count mismatch');
             if($types === '') foreach($values as $value) $types .= is_int($value) || is_bool($value) ? 'i' : (is_float($value) ? 'd' : (is_resource($value) ? 'b' : 's'));
@@ -363,7 +370,9 @@ class MySQL extends myBase implements interface_db, interface_sql, interface_db_
             } else $count = mysqli_stmt_affected_rows($statement);
             $this->noteStatement($sql, $rows);
             return $count;
-        } finally { mysqli_stmt_close($statement); }
+        } catch(mysqli_sql_exception $error) {
+            $this->checkError();$this->error('Cannot execute prepared query');return false;
+        } finally { if($statement instanceof mysqli_stmt)mysqli_stmt_close($statement); }
     }
 
     /**
@@ -605,7 +614,7 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
     }
 
     /**
-     * 功能说明：取得数据库当前状态
+     * 功能说明：取得数据库当前状态；客户端信息采用无连接参数的PHP8接口
      *
      * 参数说明：无显式参数。
      *
@@ -617,7 +626,7 @@ WHERE t.constraint_type=\'PRIMARY KEY\'
             'MySQL server version' => mysqli_get_server_info($this->connect),
             'MySQL protocol version' => mysqli_get_proto_info($this->connect),
             'MySQL host info' => mysqli_get_host_info($this->connect),
-            'MySQL client info' => mysqli_get_client_info($this->connect),
+            'MySQL client info' => mysqli_get_client_info(),
             'More info' => str_replace('    ', "\n", mysqli_stat($this->connect)),
             'Process list' => implode("\n", $this->getProcesses()),
         );

@@ -1,7 +1,5 @@
 # interface_sql：interface_sql 数据库驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
@@ -26,9 +24,8 @@ if ($db->supports(interface_db_prepared::class)) {
 
 ### interface_sql
 
-功能说明：保留历史 SQL 结果读取、数据库管理及脚本维护协议。
+功能说明：保留 SQL 结果读取、数据库管理及脚本维护协议。
 
-本文件从 interface_db.class.php 拆出，(new) 标记表示新增文件，接口本身原已存在。
 协议与 interface_db 独立；SQLite 未完整提供这些管理入口，不声明实现。
 不能据此推断事务、原生扩展安装状态或连接健康。
 
@@ -39,7 +36,7 @@ if ($db->supports(interface_db_prepared::class)) {
 | `interface_sql::getRS` | 从当前结果读取下一行；调用方负责消费完成后按驱动约定释放结果。 |
 | `interface_sql::getDBs` | 列出当前账号可见的数据库，筛选规则和权限以驱动及服务器为准。 |
 | `interface_sql::getTbls` | 列出数据表；可选库名、过滤和详细信息参数由具体驱动扩展。 |
-| `interface_sql::getPri` | 获取历史单字段键标识；部分驱动无主键时会回退唯一键/自增列。 |
+| `interface_sql::getPri` | 获取单字段键标识；部分驱动无主键时会回退唯一键/自增列。 |
 | `interface_sql::getInsertId` | 读取最近插入的自增标识，取值范围与连接/触发器语义依驱动而定。 |
 | `interface_sql::getStat` | 获取服务器状态信息；不能作为通用健康检查或事务能力证明。 |
 | `interface_sql::getCreateScript` | 导出建表脚本；不同方言输出不可直接跨引擎回放。 |
@@ -67,7 +64,7 @@ if ($db->supports(interface_db_prepared::class)) {
 public function getRS();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array|false|null 当前记录或结果结束/失败标记，依驱动约定
 
@@ -85,7 +82,7 @@ public function getRS();
 public function getDBs();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 数据库名称列表
 
@@ -105,7 +102,7 @@ public function getDBs();
 public function getTbls();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 表名列表或详细信息列表
 
@@ -117,7 +114,7 @@ public function getTbls();
 
 ### interface_sql::getPri
 
-功能说明：获取历史单字段键标识；部分驱动无主键时会回退唯一键/自增列。
+功能说明：获取单字段键标识；部分驱动无主键时会回退唯一键/自增列。
 
 ```text
 public function getPri($the_tbl);
@@ -143,7 +140,7 @@ public function getPri($the_tbl);
 public function getInsertId();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|string|false 标识值，0或false是否表示未插入须按驱动区分
 
@@ -161,7 +158,7 @@ public function getInsertId();
 public function getStat();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array|string 状态映射，未连接时内置驱动返回空字符串
 

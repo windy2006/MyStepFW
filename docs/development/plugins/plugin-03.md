@@ -1,7 +1,5 @@
 # 安装检查与卸载
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 以hello为教学标识，区分生命周期、普通宿主初始化、独立路由/API与优先脚本。
@@ -39,7 +37,6 @@ class plugin_hello implements interface_plugin
 
 安装要写的目录、替换目标和删除所需父目录权限均需检查；当前框架的安装与更新流程已有判断和反馈。多文件更新不等于完整事务，插件仍需安排部分失败和清理逻辑。卸载时只处理本插件资源，不误删其他应用／插件配置。
 
-
 ## 操作步骤与注意事项
 
 index.php中的$this是当前宿主控制器；class.php声明plugin_标识。设置、语言和资源均显式加载，独立入口不自动获得管理员权限。JS初始化代码放入前端脚本，后端负责数据和授权。
@@ -70,7 +67,7 @@ public static function check(&$result);
 public static function install();
 ```
 
-**返回**：bool|null 兼容原有无返回值实现；管理器不以返回值判定成功，失败须抛异常
+**返回**：bool|null 支持无返回值实现；管理器不以返回值判定成功，失败须抛异常
 
 **异常**：Exception 安装失败时由实现方或辅助函数抛出
 
@@ -84,7 +81,7 @@ public static function install();
 public static function uninstall();
 ```
 
-**返回**：bool|null 兼容原有无返回值实现；管理器不以返回值判定成功，失败须抛异常
+**返回**：bool|null 支持无返回值实现；管理器不以返回值判定成功，失败须抛异常
 
 **异常**：Exception 卸载失败时由实现方或辅助函数抛出
 
@@ -173,12 +170,10 @@ class plugin_hellonote implements interface_plugin
 
 `decorate()` 返回 HTML，而不是 echo；这样页面钩子链才能继续传递处理后的正文。纯文本页面不按 HTML 输出，API 返回的是数据，不在方法中手工拼 JSON。
 
-
-
 ### 8. 安装与启用
 
 1. 先确认 Hello 应用可访问。
-2. 将以上文件保存到 `plugin/hellonote/`，用 PHP 7.4 对 PHP 文件做语法检查。
+2. 将以上文件保存到 `plugin/hellonote/`，用 PHP 8.5.12 对 PHP 文件做语法检查。
 3. 使用管理员身份打开框架后台，进入插件管理。其逻辑地址是 `/{gen.path_admin}/function/plugin/`；如后台有独立域名，使用对应地址。
 4. 在未安装列表找到“页面问候提示”，查看检查结果。
 5. 保留 Hello 应用关联，填写提示文字并提交安装。

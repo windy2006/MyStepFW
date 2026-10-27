@@ -1,7 +1,5 @@
 # ZIP创建与受控解包
 
-修订日期：2026-10-23。适用于当前框架。
-
 ## 本篇目标与调用场景
 
 构造器可打开已有ZIP；解包前设置条目和总字节预算；失败时保留原始包便于检查。
@@ -53,15 +51,14 @@ public function zip($file);
 
 | 参数说明 |
 | --- |
-| string\|array $file 待压缩的文件/目录路径或列表；兼容多个位置参数 |
-| string ...$args 额外的待压缩文件/目录路径；与首项一起处理（历史位置参数，由func_get_args读取） |
+| string\|array $file 待压缩的文件/目录路径或列表；支持多个位置参数 |
+| string ...$args 额外的待压缩文件/目录路径；与首项一起处理（位置参数，由func_get_args读取） |
 
 **返回**：bool 临时ZIP完整构建并发布成功为true，否则为false
 
 ### myZip::unzip
 
 功能说明：验证ZIP路径、大小及CRC，在暂存目录解包后统一发布
-
 
 调用示例：
     $ok = (new myZip($zipFile))->setLimits(67108864, 1000)->unzip($destination);

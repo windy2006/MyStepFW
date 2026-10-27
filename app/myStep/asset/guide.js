@@ -2,7 +2,7 @@
  * 文件：app/myStep/asset/guide.js (new)
  * 功能说明：新旧后台共用的指南局部阅读、目录状态保留、全文搜索和浏览历史。
  * 方法目录：init、target、sidebarSave/sidebarRestore、saveReading、status、request、
- *           mark/clearMarks、position、select、navigate、cancelSearch、search、clearSearch。
+ *           mark/clearMarks、highlightCode/paint、position、select、navigate、cancelSearch、search、clearSearch。
  * 使用说明：依赖框架已有jQuery、queryURL和checkForm；在guide模板范围绑定，不改全站路由。
  *           HTML正文仅来自同源已鉴权指南接口，搜索标题及摘要以textContent生成。
  */
@@ -28,6 +28,7 @@
         const message = root.querySelector('.guide-status');
         const storageKey = 'mystep-guide:' + home.pathname + home.search;
         let current = root.dataset.guideDoc;
+        let highlightLoading = false;
         let pageNumber = 0, searchNumber = 0, pageAbort, searchAbort, searchTimer, sidebarTimer, scrollTimer;
 
         /**
@@ -150,6 +151,54 @@
         }
 
         /**
+         * 为当前正文的代码块加载已有本地引擎并提供纯文本复制；失败时保留原代码。
+         * 参数说明：无显式参数。
+         * @returns {void} 包括AJAX新正文；不重新高亮已处理节点，不执行示例代码。
+         */
+        function highlightCode() {
+            if (!article.querySelector('pre code')) return;
+            /** 对仍在当前正文中的节点应用高亮和复制按钮，不保留请求发起时的旧节点。 */
+            function paint() {
+                article.querySelectorAll('pre code').forEach(function (code) {
+                    if (code.dataset.guideHighlighted) return;
+                    const language = (code.className.match(/(?:^|\s)language-([a-z0-9_-]+)/i) || [])[1];
+                    if (window.hljs && typeof window.hljs.highlightBlock === 'function') {
+                        try {
+                            if (!language || window.hljs.getLanguage(language)) window.hljs.highlightBlock(code);
+                            else code.classList.add('hljs');
+                        } catch (error) { /* 格式不支持时保留可读文本。 */ }
+                    }
+                    code.dataset.guideHighlighted = 'true';
+                    if (typeof window.copy !== 'function') return;
+                    const button = document.createElement('button');
+                    button.type = 'button'; button.className = 'guide-copy'; button.textContent = '复制代码';
+                    button.setAttribute('aria-label', '复制当前代码块'); button.setAttribute('aria-live', 'polite');
+                    button.addEventListener('click', function () {
+                        button.disabled = true;
+                        let copied;
+                        try { copied = window.copy(code); }
+                        catch (error) { copied = Promise.reject(error); }
+                        Promise.resolve(copied).then(function (ok) {
+                            button.textContent = ok === false ? '复制失败，请手动选择' : '已复制';
+                        }).catch(function () { button.textContent = '复制失败，请手动选择'; }).finally(function () {
+                            button.disabled = false;
+                            window.setTimeout(function () { button.textContent = '复制代码'; }, 1800);
+                        });
+                    });
+                    code.parentElement.classList.add('guide-code'); code.parentElement.appendChild(button);
+                });
+            }
+            if (window.hljs && typeof window.hljs.highlightBlock === 'function') { paint(); return; }
+            if (highlightLoading || typeof $.setJS !== 'function') return;
+            const prefix = window.setting && typeof window.setting.path_root === 'string' ? window.setting.path_root : '';
+            if (!prefix) return;
+            highlightLoading = true;
+            $.setJS([prefix + 'vendor/highlight/highlightjs/highlight.pack.js'], true, function () {
+                highlightLoading = false; paint();
+            });
+        }
+
+        /**
          * 只滚动右侧阅读区域，不调用会牵动左栏和整页的scrollIntoView。
          * @param {string} hash 目标章节锚点。
          * @param {number|undefined} top 浏览历史保存的右侧位置。
@@ -202,6 +251,7 @@
                 canonical.hash = url.hash;
                 if (push) saveReading();
                 article.innerHTML = data.article; current = data.id; root.dataset.guideDoc = current;
+                highlightCode();
                 mark(input.value); select(); position(canonical.hash, top, Boolean(useMatch));
                 document.title = data.title + ' · 框架指南';
                 if (push) window.history.pushState(Object.assign({}, window.history.state || {}), '', canonical.href);
@@ -275,6 +325,7 @@
         });
         window.addEventListener('pagehide', sidebarSave);
         form.querySelectorAll('input,button').forEach(function (control) { control.disabled = false; });
+        highlightCode();
         position(window.location.hash, undefined, false); saveReading(); if (input.value.trim()) search();
     }
     $(init);

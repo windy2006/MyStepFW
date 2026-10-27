@@ -1,6 +1,34 @@
 body {padding:8px;}
+/* 编辑区标题字号统一在CSS中定义，h6保留供已有内容显示。 */
+h1 {font-size:20pt;}
+h2 {font-size:18pt;}
+h3 {font-size:16pt;}
+h4 {font-size:14pt;}
+h5 {font-size:12pt;}
+h6 {font-size:11pt;}
 p {text-indent:2rem;}
 span.mceSubtitle {font-weight:bold;background-color:#ffff99;}
-blockquote, pre.highlight {position:relative;padding:25px 5px 5px 5px;border:1px #CCCCCC solid;background-color: #EEEEEE;}
-blockquote:before, pre.highlight:before {content:attr(data-lng);text-transform:uppercase;font-weight:bold;position:absolute;top:0;left:5px;}
+blockquote {position:relative;padding:25px 5px 5px 5px;border:1px #CCCCCC solid;background-color: #EEEEEE;}
+blockquote:before {content:attr(data-lng);text-transform:uppercase;font-weight:bold;position:absolute;top:0;left:5px;}
 blockquote:before {content:'〝〞';font-size:32px;left:-10px;opacity:0.4;}
+/* 编辑区所有pre都清楚区分；旧文即使尚无highlight类，也有统一的代码容器外观。 */
+pre { position: relative; padding: 32px 14px 14px; margin: 16px 0; border: 1px solid #bdcde0; border-left: 4px solid #3976bd; border-radius: 4px; background: #eef4fb; color: #24364c; white-space: pre; overflow-x: auto; text-indent: 0; line-height: 1.6; font-family: Consolas, Monaco, monospace; }
+pre:before { content: "代码段"; position: absolute; top: 4px; left: 14px; color: #31577f; font-size: 12px; line-height: 20px; font-weight: bold; text-transform: none; }
+pre.highlight:before { content: "代码段 · " attr(data-lng); left: 14px; text-transform: none; }
+pre:hover { border-color: #7a9dc6; border-left-color: #2563a8; }
+pre code, pre code * { color: inherit !important; background: transparent !important; font-family: inherit; font-size: inherit; font-weight: normal !important; font-style: normal !important; white-space: pre; }
+
+/* 编辑区表格：统一边框、表头和行底色，单元格留白也覆盖Bootstrap的table-sm紧凑规则。
+   样式只作用于编辑器内容区；用户明确设置的行内颜色、宽度及对齐仍按原值显示。 */
+body.mce-content-body table { max-width: 100%; margin: 16px 0; border-collapse: collapse; border: 1px solid #cbd6e2; }
+body.mce-content-body table th,
+body.mce-content-body table td { padding: 10px 14px; border: 1px solid #cbd6e2; vertical-align: middle; line-height: 1.6; }
+body.mce-content-body table th { background-color: #e8eff7; color: #2c435e; font-weight: 600; }
+body.mce-content-body table thead > tr > th { border-bottom: 2px solid #aebfd3; }
+body.mce-content-body table tbody > tr { background-color: #ffffff; }
+body.mce-content-body table tbody > tr:nth-of-type(even) { background-color: #f5f8fc; }
+body.mce-content-body table tbody > tr:hover { background-color: #edf4fc; }
+body.mce-content-body table th p,
+body.mce-content-body table td p { margin: 0 0 8px; text-indent: 0; }
+body.mce-content-body table th > :last-child,
+body.mce-content-body table td > :last-child { margin-bottom: 0; }

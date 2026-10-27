@@ -147,8 +147,8 @@ class myCacheCodec {
         if(is_resource($value) || gettype($value)==='resource (closed)') throw new InvalidArgumentException('Resources cannot be cached; use an explicit key and cache their data');
         if($depth>$this->depth) throw new LengthException('Cached value exceeds depth limit');
         if(is_object($value)) {
-            if($objects->contains($value)) return;
-            $objects->attach($value);$value=(array)$value;
+            if($objects->offsetExists($value)) return;
+            $objects->offsetSet($value);$value=(array)$value;
         }
         if(!is_array($value)) return;
         foreach($value as $key=>$item) {

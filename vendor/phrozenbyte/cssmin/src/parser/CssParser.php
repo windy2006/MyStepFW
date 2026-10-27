@@ -67,7 +67,7 @@ class CssParser
 	 * @param array $plugins Plugin configuration [optional]
 	 * @return void
 	 */
-	public function __construct($source = null, array $plugins = null)
+	public function __construct($source = null, ?array $plugins = null)
 		{
 		$plugins = array_merge(array
 			(

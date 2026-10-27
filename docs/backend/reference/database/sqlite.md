@@ -1,7 +1,5 @@
 # SQLite：sqlite 数据库驱动／协议
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 本文件提供数据库底层契约或驱动实现，调用前核对目标是否声明相应能力；SQL方言、错误及事务语义按本页各方法说明使用。
@@ -26,7 +24,7 @@ if ($db->supports(interface_db_prepared::class)) {
 
 ### SQLite
 
-功能说明：基于SQLite3提供参数绑定、受管事务、结构脚本与受限SQL兼容转换。
+功能说明：基于SQLite3提供参数绑定、受管事务、结构脚本与受限SQL格式转换。
 
 使用说明：
   1. 可使用内存数据库或受信SQLite文件，通常经myDb调用。
@@ -47,7 +45,7 @@ SQLite3 驱动，提供原生参数绑定并复用 SQL 构建、缓存和事务�
 2. query() 委托 execute()，读查询成功返回 0；结果通过 getRS() 或 fetch*() 读取。
    写查询返回 SQLite changes()，失败返回 false 或按异常策略抛出。
 3. execute() 支持位置和命名参数，SQL NULL、有限数字、文本及二进制流按类型绑定。
-4. convertSQL() 仅做有限兼容，不能把任意 MySQL 方言转换为 SQLite；转义使用
+4. convertSQL() 仅做有限支持，不能把任意 MySQL 方言转换为 SQLite；转义使用
    SQLite3 自身规则。事务、缓存和结果读取的具体约定参见 base_db/base_sql。
 
 ## 状态字段与公开变量
@@ -73,9 +71,9 @@ protected
 | --- | --- |
 | `SQLite::__construct` | 打开 SQLite 数据库，无参数时创建独立内存库 |
 | `SQLite::init` | 关闭旧连接，打开指定库并重置缓存、事务及内存库隔离身份 |
-| `SQLite::connect` | 检查是否已持有 SQLite3 对象，用于兼容数据库接口 |
+| `SQLite::connect` | 检查是否已持有 SQLite3 对象，用于支持数据库接口 |
 | `SQLite::selectDB` | 切换 SQLite 文件或内存库，委托 init() 关闭旧库并打开新库 |
-| `SQLite::convertSQL` | 做有限的 MySQL 兼容转换，不修改字符串和注释中的 LOW_PRIORITY |
+| `SQLite::convertSQL` | 做有限的 MySQL 格式转换，不修改字符串和注释中的 LOW_PRIORITY |
 | `SQLite::safeValue` | 按 SQLite 规则转义单引号，避免使用 MySQL 反斜杠语义 |
 | `SQLite::query` | 执行无参数 SQL，委托 execute() 并沿用其错误及资源管理策略 |
 | `SQLite::execute` | 原生预处理并按类型绑定参数，成功后更新事务及共享缓存跟踪 |
@@ -108,12 +106,12 @@ public function __construct();
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `...$args` | mixed；按init声明顺序传入的SQLite路径等设置（历史位置参数，由func_get_args读取） |
-| `$file` | string；历史位置参数说明：可选文件路径或 :memory:，转给 init() |
-| `$flag` | int；历史位置参数说明：可选 SQLite3 打开标志，默认 -1 自动判断 |
-| `$key` | string\|null；历史位置参数说明：可选加密密钥，须由 SQLite 构建提供加密支持 |
-| `$exception` | bool；历史位置参数说明：可选是否让 SQLite3 抛异常，默认 false |
-| `$timeout` | int；历史位置参数说明：可选忙等待毫秒数，默认 5000 |
+| `...$args` | mixed；按init声明顺序传入的SQLite路径等设置（位置参数，由func_get_args读取） |
+| `$file` | string；位置参数说明：可选文件路径或 :memory:，转给 init() |
+| `$flag` | int；位置参数说明：可选 SQLite3 打开标志，默认 -1 自动判断 |
+| `$key` | string\|null；位置参数说明：可选加密密钥，须由 SQLite 构建提供加密支持 |
+| `$exception` | bool；位置参数说明：可选是否向调用方抛出SQLite3Exception；原生连接始终启用异常，默认 false |
+| `$timeout` | int；位置参数说明：可选忙等待毫秒数，默认 5000 |
 
 **返回值**：void 初始化或释放资源，无返回值。
 
@@ -134,7 +132,7 @@ public function init($file=':memory:', $flag=-1, $key=null, $exception=false, $t
 | `$file` | string；文件路径或 :memory:，默认独立内存库（默认：':memory:'） |
 | `$flag` | int；SQLite3 打开标志；-1 自动选择读写，文件不存在时加 CREATE（默认：-1） |
 | `$key` | string\|null；可选数据库加密密钥，是否支持由 SQLite 构建决定（默认：null） |
-| `$exception` | bool；是否启用 SQLite3 异常，默认 false（默认：false） |
+| `$exception` | bool；是否向调用方抛出SQLite3Exception；原生连接始终启用异常，默认 false（默认：false） |
 | `$timeout` | int；busyTimeout 等待毫秒数，默认 5000（默认：5000） |
 
 **返回值**：void 打开失败由 SQLite3/框架错误策略处理
@@ -150,7 +148,7 @@ $result = $instance->init($file, $flag, $key, $exception, $timeout);
 
 ### SQLite::connect
 
-功能说明：检查是否已持有 SQLite3 对象，用于兼容数据库接口
+功能说明：检查是否已持有 SQLite3 对象，用于支持数据库接口
 
 参数说明：无显式参数。
 
@@ -158,7 +156,7 @@ $result = $instance->init($file, $flag, $key, $exception, $timeout);
 public function connect();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 已初始化为 SQLite3 对象时为 true；本方法不重新打开数据库
 
@@ -198,7 +196,7 @@ $result = $instance->selectDB($file, $flag, $key);
 
 ### SQLite::convertSQL
 
-功能说明：做有限的 MySQL 兼容转换，不修改字符串和注释中的 LOW_PRIORITY
+功能说明：做有限的 MySQL 格式转换，不修改字符串和注释中的 LOW_PRIORITY
 
 ```text
 public function convertSQL($sql);
@@ -284,7 +282,7 @@ public function execute($sql, array $params = []);
 
 **返回值**：int|false 读查询成功为 0，写查询为受影响行数，无连接或执行失败为 false
 
-**异常与失败**：InvalidArgumentException SQL、参数个数/名称/类型非法或浮点数非有限；RuntimeException 无法读取二进制流；BadMethodCallException 写入 RETURNING 在执行前拒绝，避免 PHP 7.4 SQLite 结果读取重复执行写入；Throwable SQLite3 或框架错误策略产生的异常继续传递
+**异常与失败**：InvalidArgumentException SQL、参数个数/名称/类型非法或浮点数非有限；RuntimeException 无法读取二进制流；BadMethodCallException 写入 RETURNING 在执行前拒绝，避免 SQLite 结果读取导致重复执行写入；Throwable SQLite3 或框架错误策略产生的异常继续传递
 
 调用形式：
 
@@ -398,7 +396,7 @@ $result = $instance->getFields($the_tbl);
 public function getTbls();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：array 当前主库中的表名
 
@@ -490,7 +488,7 @@ $result = $instance->getIdxScript($the_tbl);
 public function getInsertId();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：int|false 连接存在时返回lastInsertRowID，包括有效的0；未连接为false
 
@@ -513,7 +511,7 @@ $result = $instance->getInsertId();
 public function free();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 可重复调用，不关闭数据库对象
 
@@ -536,7 +534,7 @@ public function close(&$err_info = array());
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是历史默认占位值（默认：array()） |
+| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是默认占位值（默认：array()） |
 
 **返回值**：int 驱动累计执行次数；重复关闭安全，内存库身份会随关闭重置
 
@@ -559,7 +557,7 @@ public function checkError(&$err_info = array());
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是历史默认占位值（默认：array()） |
+| `&$err_info` | string\|array；引用输出：当前驱动的错误文本；空数组只是默认占位值（默认：array()） |
 
 **返回值**：int|false SQLite错误代码，0表示无错误；未连接时沿用已有错误状态
 
@@ -582,7 +580,7 @@ $result = $instance->checkError($err_info);
 public function clearError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 

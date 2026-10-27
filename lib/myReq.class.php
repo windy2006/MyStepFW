@@ -57,7 +57,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -174,7 +174,7 @@ class myReq extends myBase {
                 $var = &$_SESSION;
                 break;
             default:
-                $var = &$GLOBALS;
+                $var = $GLOBALS; // PHP8禁止引用整个GLOBALS；此处只读取快照，写入仍通过globals()。
                 break;
         }
         if(is_null($para)) $para = '[ALL]';
@@ -541,13 +541,13 @@ class myReq extends myBase {
      *
      *
      * 资源生命周期：成功后PHP在请求结束时写回并关闭会话；需要提前释放同ID请求锁时由调用方使用session_write_close。
-     * 处理器结构：字符串可为内置files或静态处理器类名；数组前6项依次为open/close/read/write/destroy/gc，9项模式追加create_sid/validate_sid/update_timestamp；空数组使用原生files。
+     * 处理器结构：可传原生SessionHandlerInterface对象；字符串可为内置files或静态处理器类名；数组前6项依次为open/close/read/write/destroy/gc，9项模式追加create_sid/validate_sid/update_timestamp；空数组使用原生files；静态/回调协议经mySessionHandler桥接后注册原生对象。
      *
-     * @param string|array $handle 处理器类名、6个原回调或9个完整回调；空数组使用原生files（默认：array()）
+     * @param string|array|SessionHandlerInterface $handle 处理器类名、6个原回调或9个完整回调；空数组使用原生files（默认：array()）
      * @param bool $httponly Cookie是否禁止脚本读取（默认：true）
      * @return string|false 成功返回实际ID；no_log禁用、处理器无效或启动失败返回false，不静默切换存储
      * @throws InvalidArgumentException 显式选择的Redis存储插件未安装、未启用或PHP扩展不可用
-     * @phpstan-param string|list<callable> $handle
+     * @phpstan-param string|list<callable>|SessionHandlerInterface $handle
      */
     public static function sessionStart($handle = array(), $httponly = true) {
         if(!empty($GLOBALS['no_log']) || self::sessionCheck() || headers_sent()) return false;
@@ -570,9 +570,11 @@ class myReq extends myBase {
             foreach($callbacks as $index => $callback) {
                 if(!is_callable($callback)) return false;
             }
-        } elseif(!is_array($handle) && $handle !== 'files' && $handle !== '') return false;
-        if($callbacks) {
-            if(!session_set_save_handler(...$callbacks)) return false;
+        } elseif(!is_array($handle) && !($handle instanceof SessionHandlerInterface) && $handle !== 'files' && $handle !== '') return false;
+        if($callbacks || $handle instanceof SessionHandlerInterface) {
+            require_once __DIR__.'/session/mySessionHandler.class.php';
+            $handler=$handle instanceof SessionHandlerInterface ? $handle : new mySessionHandler($callbacks);
+            if(!session_set_save_handler($handler,false)) return false;
             self::$session_opt['mode'] = 'user';
         } else {
             session_module_name('files');

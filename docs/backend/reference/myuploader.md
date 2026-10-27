@@ -1,7 +1,5 @@
 # myUploader：HTTP上传
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 真实上传需浏览器multipart请求；结果数组逐项报告成功或失败。允许后缀、容量、鉴权及附件登记分别处理。
@@ -182,7 +180,7 @@ $result = $instance->do($getsize);
 private function uploadFile();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：void 无返回值。
 
@@ -193,7 +191,6 @@ private function uploadFile();
 ### myUploader::result
 
 功能说明：取得结构化上传结果或HTML结果表
-
 
 调用示例：
     $uploader->do();

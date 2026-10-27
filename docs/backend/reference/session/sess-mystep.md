@@ -1,7 +1,5 @@
 # sess_mystep：sess_mystep 会话处理器
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 此文件实现PHP会话保存或查询相关能力，通常由框架按session.mode选择。应用内使用会话门面，不重复启动处理器；底层回调由PHP引擎调用。
@@ -25,7 +23,7 @@ myReq::removeSession('editor_id');
 
 ### sess_mystep
 
-功能说明：在独立InnoDB表保存权威会话，同时维护兼容user_online展示记录。
+功能说明：在独立InnoDB表保存权威会话，同时维护支持user_online展示记录。
 
 使用说明：
   1. 由CMS会话配置选择；认证表与在线展示表分离，展示摘要不能作为登录凭据。
@@ -55,13 +53,13 @@ private static $online = '', $storage = '', $tracking_error = false;
 | --- | --- |
 | `sess_mystep::open` | 从框架配置初始化独立会话表和在线统计；不自动改写旧user_online表结构。 |
 | `sess_mystep::close` | 释放专属数据库连接和锁，清空监控状态；GC不再负责关闭连接。 |
-| `sess_mystep::read` | 读取认证数据，首次访问可迁移旧在线表中未过期且非空的会话。 |
-| `sess_mystep::sessionTable` | 获取已校验的独立存储表名，供兼容迁移查询使用。 |
+| `sess_mystep::read` | 读取指定ID的有效认证数据。 |
+| `sess_mystep::sessionTable` | 获取已校验的独立会话存储表名。 |
 | `sess_mystep::write` | 可靠保存所有请求的认证数据，再尽力刷新在线统计；统计失败不伪装为认证失败。 |
-| `sess_mystep::track` | 按访客策略刷新在线摘要；统计ID使用32位摘要，兼容原CHAR(32)字段。 |
-| `sess_mystep::trackingData` | 生成255字节内的展示摘要，兼容原在线列表的PHP会话解码；不复制认证版本、 |
+| `sess_mystep::track` | 按访客策略刷新在线摘要；统计ID使用32位摘要，支持原CHAR(32)字段。 |
+| `sess_mystep::trackingData` | 生成255字节内的展示摘要，支持原在线列表的PHP会话解码；不复制认证版本、 |
 | `sess_mystep::destroy` | 删除认证及旧在线副本；旧副本删除失败时保留空会话屏障并报告失败，避免恢复旧身份。 |
-| `sess_mystep::validateId` | 严格ID校验兼容首次迁移；必须实际存在有效会话，不能只检查ID格式。 |
+| `sess_mystep::validateId` | 严格校验会话ID；必须实际存在有效会话，不能只检查ID格式。 |
 | `sess_mystep::updateTimestamp` | 惰性写入也刷新认证期限及可选在线统计。 |
 | `sess_mystep::gc` | 清理主会话和过期在线访客；保持连接与run状态，允许PHP随后继续write。 |
 | `sess_mystep::hasTrackingError` | 本次打开以来在线统计是否失败；不包含敏感SQL及会话内容。 |
@@ -103,7 +101,7 @@ $result = sess_mystep::open($sess_path, $sess_name);
 public static function close();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 连接及锁释放后的结果；内置实现允许重复关闭
 
@@ -117,7 +115,7 @@ $result = sess_mystep::close();
 
 ### sess_mystep::read
 
-功能说明：读取认证数据，首次访问可迁移旧在线表中未过期且非空的会话。
+功能说明：读取指定ID的有效认证数据。
 
 ```text
 public static function read($sid);
@@ -139,7 +137,7 @@ $result = sess_mystep::read($sid);
 
 ### sess_mystep::sessionTable
 
-功能说明：获取已校验的独立存储表名，供兼容迁移查询使用。
+功能说明：获取已校验的独立会话存储表名。
 
 参数说明：无显式参数。
 
@@ -147,7 +145,7 @@ $result = sess_mystep::read($sid);
 private static function sessionTable();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 包含经校验前缀的认证存储表名，不含任意用户SQL
 
@@ -180,7 +178,7 @@ $result = sess_mystep::write($sid, $sess_data);
 
 ### sess_mystep::track
 
-功能说明：按访客策略刷新在线摘要；统计ID使用32位摘要，兼容原CHAR(32)字段。
+功能说明：按访客策略刷新在线摘要；统计ID使用32位摘要，支持原CHAR(32)字段。
 
 ```text
 private static function track($sid);
@@ -198,9 +196,9 @@ private static function track($sid);
 
 ### sess_mystep::trackingData
 
-功能说明：生成255字节内的展示摘要，兼容原在线列表的PHP会话解码；不复制认证版本、
+功能说明：生成255字节内的展示摘要，支持原在线列表的PHP会话解码；不复制认证版本、
 
-CSRF令牌等会话私密字段。标记前缀阻止摘要作为旧认证数据迁移。
+CSRF令牌等会话私密字段。统计标记仅用于展示，不作为认证凭据。
 
 参数说明：无显式参数。
 
@@ -208,7 +206,7 @@ CSRF令牌等会话私密字段。标记前缀阻止摘要作为旧认证数据�
 private static function trackingData();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 最多255字节的在线统计会话摘要，保留php会话编码，不含完整认证数据
 
@@ -240,7 +238,7 @@ $result = sess_mystep::destroy($sid);
 
 ### sess_mystep::validateId
 
-功能说明：严格ID校验兼容首次迁移；必须实际存在有效会话，不能只检查ID格式。
+功能说明：严格校验会话ID；必须实际存在有效会话，不能只检查ID格式。
 
 ```text
 public static function validateId($sid);
@@ -315,7 +313,7 @@ $result = sess_mystep::gc($maxlifetime);
 public static function hasTrackingError();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：bool 本次open以来发生在线统计错误为true；不表示认证会话保存失败
 

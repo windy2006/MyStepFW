@@ -43,8 +43,9 @@ $db->setCache($cache, 600);
 $tpl->assign('update', $db->result('select add_date from '.$S->db->pre_sub.'news_show where web_id='.$web_info['web_id'].' order by news_id desc limit 1'));
 
 $db->build($S->db->pre_sub.'news_show')->field('news_id,cat_id,web_id,subject,tag,describe,original,add_date,active')->order('news_id', true)->limit(20);
-$db->select();
-while($record=$db->getRS()) {
+$feed_records=$db->records();
+\app\CMS\primeArticleAliases($feed_records);
+foreach($feed_records as $record) {
     if(empty($record['original'])) $record['original'] = $S->web->title;
     if(empty($record['active'])) $record['active'] = $record['add_date'];
     $record['tag'] = explode(',', $record['tag']);

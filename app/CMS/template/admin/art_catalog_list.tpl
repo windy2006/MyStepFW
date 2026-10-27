@@ -61,24 +61,10 @@ $(function(){
     if(web_id !== '1') {
         $('#web_id').val(web_id).parent().hide();
     }
-    let refer = decodeURIComponent('<!--back_url|url-->');
-    if(refer.match(/catalog\/(\w+)/) || location.search.indexOf('Refresh')) {
-        if(RegExp.$1!=='list' && typeof window.parent.getList !== 'undefined') {
-            $.getJSON('<!--url_prefix-->api/CMS/get/news_cat', function(data){
-                let obj = $(window.parent.document.getElementById('sidebar'));
-                if(typeof data.err==='undefined') {
-                    obj.empty();
-                    obj.append(window.parent.getList(data).removeClass('sub-menu'));
-                    setURL(global.root_fix.replace('article/catalog/', ''), obj);
-                    window.parent.setLink();
-                    obj.find('.collapse').addClass('show');
-                    obj.find('.menu-arrow').removeClass('collapsed').attr('aria-expanded', true);
-                    window.parent.$('#web_id').val(web_id).trigger('change');
-                } else {
-                    alert(data.err);
-                }
-            });
-        }
+    // 只有成功变更后携带明确标记才刷新左栏，普通打开不重建栏目树。
+    if (new URLSearchParams(location.search).get('Refresh') === '1') {
+        if (window.parent !== window && typeof window.parent.refreshSidebar === 'function') window.parent.refreshSidebar();
+        history.replaceState(history.state, '', queryURL(location.href, {Refresh:null}));
     }
     global.root_fix += 'article/catalog/';
     $('tr[data-layer]').click(function(){
@@ -111,14 +97,25 @@ $(function(){
 
         obj.attr('data-expand', (expand?'false':'true'));
     });
-    $('#web_id').change(function(){
-        let val = this.value;
-        if(val==='') {
-            $('#cat_list > tr').show();
-        } else {
-            $('#cat_list > tr').hide();
-            $('#cat_list > tr[web_id='+val+']').show();
-        }
-    });
+    /** 过滤当前列表并将筛选带入编辑/排序及返回地址，不改变外层网站选择。
+     * 参数说明：无显式参数；读取当前页面的web_id选择框。
+     * @returns {void} 保留其他查询参数、路由首段和历史项附加状态。
+     */
+    function applyCatalogFilter() {
+        const value = String($('#web_id').val() || '');
+        $('#cat_list > tr').each(function () { $(this).toggle(value === '' || this.getAttribute('web_id') === value); });
+        $('.card a[href]').each(function () { $(this).attr('href', queryURL(this.getAttribute('href'), {web_id:value})); });
+        $('form[action]').each(function () { $(this).attr('action', queryURL(this.getAttribute('action'), {web_id:value})); });
+        history.replaceState(history.state, '', queryURL(location.href, {web_id:value}));
+    }
+    // 未指定筛选时沿用左栏网站；显式“显示所有”用web_id=保留，不能当作缺省。
+    if (web_id === '1' && !new URLSearchParams(location.search).has('web_id') && window.parent !== window) {
+        try {
+            const selector = window.parent.document.getElementById('web_id');
+            if (selector && $('#web_id option').filter(function () { return this.value === selector.value; }).length) $('#web_id').val(selector.value);
+        } catch (error) { /* 单独嵌入跨域页面时使用当前筛选，不读取外层窗口。 */ }
+    }
+    $('#web_id').on('change', applyCatalogFilter);
+    applyCatalogFilter();
 });
 </script>

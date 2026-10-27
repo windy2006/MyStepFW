@@ -66,7 +66,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -131,7 +131,7 @@ class myFile {
      * @return void 初始化或释放资源，无返回值。
      */
     public function __construct($file, $headers=array()) {
-        ini_set("auto_detect_line_endings", true);
+
         if(preg_match('/^[\w]{2,}:/', $file)) $this->remote = true;
         if($this->remote) {
             $this->file = $file;
@@ -931,7 +931,7 @@ class myFile {
         $result = curl_exec($curl);
         if($result === false || curl_errno($curl) || curl_getinfo($curl, CURLINFO_HTTP_CODE) !== 200) $result = '';
         $return_header = curl_getinfo($curl, CURLINFO_HEADER_OUT);
-        curl_close($curl);
+        unset($curl);
         return self::removeBom($result);
     }
 
@@ -1163,7 +1163,7 @@ class myFile {
         try {
             $ok = curl_exec($curl); $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             return $ok !== false && !$overflow && $status >= 200 && $status < 300 ? $body : false;
-        } finally { curl_close($curl); }
+        } finally { unset($curl); }
     }
 
     /**
@@ -1225,7 +1225,7 @@ class myFile {
             $stored = time().'.'.bin2hex(random_bytes(12)).'.'.$extension;
             $path = rtrim($directory, '/').'/'.$stored;
             try { $encoder = ['jpg'=>'imagejpeg', 'png'=>'imagepng', 'gif'=>'imagegif'][$extension]; $saved = $encoder($resource, $path); }
-            finally { imagedestroy($resource); }
+            finally { unset($resource); }
             if(!$saved || !is_file($path)) { if(is_file($path)) unlink($path); return false; }
             $display = rawurldecode(basename(parse_url($url, PHP_URL_PATH) ?: 'image.'.$extension));
             if(!myAttachment::append($directory, $stored, $display)) { unlink($path); return false; }

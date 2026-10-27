@@ -1,7 +1,5 @@
 # 字符串与文件认证加密
 
-修订日期：2026-10-24。以下接口面向 PHP 7.4，使用框架现有的 `myEncrypt` 类。
-
 ## 职责与运行前提
 
 `myEncrypt` 处理需要恢复原文的数据。字符串接口使用 OpenSSL 的 AES-256-GCM；文件接口使用 Sodium Secretstream 的 XChaCha20-Poly1305，按块校验并发布结果。文件接口需要启用 PHP Sodium 扩展及 Secretstream 能力，不存在时抛出明确异常，不回退到无认证加密。
@@ -70,27 +68,3 @@ if (!myEncrypt::openFile($file, $key)) {
 文件格式为二进制 `MSFILE1:` 头、16 字节盐、Sodium 原生 24 字节流头，以及连续认证块。HKDF 上下文为 `MyStepFW file seal v1`；完整文件头作为每块的附加认证数据。非末块对应 65536 字节明文及 17 字节认证开销；末块可更短，必须携带 `TAG_FINAL` 且后面没有任何字节。
 
 文件状态、nonce 和密钥轮换由 [Sodium Secretstream](https://doc.libsodium.org/secret-key_cryptography/secretstream) 管理。字符串与文件格式不能交叉调用解密入口。
-
-## 2.3 入口统一与迁移
-
-本次移除已经能被正式入口完整替代的实现与拼写，不保留别名或旧加密算法回退。
-
-| 已移除或替换的入口 | 当前入口 |
-| --- | --- |
-| `myEncrypt::encStr` / `decStr` | `myEncrypt::seal` / `open` |
-| `myEncrypt::encFile` / `decFile` | `myEncrypt::sealFile` / `openFile` |
-| `myEncrypt::keyED` | 已移除，不再直接调用无认证异或变换 |
-| `simpleDB::destory` | `simpleDB::destroy` |
-| `myTrait` 的 `instatnce` 属性 | `instance` 属性 |
-| 图片示例的 `destory` 调用 | `myImg::destroy` |
-
-旧 XOR 密文与新版格式不同。已有外部旧密文须在升级前用旧版本及原密钥解密，再用新版重新封装；新版不猜测或解码旧格式。框架内的旧调用、示例及测试已经统一替换；不会自动扫描、改写未知业务文件。
-
-并非所有带“旧”字样的功能都能直接删除：
-
-- 历史密码摘要无法在没有明文密码时转成新版摘要，因此 `myAuth` 仍保留校验及成功登录后的摘要升级流程。
-- `myApi::invoke` 返回原始数据，`run` 返回编码响应并设置类型，两者职责不同。
-- SQL 构建、参数绑定、缓存读取的返回语义不同，不能以删除旧入口代替业务迁移。
-- `myPath` 的配置路径规范化与 `myFile` 的文件路径、访问边界检查用途不同。
-
-在线样例路径为 `/Document/myEncrypt`，源码位于 `app/Document/module/myEncrypt.php`。完整参数、返回和内部方法说明见 [myEncrypt 方法参考](../reference/myencrypt.md)。

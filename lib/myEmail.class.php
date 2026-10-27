@@ -57,7 +57,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -656,7 +656,7 @@ class SMTP {
                 // SMTP server can take longer to respond, give longer timeout for first read
                 // Windows does not have support for this timeout function
                 if(substr(PHP_OS, 0, 3) != "WIN")
-                        socket_set_timeout($this->smtp_conn, $tval, 0);
+                        stream_set_timeout($this->smtp_conn, $tval, 0);
 
                 // get any announcement
                 $announce = $this->get_lines();
@@ -915,8 +915,8 @@ class SMTP {
 
                 $max_line_length = 998; // used below; set here for ease in change
 
-                while(list(, $line) = @each($lines)) {
-                        $lines_out = null;
+                foreach($lines as $line) {
+                        $lines_out = [];
                         if($line == "" && $in_headers) {
                                 $in_headers = false;
                         }
@@ -944,7 +944,7 @@ class SMTP {
                         $lines_out[] = $line;
 
                         // send the lines to the server
-                        while(list(, $line_out) = @each($lines_out)) {
+                        foreach($lines_out as $line_out) {
                                 if(strlen($line_out) > 0)
                                 {
                                         if(substr($line_out, 0, 1) == ".") {

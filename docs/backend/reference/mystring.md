@@ -1,7 +1,5 @@
 # myString：字符串与字符集
 
-修订日期：2026-10-23。功能详解。
-
 ## 职责与调用位置
 
 字符集转换、数据编码和HTML转义分别承担不同职责；已知编码时显式给定来源，不反复猜测。
@@ -78,7 +76,7 @@ protected
 | `myString::charsetOptions` | 校验转换选项，避免拼错策略后悄悄退回有损默认值 |
 | `myString::convertCharset` | 在两个明确编码之间转换原始字节，严格模式验证往返，不静默丢失数据 |
 | `myString::charsetTree` | 递归复制并转换值，拒绝循环及过深结构；JSON 模式只取可序列化的数据形状 |
-| `myString::setCharset` | 兼容批量转码入口，支持明确来源，复制对象而不原地修改 |
+| `myString::setCharset` | 支持批量转码入口，支持明确来源，复制对象而不原地修改 |
 | `myString::toHex` | 将字符串转换为16进制 |
 | `myString::fromHex` | 将16进制转换为字符串 |
 | `myString::fromIni` | 以相同的原始扫描规则解析INI文件或INI文本 |
@@ -88,7 +86,7 @@ protected
 | `myString::fromAny` | 将任意值转换为文本，复杂类型使用PHP序列化 |
 | `myString::toXML` | 将数组转换为XML |
 | `myString::toScript` | 转换变量为php变量脚本 |
-| `myString::fileCharset` | 在边界内完整转换本地文本文件，以同目录临时文件原子替换，失败保留旧文件 |
+| `myString::fileCharset` | 在边界内完整转换本地文本文件，以同目录临时文件原子替换，失败保留原文件 |
 | `myString::htmlTrans` | 将字符串转换为超文本格式 |
 | `myString::txt2html` | 将纯文本转换为超文本格式 |
 | `myString::rndKey` | 生成随机字符串或可在目标编码表示的随机汉字 |
@@ -131,7 +129,7 @@ public function __construct($str='', $from_charset = null);
 public function __toString();
 ```
 
-显式参数：无。若采用历史可变位置参数约定，以本方法PHPDoc及初始化说明为准。
+显式参数：无。若采用可变位置参数约定，以本方法PHPDoc及初始化说明为准。
 
 **返回值**：string 当前字符串按get约定取得的文本
 
@@ -177,7 +175,7 @@ public function get($charset='');
 | --- | --- |
 | `$charset` | string；空字符串返回原始字节；非空指定目标编码（默认：''） |
 
-**返回值**：string 成功转换后更新实例状态；失败保留旧字符串及来源
+**返回值**：string 成功转换后更新实例状态；失败保留原字符串及来源
 
 **异常与失败**：Throwable 来源未知、不能无损转换或目标非法时明确报错
 
@@ -281,7 +279,7 @@ public static function charset($str, $encodings = null);
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$str` | string；待检查字节串；空串及普通 ASCII 默认按 UTF-8 兼容 |
+| `$str` | string；待检查字节串；空串及普通 ASCII 默认按 UTF-8 支持 |
 | `$encodings` | array\|string\|null；候选列表或逗号串；默认 UTF-8、GBK、BIG5、GB18030（默认：null） |
 
 **返回值**：string|false 首个严格合法候选，BOM 编码只有符合候选时使用；均不符为 false
@@ -372,7 +370,7 @@ protected static function charsetTree($value, $to, $from, array $options, SplObj
 
 ### myString::setCharset
 
-功能说明：兼容批量转码入口，支持明确来源，复制对象而不原地修改
+功能说明：支持批量转码入口，支持明确来源，复制对象而不原地修改
 
 ```text
 public static function setCharset($str, $charset='UTF-8', $from_charset = null, array $options = []);
@@ -502,7 +500,7 @@ public static function toJson($var, $charset='UTF-8', $from_charset = null);
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
 | `$var` | mixed；待编码数据 |
-| `$charset` | string；兼容旧参数，非空时统一转 UTF-8；空字符串完全跳过预处理（默认：'UTF-8'） |
+| `$charset` | string；保留参数，非空时统一转 UTF-8；空字符串完全跳过预处理（默认：'UTF-8'） |
 | `$from_charset` | string\|null；新增明确源编码；null 自动推测字符串值，键单独推测（默认：null） |
 
 **返回值**：string|false JSON 文本或原生编码错误 false
@@ -615,7 +613,7 @@ $result = myString::toScript($var, $name);
 
 ### myString::fileCharset
 
-功能说明：在边界内完整转换本地文本文件，以同目录临时文件原子替换，失败保留旧文件
+功能说明：在边界内完整转换本地文本文件，以同目录临时文件原子替换，失败保留原文件
 
 ```text
 public static function fileCharset($file_src, $file_dst='', $charset='UTF-8', $from_charset = null, array $options = []);
@@ -695,7 +693,7 @@ public static function rndKey($length, $scope=1, $charset='UTF-8');
 
 | 参数 | 类型、默认值与含义 |
 | --- | --- |
-| `$length` | int；生成字符数量，沿用原有循环约定 |
+| `$length` | int；生成字符数量，沿用循环约定 |
 | `$scope` | int；1 数字，2 加小写，3 加大写，4 加特殊符；其他值生成汉字（默认：1） |
 | `$charset` | string；汉字的目标编码，默认 UTF-8；英文/数字分支不做字符转码（默认：'UTF-8'） |
 
@@ -767,7 +765,7 @@ public static function breakStr($str);
 | --- | --- |
 | `$str` | string；待处理的字符串 |
 
-**返回值**：array 逐字符字节串列表；优先按UTF-8，否则按历史双字节规则拆分
+**返回值**：array 逐字符字节串列表；优先按UTF-8，否则按双字节规则拆分
 
 调用形式：
 

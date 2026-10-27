@@ -1,7 +1,5 @@
 # 加载提示、窗口、滚动与复制
 
-修订日期：2026-10-23。浏览器脚本用法。
-
 ## 本篇目标与调用场景
 
 本篇所有JavaScript示例在浏览器运行。先加载所需本地脚本，不把PHP变量或磁盘路径直接当成浏览器变量。
@@ -11,7 +9,7 @@
 | 变量 | 用途与约束 |
 | --- | --- |
 | `root_web/global.root` | 网站Web根前缀，用于公开资源 |
-| `setting/language` | 异步装入的公开设置和语言，须等待就绪 |
+| `setting/language` | 完整框架页面在脚本前预置公开设置和语言；独立页面用checkNrun等待 |
 | `document/window` | 当前浏览器页面上下文，不是PHP的全局变量 |
 
 ## 5. 加载提示、窗口与锚点
@@ -20,8 +18,8 @@
 | --- | --- | --- |
 | `loadingShow(info, show)` | info 为纯文本提示，null 用语言包或默认值；show 为 true 显示、false 隐藏，省略则切换 | boolean 当前显示状态；管理遮罩和 body overflow，依赖现有基础样式及本地 loading.gif |
 | `openWindow(url, width, height)` | 打开名为 new_window 的浏览器窗口，宽高单位像素 | Window 或 null；受浏览器弹窗策略约束 |
-| `openDialog(url, width, height, mode)` | 尝试旧版对话框；mode true 为模态、false 为非模态，不支持时回退 openWindow | 浏览器的窗口／旧对话框结果或 null |
-| `gotoAnchor(theAnchor='')` | 按 id 或旧式 a.name 滚动；允许带 #，空串回顶部 | 始终 false，方便链接处理；没有目标或已有动画时不重复启动 |
+| `openDialog(url, width, height, mode)` | 尝试对话框；mode true 为模态、false 为非模态，不支持时回退 openWindow | 浏览器的窗口／旧对话框结果或 null |
+| `gotoAnchor(theAnchor='')` | 按 id 或 a.name 滚动；允许带 #，空串回顶部 | 始终 false，方便链接处理；没有目标或已有动画时不重复启动 |
 | `setLocation(path, name='')` | 调用 history.pushState，记录 title／url 状态 | undefined；不导航、不刷新页面，也不更新 document.title |
 | `sleep(ms=0)` | 非阻塞等待，毫秒；负数按 0；非有限值或超过 2147483647 被拒绝 | Promise<void>，调用方需 await／then |
 
@@ -44,8 +42,7 @@ if (previewButton) previewButton.addEventListener('click', function () {
 // setLocation(queryURL(location.href, {tab: 'preview'}), '预览');
 ```
 
-openDialog 是兼容入口，不提供现代页面模态组件的行为保证。setLocation 仅改变历史状态，不会执行服务端路由；需要新的页面内容时仍应进行导航或主动加载。
-
+openDialog 是入口，不提供现代页面模态组件的行为保证。setLocation 仅改变状态，不会执行服务端路由；需要新的页面内容时仍应进行导航或主动加载。
 
 ## 6. 复制文本
 
@@ -70,7 +67,6 @@ if (copyButton) copyButton.addEventListener('click', async function () {
 ```
 
 以 # 或 . 开头的字符串会被解释为选择器；要复制这种字面文本，可放在元素的 data-copy 中，再传元素。浏览器权限、HTTPS 和用户手势都会影响结果，应检查返回值。
-
 
 ## 明确调用示例
 

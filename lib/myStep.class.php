@@ -39,6 +39,8 @@
  *   public static myStep::captcha($len = 4, $scope = 3) — 生成验证码
  *   public static myStep::language($app_name, $type='default') — JS语言包接口
  *   public static myStep::setting($app_name) — JS设置信息接口
+ *   public static myStep::browserSetting($app_name, ?myConfig $config = null): array — 生成与页面和旧JS接口共用的公开配置白名单
+ *   protected myStep::browserBootstrap(?string $page = null): string — 同步预置或刷新缓存页的setting/language，不依赖异步网络
  *   public static myStep::apiOriginAllowed($origin, $current, array $domains, $cookie_domain = '', array $extra = []) — 按当前来源、绑定域名、Cookie域及额外白名单检查API来源
  *   public static myStep::api($path) — 框架API执行接口
  *   public static myStep::module($path, $dummy = '') — 框架模块调用接口
@@ -50,6 +52,8 @@
  *   public static myStep::setURL($url='') — 链接处理
  *   public static myStep::redirect($url = '', $code = '302') — 链接跳转
  *   public static myStep::init() — 框架变量初始化
+ *   public static myStep::userProvider(): interface_user — 应用的普通会员存储工厂
+ *   public myStep::users(): myUser — 按需取得普通会员资源
  *   public static myStep::storagePlugin($name) — 在缓存和会话初始化前校验并加载已启用的存储插件。
  *   public static myStep::configureStorage(myConfig $config,$probe = false) — 校验显式选择的插件存储，保存前可执行连接检查。
  *   public static myStep::activePlugins() — 按框架插件配置收集已启用插件并在当前请求内复用结果
@@ -71,7 +75,7 @@
  *
  * 说明：目录覆盖本文件直接声明的全部方法/函数，包括非公开及静态入口。
  *       继承方法、trait导入/别名和运行时扩展不重复计数；详细参数见各声明旁PHPDoc。
- *       原生签名保持PHP 7.4兼容，PHPDoc类型用于说明，不额外强制运行时类型。
+ *       原生签名以PHP 8.5.12为运行基线，PHPDoc类型用于说明，不额外强制运行时类型。
  */
 
 
@@ -167,7 +171,7 @@ class myStep extends myController {
      * @return object 按父控制器规则取得并配置别名和错误回调的实例
      */
     public static function getInstance($calledClass = '') {
-        $instance = call_user_func_array('parent::getInstance', func_get_args());
+        $instance = parent::getInstance(...func_get_args());
         if(is_callable([$instance, 'regAlias']) && is_file(CONFIG.'method_alias/'.$calledClass.'.php')) {
             $alias = include(CONFIG.'method_alias/'.$calledClass.'.php');
             $instance->regAlias($alias);
@@ -188,6 +192,7 @@ class myStep extends myController {
     public function start($charset = 'UTF-8', $set_plugin = true) {
         $this->mem_start = memory_get_usage();
         $this->time_start = getMicrotime();
+        if(function_exists('opcache_invalidate')) opcache_invalidate(CONFIG.'class_alias.php',true);
         $alias = include(CONFIG.'class_alias.php');
         self::setAlias($alias);
 
@@ -200,6 +205,7 @@ class myStep extends myController {
         ));
 
         if(defined('PATH') && is_file(PATH.'plugin.php')) {
+            if(function_exists('opcache_invalidate')) opcache_invalidate(PATH.'plugin.php',true);
             $plugin = include(PATH.'plugin.php');
             $active = self::activePlugins();
             // 应用绑定负责选择范围，注册表 order 负责执行顺序；重复绑定只初始化一次。
@@ -437,6 +443,8 @@ class myStep extends myController {
         foreach($paras as $k => $v) {
             $tpl->assign($k, $v);
         }
+        // 始终置于应用追加脚本和合并资源之前，避免DOM就绪或点击事件抢先读取setting。
+        $this->page_content['start'] = ['browser_state'=>$this->browserBootstrap()] + ($this->page_content['start'] ?? []);
         $this->setAddedContent('start', '<script type="application/javascript">const root_web="'.ROOT_WEB.'";</script>');
         if(gettype(self::$cache_css)=='string' && self::$cache_css!=='') {
             $this->CSS(self::$cache_css);
@@ -493,14 +501,14 @@ class myStep extends myController {
      * 功能说明：检查模版缓存并输出
      *
      *
-     * 命中页面缓存时输出当前会话装饰后的HTML并调用end终止；未命中时继续返回业务流程。
+     * 命中页面缓存时刷新公开浏览器设置/语言，再输出当前会话装饰后的HTML并调用end终止；未命中时继续业务流程。
      *
      * @param myTemplate $tpl 已经初始化的模板实例
      * @return void 无返回值。
      */
     public function checkCache(myTemplate $tpl) {
         if($tpl->checkCache()) {
-            echo mySecurity::decorate($tpl->getCache());
+            echo mySecurity::decorate($this->browserBootstrap($tpl->getCache()));
             $this->end();
         }
     }
@@ -797,22 +805,39 @@ code;
      * @return void 无返回值。
      */
     public static function setting($app_name) {
-        $app_name = preg_replace('#&.+$#', '', $app_name);
-        if(empty($app_name) || !is_dir(APP.$app_name)) $app_name='myStep';
-        $setting = new myConfig(CONFIG.'config.php');
-        if($app_name!='myStep') {
-            $setting->merge(APP.$app_name.'/config.php');
+        $result = 'var setting = '.myString::toJson(self::browserSetting($app_name)).';';
+        header('Content-Type: application/x-javascript');
+        header('Accept-Ranges: bytes');
+        header('Accept-Length: '.strlen($result));
+        echo $result;
+        exit;
+    }
+
+    /**
+     * 功能说明：生成浏览器可见的公开设置白名单，页面预置与ms_setting接口共用，不返回数据库、管理员或SMTP凭据。
+     *
+     * @param string $app_name 应用目录标识，非法或不存在时使用myStep；兼容旧查询串尾部参数
+     * @param myConfig|null $config 当前页面配置；默认null时按全局和应用配置重新装载
+     * @return array 浏览器公开设置及显式js扩展分组，包含当前路由和上传上限
+     * @throws InvalidArgumentException 配置或公开扩展格式无效
+     */
+    public static function browserSetting($app_name, ?myConfig $config = null): array {
+        $app_name = is_string($app_name) ? preg_replace('#&.+$#', '', $app_name) : '';
+        if(!preg_match('/\A[A-Za-z][A-Za-z0-9_]*\z/D', $app_name) || !is_dir(APP.$app_name)) $app_name='myStep';
+        if($config === null) {
+            $config = new myConfig(CONFIG.'config.php');
+            if($app_name !== 'myStep') $config->merge(APP.$app_name.'/config.php');
         }
+        $setting = $config->get(true);
         $limits=[];
         foreach(['post_max_size','upload_max_filesize'] as $option) {
             $limit=myFile::getByte(ini_get($option));
             if($limit>0) $limits[]=$limit;
         }
         $max_bytes=$limits ? min($limits) : 0;
-        $setting = myConfig::o2a($setting);
         $setting_js = array(
-            'language' => $setting['setting']['gen']['language'],
-            'debug' => $setting['setting']['gen']['debug'],
+            'language' => $setting['gen']['language'],
+            'debug' => $setting['gen']['debug'],
             'app' => trim($app_name, '/'),
             'path_root' => ROOT_WEB,
             'path_app' => str_replace(myFile::rootPath(), '/', APP.$app_name),
@@ -822,15 +847,35 @@ code;
             'url_prefix' => self::$url_prefix,
             'url_prefix_app' => self::$url_prefix.(defined('URL_FIX')?'':$app_name),
         );
-        if(isset($setting['setting']['js'])) $setting_js = array_merge($setting_js, $setting['setting']['js']);
-
-        $result = 'var setting = '.myString::toJson($setting_js).';';
-        header('Content-Type: application/x-javascript');
-        header('Accept-Ranges: bytes');
-        header('Accept-Length: '.strlen($result));
-        echo $result;
-        exit;
+        if(isset($setting['js'])) {
+            if(!is_array($setting['js'])) throw new InvalidArgumentException('Browser JS settings must be a group');
+            $setting_js = array_merge($setting_js, $setting['js']);
+        }
+        return $setting_js;
     }
+
+    /**
+     * 功能说明：构造页面最早执行的setting/language脚本，或刷新页面缓存中的公开状态；不依赖异步网络请求。
+     *
+     * 页面状态使用JSON的HTML转义标志和UTF-8转换，避免自定义文本形成script结束标签。
+     * 缓存HTML在head起始处更新同一标识脚本；没有head的非HTML内容保持原样。
+     *
+     * @param string|null $page 默认null返回脚本；传入完整缓存HTML时替换旧预置并放到head首位
+     * @return string 公开配置脚本或更新后的页面，不包含服务端秘密及会话令牌
+     * @throws JsonException 公开设置或语言数据不能安全编码
+     */
+    protected function browserBootstrap(?string $page = null): string {
+        global $info_app;
+        $state = ['setting'=>self::browserSetting($info_app['app'] ?? 'myStep', $this->setting), 'language'=>(object)$this->language];
+        $state = myString::setCharset($state, 'UTF-8', (string)$this->setting->gen->charset);
+        $flags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR;
+        $script = '<script id="ms-browser-state">var setting='.json_encode($state['setting'], $flags).';var language='.json_encode($state['language'], $flags).';</script>';
+        if($page === null) return $script;
+        if(!preg_match('/<head\b[^>]*>/i', $page)) return $page;
+        $page = preg_replace('~<script\b[^>]*\bid\s*=\s*(["\x27]?)ms-browser-state\1(?=[\s>])[^>]*>.*?</script\s*>~is', '', $page);
+        return preg_replace_callback('/<head\b[^>]*>/i', static fn($match)=>$match[0].$script, $page, 1);
+    }
+
 
     /**
      * 功能说明：按当前来源、绑定域名、Cookie域及额外白名单检查API来源
@@ -1190,6 +1235,30 @@ code;
         }
     }
 
+    /** @var myUser|null 当前应用的普通会员资源，按需创建 */
+    protected ?myUser $user_service = null;
+
+    /**
+     * 功能说明：应用覆写的普通会员存储工厂，不包含框架管理员认证。
+     * 参数说明：无显式参数。
+     * @return interface_user 应用的受信适配器
+     * @throws LogicException 当前应用未实现普通会员接口
+     */
+    public static function userProvider(): interface_user {
+        throw new LogicException('当前应用未实现普通会员接口。');
+    }
+
+    /**
+     * 功能说明：按需取得当前应用统一会员资源，避免创建第二个应用控制器。
+     * 参数说明：无显式参数。
+     * @return myUser 普通会员服务
+     * @throws LogicException 应用未提供会员适配器
+     */
+    public function users(): myUser {
+        if($this->user_service === null)$this->user_service = new myUser(static::userProvider());
+        return $this->user_service;
+    }
+
     protected static $active_plugins = null, $known_plugins = [], $plugin_signature = null;
 
     /**
@@ -1395,6 +1464,7 @@ code;
         $ms_setting->router->url_fix = '';
 
         if(is_file(CONFIG.'domain.php')) {
+            if(function_exists('opcache_invalidate')) opcache_invalidate(CONFIG.'domain.php',true);
             $domain = include(CONFIG.'domain.php');
             if(isset($domain[$host])) {
                 $rule = $domain[$host];
@@ -1476,6 +1546,7 @@ code;
         $ms_setting->cookie->path = str_replace('\\', '/', dirname(myReq::server('SCRIPT_NAME')));
         $ms_setting->web->url = (isHttps()?'https://':'http://').myReq::server('HTTP_HOST');
         if(is_file(CONFIG.'variant_alias.php')) {
+            if(function_exists('opcache_invalidate')) opcache_invalidate(CONFIG.'variant_alias.php',true);
             $variant_alias = require CONFIG.'variant_alias.php';
             self::$variant_alias = array_keys($variant_alias);
             foreach ($variant_alias as $k => $v) {
@@ -1574,11 +1645,8 @@ code;
         $mystep->addJS(PATH.'asset/function.js');
         $mystep->addJS(PATH.'asset/'.$ms_setting->template->style.'/function.js');
         $mystep->addJS('
-$.getScript("'.ROOT_WEB.'index.php?ms_setting/'.$info_app['app'].'", function(){
-    $.getScript("'.ROOT_WEB.'index.php?ms_language/'.$info_app['app'].'/"+setting.language);
-    if(typeof setting.debug != "undefined" && setting.debug == true) {
-        window.onerror = reportError;
-    }
+$(function(){
+    if(window.setting && window.setting.debug == true) window.onerror = reportError;
 });
         ', true);
         self::$cache_js = CACHE.'script/'.$info_app['app'].'_'.$ms_setting->template->style.'.js';
