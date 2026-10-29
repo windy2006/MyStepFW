@@ -1,3 +1,8 @@
+/**
+ * 框架调用：date_input(options|string)
+ * 功能说明：返回原选择集；字符串支持 show/hide/destroy。日期写回原输入框并触发 change；重复传入选项重建日历。
+ * 使用说明：完整参数和示例见 docs/frontend/vendor/README.md；保留原组件版权声明。
+ */
 /*
 Date Input 1.2.1
 Requires jQuery version: >= 1.2.6
@@ -32,6 +37,9 @@ DateInput = (function($) {
 		$.extend(this, DateInput.DEFAULT_OPTS, opts);
 
 		this.input = $(el);
+        this.ns='.dateInput'+($.data(document,'dateInputSerial')||0);
+        $.data(document,'dateInputSerial',($.data(document,'dateInputSerial')||0)+1);
+        this.start_of_week=((Number(this.start_of_week)||0)%7+7)%7;
 		this.bindMethodsToObj("show", "hide", "hideIfClickOutside", "keydownHandler", "selectDate");
 
 		this.build();
@@ -76,7 +84,7 @@ DateInput = (function($) {
 
 			this.tbody = $("tbody", this.dateSelector);
 
-			this.input.change(this.bindToObj(function() { this.selectDate(); }));
+			this.input.on('change'+this.ns,this.bindToObj(function() { this.selectDate(); }));
 			this.selectDate();
 		},
 
@@ -107,7 +115,7 @@ DateInput = (function($) {
 				}
 				this.tbody.empty().append(dayCells);
 
-				this.monthNameSpan.empty().append(this.monthName(date));
+				this.monthNameSpan.text(this.monthName(date));
 				this.yearNameSpan.empty().append(this.currentMonth.getFullYear());
 
 				$(".unselected_month", this.tbody).click(this.bindToObj(function(event) {
@@ -125,7 +133,7 @@ DateInput = (function($) {
 			}
 
 			$('.selected', this.tbody).removeClass("selected");
-			$('td[date=' + this.selectedDateString + ']', this.tbody).addClass("selected");
+			$('td[date="' + this.selectedDateString + '"]', this.tbody).addClass("selected");
 		},
 
 		selectDate: function(date) {
@@ -145,18 +153,21 @@ DateInput = (function($) {
 		},
 
 		show: function() {
+            if(this.input.prop('disabled'))return;
 			this.rootLayers.css("display", "block");
-			$([window, document.body]).click(this.hideIfClickOutside);
-			this.input.unbind("focus", this.show);
-			$(document.body).keydown(this.keydownHandler);
+			$([window,document.body]).off('click'+this.ns).on('click'+this.ns,this.hideIfClickOutside);
+			this.input.off('focus'+this.ns,this.show);
+			$(document.body).off('keydown'+this.ns).on('keydown'+this.ns,this.keydownHandler);
 			this.setPosition();
+            $(window).on('resize'+this.ns+' scroll'+this.ns,this.bindToObj(this.setPosition));
 		},
 
 		hide: function() {
 			this.rootLayers.css("display", "none");
-			$([window, document.body]).unbind("click", this.hideIfClickOutside);
-			this.input.focus(this.show);
-			$(document.body).unbind("keydown", this.keydownHandler);
+            $(window).off('resize'+this.ns+' scroll'+this.ns);
+			$([window,document.body]).off('click'+this.ns,this.hideIfClickOutside);
+			this.input.off('focus'+this.ns,this.show).on('focus'+this.ns,this.show);
+			$(document.body).off('keydown'+this.ns,this.keydownHandler);
 		},
 
 		hideIfClickOutside: function(event) {
@@ -166,14 +177,8 @@ DateInput = (function($) {
 		},
 
 		insideSelector: function(event) {
-			let offset = this.dateSelector.position();
-			offset.right = offset.left + this.dateSelector.outerWidth();
-			offset.bottom = offset.top + this.dateSelector.outerHeight();
+			return this.dateSelector[0]===event.target||$.contains(this.dateSelector[0],event.target);
 
-			return event.pageY < offset.bottom &&
-				event.pageY > offset.top &&
-				event.pageX < offset.right &&
-				event.pageX > offset.left;
 		},
 
 		keydownHandler: function(event) {
@@ -210,9 +215,11 @@ DateInput = (function($) {
 		},
 
 		stringToDate: function(string) {
-			let matches = string.match(/^(\d{4})-(\d{2})-(\d{2})[\s\d:]*$/);
+			let matches = String(string||'').match(/^(\d{4})-(\d{2})-(\d{2})[\s\d:]*$/);
 			if (matches) {
-				return new Date(matches[1], matches[2] - 1, matches[3]);
+				const y=Number(matches[1]),m=Number(matches[2])-1,d=Number(matches[3]);
+                const date=new Date(0);date.setHours(0,0,0,0);date.setFullYear(y,m,d);
+                return date.getFullYear()===y&&date.getMonth()===m&&date.getDate()===d?date:null;
 			} else {
 				return null;
 			}
@@ -240,14 +247,12 @@ DateInput = (function($) {
 			this.selectDate(newDate);
 		},
 
-		moveDateMonthBy: function(amount) {
-			let newDate = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth() + amount, this.selectedDate.getDate());
-			if (newDate.getMonth() === this.selectedDate.getMonth() + amount + 1) {
-
-				newDate.setDate(0);
-			}
-			this.selectDate(newDate);
-		},
+        moveDateMonthBy: function(amount) {
+            const y=this.selectedDate.getFullYear(),m=this.selectedDate.getMonth()+amount;
+            const first=new Date(0);first.setFullYear(y,m,1);first.setHours(0,0,0,0);
+            const end=new Date(first.getTime());end.setMonth(end.getMonth()+1,0);const last=end.getDate();
+            first.setDate(Math.min(this.selectedDate.getDate(),last));this.selectDate(first);
+        },
 
 		moveMonthBy: function(amount) {
 			let newMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + amount, this.currentMonth.getDate());
@@ -303,7 +308,7 @@ DateInput = (function($) {
 		},
 
 		rangeEnd: function(date) {
-			return this.changeDayTo((this.start_of_week - 1) % 7, new Date(date.getFullYear(), date.getMonth() + 1, 0), 1);
+			return this.changeDayTo((this.start_of_week + 6) % 7, new Date(date.getFullYear(), date.getMonth() + 1, 0), 1);
 		},
 
 		isFirstDayOfWeek: function(date) {
@@ -311,8 +316,13 @@ DateInput = (function($) {
 		},
 
 		isLastDayOfWeek: function(date) {
-			return date.getDay() === (this.start_of_week - 1) % 7;
+			return date.getDay() === (this.start_of_week + 6) % 7;
 		},
+
+        destroy: function(){
+            this.hide();this.input.off(this.ns).removeData('dateInput');
+            $([window,document.body]).off(this.ns);this.rootLayers.remove();
+        },
 
 		adjustDays: function(days) {
 			let newDays = [];
@@ -324,7 +334,15 @@ DateInput = (function($) {
 	};
 
 	$.fn.date_input = function(opts) {
-		return this.each(function() { new DateInput(this, opts); });
+		return this.each(function() {
+            const input=$(this),instance=input.data('dateInput');
+            if(typeof opts==='string'){
+                if(!['destroy','show','hide'].includes(opts))throw new Error('Unknown date_input method: '+opts);
+                if(instance)instance[opts]();return;
+            }
+            if(instance){instance.destroy();}
+            input.data('dateInput',new DateInput(this,opts));
+        });
 	};
 
 	$.date_input = {initialize: function(opts) {
@@ -336,8 +354,10 @@ DateInput = (function($) {
 })(jQuery);
 
 $(function() {
-	let setDateInput = setInterval(function() {
-		if(typeof(language)=="undefined") return;
+	if($.data(document,'dateInputLanguageTimer'))clearInterval($.data(document,'dateInputLanguageTimer'));
+    let attempts=0;
+    let setDateInput = setInterval(function() {
+        if(typeof(language)==='undefined'){if(++attempts<30)return;clearInterval(setDateInput);$('input[need=date],input[need=date_]').prop('readonly',true).date_input();return;}
 		jQuery.extend(DateInput.DEFAULT_OPTS, {
 			month_names: [language.month_names_1, language.month_names_2, language.month_names_3, language.month_names_4, language.month_names_5, language.month_names_6, language.month_names_7, language.month_names_8, language.month_names_9, language.month_names_10, language.month_names_11, language.month_names_12],
 			short_month_names: [language.short_month_names_1, language.short_month_names_2, language.short_month_names_3, language.short_month_names_4, language.short_month_names_5, language.short_month_names_6, language.short_month_names_7, language.short_month_names_8, language.short_month_names_9, language.short_month_names_10, language.short_month_names_11, language.short_month_names_12],
@@ -349,4 +369,5 @@ $(function() {
 		$("input[need=date_]").date_input();
 		clearInterval(setDateInput);
 	}, 1000);
+    $.data(document,'dateInputLanguageTimer',setDateInput);
 });

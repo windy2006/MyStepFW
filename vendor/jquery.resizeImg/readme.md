@@ -37,3 +37,5 @@ $(fileObj).resizeImg(options);
 同时，opt亦可为一个返回此标准对象的函数，以自动响应页面其他元素的设置变更。
 
 本插件调用比较简单，更多可参考 [演示页面](https://windy2006.github.io/jquery.resizeImg/)
+
+框架内的完整参数、示例及销毁方法见[使用指南](../../docs/frontend/vendor/resize.md)。

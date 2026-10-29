@@ -1,581 +1,486 @@
 /**
- * jquery.powerUpload.js - File upload through browse, drop or paste function
- *
- * Written by
- * ----------
- * Windy2000 (windy2006@gmail.com)
- *
- * Licensed under the Apache License Version 2.0
- *
- * Dependencies
- * ------------
- * jQuery (http://jquery.com)
- *
- **/
-jQuery.event.addProp("dataTransfer");
-(function($){
-    let opts = {},
-        default_opts = {
-            title: 'Power Uploader',    //浏览模式下载的对话框标题
-            url: '',                    //响应上传的服务器地址
-            refresh: 1000,              //进程刷新频率，1000为1秒
-            param_name: 'userfile',     //上传文件的变量名
-            max_files: 1,               //同时上传文件的数量限制
-            max_file_size: 10,          //上传文件的最大体积（MB）
-            data: {},                   //随同文件同时提交的参数（类似于form表单）
-            mode: 'drop',               //上传模式，可为：browse, drop, paste 或直接传入文件对象变量（可为数组）
-            errors: [],                 //错误回馈信息，默认为：["Browser Not Supported", "Too Many Files", "File Too Large", "No Upload Script Set", "Choose a file at least", "Error occurred when send data"]
-            drop: dummy,                //在执行拖拽上传前所执行的指令，参数为浏览器事件，需返回 true 才会继续
-            file: dummy,                //在执行浏览上传前所执行的指令，参数为浏览器事件，需返回 true 才会继续
-            paste: dummy,               //在执行粘贴上传前所执行的指令，参数为浏览器事件，需返回 true 才会继续
-            dragEnter: dummy,           //当鼠标拖拽文件进入目标元素时所执行的代码，参数为浏览器事件
-            dragOver: dummy,            //当鼠标拖拽文件经过目标元素时所执行的代码，参数为浏览器事件
-            dragLeave: dummy,           //当鼠标拖拽文件离开目标元素时所执行的代码，参数为浏览器事件
-            docEnter: dummy,            //当鼠标拖拽文件进入浏览器时所执行的代码，参数为浏览器事件
-            docOver: dummy,             //当鼠标拖拽文件经过浏览器时所执行的代码，参数为浏览器事件
-            docLeave: dummy,            //当鼠标拖拽文件离开浏览器时所执行的代码，参数为浏览器事件
-            beforeUpload: dummy,        //在执行上传操作前需执行的代码
-            beforeEach: dummy,          //在每个文件上传操作前执行的检测代码，参数为当前文件对象，需返回true才能继续
-            allDone: dummy,             //所有文件上传结束后执行的代码
-            uploadStarted: dummy,       //在每个文件开始上传时执行的代码，包含 index, file, files_count 三个参数
-            uploadFinished: dummy,      //在每个文件上传完成时执行的代码，包含 index, file, info, duration 四个参数
-            progressUpdated: dummy,     //在当前进度发生变化时执行的代码，包含 index, file, currentProgress 三个参数
-            speedUpdated: dummy         //在上传速度发生变化时执行的代码，包含 index, file, speeds 三个参数
-        },
-        errors = ["Browser Not Supported", "Too Many Files", "File Too Large", "No Upload Script Set", "Choose a file at least", "Error occurred when send data"],
-        doc_leave_timer,
-        stop_loop = false,
-        files_count = 0,
-        files_done = 0,
-        files_rejected = 0,
-        files_loaded = 0,
-        reject_list = [],
-        files = [],
-        result = [];
-    let template = {
-        'main' :    '<div id="uploader" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">\n' +
-                    '    <div class="modal-dialog modal-dialog-scrollable" role="document">\n' +
-                    '        <div class="modal-content">\n' +
-                    '            <div class="modal-header py-0 bg-light">\n' +
-                    '                <h4 class="modal-title"><span class="glyphicon glyphicon-upload"></span> <b>Power Uploader</b></h4>\n' +
-                    '                <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n' +
-                    '                    <span aria-hidden="true">&times;</span>\n' +
-                    '                </button>\n' +
-                    '            </div>\n' +
-                    '            <div class="modal-body"></div>\n' +
-                    '            <div class="modal-footer py-2"></div>\n' +
-                    '        </div>\n' +
-                    '    </div>\n' +
-                    '</div>',
-        'file' :    '<div class="input-group mb-3">\n' +
-                    '    <div class="input-group-prepend">\n' +
-                    '        <span class="input-group-text">文件</span>\n' +
-                    '    </div>\n' +
-                    '    <div class="custom-file">\n' +
-                    '        <label><input type="file" multiple class="custom-file-input" />\n' +
-                    '        <span class="custom-file-label nowrap" data-browse="浏览">点击选取文件</span></label>\n' +
-                    '    </div>\n' +
-                    '</div>\n' +
-                    '<div class="input-group mb-3">\n' +
-                    '    <div class="list-group w-100"></div>' +
-                    '</div>\n',
-        'waiting' : '<div class="input-group p-3">\n' +
-                    '    <h6>正在读取文件准备上传，文件如果较大，可能持续较长时间，请耐心等待！</h6>\n' +
-                    '</div>\n',
-        'process' : '<div data-idx="" class="progress mb-3">\n' +
-                    '  <div class="progress-bar progress-bar-striped progress-bar-animated text-left p-2" role="progressbar" style="width:0"></div>\n' +
-                    '</div>\n',
-        'btn_close' :'<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> 关闭 </button>',
-        'btn_upload':'<button type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-floppy-open"></span> 上传 </button>',
-    };
-
-    $.fn.powerUpload = function(options) {
-        if(typeof(this.data('upload')) !== 'undefined') {
-            $.extend(opts, this.data('upload'), options );
-            return;
-        }
-        opts = $.extend( {}, default_opts, options );
-        switch(opts.mode) {
-            case 'paste':
-                opts.max_files = 1;
-                this.bind('paste', paste);
-                break;
-            case 'drop':
-                this.bind('drop', drop)
-                    .bind('dragenter', dragEnter)
-                    .bind('dragover', dragOver)
-                    .bind('dragleave', dragLeave)
-                    .bind('paste', paste);
-                $(document).bind('drop', docDrop)
-                    .bind('dragenter', docEnter)
-                    .bind('dragover', docOver)
-                    .bind('dragleave', docLeave);
-                break;
-            case 'browse':
-            default:
-                if(opts.mode instanceof Function) {
-                    $(this).click(function(e){
-                        reset(this);
-                        files = opts.mode();
-                        files_count = files.length;
-                        beforeUpload();
-                        setTimeout(upload, 1000);
-                        e.preventDefault();
-                    });
-                } else {
-                    $(this).click(function(){
-                        reset(this);
-                        getTpl('browse');
-                    });
-                    template.file = $(template.file);
-                    template.file.find('input[type=file]').change(function(){
-                        $(this).next().text(this.value.replace(/^.+[\/\\]([^\/\\]+)$/, '$1'));
-                    });
-                }
-                break;
-        }
-        this.addClass('upload');
-        this.data('upload', opts);
-    };
-
-    function reset(obj) {
-        stop_loop = false;
-        files_count = 0;
-        files_done = 0;
-        files_rejected = 0;
-        files_loaded = 0;
-        files = [];
-        result = [];
-        reject_list = [];
-        if(typeof obj!="undefined") {
-            obj = $(obj);
-            if(!obj.hasClass('upload')) obj = obj.parentsUntil('.upload').parent();
-            if(obj.length>0 && obj.data('upload')!=null) opts = obj.data('upload');
-        }
-    }
-
-    function getTpl(mode) {
-        if(files_count>0 && files_count===files_rejected) {
-            reset();
-            return;
-        }
-        let tpl, obj;
-        tpl = $('#uploader');
-        if(tpl.length>0) {
-            tpl.find(".modal-body").empty();
-            tpl.find(".modal-footer").empty();
-        } else {
-            tpl = $(template.main);
-        }
-        tpl.find(".modal-title > b").html(opts.title);
-
-        switch(mode) {
-            case 'waiting':
-                tpl.find(".modal-body").append($(template.waiting));
-                break;
-            case 'drop':
-                tpl.find(".modal-body").html('Drop the file(s) you need to upload here.(WIP)');
-                tpl.find(".modal-footer").append($(template.btn_close));
-                break;
-            case 'process':
-                for (let i=0; i<files_count; i++) {
-                    obj = $(template.process).attr('data-idx',i);
-                    if(typeof reject_list[i]==='undefined') {
-                        obj.find('div').text(files[i].name);
-                    } else {
-                        obj.find('div')
-                            .addClass('bg-danger').css('width','100%')
-                            .text(files[i].name + ' - '+reject_list[i]);
-                    }
-                    tpl.find(".modal-body").append(obj);
-                }
-                tpl.find(".modal-footer").append($(template.btn_close));
-                break;
-            case 'browse':
-            default:
-                let btn = $(template.btn_upload).bind('click', file);
-                tpl.find(".modal-body").append(template.file.clone(true));
-                tpl.find(".modal-footer").append(btn).append($(template.btn_close));
-                if(typeof opts.obj_attr === 'object') {
-                    tpl.find("input[type=file]").attr(opts.obj_attr);
-                }
-                tpl.find("input[type=file]").change(function(){
-                    let files = this.files, m = files.length;
-                    if($('#uploader .list-group').find('.list-group-item').length + m > opts.max_files) {
-                        error(1);
-                        return false;
-                    }
-                    let btn = $('<a href="###" class="link-secondary">&times;</a>');
-                    btn.css('float', 'right').click(function(){
-                        $(this).parentsUntil('.list-group').remove();
-                    });
-                    for(let i=0; i<m; i++) {
-                        $('<a>').addClass('list-group-item list-group-item-action')
-                            .html(files[i].name).data('file', files[i])
-                            .appendTo('#uploader .list-group')
-                            .append(btn.clone(true));
-                    }
-                    if(typeof tpl.find("input[type=file]").attr('capture')==='undefined')
-                        tpl.find('.custom-file-label').text('点击选取文件');
-                });
-        }
-        $('body').append(tpl);
-        if(!tpl.is(":visible")) tpl.modal('show');
-    }
-
-    function file(e) {
-        if(opts.file(e)===false) return;
-        let objs = $(e.target).parentsUntil('#uploader').parent().find(".list-group-item");
-        let size = 0, m = objs.length;
-        for(let i=0;i<m;i++) {
-            files_count++;
-            if($(objs.get(i)).data('file').size<size) {
-                files.push($(objs.get(i)).data('file'));
-            } else {
-                files.unshift($(objs.get(i)).data('file'));
-            }
-            size = $(objs.get(i)).data('file').size;
-        }
-        if(files_count===0) {
-            error(4);
-        } else {
-            beforeUpload();
-            setTimeout(upload, 1000);
-            e.preventDefault();
-        }
-        return false;
-    }
-
-    function paste(e) {
-        reset(e.target);
-        if(opts.paste(e)===false) return;
-        if((/webkit/i).test(navigator.userAgent)) {
-            e = e.originalEvent || e;
-            files = e.clipboardData.files;
-            let items = e.clipboardData.items;
-            if(items.length > 0) {
-                if((items[0]['kind'] === 'file') && (items[0]['type'].search('^image/') !== -1)) {
-                    let reader = new FileReader();
-                    files_count = 1;
-                    reader.onloadend = send;
-                    reader.readAsBinaryString(items[0].getAsFile());
-                    e.preventDefault();
-                    getTpl('process');
-                }
-            } else if(files.length>0) {
-                files_count = files.length;
-                beforeUpload();
-                setTimeout(upload, 1000);
-                e.preventDefault();
-            }
+ * 框架调用：powerUpload(options|command[,files])
+ * 功能说明：返回原选择集；命令为 browse/start/cancel/destroy；上传回调保持四参数并追加所属弹窗，回调异常触发 upload:callbackerror。
+ * 使用说明：完整参数和示例见 docs/frontend/vendor/README.md；保留原组件版权声明。
+ */
+/** jquery.powerUpload.js — Windy2000, Apache-2.0. https://github.com/windy2006/jquery.powerUpload */
+(function ($) {
+  "use strict";
+  let serial=$.data(document,'jquerypowerUploadSerial')||0;
+  const noop = () => true;
+  const errors = [
+    "Browser Not Supported",
+    "Too Many Files",
+    "File Too Large",
+    "No Upload Script Set",
+    "Choose a file at least",
+    "Error occurred when send data",
+  ];
+  const defaults = {
+    title: "Power Uploader",
+    url: "",
+    refresh: 1000,
+    param_name: "userfile",
+    max_files: 1,
+    max_file_size: 10,
+    data: {},
+    mode: "drop",
+    errors: [],
+    drop: noop,
+    file: noop,
+    paste: noop,
+    dragEnter: noop,
+    dragOver: noop,
+    dragLeave: noop,
+    docEnter: noop,
+    docOver: noop,
+    docLeave: noop,
+    beforeUpload: noop,
+    beforeEach: noop,
+    allDone: noop,
+    uploadStarted: noop,
+    uploadFinished: noop,
+    progressUpdated: noop,
+    speedUpdated: noop,
+    timeout: 0,
+  };
+  $.fn.powerUpload = function (options) {
+    const commandArgument=arguments[1];
+    return this.each(function () {
+      if(typeof options==='string'){const instance=$(this).data('powerUpload');if(!['destroy','cancel','browse','start'].includes(options))throw new Error('Unknown powerUpload method: '+options);if(instance)instance[options](commandArgument);return;}
+      const target = this,
+        $target = $(target),
+        old = $target.data("powerUpload");
+      if(options&&typeof options==='object'){
+        options=$.extend({},options);
+        if(options.max_files===undefined&&options.maxfiles!==undefined)options.max_files=options.maxfiles;
+        if(options.max_file_size===undefined&&options.maxfilesize!==undefined)options.max_file_size=options.maxfilesize;
+      }
+      const previousOptions = $target.data("upload");
+      if (old) old.destroy();
+      const opt = $.extend({}, defaults, previousOptions, options),
+        id = ($.data(document,'jquerypowerUploadSerial',++serial),serial),
+        ns = ".powerUpload" + id;
+      let modalPhase="new";
+      let modal = null,
+        batch = null,
+        disposed = false,
+        selected = [],
+        leaveTimer;
+      const requests = new Set();
+      function isBlob(file){return !!file&&typeof file.size==='number'&&typeof file.slice==='function'&&typeof file.type==='string';}
+      function callback(name, ...args) {
+        if (typeof opt[name] === "function"){
+          try{return opt[name].apply(opt,args);}catch(error){$target.trigger('upload:callbackerror',[error,name]);return false;}
         }
         return true;
-    }
-
-    function drop(e) {
-        reset(e.target);
-        if(opts.drop(e)===false) return;
-        files = e.dataTransfer.files;
-        if (files === null || files === undefined) {
-            error(0);
-            return false;
+      }
+      function error(index, file, position, message) {
+        const text = message || (opt.errors||[])[index] || errors[index];
+        if (typeof opt.error === "function")
+          callback("error",text,file,position);
+        else window.alert(text);
+        $target.trigger("upload:error", [
+          { message: text, file, index: position },
+        ]);
+      }
+      function getModal() {
+        if (modal) return modal;
+        modal = $(
+          '<div class="modal fade" data-bs-backdrop="static" data-backdrop="static" tabindex="-1" role="dialog">',
+        ).attr(
+          "id",
+          document.getElementById("uploader") ? "uploader-" + id : "uploader",
+        );
+        modal
+          .append(
+            '<div class="modal-dialog modal-dialog-scrollable" role="document"><div class="modal-content"><div class="modal-header py-0 bg-light"><h4 class="modal-title"><span class="glyphicon glyphicon-upload"></span> <b></b></h4><button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"></div><div class="modal-footer py-2"></div></div></div>',
+          )
+          .appendTo(document.body);
+        modal.attr('data-power-upload-id',id);
+        // Without Bootstrap, dismiss controls still close their own dialog.
+        modal.on('click'+ns,'[data-dismiss=modal],[data-bs-dismiss=modal]',function(event){if(!$.fn.modal){event.preventDefault();modal.hide().trigger('hidden.bs.modal');}});
+        modal.on('show.bs.modal'+ns,()=>{modalPhase='showing';})
+          .on('shown.bs.modal'+ns,()=>{modalPhase='shown';})
+          .on('hide.bs.modal'+ns,()=>{modalPhase='hiding';})
+          .on('hidden.bs.modal'+ns,()=>{modalPhase='hidden';if($('.modal.show').length)$(document.body).addClass('modal-open');});
+        modal.find(".modal-title b").text(opt.title);
+        return modal;
+      }
+      function show() {
+        const m = getModal(),
+          other = $("#uploader");
+        // Keep the historical ID for the foreground dialog, while retaining
+        // private DOM references for every background request and progress bar.
+        if (other.length && other[0] !== m[0]) {
+          other.attr("id", "uploader-" + (other.attr("data-power-upload-id")||id));
+          if ($.fn.modal) other.modal("hide");
         }
-        files_count = files.length;
-        beforeUpload();
-        setTimeout(upload, 1000);
-        e.preventDefault();
-        return false;
-    }
-
-    function getBuilder(filename, filetype, filedata, boundary) {
-        let the_dash = '--', crlf = '\r\n', builder = '';
-        $.each(opts.data, function(i, val) {
-            if (typeof val === 'function') val = val();
-            if(builder==='') {
-                builder = the_dash;
-            } else {
-                builder += the_dash;
-            }
-            builder += boundary;
-            builder += crlf;
-            builder += 'Content-Disposition: form-data; name="'+i+'"';
-            builder += crlf;
-            builder += crlf;
-            builder += val;
-            builder += crlf;
-        });
-
-        builder += the_dash;
-        builder += boundary;
-        builder += crlf;
-        builder += 'Content-Disposition: form-data; name="'+opts.param_name+'"';
-        builder += '; filename="' + filename + '"';
-        builder += crlf;
-
-        builder += 'Content-Type: ' + (filetype.length<5?"application/octet-stream":filetype);
-        builder += crlf;
-        builder += crlf;
-
-        builder += filedata;
-        builder += crlf;
-
-        builder += the_dash;
-        builder += boundary;
-        builder += the_dash;
-        builder += crlf;
-        return builder;
-    }
-
-    function progress(e) {
-        if (e.lengthComputable) {
-            let percentage = Math.round((e.loaded * 100) / e.total);
-            let obj = $(".progress[data-idx="+this.index+"] > div");
-            if (this.currentProgress !== percentage) {
-                this.currentProgress = percentage;
-                obj.css('width', this.currentProgress+'%');
-                opts.progressUpdated(this.index, this.file, this.currentProgress);
-                let elapsed = new Date().getTime();
-                let diffTime = elapsed - this.currentStart;
-                if (diffTime >= opts.refresh) {
-                    let diffData = e.loaded - this.startData;
-                    let speed = diffData / diffTime; // KB per second
-                    opts.speedUpdated(this.index, this.file, speed);
-                    obj.html(files[this.index].name+" ("+Math.round(speed) + "KB/S)");
-                    this.startData = e.loaded;
-                    this.currentStart = elapsed;
-                }
-            }
+        m.attr("id", "uploader");
+        if ($.fn.modal) m.modal("show");
+        else m.show();
+        return m;
+      }
+      function finish(state) {
+        if (state !== batch || state.finished || state.done !== state.total)
+          return;
+        state.finished = true;
+        if (disposed) return;
+        callback("allDone", modal);
+        $target.trigger("upload:complete", [state]);
+      }
+      function cancel() {
+        const state = batch;
+        if (!state || state.finished) return;
+        state.cancelled = true;
+        // Aborts finish their individual items exactly once before the batch settles.
+        Array.from(requests).forEach((xhr) => xhr.abort());
+        finish(state);
+      }
+      function start(list) {
+        if (disposed) return;
+        if (batch && !batch.finished) {
+          error(5, null, null, "当前批次尚未结束，请等待完成或取消后重试。");
+          return;
         }
-    }
-
-    function upload() {
-        stop_loop = false;
-        if (!files) {
-            error(0);
-            return false;
+        const files = Array.from(list || []).map((file, i) =>
+          isBlob(file) && typeof file.name === "string"
+            ? file
+            : isBlob(file)
+              ? new File(
+                  [file],
+                  "blob_" +
+                    i +
+                    "." +
+                    (file.type === "image/png" ? "png" : "bin"),
+                  { type: file.type },
+                )
+              : file,
+        );
+        if (!files.length) {
+          error(4);
+          return;
         }
-        if (files_count > opts.max_files) {
-            error(1);
-            return false;
+        if (files.length > Number(opt.max_files)) {
+          error(1);
+          return;
         }
-        files_loaded = 0;
-        for (let i=0; i<files_count; i++) {
-            if (stop_loop) return false;
+        if (!opt.url) {
+          error(3);
+          return;
+        }
+        if (callback("beforeUpload") === false) return;
+        const m = show();
+        m.find(".modal-body,.modal-footer").empty();
+        const state = {
+          total: files.length,
+          done: 0,
+          finished: false,
+          cancelled: false,
+        };
+        batch = state;
+        m.find(".modal-footer").append(
+          '<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" data-dismiss="modal">关闭</button>',
+        );
+        files.forEach((file, index) => {
+          if (disposed) return;
+          if (state.cancelled) {
+            state.done++;
+            finish(state);
+            return;
+          }
+          if (!(isBlob(file))) {
+            state.done++;
+            error(0, file, index);
+            finish(state);
+            return;
+          }
+          if (file.size > Number(opt.max_file_size) * 1048576) {
+            state.done++;
+            error(2, file, index);
+            finish(state);
+            return;
+          }
+          let accepted;
+          try {
+            accepted = callback("beforeEach", file) !== false;
+          } catch (e) {
+            error(5, file, index, e.message);
+            accepted = false;
+          }
+          if (!accepted) {
+            state.done++;
+            finish(state);
+            return;
+          }
+          const row = $('<div class="progress mb-3">')
+            .attr("data-idx", index)
+            .appendTo(m.find(".modal-body"));
+          const bar = $(
+            '<div class="progress-bar progress-bar-striped progress-bar-animated text-left p-2" role="progressbar">',
+          )
+            .css("width", "0%")
+            .text(file.name)
+            .appendTo(row);
+          const xhr = new XMLHttpRequest(),
+            started = Date.now();
+          let settled = false,
+            lastTime = started,
+            lastLoaded = 0,
+            lastProgress = -1;
+          function settle(info, success) {
+            if (settled) return;
+            settled = true;
+            requests.delete(xhr);
+            state.done++;
+            bar
+              .removeClass("progress-bar-animated")
+              .toggleClass("bg-success", success)
+              .toggleClass("bg-danger", !success)
+              .css("width", "100%")
+              .text(
+                file.name +
+                  (success ? "" : " - " + (info.message || "上传失败")),
+              );
+            if (disposed) return;
             try {
-                if (beforeEach(files[i]) !== false) {
-                    if (i === files_count) return;
-                    let reader = new FileReader(), max_file_size = 1048576 * opts.max_file_size;
-                    reader.index = i;
-                    reader.onerror = function (e) {
-                        switch (e.target.error.code) {
-                            case e.target.error.NOT_FOUND_ERR:
-                                console.log('File Not Found!');
-                                break;
-                            case e.target.error.NOT_READABLE_ERR:
-                                console.log('File is not readable');
-                                break;
-                            case e.target.error.ABORT_ERR:
-                                console.log("errorHandler ABORT_ERROR");
-                                break; // noop
-                            default:
-                                console.log('An error occurred reading this file.');
-                        }
-                    };
-                    reader.onabort = function (e) {
-                        console.log('File read cancelled');
-                    };
-                    reader.onloadstart = function (e) {
-                        console.log('loading file...')
-                    };
-
-                    if (files[i].size < max_file_size) {
-                        reader.onloadend = send;
-                        reader.readAsBinaryString(files[i]);
-                    } else {
-                        reject_list[i] = errors[2];
-                        files_rejected++;
-                        error(2, files[i], i);
-                    }
-                } else {
-                    reject_list[i] = 'Reject by user';
-                    files_rejected++;
-                }
-            } catch(err) {
-                error(0);
-                return false;
+              if (
+                callback(
+                  "uploadFinished",
+                  index,
+                  file,
+                  info,
+                  Date.now() - started,
+                  m,
+                ) === false
+              ) {
+                state.cancelled = true;
+                Array.from(requests).forEach((request) => request.abort());
+              }
+            } finally {
+              finish(state);
             }
+          }
+          xhr.upload.addEventListener("progress", (event) => {
+            if (disposed || settled || !event.lengthComputable) return;
+            const percent = Math.round((event.loaded / event.total) * 100);
+            bar.css("width", percent + "%");
+            if (percent !== lastProgress) {
+              lastProgress = percent;
+              callback("progressUpdated", index, file, percent);
+            }
+            const now = Date.now(),
+              elapsed = now - lastTime;
+            if (elapsed >= Math.max(1, Number(opt.refresh) || 1000)) {
+              const speed = (event.loaded - lastLoaded) / elapsed;
+              bar.text(file.name + " (" + Math.round(speed) + "KB/S)");
+              callback("speedUpdated", index, file, speed);
+              lastTime = now;
+              lastLoaded = event.loaded;
+            }
+          });
+          xhr.onload = () => {
+            let info;
+            try {
+              info = JSON.parse(xhr.responseText);
+            } catch (e) {
+              info = { error: 1, message: "服务器返回了无效的 JSON 响应。" };
+            }
+            if (!info || typeof info !== "object")
+              info = { error: 1, message: "服务器返回了无效的上传结果。" };
+            const success =
+              xhr.status >= 200 && xhr.status < 300 &&
+              (!Object.prototype.hasOwnProperty.call(info,'error')||info.error===0||info.error==='0'||info.error===false);
+            if (xhr.status < 200 || xhr.status >= 300)
+              info = $.extend({}, info, {
+                error: info.error || 1,
+                message: info.message || "上传失败：HTTP " + xhr.status,
+                status: xhr.status,
+              });
+            settle(info, success);
+          };
+          xhr.onerror = () =>
+            settle({ error: 1, message: "网络连接失败，请重试。" }, false);
+          xhr.ontimeout = () =>
+            settle({ error: 1, message: "上传超时，请重试。" }, false);
+          xhr.onabort = () =>
+            settle(
+              { error: 1, cancelled: true, message: "上传已取消。" },
+              false,
+            );
+          try {
+            const data = new FormData();
+            Object.entries(opt.data || {}).forEach(([key, value]) => {
+              data.append(key, typeof value === "function" ? value() : value);
+            });
+            data.append(opt.param_name, file, file.name);
+            xhr.open("POST", opt.url, true);
+            xhr.timeout = Math.max(0, Number(opt.timeout) || 0);
+            requests.add(xhr);
+            callback("uploadStarted", index, file, files.length);
+            if (disposed || state.cancelled) {
+              requests.delete(xhr);
+              settle(
+                { error: 1, cancelled: true, message: "上传已取消。" },
+                false,
+              );
+              return;
+            }
+            xhr.send(data);
+          } catch (e) {
+            settle({ error: 1, message: e.message }, false);
+          }
+        });
+        finish(state);
+      }
+      function browse() {
+        if (batch && !batch.finished) {
+          show();
+          return;
         }
-    }
-
-    function send(e) {
-        if(opts.url==='') {
-            error(3);
+        const m = show();
+        selected = [];
+        m.find(".modal-body,.modal-footer").empty();
+        const field = $(
+          '<div class="input-group mb-3"><div class="input-group-prepend"><span class="input-group-text">文件</span></div><div class="custom-file"><label><span class="custom-file-label nowrap" data-browse="浏览">点击选取文件</span></label></div></div>',
+        ).appendTo(m.find(".modal-body"));
+        const input = $(
+          '<input type="file" multiple class="custom-file-input">',
+        )
+          .attr(opt.obj_attr || {})
+          .prependTo(field.find("label"));
+        const list = $('<div class="list-group w-100 mb-3">').appendTo(
+          m.find(".modal-body"),
+        );
+        input.on("change" + ns, function () {
+          if (
+            callback("file", {
+              target: this,
+              originalEvent: { target: this },
+            }) === false
+          )
             return;
+          const next = Array.from(this.files || []);
+          if (selected.length + next.length > Number(opt.max_files)) {
+            error(1);
+            this.value = "";
+            return;
+          }
+          next.forEach((file) => {
+            selected.push(file);
+            const item = $('<div class="list-group-item list-group-item-action">')
+              .text(file.name)
+              .appendTo(list);
+            $('<a href="###" class="link-secondary">&times;</a>')
+              .css("float", "right")
+              .appendTo(item)
+              .on("click" + ns, (event) => {
+                event.preventDefault();
+                selected.splice(selected.indexOf(file), 1);
+                item.remove();
+              });
+          });
+          this.value = "";
+        });
+        $('<button type="button" class="btn btn-primary btn-sm">上传</button>')
+          .appendTo(m.find(".modal-footer"))
+          .on("click" + ns, () => start(selected));
+        m.find(".modal-footer").append(
+          '<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" data-dismiss="modal">关闭</button>',
+        );
+      }
+      function paste(event) {
+        const items = (
+          event.originalEvent?.clipboardData || event.clipboardData
+        )?.items;
+        const files = Array.from(items || [])
+          .filter((item) => item.kind === "file")
+          .map((item) => item.getAsFile())
+          .filter(Boolean);
+        if (files.length && callback("paste", event) !== false) {
+          event.preventDefault();
+          start(files);
         }
-        files_loaded++;
-        if(files_loaded===files_count) getTpl('process');
-        let xhr = new XMLHttpRequest(),
-            upload = xhr.upload,
-            file = null,
-            index = 0,
-            start_time = new Date().getTime(),
-            boundary = '------multipartformboundary' + (new Date).getTime(),
-            builder;
-
-        if(e.target.index === undefined) {
-            file = new File([], "img_" + start_time + ".png");
-            file.name = "img_" + start_time + ".png";
-            file.size = e.total;
-            file.type = "image/png";
-            files = [file];
-        } else {
-            file = files[e.target.index];
-            index = e.target.index;
-        }
-        builder = getBuilder(encodeURIComponent(file.name), file.type, e.target.result, boundary);
-
-        upload.index = index;
-        upload.file = file;
-        upload.downloadStartTime = start_time;
-        upload.currentStart = start_time;
-        upload.currentProgress = 0;
-        upload.startData = 0;
-        upload.addEventListener("progress", progress, false);
-
-        xhr.open("POST", opts.url, true);
-        xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-        xhr.overrideMimeType(file.type);
-        xhr.sendAsBinary(builder);
-        opts.uploadStarted(index, file, files_count);
-
-        xhr.onerror = function(e) {
-            setTimeout(function(){
-                $('#uploader').modal('hide');
-            },2000);
-            error(5);
-        };
-
-        xhr.onload = function() {
-            if (xhr.responseText) {
-                let flag = false;
-                let obj = $(".progress[data-idx="+index+"] > div");
-                let info = {};
-                try{
-                    info = jQuery.parseJSON(xhr.responseText);
-                    result.push("<"+file.name+"> uploaded!");
-                } catch(e) {
-                    info = {error: e.number, message: e.message};
-                    result.push("<"+file.name+"> error!");
+      }
+      if (opt.mode === "drop") {
+        $target
+          .on("drop" + ns, (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (callback("drop", event) !== false)
+              start(
+                (event.originalEvent?.dataTransfer || event.dataTransfer)
+                  ?.files,
+              );
+          })
+          .on("dragenter" + ns, (event) => {
+            event.preventDefault();
+            callback("dragEnter", event);
+          })
+          .on("dragover" + ns, (event) => {
+            event.preventDefault();
+            callback("dragOver", event);
+          })
+          .on("dragleave" + ns, (event) => callback("dragLeave", event))
+          .on("paste" + ns, paste);
+        $(document)
+          .on("drop" + ns, (event) => event.preventDefault())
+          .on("dragover" + ns, (event) => {
+            event.preventDefault();
+            callback("docOver", event);
+          })
+          .on("dragenter" + ns, (event) => {
+            event.preventDefault();
+            clearTimeout(leaveTimer);
+            callback("docEnter", event);
+          })
+          .on("dragleave" + ns, (event) => {
+            clearTimeout(leaveTimer);
+            leaveTimer = setTimeout(() => {
+              if (!disposed) callback("docLeave", event);
+            }, 100);
+          });
+      } else if (opt.mode === "paste") $target.on("paste" + ns, paste);
+      else
+        $target.on("click" + ns, (event) => {
+          event.preventDefault();
+          if (typeof opt.mode === "function") start(opt.mode.call(opt));
+          else if (Array.isArray(opt.mode) || isBlob(opt.mode))
+            start(isBlob(opt.mode) ? [opt.mode] : opt.mode);
+          else browse();
+        });
+      $target
+        .addClass("upload")
+        .data("upload", opt)
+        .data("powerUpload", {
+          cancel,browse,start,
+          destroy() {
+            disposed = true;
+            cancel();
+            clearTimeout(leaveTimer);
+            $target
+              .off(ns)
+              .removeData("upload powerUpload")
+              .removeClass("upload");
+            $(document).off(ns);
+            if (modal) {
+              const element = modal,
+                instance = typeof window.bootstrap?.Modal?.getInstance==='function'
+                  ? window.bootstrap.Modal.getInstance(element[0]) : element.data('bs.modal');
+              if(instance){
+                let cleaned=false;
+                const dispose=()=>{if(cleaned)return;cleaned=true;element.off(ns);instance.dispose();element.remove();};
+                if(modalPhase==='new'||modalPhase==='hidden')dispose();
+                else {
+                    element.one('hidden.bs.modal'+ns,dispose);
+                    if(modalPhase==='showing')element.one('shown.bs.modal'+ns,()=>instance.hide());
+                    else if(modalPhase==='shown')instance.hide();
+                    // Hiding instances must finish their backdrop transition before disposal.
                 }
-                if(typeof info.error != 'undefined' && info.error != 0) {
-                    obj.addClass('bg-danger').css('width','100%')
-                        .text(files[index].name + ' - ' + info.message);
-                } else {
-                    obj.addClass('bg-success').css('width','100%')
-                        .text(files[index].name + ' - uploaded!');;
-                }
-                flag = opts.uploadFinished(index, file, info, (new Date().getTime() - start_time));
-                files_done++;
-                if (files_done === files_count - files_rejected) allDone();
-                if (flag === false) stop_loop = true;
+              } else element.remove();
             }
-            xhr.abort();
-        };
-    }
-
-    function beforeUpload() {
-        getTpl('waiting');
-        return opts.beforeUpload();
-    }
-
-    function beforeEach(file) {
-        return opts.beforeEach(file);
-    }
-
-    function allDone() {
-        return opts.allDone();
-    }
-
-    function dragEnter(e) {
-        clearTimeout(doc_leave_timer);
-        e && e.preventDefault();
-        opts.dragEnter(e);
-    }
-
-    function dragOver(e) {
-        clearTimeout(doc_leave_timer);
-        e.preventDefault();
-        opts.docOver(e);
-        opts.dragOver(e);
-    }
-
-    function dragLeave(e) {
-        clearTimeout(doc_leave_timer);
-        opts.dragLeave(e);
-        e && e.stopPropagation();
-    }
-
-    function docDrop(e) {
-        e.preventDefault();
-        opts.docLeave(e);
-        return false;
-    }
-
-    function docEnter(e) {
-        clearTimeout(doc_leave_timer);
-        e.preventDefault();
-        opts.docEnter(e);
-        return false;
-    }
-
-    function docOver(e) {
-        clearTimeout(doc_leave_timer);
-        e.preventDefault();
-        opts.docOver(e);
-        return false;
-    }
-
-    function docLeave(e) {
-        doc_leave_timer = setTimeout(function(){
-            opts.docLeave(e);
-        }, 200);
-    }
-
-    function error(idx,file,i) {
-        //errors = ["Browser Not Supported", "Too Many Files", "File Too Large", "No Upload Script Set", "Choose a file at least"],
-        let err;
-        if(typeof opts.errors[idx]!=='undefined') {
-            err = opts.errors[idx];
-        } else if(typeof errors[idx]!=='undefined') {
-            err = errors[idx];
-        } else {
-            err = 'Error Occurs!';
-        }
-        if(typeof(file)!=='undefined') {
-            err += ' - '+file.name+'('+Math.round(file.size/1048576)+'MB)';
-        }
-        if(typeof opts.error == 'function') {
-            opts.error(err,file,i);
-        } else {
-            alert(err);
-        }
-        $('#uploader').modal('hide');
-        dragLeave();
-    }
-
-    function dummy(){
-        return true;
-    }
-
-    try {
-        if (XMLHttpRequest.prototype.sendAsBinary) return;
-        XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
-            function byteValue(x) {
-                return x.charCodeAt(0) & 0xff;
-            }
-            let ords = Array.prototype.map.call(datastr, byteValue);
-            let ui8a = new Uint8Array(ords);
-            this.send(ui8a.buffer);
-        }
-    } catch(e) {}
+          },
+        });
+    });
+  };
 })(jQuery);

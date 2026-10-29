@@ -100,13 +100,14 @@ function uploadInit() {
             }
             $('#upload').powerUpload($.extend({}, opts, {
                 max_files: 1,
-                uploadFinished:function(i,file,result,timeDiff){
-                    if(result.error!=="0") {
+                uploadFinished:function(i,file,result,timeDiff,uploader){
+                    uploader = uploader || $('#uploader');
+                    if(String(result.error) !== '0') {
                         alert("上传失败！\n原因：" + result.message);
                     } else {
-                        $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
+                        uploader.find(".modal-title > b").html("上传完成，请关闭本对话框！");
                         $("input[name=image]").val(setting.url_prefix+'api/CMS/attachment/'+result.new_name);
-                        $('#uploader').unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
+                        uploader.unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
                             $("input[name=image]").select();
                         });
                     }
@@ -114,9 +115,10 @@ function uploadInit() {
             }));
             opts = $.extend(opts, {
                 title: '附件上传',
-                uploadFinished:function(i,file,result,timeDiff){
-                    let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
-                    if(result.error == 0) {
+                uploadFinished:function(i,file,result,timeDiff,uploader){
+                    uploader = uploader || $('#uploader');
+                    let obj = uploader.find(".progress[data-idx="+i+"] > div");
+                    if(String(result.error) === '0') {
                         let editor = tinyMCE.activeEditor;
                         let content = editor.getContent();
                         if(content.match(new RegExp('"(file://.+?/'+result.name+')"'))) {
@@ -138,10 +140,11 @@ function uploadInit() {
                         }
                     }
                 },
-                allDone:function(){
-                    $('#uploader').find(".modal-title > b").html("全部文件上传完成，请关闭本对话框！");
+                allDone:function(uploader){
+                    uploader = uploader || $('#uploader');
+                    uploader.find(".modal-title > b").html("全部文件上传完成，请关闭本对话框！");
                     $('#cover').hide();
-                    $('#uploader').unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
+                    uploader.unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
                         tinyMCE.activeEditor.focus();
                     });
                 },

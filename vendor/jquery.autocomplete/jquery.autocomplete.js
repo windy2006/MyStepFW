@@ -1,4 +1,9 @@
 /**
+ * 框架调用：autocomplete(options|string)
+ * 功能说明：选项初始化返回首个实例；字符串支持 destroy/clearCache/disable/enable/hide。onSelect(text,data,input) 保持原参数。
+ * 使用说明：完整参数和示例见 docs/frontend/vendor/README.md；保留原组件版权声明。
+ */
+/**
  *  Ajax Autocomplete for jQuery, version 1.1.3
  *  (c) 2010 Tomas Kirda
  *
@@ -15,13 +20,20 @@
 
   let reEscape = new RegExp('(\\' + ['/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\'].join('|\\') + ')', 'g');
 
+  function escapeText(value){return String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function fnFormatResult(value, data, currentValue) {
-    let pattern = '(' + currentValue.replace(reEscape, '\\$1') + ')';
-    return value.replace(new RegExp(pattern, 'gi'), '<strong>$1<\/strong>');
+    value=String(value);if(!currentValue)return escapeText(value);
+    const pattern=new RegExp(currentValue.replace(reEscape,'\\$1'),'gi');
+    let out='',last=0;value.replace(pattern,(match,index)=>{out+=escapeText(value.slice(last,index))+'<strong>'+escapeText(match)+'</strong>';last=index+match.length;return match;});
+    return out+escapeText(value.slice(last));
   }
 
   function Autocomplete(el, options) {
     this.el = $(el);
+    this.ns='.autocomplete'+($.data(document,'autocompleteSerial')||0);
+    $.data(document,'autocompleteSerial',($.data(document,'autocompleteSerial')||0)+1);
+    this.requestGeneration=0;this.pendingRequest=null;
+    this.originalAutocomplete = el.getAttribute('autocomplete');
     this.el.attr('autocomplete', 'off');
     this.suggestions = [];
     this.data = [];
@@ -29,7 +41,7 @@
     this.selectedIndex = -1;
     this.currentValue = this.el.val();
     this.intervalId = 0;
-    this.cachedResponse = [];
+    this.cachedResponse = Object.create(null);
     this.onChangeInterval = null;
     this.ignoreValueChange = false;
     this.serviceUrl = options.serviceUrl;
@@ -51,7 +63,19 @@
   }
 
   $.fn.autocomplete = function(options) {
-    return new Autocomplete(this.get(0)||$('<input />'), options);
+    if(!this.length)return undefined;
+    if(typeof options==='string'){
+      let result;const args=Array.prototype.slice.call(arguments,1);
+      this.each(function(){const instance=$(this).data('autocomplete');if(!instance)return;if(!['destroy','dispose','clearCache','disable','enable','hide'].includes(options))throw new Error('Unknown autocomplete method: '+options);const value=instance[options].apply(instance,args);if(value!==undefined)result=value;});
+      return result===undefined?this:result;
+    }
+    let first;
+    this.each(function(){
+      const el=$(this);let instance=el.data('autocomplete');
+      if(instance){instance.hide();instance.currentValue=el.val();instance.setOptions(options||{});}
+      else {instance=new Autocomplete(this,options||{});el.data('autocomplete',instance);}
+      if(!first)first=instance;
+    });return first;
   };
 
   Autocomplete.prototype = {
@@ -59,7 +83,7 @@
     initialize: function() {
       let me, uid, autocompleteElId;
       me = this;
-      uid = Math.floor(Math.random()*0x100000).toString(16);
+      uid = this.ns.slice(1);
       autocompleteElId = 'Autocomplete_' + uid;
 
       this.killerFn = function(e) {
@@ -77,18 +101,26 @@
       this.container = $('#' + autocompleteElId);
       this.fixPosition();
       if (window.opera) {
-        this.el.keypress(function(e) { me.onKeyPress(e); });
+        this.el.on('keypress'+this.ns,function(e) { me.onKeyPress(e); });
       } else {
-        this.el.keydown(function(e) { me.onKeyPress(e); });
+        this.el.on('keydown'+this.ns,function(e) { me.onKeyPress(e); });
       }
-      this.el.keyup(function(e) { me.onKeyUp(e); });
-      this.el.blur(function() { me.enableKillerFn(); });
-      this.el.focus(function() { me.fixPosition(); });
+      this.el.on('input'+this.ns+' keyup'+this.ns,function(e) { if(!me.composing)me.onKeyUp(e); });
+      this.el.on('compositionstart'+this.ns,()=>{me.composing=true;clearTimeout(me.onChangeInterval);me.requestGeneration++;if(me.pendingRequest)me.pendingRequest.abort();});
+      this.el.on('compositionend'+this.ns,()=>{me.composing=false;me.onKeyUp({});});
+      this.el.on('blur'+this.ns,function() { me.enableKillerFn(); });
+      this.el.on('focus'+this.ns,function() { me.fixPosition(); });
+      $(window).on('resize'+this.ns,()=>me.fixPosition());
     },
 
     setOptions: function(options){
+      options=options||{};
       let o = this.options;
-      $.extend(o, options);
+      clearTimeout(this.onChangeInterval);
+      this.requestGeneration++;if(this.pendingRequest&&this.pendingRequest.abort)this.pendingRequest.abort();
+      if(options.serviceUrl!==undefined)this.serviceUrl=options.serviceUrl;
+      this.clearCache();$.extend(o, options);
+      this.isLocal=!!o.lookup;
       if(o.lookup){
         this.isLocal = true;
         if($.isArray(o.lookup)){ o.lookup = { suggestions:o.lookup, data:[] }; }
@@ -98,12 +130,12 @@
     },
 
     clearCache: function(){
-      this.cachedResponse = [];
+      this.cachedResponse = Object.create(null);
       this.badQueries = [];
     },
 
     disable: function(){
-      this.disabled = true;
+      this.disabled = true;this.hide();this.requestGeneration++;if(this.pendingRequest&&this.pendingRequest.abort)this.pendingRequest.abort();
     },
 
     enable: function(){
@@ -111,18 +143,18 @@
     },
 
     fixPosition: function() {
-      let offset = this.el.offset();
+      let offset = this.el.offset();if(!offset)return;
       $('#' + this.mainContainerId).css({ top: (offset.top + this.el.innerHeight()) + 'px', left: offset.left + 'px' });
     },
 
     enableKillerFn: function() {
       let me = this;
-      $(document).bind('click', me.killerFn);
+      $(document).off('click'+me.ns,me.killerFn).on('click'+me.ns,me.killerFn);
     },
 
     disableKillerFn: function() {
       let me = this;
-      $(document).unbind('click', me.killerFn);
+      $(document).off('click'+me.ns,me.killerFn);
     },
 
     killSuggestions: function() {
@@ -167,18 +199,18 @@
     },
 
     onKeyUp: function(e) {
-      if(this.disabled){ return; }
+      if(this.disabled||this.disposed){ return; }
       switch (e.keyCode) {
         case 38: //KEY_UP:
         case 40: //KEY_DOWN:
           return;
       }
-      clearInterval(this.onChangeInterval);
+      clearTimeout(this.onChangeInterval);
       if (this.currentValue !== this.el.val()) {
         if (this.options.deferRequestBy > 0) {
           // Defer lookup in case when value changes very quickly:
           let me = this;
-          this.onChangeInterval = setInterval(function() { me.onValueChange(); }, this.options.deferRequestBy);
+          this.onChangeInterval = setTimeout(function() { me.onValueChange(); }, this.options.deferRequestBy);
         } else {
           this.onValueChange();
         }
@@ -186,14 +218,12 @@
     },
 
     onValueChange: function() {
-      clearInterval(this.onChangeInterval);
+      clearTimeout(this.onChangeInterval);
+      this.requestGeneration++;if(this.pendingRequest&&this.pendingRequest.abort)this.pendingRequest.abort();
       this.currentValue = this.el.val();
       let q = this.getQuery(this.currentValue);
       this.selectedIndex = -1;
-      if (this.ignoreValueChange) {
-        this.ignoreValueChange = false;
-        return;
-      }
+      if(this.disabled||this.disposed)return;
       if (q === '' || q.length < this.options.minChars) {
         this.hide();
       } else {
@@ -217,9 +247,9 @@
       q = q.toLowerCase();
       for(i=0; i< len; i++){
         val = arr.suggestions[i];
-        if(val.toLowerCase().indexOf(q) === 0){
+        if(String(val).toLowerCase().indexOf(q) === 0){
           ret.suggestions.push(val);
-          ret.data.push(arr.data[i]);
+          ret.data.push((arr.data||[])[i]);
         }
       }
       return ret;
@@ -229,13 +259,14 @@
       let cr, me;
       cr = this.isLocal ? this.getSuggestionsLocal(q) : this.cachedResponse[q];
       if (cr && $.isArray(cr.suggestions)) {
-        this.suggestions = cr.suggestions;
+        this.suggestions = cr.suggestions.map(String);
         this.data = cr.data;
         this.suggest();
       } else if (!this.isBadQuery(q)) {
         me = this;
-        me.options.params.query = q;
-        $.post(this.serviceUrl, me.options.params, function(txt) { me.processResponse(txt); }, 'text');
+        const generation=++me.requestGeneration;
+        if(me.pendingRequest&&me.pendingRequest.abort)me.pendingRequest.abort();
+        me.pendingRequest=$.post(this.serviceUrl,$.extend({},me.options.params,{query:q}),function(txt){if(generation===me.requestGeneration&&!me.disabled)me.processResponse(txt);},'text');
       }
     },
 
@@ -254,7 +285,7 @@
     },
 
     suggest: function() {
-      if (this.suggestions.length === 0) {
+      if (this.disposed||this.disabled||this.suggestions.length === 0) {
         this.hide();
         return;
       }
@@ -269,7 +300,7 @@
       this.container.hide().empty();
       for (i = 0; i < len; i++) {
         s = this.suggestions[i];
-        div = $((me.selectedIndex === i ? '<div class="selected"' : '<div') + ' title="' + s + '">' + f(s, this.data[i], v) + '</div>');
+        div=$('<div>').toggleClass('selected',me.selectedIndex===i).attr('title',s).html(f(String(s),this.data[i],v));
         div.mouseover(mOver(i));
         div.click(mClick(i));
         this.container.append(div);
@@ -280,17 +311,17 @@
 
     processResponse: function(text) {
       let response;
-      text = text.replace(/null/ig, "[]");
       try {
-        response = eval('(' + text + ')');
+        response = typeof text==='string'?JSON.parse(text):text;
       } catch (err) { return; }
+      if(!response||typeof response!=='object'||!Array.isArray(response.suggestions)||typeof response.query!=='string')return;
       if (!$.isArray(response.data)) { response.data = []; }
       if(!this.options.noCache){
         this.cachedResponse[response.query] = response;
         if (response.suggestions.length === 0) { this.badQueries.push(response.query); }
       }
       if (response.query === this.getQuery(this.currentValue)) {
-        this.suggestions = response.suggestions;
+        this.suggestions = response.suggestions.map(String);
         this.data = response.data;
         this.suggest();
       }
@@ -319,15 +350,12 @@
     select: function(i) {
       let selectedValue, f;
       selectedValue = this.suggestions[i];
-      if (selectedValue) {
+      if (selectedValue !== undefined) {
         this.el.val(selectedValue);
-        if (this.options.autoSubmit) {
-          f = this.el.parents('form');
-          if (f.length > 0) { f.get(0).submit(); }
-        }
-        this.ignoreValueChange = true;
+        this.ignoreValueChange = false;
         this.hide();
         this.onSelect(i);
+        if(this.options.autoSubmit){f=this.el.closest('form');if(f.length){const form=f[0];if(typeof form.requestSubmit==='function')form.requestSubmit();else HTMLFormElement.prototype.submit.call(form);}}
       }
     },
 
@@ -367,9 +395,17 @@
       fn = me.options.onSelect;
       s = me.suggestions[i];
       d = me.data[i];
-      me.el.val(me.getValue(s));
+      me.el.val(me.getValue(s));me.currentValue=me.el.val();
       if ($.isFunction(fn)) { fn(s, d, me.el); }
     },
+
+    destroy: function(){
+      this.disposed=true;this.disable();clearTimeout(this.onChangeInterval);this.stopKillSuggestions();
+      this.el.off(this.ns);$(window).off(this.ns);$(document).off(this.ns);
+      $('#'+this.mainContainerId).remove();this.el.removeData('autocomplete');
+      if(this.originalAutocomplete===null)this.el.removeAttr('autocomplete');else this.el.attr('autocomplete',this.originalAutocomplete);
+    },
+    dispose: function(){this.destroy();},
 
     getValue: function(value){
       let del, currVal, arr, me;

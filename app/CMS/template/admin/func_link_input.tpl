@@ -78,13 +78,14 @@ $(function(){
                 max_files: 1,
                 max_file_size: 8,
                 errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
-                uploadFinished:function(i,file,result,timeDiff){
-                    if(result.error!=0) {
+                uploadFinished:function(i,file,result,timeDiff,uploader){
+                    uploader = uploader || $('#uploader');
+                    if(String(result.error) !== '0') {
                         alert("上传失败！\n原因：" + result.message);
                     } else {
-                        $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
+                        uploader.find(".modal-title > b").html("上传完成，请关闭本对话框！");
                         $("input[name=image]").val('<!--url_prefix-->api/myStep/download/'+result.new_name.split('.').slice(0,2).join('.'));
-                        $('#uploader').unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
+                        uploader.unbind('hidden.bs.modal').on('hidden.bs.modal', function(e){
                             $("input[name=image]").select();
                         });
                     }

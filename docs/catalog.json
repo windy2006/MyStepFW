@@ -824,6 +824,78 @@
             "group": "浏览器前端"
         },
         {
+            "id": "jquery-readme",
+            "title": "组件选用",
+            "path": "docs/frontend/vendor/README.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-autocomplete",
+            "title": "自动补全",
+            "path": "docs/frontend/vendor/autocomplete.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-date-input",
+            "title": "日期输入",
+            "path": "docs/frontend/vendor/date-input.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-popups",
+            "title": "弹出窗口",
+            "path": "docs/frontend/vendor/popups.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-media",
+            "title": "设备采集",
+            "path": "docs/frontend/vendor/media.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-parallax",
+            "title": "滚动视差",
+            "path": "docs/frontend/vendor/parallax.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-power-image",
+            "title": "延迟图片",
+            "path": "docs/frontend/vendor/power-image.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-upload",
+            "title": "文件上传",
+            "path": "docs/frontend/vendor/upload.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-range",
+            "title": "数值滑块",
+            "path": "docs/frontend/vendor/range.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-resize",
+            "title": "图片缩放",
+            "path": "docs/frontend/vendor/resize.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-gallery",
+            "title": "图集展示",
+            "path": "docs/frontend/vendor/gallery.md",
+            "group": "浏览器前端"
+        },
+        {
+            "id": "jquery-tree",
+            "title": "树形选择",
+            "path": "docs/frontend/vendor/tree.md",
+            "group": "浏览器前端"
+        },
+        {
             "id": "js-text-calendar",
             "title": "文字工具",
             "path": "docs/frontend/javascript/js-text-calendar.md",

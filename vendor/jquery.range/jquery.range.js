@@ -1,3 +1,8 @@
+/**
+ * 框架调用：jRange(options|method[,value])
+ * 功能说明：选项初始化返回原选择集；getter 返回字符串。setValue 一次写回最终值；destroy 释放文档监听和生成界面。
+ * 使用说明：完整参数和示例见 docs/frontend/vendor/README.md；保留原组件版权声明。
+ */
 /*jshint multistr:true, curly: false */
 /*global jQuery:false, define: false */
 /**
@@ -49,8 +54,12 @@
             <div class="scale"></div>\
 		</div>',
 		init: function(node, options) {
-			this.options       = $.extend({}, this.defaults, options);
+			this.options=$.extend({from:0,to:100},this.defaults,options);
+            this.options.from=Number(this.options.from);this.options.to=Number(this.options.to);this.options.step=Number(this.options.step);
+            if(!Number.isFinite(this.options.from)||!Number.isFinite(this.options.to)||this.options.to<=this.options.from||!Number.isFinite(this.options.step)||this.options.step<=0)throw new RangeError('jRange 范围与步长无效');
+            this.ns='.slider'+($.data(document,'rangeSerial')||0);$.data(document,'rangeSerial',($.data(document,'rangeSerial')||0)+1);
 			this.inputNode     = $(node);
+            this.originalStyle=node.getAttribute('style');
 			this.options.value = this.inputNode.val() || (this.options.isRange ? this.options.from + ',' + this.options.from : '' + this.options.from);
 			this.domNode       = $(this.template);
 			this.domNode.addClass(this.options.theme);
@@ -115,27 +124,27 @@
 			this.pointers.removeClass('last-active');
 			pointer.addClass('focused last-active');
 			this[(pointer.hasClass('low') ? 'low' : 'high') + 'Label'].addClass('focused');
-			$(document).on('mousemove.slider touchmove.slider', $.proxy(this.onDrag, this, pointer));
-			$(document).on('mouseup.slider touchend.slider touchcancel.slider', $.proxy(this.onDragEnd, this));
+			$(document).on('mousemove'+this.ns+' touchmove'+this.ns, $.proxy(this.onDrag, this, pointer));
+			$(document).on('mouseup'+this.ns+' touchend'+this.ns+' touchcancel'+this.ns, $.proxy(this.onDragEnd, this));
 		},
 		onDrag: function(pointer, e) {
 			e.stopPropagation();
 			e.preventDefault();
 
-			if (e.originalEvent.touches && e.originalEvent.touches.length) {
+			if (e.originalEvent&&e.originalEvent.touches && e.originalEvent.touches.length) {
 				e = e.originalEvent.touches[0];
-			} else if (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length) {
+			} else if (e.originalEvent&&e.originalEvent.changedTouches && e.originalEvent.changedTouches.length) {
 				e = e.originalEvent.changedTouches[0];
 			}
 
-			let position = e.clientX - this.domNode.offset().left;
+			let position = (e.pageX!==undefined?e.pageX:e.clientX+window.pageXOffset) - this.domNode.offset().left;
 			this.domNode.trigger('change', [this, pointer, position]);
 		},
 		onDragEnd: function(e) {
 			this.pointers.removeClass('focused')
 				.trigger('rangeslideend');
 			this.labels.removeClass('focused');
-			$(document).off('.slider');
+			$(document).off(this.ns);
 			this.options.ondragend.call(this, this.options.value);
 		},
 		barClicked: function(e) {
@@ -214,7 +223,7 @@
 		},
 		correctPositionForSnap: function(position){
 			let currentValue = this.positionToValue(position) - this.options.from;
-			let diff = this.options.width / (this.interval / this.options.step),
+			let diff = this.domNode.width() / (this.interval / this.options.step),
 				expectedPosition = (currentValue / this.options.step) * diff;
 			if( position <= expectedPosition + diff / 2 && position >= expectedPosition - diff / 2){
 				return expectedPosition;
@@ -224,12 +233,15 @@
 		},
 		// will be called from outside
 		setValue: function(value) {
-			let values = value.toString().split(',');
+			let values=String(value).split(',');if(values.length>2)throw new RangeError('jRange 仅接受一个数值或两个区间端点');if(!values.every(v=>v.trim()!==''&&Number.isFinite(Number(v))))throw new RangeError('jRange 数值无效');
+            if(this.options.isRange&&values.length===1)values.push(values[0]);
+            if(values.length===2&&Number(values[0])>Number(values[1]))values.reverse();
 			values[0] = Math.min(Math.max(values[0], this.options.from), this.options.to) + '';
 			if (values.length > 1){
 				values[1] = Math.min(Math.max(values[1], this.options.from), this.options.to) + '';
 			}
-			this.options.value = value;
+            this.settingValue=true;
+			this.options.value=values.join(',');
 			let prc = this.valuesToPrc(values.length === 2 ? values : [0, values[0]]);
 			if (this.isSingle()) {
 				this.setPosition(this.highPointer, prc[1]);
@@ -237,15 +249,12 @@
 				this.setPosition(this.lowPointer, prc[0]);
 				this.setPosition(this.highPointer, prc[1]);
 			}
+            this.settingValue=false;this.commitInputValue();
 		},
 		renderScale: function() {
-			let s = this.options.scale || [this.options.from, this.options.to];
-			let prc = Math.round((100 / (s.length - 1)) * 10) / 10;
-			let str = '';
-			for (let i = 0; i < s.length; i++) {
-				str += '<span style="left: ' + i * prc + '%">' + (s[i] !== '|' ? '<ins>' + s[i] + '</ins>' : '') + '</span>';
-			}
-			this.scale.html(str);
+            const scale=this.options.scale||[this.options.from,this.options.to];
+            this.scale.empty();
+            scale.forEach((value,i)=>{const item=$('<span>').css('left',(scale.length<2?0:i*100/(scale.length-1))+'%').appendTo(this.scale);if(value!=='|')$('<ins>').text(value).appendTo(item);});
 
 			$('ins', this.scale).each(function() {
 				$(this).css({
@@ -276,7 +285,7 @@
 
 			let width = label.html(text).width(),
 				left = position - width / 2;
-			left = Math.min(Math.max(left, 0), this.options.width - width);
+			left = Math.min(Math.max(left, 0), this.domNode.width() - width);
 			label[animate ? 'animate' : 'css']({
 				left: left
 			});
@@ -293,27 +302,16 @@
 		isDecimal: function() {
 			return ((this.options.value + this.options.from + this.options.to).indexOf(".") !== -1);
 		},
-		positionToValue: function(pos) {
-			let value = (pos / this.domNode.width()) * this.interval;
-			value = parseFloat(value, 10) + parseFloat(this.options.from, 10);
-			if (this.isDecimal()) {
-				let final = Math.round(Math.round(value / this.options.step) * this.options.step *100)/100;
-				if (final!==0.0) {
-					final = '' + final;
-					if (final.indexOf(".")===-1) {
-						final = final + ".";
-					}
-					while (final.length - final.indexOf('.')<3) {
-						final = final + "0";
-					}
-				} else {
-					final = "0.00";
-				}
-				return final;
-			} else {
-				return Math.round(value / this.options.step) * this.options.step;
-			}
-		},
+        positionToValue: function(pos) {
+            const from=this.options.from,to=this.options.to,step=this.options.step;
+            let value=from+(pos/this.domNode.width())*this.interval;
+            value=Math.max(from,Math.min(to,from+Math.round((value-from)/step)*step));
+            const precision=number=>{const [base,exponent='0']=String(number).toLowerCase().split('e');return Math.max(0,(base.split('.')[1]||'').length-Number(exponent));};
+            const decimal=this.isDecimal()||precision(step)>0;
+            const places=Math.min(12,Math.max(decimal?2:0,precision(step),precision(from),precision(to)));
+            return decimal?value.toFixed(places):Math.round(value);
+        },
+
 		setInputValue: function(pointer, v) {
 			// if(!isChanged) return;
 			if (this.isSingle()) {
@@ -326,12 +324,20 @@
 					this.options.value = values[0] + ',' + v;
 				}
 			}
-			if (this.inputNode.val() !== this.options.value) {
-				this.inputNode.val(this.options.value)
-					.trigger('change');
-				this.options.onstatechange.call(this, this.options.value);
-			}
-		},
+            if(!this.settingValue)this.commitInputValue();
+        },
+        commitInputValue:function(){
+            if(this.inputNode.val()!==this.options.value){
+                this.inputNode.val(this.options.value).trigger('change');
+                this.options.onstatechange.call(this,this.options.value);
+            }
+        },
+        destroy:function(){
+            $(document).off(this.ns);$(window).off(this.ns);this.domNode.find('*').addBack().stop(true,false);this.domNode.remove();
+            if(this.originalStyle===null)this.inputNode.removeAttr('style');else this.inputNode.attr('style',this.originalStyle);
+            this.inputNode.removeData('plugin_jRange');
+        },
+
 		getValue: function() {
 			return this.options.value;
 		},
@@ -356,15 +362,14 @@
 			this.options.disable = !this.options.disable;
 			this.isReadonly();
 		},
-		updateRange: function(range, value) {
-			let values = range.toString().split(',');
-			this.interval = parseInt(values[1]) - parseInt(values[0]);
-			if(value){
-				this.setValue(value);
-			}else{
-				this.setValue(this.getValue());
-			}
-		}
+        updateRange: function(range,value){
+            const values=String(range).split(',').map(Number);
+            if(values.length!==2||!values.every(Number.isFinite)||values[1]<=values[0])throw new RangeError('jRange 范围无效');
+            this.options.from=values[0];this.options.to=values[1];this.interval=values[1]-values[0];
+            if(this.options.showScale)this.renderScale();
+            this.setValue(value!==undefined?value:this.getValue());
+        }
+
 	};
 
 	let pluginName = 'jRange';
@@ -378,9 +383,10 @@
 			let $this = $(this),
 				data = $.data(this, 'plugin_' + pluginName),
 				options = typeof option === 'object' && option;
+            if(!data&&typeof option==='string'){if(option==='destroy')return;throw new Error('jRange 尚未初始化');}
 			if (!data) {
 				$this.data('plugin_' + pluginName, (data = new jRange(this, options)));
-				$(window).resize(function() {
+				$(window).on('resize'+data.ns,function() {
 					data.setValue(data.getValue());
 				}); // Update slider position when window is resized to keep it in sync with scale
 			}
@@ -388,13 +394,20 @@
 			// this gives flexibility to call functions of the plugin e.g.
 			//   - $('.dial').plugin('destroy');
 			//   - $('.dial').plugin('render', $('.new-child'));
-			if (typeof option === 'string') {
-				result = data[option].apply(data, Array.prototype.slice.call(args, 1));
+            if(data&&options&&$this.data('plugin_'+pluginName)===data&&data._configured){
+                const next=$.extend({},data.options,options);next.from=Number(next.from);next.to=Number(next.to);next.step=Number(next.step);
+                if(!Number.isFinite(next.from)||!Number.isFinite(next.to)||next.to<=next.from||!Number.isFinite(next.step)||next.step<=0)throw new RangeError('jRange 范围与步长无效');
+                $.extend(data.options,next);data.domNode.css('width',data.options.width);data.updateRange(data.options.from+','+data.options.to,options.value!==undefined?options.value:data.getValue());
+            }
+            data._configured=true;
+            if (typeof option === 'string') {
+				if(option.charAt(0)==='_'||typeof data[option]!=='function')throw new Error('Unknown jRange method: '+option);
+                result = data[option].apply(data, Array.prototype.slice.call(args, 1));
 			}
 		});
 
 		// To enable plugin returns values
-		return result || this;
+		return result===undefined?this:result;
 	};
 
 })(jQuery, window, document);

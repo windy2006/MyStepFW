@@ -146,3 +146,5 @@ $(obj).fullscreen(opt);
 - **check**：检测全屏状态
 - **留空**：切换全屏状态
 - **其他**：返回当前全屏对象
+
+框架内的完整参数、示例及销毁方法见[使用指南](../../docs/frontend/vendor/media.md)。

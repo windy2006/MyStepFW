@@ -44,9 +44,10 @@ function init() {
                 max_file_size: setting.max_size,
                 errors: ["浏览器不支持", "一次只能上传5个文件", "每个文件必须小于"+setting.max_size+"MB", "未设置上传目标", "请至少选择一个文件"],
 
-                uploadFinished:function(i,file,result,timeDiff){
-                    let obj = $('#uploader').find(".progress[data-idx="+i+"] > div");
-                    if(result.error!=='0') {
+                uploadFinished:function(i,file,result,timeDiff,uploader){
+                    uploader = uploader || $('#uploader');
+                    let obj = uploader.find(".progress[data-idx="+i+"] > div");
+                    if(String(result.error) !== '0') {
                         obj.html(obj.html()+' - upload failed! ('+result.message+')');
                     } else {
                         $('#list_file').removeClass('d-none');
@@ -70,9 +71,10 @@ function init() {
                     }
                 },
 
-                allDone:function(){
+                allDone:function(uploader){
+                    uploader = uploader || $('#uploader');
                     $("#receiver").html('请将需上传的文件拖拽至此框内，<br />亦可在截图后点击此筐粘贴。');
-                    $('#uploader').find(".modal-title > b").html("全部文件上传完成，请关闭本对话框！");
+                    uploader.find(".modal-title > b").html("全部文件上传完成，请关闭本对话框！");
                 },
 
                 dragEnter: function(){

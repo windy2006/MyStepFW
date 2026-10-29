@@ -167,3 +167,8 @@ $.vendor('highlight', {callback: function () { highlight(0); }});
 `highlight(0)`处理 SyntaxHighlighter 的 `brush:...` 代码块；`highlight(1)`处理 highlight.js 的 `pre code` 代码块，第二个参数为已有的本地主题名，默认 `default`。依赖脚本、语法和样式从网站本地加载，不需要 CDN。
 
 `setting`和`language`在完整框架页中同步预置；适配器仍应使用 `checkSetting(100, highlight, [mode, style])`，在配置就绪后保留原参数继续执行。仅调用 `checkSetting()`只检查状态，不会自动重试；首次加载时可能导致整个高亮初始化提前结束。框架等待最多15秒，加载失败不会永久轮询。
+
+
+## 常用组件
+
+组件的参数、回调和局部页面清理方式见[组件选用](../vendor/README.md)。

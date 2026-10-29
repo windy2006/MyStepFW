@@ -86,15 +86,16 @@
                 url: '<!--path_admin-->/function/plugin/upload',
                 title: '请选择需要上传的插件文件',
                 mode: 'browse',
-                maxfiles: 1,
-                maxfilesize: 8,
+                max_files: 1,
+                max_file_size: 8,
                 errors: ["浏览器不支持", "一次只能上传1个文件", "每个文件必须小于8MB", "未设置上传目标", "更新文件未选择"],
-                uploadFinished:function(i,file,result,timeDiff){
-                    if(result.error!=0) {
+                uploadFinished:function(i,file,result,timeDiff,uploader){
+                    uploader = uploader || $('#uploader');
+                    if(String(result.error) !== '0') {
                         alert("上传失败！\n原因：" + result.message);
                     } else {
-                        $('#uploader').find(".modal-title > b").html("上传完成，请关闭本对话框！");
-                        $('#uploader').on('hidden.bs.modal', function (e) {
+                        uploader.find(".modal-title > b").html("上传完成，请关闭本对话框！");
+                        uploader.on('hidden.bs.modal', function (e) {
                             window.location.reload();
                         });
                     }

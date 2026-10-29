@@ -351,7 +351,7 @@
             $('#auto_fill').autocomplete(ac_options);
             $('#auto_mode').change(function(){
                 $('#auto_fill').val('').attr('placeholder', $(this.options[this.selectedIndex]).attr('default'));
-                $('#auto_fill').unbind();
+                // autocomplete reuses its existing instance and preserves caller events.
                 ac_options.params.mode = this.value;
                 $('#auto_fill').autocomplete(ac_options);
             });

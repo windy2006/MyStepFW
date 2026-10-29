@@ -1,190 +1,172 @@
 /**
- * jquery.resizeImg.js - get the base64 code of a resized picture
- *
- * Written by
- * ----------
- * Windy2000 (windy2006@gmail.com)
- *
- * Licensed under the Apache License Version 2.0
- *
- * Dependencies
- * ------------
- * jQuery (http://jquery.com)
- *
- **/
-
-$.fn.resizeImg = function(options) {
-    let defaults = {
-        mode: 0,                    // 缩放模式：1 - 按宽度，2 - 按比例，3 - 按大小
-        val: 400,                   // 对应模式的变化参数：1-像素，2-分数，3-目标KB数
-        type: "image/jpeg",         // 生成图片的格式，可为 image/jpeg 或 image/png
-        quality: 0.8,               // 生成图片的质量，不压缩为1（针对jpg格式）
-        capture: true,              // 是否为移动端添加调用摄像头拍摄的功能
-        before: new Function(),     // 在生成缩略图前的预处理，将传入未处理的图片文件对象
-        callback: new Function()    // 处理后经base64编码的缩略图信息将传递给此回调函数
-    };
-    let opt = $.extend({}, defaults, options || {});
-
-    if(opt.capture) {
-        this.attr({
-            accept : "image/*",
-            capture : "true"
-        });
-    }
-
-    this.on('change', function() {
-        if(this.value==="") return;
-        let file = this.files[0];
-        if($.isFunction(options)) opt = options();
-        getOrientation(file, function(orientation){
-            let reader, blob;
-            if(typeof(FileReader)==='function') {
-                reader  = new FileReader();
-            } else {
-                let URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
-                blob = URL.createObjectURL(file);
-            }
-            if($.isFunction(opt.before)) opt.before(file);
-            let img = new Image();
-            img.onload = function() {
-                let para = getOpt(this.width, this.height, file.size);
-                let w = para.width;
-                let h = para.height;
-                let canvas = document.createElement("canvas");
-                let ctx = canvas.getContext('2d');
-                if(orientation<6) {
-                    canvas.width = w;
-                    canvas.height = h;
-                } else {
-                    canvas.width = h;
-                    canvas.height = w;
-                }
-                switch(orientation) {
-                    case 2:
-                        // horizontal flip
-                        ctx.translate(w, 0);
-                        ctx.scale(-1, 1);
-                        break;
-                    case 3:
-                        // 180 rotate left
-                        ctx.translate(w, h);
-                        ctx.rotate(Math.PI);
-                        break;
-                    case 4:
-                        // vertical flip
-                        ctx.translate(0, h);
-                        ctx.scale(1, -1);
-                        break;
-                    case 5:
-                        // vertical flip + 90 rotate right
-                        ctx.rotate(0.5 * Math.PI);
-                        ctx.scale(1, -1);
-                        break;
-                    case 6:
-                        // 90 rotate right
-                        ctx.rotate(0.5 * Math.PI);
-                        ctx.translate(0, -h);
-                        break;
-                    case 7:
-                        // horizontal flip + 90 rotate right
-                        ctx.rotate(0.5 * Math.PI);
-                        ctx.translate(w, -h);
-                        ctx.scale(-1, 1);
-                        break;
-                    case 8:
-                        // 90 rotate left
-                        ctx.rotate(-0.5 * Math.PI);
-                        ctx.translate(-w, 0);
-                        break;
-                    default:
-                        console.log(orientation);
-                }
-                ctx.drawImage(this, 0, 0, w, h);
-                this.onload = null;
-
-                let result = '';
-                if( navigator.userAgent.match(/iphone/i) ) {
-                    let mpImg = new MegaPixImage(img);
-                    mpImg.render(canvas, { maxWidth: w, maxHeight: h, quality: opt.quality || 0.8});
-                    result = canvas.toDataURL(opt.type, opt.quality);
-                } else if( navigator.userAgent.match(/Android/i) ) {
-                    opt.type = "image/jpeg";
-                    let encoder = new JPEGEncoder();
-                    result = encoder.encode(ctx.getImageData(0,0,w,h), opt.quality * 100);
-                } else {
-                    result = canvas.toDataURL(opt.type, opt.quality);
-                }
-                if($.isFunction(opt.callback)) opt.callback(result);
-            }
-
-            if(!!reader) {
-                reader.addEventListener("load", function () {
-                    img.src = reader.result;
-                }, false);
-                reader.readAsDataURL(file);
-            } else {
-                img.src = blob;
-            }
-        });
-    });
-
-    let getOpt = function(width, height, size) {
-        let result = {};
-        switch(opt.mode) {
-            case 0:
-                result.rate = opt.val/width;
-                result.width = opt.val;
-                result.height = height * result.rate;
-                break;
-            case 1:
-                result.rate = opt.val;
-                result.width = width * opt.val;
-                result.height = height * opt.val;
-                break;
-            case 2:
-                opt.val *= 1024;
-                result.rate = Math.sqrt(size / opt.val);
-                result.width = Math.ceil(width / result.rate);
-                result.height = Math.ceil(height / result.rate);
-                break;
-        }
-        opt = $.extend(opt, result);
-        return result;
-    }
-
-    let getOrientation = function (file, callback) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let view = new DataView(e.target.result);
-            if (view.getUint16(0, false) !== 0xFFD8) {
-                return callback(-2);
-            }
-            let length = view.byteLength, offset = 2;
-            while (offset < length) {
-                if (view.getUint16(offset+2, false) <= 8) return callback(-1);
-                let marker = view.getUint16(offset, false);
-                offset += 2;
-                if (marker === 0xFFE1) {
-                    if (view.getUint32(offset += 2, false) !== 0x45786966) {
-                        return callback(-1);
-                    }
-                    let little = view.getUint16(offset += 6, false) === 0x4949;
-                    offset += view.getUint32(offset + 4, little);
-                    let tags = view.getUint16(offset, little);
-                    offset += 2;
-                    for (let i = 0; i < tags; i++) {
-                        if (view.getUint16(offset + (i * 12), little) === 0x0112) {
-                            return callback(view.getUint16(offset + (i * 12) + 8, little));
-                        }
-                    }
-                } else if ((marker & 0xFF00) !== 0xFF00) {
-                    break;
-                } else {
-                    offset += view.getUint16(offset, false);
-                }
-            }
-            return callback(-1);
+ * 框架调用：resizeImg(options|"destroy")
+ * 功能说明：options 可为每次选图求值的函数；callback(dataURL) 仅接收最新缩图结果，error(Error) 反馈失败；destroy 恢复输入属性。
+ * 使用说明：完整参数和示例见 docs/frontend/vendor/README.md；保留原组件版权声明。
+ */
+/** jquery.resizeImg.js — Windy2000, Apache-2.0. https://github.com/windy2006/jquery.resizeImg */
+(function ($) {
+  "use strict";
+  let serial=$.data(document,'jqueryresizeImgSerial')||0;
+  const defaults = {
+    mode: 0,
+    val: 400,
+    type: "image/jpeg",
+    quality: 0.8,
+    capture: true,
+    before: () => {},
+    callback: () => {},
+    error: () => {},
+  };
+  $.fn.resizeImg = function (options) {
+    return this.each(function () {
+      if(typeof options==='string'){const instance=$(this).data('resizeImg');if(options!=='destroy')throw new Error('Unknown resizeImg method: '+options);if(instance)instance.destroy();return;}
+      const input = this,
+        $input = $(input),
+        old = $input.data("resizeImg");
+      if (old) old.destroy();
+      if(input.tagName!=="INPUT"||input.type!=="file")return;
+      const ns = ".resizeImg" + ($.data(document,'jqueryresizeImgSerial',++serial),serial),
+        attrs = {
+          accept: input.getAttribute("accept"),
+          capture: input.getAttribute("capture"),
         };
-        reader.readAsArrayBuffer(file);
-    }
-};
+      let generation = 0,
+        pending = null,
+        disposed = false;
+      function config() {
+        return $.extend(
+          {},
+          defaults,
+          typeof options === "function" ? options.call(input) : options,
+        );
+      }
+      // A dynamic configuration is evaluated per file, as in the original API.
+      if ((typeof options === "function" ? defaults : config()).capture)
+        $input.attr({ accept: "image/*", capture: "true" });
+      function cancel() {
+        generation++;
+        if (pending) {
+          pending();
+          pending = null;
+        }
+      }
+      function fail(error, opt) {
+        if (disposed) return;
+        try {
+          if (typeof opt.error === "function") opt.error.call(input, error);
+        } finally {
+          $input.trigger("resizeImg:error", [error]);
+        }
+      }
+      $input.on("change" + ns, function () {
+        cancel();
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const id = generation;
+        let opt;
+        try {
+          opt = config();
+          if (
+            typeof opt.before === "function" &&
+            opt.before.call(input, file) === false
+          )
+            return;
+          const mode = Number(opt.mode),
+            value = Number(opt.val),
+            quality = Number(opt.quality);
+          if (
+            ![0, 1, 2].includes(mode) ||
+            !Number.isFinite(value) ||
+            value <= 0
+          )
+            throw new Error("缩图模式或尺寸参数无效。");
+          if (!["image/jpeg", "image/png"].includes(opt.type))
+            throw new Error("输出格式仅支持 image/jpeg 或 image/png。");
+          if (!Number.isFinite(quality) || quality < 0 || quality > 1)
+            throw new Error("图片质量必须介于 0 和 1。");
+          if (file.type && !file.type.startsWith("image/"))
+            throw new Error("请选择图片文件。");
+          if (!file.size) throw new Error("图片文件为空。");
+          const image = new Image(),
+            url = URL.createObjectURL(file);
+          let cleaned = false;
+          function cleanup() {
+            if (cleaned) return;
+            cleaned = true;
+            image.onload = image.onerror = null;
+            image.removeAttribute("src");
+            URL.revokeObjectURL(url);
+            if (pending === cleanup) pending = null;
+          }
+          pending = cleanup;
+          image.onerror = () => {
+            cleanup();
+            if (id === generation)
+              fail(
+                new Error("图片无法解码，文件可能损坏或格式不受支持。"),
+                opt,
+              );
+          };
+          image.onload = () => {
+            if (id !== generation || disposed) {
+              cleanup();
+              return;
+            }
+            try {
+              // Native image decoding applies orientation consistently with browser display.
+              const width = image.naturalWidth,
+                height = image.naturalHeight;
+              if (!width || !height) throw new Error("无法读取图片尺寸。");
+              const ratio =
+                mode === 0
+                  ? value / width
+                  : mode === 1
+                    ? value
+                    : Math.sqrt((value * 1024) / file.size);
+              const w = Math.max(1, Math.round(width * ratio)),
+                h = Math.max(1, Math.round(height * ratio));
+              if (
+                !Number.isSafeInteger(w) ||
+                !Number.isSafeInteger(h) ||
+                w * h > 40_000_000 ||
+                w > 32767 ||
+                h > 32767
+              )
+                throw new Error("目标图片尺寸过大，请降低尺寸或比例。");
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) throw new Error("当前浏览器无法创建图片画布。");
+              ctx.drawImage(image, 0, 0, w, h);
+              const result = canvas.toDataURL(opt.type, quality);
+              if (result === "data:,")
+                throw new Error("图片编码失败，请降低输出尺寸。");
+              cleanup();
+              if (id === generation && typeof opt.callback === "function")
+                opt.callback.call(input, result);
+            } catch (error) {
+              cleanup();
+              if (id === generation) fail(error, opt);
+            }
+          };
+          image.src = url;
+        } catch (error) {
+          if (id === generation) fail(error, opt || defaults);
+        }
+      });
+      $input.data("resizeImg", {
+        destroy() {
+          disposed = true;
+          cancel();
+          $input.off(ns).removeData("resizeImg");
+          Object.entries(attrs).forEach(([key, value]) =>
+            value === null
+              ? input.removeAttribute(key)
+              : input.setAttribute(key, value),
+          );
+        },
+      });
+    });
+  };
+})(jQuery);

@@ -3192,4 +3192,67 @@ if(is_file(PLUGIN.\'plugin.db\')) {
     'setting' => array(),
     'code' => '',
   ),
+  '2.6.2' => array (
+    'info' => '修复jQuery组件交互与资源清理，兼容后台上传及图片展示，补充组件使用指南',
+    'file' => array (
+      0 => '/app/CMS/asset/admin/tinymce_init.js',
+      1 => '/app/CMS/info.php',
+      2 => '/app/CMS/template/admin/art_catalog_input.tpl',
+      3 => '/app/CMS/template/admin/func_link_input.tpl',
+      4 => '/app/CMS/template/admin/func_template.tpl',
+      5 => '/app/Document/data/controller/js/jquery.addon.js',
+      6 => '/app/Document/info.php',
+      7 => '/app/myStep/info.php',
+      8 => '/app/myStep/sample/form.tpl',
+      9 => '/app/myStep/sample/upload.tpl',
+      10 => '/app/myStep/template/function_app.tpl',
+      11 => '/app/myStep/template/function_plugin.tpl',
+      12 => '/config/version.php',
+      13 => '/docs/catalog.json',
+      14 => '/docs/frontend/javascript/js-addons.md',
+      15 => '/docs/frontend/vendor/README.md',
+      16 => '/docs/frontend/vendor/autocomplete.md',
+      17 => '/docs/frontend/vendor/date-input.md',
+      18 => '/docs/frontend/vendor/gallery.md',
+      19 => '/docs/frontend/vendor/media.md',
+      20 => '/docs/frontend/vendor/parallax.md',
+      21 => '/docs/frontend/vendor/popups.md',
+      22 => '/docs/frontend/vendor/power-image.md',
+      23 => '/docs/frontend/vendor/range.md',
+      24 => '/docs/frontend/vendor/resize.md',
+      25 => '/docs/frontend/vendor/tree.md',
+      26 => '/docs/frontend/vendor/upload.md',
+      27 => '/plugin/manager/info.php',
+      28 => '/plugin/manager/template/manager.tpl',
+      29 => '/plugin/manager/version.php',
+      30 => '/vendor/jquery.autocomplete/jquery.autocomplete.js',
+      31 => '/vendor/jquery.date_input/jquery.date_input.js',
+      32 => '/vendor/jquery.jmpopups/jquery.jmpopups.js',
+      33 => '/vendor/jquery.mediaDevice/jquery.mediaDevice.js',
+      34 => '/vendor/jquery.mediaDevice/readme.md',
+      35 => '/vendor/jquery.parallax/jquery.parallax.js',
+      36 => '/vendor/jquery.parallax/readme.md',
+      37 => '/vendor/jquery.powerImage/jquery.powerImage.js',
+      38 => '/vendor/jquery.powerUpload/jquery.powerUpload.js',
+      39 => '/vendor/jquery.powerUpload/readme.md',
+      40 => '/vendor/jquery.range/jquery.range.js',
+      41 => '/vendor/jquery.resizeImg/jquery.resizeImg.js',
+      42 => '/vendor/jquery.resizeImg/readme.md',
+      43 => '/vendor/jquery.showImage/jquery.showImage.js',
+      44 => '/vendor/jquery.treeSelection/README.md',
+      45 => '/vendor/jquery.treeSelection/jquery.treeSelection.css',
+      46 => '/vendor/jquery.treeSelection/jquery.treeSelection.js',
+    ),
+    'setting' => array(),
+    'code' => 'if(is_file(PLUGIN.\'plugin.db\')) {
+    $mystep_release_plugins=new myDb(\'simpleDB\',\'plugin\',PLUGIN);
+    try {
+        if($mystep_release_plugins->check() && !$mystep_release_plugins->mutate(static function(&$rows,$columns) {
+            if(!isset($columns[\'ver\']))return true;
+            foreach($rows as &$row)if(($row[\'idx\']??\'\')===\'manager\')$row[\'ver\']=\'1.1.9\';
+            unset($row);return true;
+        }))throw new RuntimeException(\'Cannot synchronize installed manager version\');
+    } finally {$mystep_release_plugins->close();}
+}',
+  ),
 );
