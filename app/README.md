@@ -8,6 +8,8 @@
 
 组件信息在本应用的`info.php`中声明，标识与目录保持一致；`name`用于展示，`ver`用于识别组件版本。变量、函数、方法及浏览器对象的写法见[命名规范](../docs/basics/09-naming.md)。
 
+各现有应用的独立使用说明文件见[应用说明目录](#15-独立应用说明)。
+
 ## 1. 目录归属
 
 - 网站根目录的 `lib/` 负责公用框架能力，例如路由、配置、请求、数据库、缓存、模板和文件操作。
@@ -303,3 +305,46 @@ return ['template' => [
 | 前端资源 | asset/style.css、asset/function.js、风格下同名文件 | 框架收集对应资源；其他图片和文件走允许的资源入口 |
 
 根脚本职责按本文约定处理，开发步骤见[应用实战](../docs/development/app/README.md)。插件的独立结构及与应用的关系见 [插件文件结构、命名与脚本职责](../docs/development/plugins/README.md)。
+
+
+## 14. 应用后台引用插件
+
+应用后台可从插件声明自动生成管理入口。插件先在 `info.php` 声明 `admin` 页面，实际启用状态来自插件注册表，应用范围来自各自 `plugin.php`。新旧框架总后台的插件入口不受应用绑定限制，业务应用后台仍按绑定及管理员权限筛选。应用核心类提供 `pluginBackend()`，返回原生后台的 `path` 和验证当前应用管理员及页面权限的 `authorize` 回调。菜单数据使用 `pluginAdminLinks()`，主体使用 `renderPluginPage()`，插件自己的操作／返回链接使用 `pluginManagementURL()`。
+
+CMS可作为完整范例：核心类声明入口及组群校验，`module/admin/plugin/manage.php`处理页面，`template/admin/plugin_manage.tpl`承载主体，后台frame模板动态展示菜单。无需在应用根目录添加页面装配脚本，也不需要把插件页面复制到应用目录。插件只有显式声明 `app_admin=true` 才能委托应用管理员，受信PHP源码等操作仍单独验证框架管理员。
+
+菜单的每项包含 `idx`、`page`、`name`、`url`、`app_admin`、`permission`。先调用 `pluginAdminAuthorized()` 筛选，再将 `name/url` 交给自己的模板；插入HTML属性时转义。模块入口也必须重新校验，不以“看得到菜单”替代授权。应用路由按框架原有规则声明，`path`应与实际后台路由一致，不自动拼接应用目录名。
+
+完整声明、参数与示例见[插件动态后台入口](../plugin/README.md#19-应用后台动态入口)。
+
+## 15. 独立应用说明
+
+每个应用在自己的根目录维护`README.md`，作为该应用的一对一使用说明；本文件继续负责通用应用编写规范。应用说明不放到网站根公共lib目录，也不把业务参数混入通用框架说明。
+
+一级标题使用与插件一致的格式：
+
+```markdown
+# 中文名（应用目录名） <small>v1.0.0</small>
+```
+
+应用名称与info.php对应，版本与该应用当前声明一致，以三段数字展示。正文统一包括功能概述、安装与访问、使用方法、设置说明、目录与扩展、常见问题和相关资料；按实际功能增加专题。没有独立配置页面的应用应明确说明设置文件及继承关系，不编造设置项目。
+
+每个设置单独解释名称、配置键、作用、取值或单位、留空含义和示例。嵌套参数使用稳定标题，如`### setting-template-path`对应`template.path`；子站等独立配置作用域使用不同前缀，如`### site-template-style`。示例使用公开的示范值，磁盘路径相对于网站根，网页地址用框架链接方法生成。更新记录及迁移注意另放应用自己的CHANGELOG.md，使用说明只介绍当前操作，不编造发布历史。
+
+当前应用说明位置：
+
+| 应用 | 说明文件 | 主要内容 |
+| --- | --- | --- |
+| Admin | [Admin/README.md](Admin/README.md) | 新后台功能、参数、路由扩展及源码编辑 |
+| myStep | [myStep/README.md](myStep/README.md) | 原后台操作、参数、框架通用入口 |
+| CMS | [CMS/README.md](CMS/README.md) | 内容、栏目、子站、会员、模板及逐项配置 |
+| Document | [Document/README.md](Document/README.md) | 类示例、反射方法说明与直接文件输出 |
+| Sample | [Sample/README.md](Sample/README.md) | 路由、API、注册模块与模板组合示例 |
+| test | [test/README.md](test/README.md) | 执行阶段、模块配对与浏览器参数示例 |
+
+各应用README是应用自己的操作说明文件；本规范中的应用标识、目录和module/template组织要求继续适用。
+
+
+在应用管理中，每个提供README的应用通过“说明”按钮打开自己的阅读页。逻辑入口为`app/guide?idx=应用标识`，链接由框架setURL生成，支持三种URL模式和子目录；阅读器与插件说明共用安全Markdown解析，不执行应用代码，也不需要启动应用或登录。默认仅阅读当前应用README，文内公开文档引用仍通过受限路径校验。
+
+应用的插件选择列表只显示已经安装并启用、且目录元信息存在的插件；保存只更新这批可见选择，保留停用或未显示插件已有的关联。页面打开后插件登记状态改变时，应刷新后重新选择。

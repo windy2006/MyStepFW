@@ -362,6 +362,7 @@ class Admin extends myStep {
     /**
      * 功能说明：准备导航、账号及主体，返回应用配置指定的外层模板。
      * 导航中的menu_links按受信页面声明展开，使用框架setURL生成应用直达链接。
+     * 主体含data-admin-code源码标记时，按依赖顺序登记本地CodeMirror资源，并入框架缓存。
      * @param string $title 页面标题
      * @param string $body 已渲染的可信主体HTML
      * @param string $notice 普通提示文字（默认：''）
@@ -369,6 +370,18 @@ class Admin extends myStep {
      * @throws Throwable 模板或导航渲染失败
      */
     public function layout($title, $body, $notice = '') {
+        // 源码控件按模板标记按需登记本地资源；与其他后台资源统一合并、缓存。
+        if(strpos($body, 'data-admin-code=') !== false) {
+            $assets = ($GLOBALS['mystep']??null) instanceof myStep ? $GLOBALS['mystep'] : $this;
+            foreach(['lib/codemirror.css', 'addon/display/fullscreen.css'] as $file) $assets->addCSS(VENDOR.'codemirror/'.$file);
+            foreach([
+                'lib/codemirror.js',
+                'mode/xml/xml.js', 'mode/javascript/javascript.js', 'mode/css/css.js',
+                'mode/htmlmixed/htmlmixed.js', 'mode/clike/clike.js', 'mode/php/php.js',
+                'addon/edit/matchbrackets.js', 'addon/selection/active-line.js',
+                'addon/display/fullscreen.js',
+            ] as $file) $assets->addJS(VENDOR.'codemirror/'.$file);
+        }
         $groups = [];
         $active = '';
         foreach($this->adminPages as $path => $entry) {
@@ -383,8 +396,9 @@ class Admin extends myStep {
                 }
                 $groups[$entry['group']][] = ['url' => $this->url($path), 'label' => $entry['title'], 'current' => $path === $active?'page':'false'];
             }
+            require_once PLUGIN.'interface_plugin.class.php';
             $menu = json_decode(myFile::getLocal(APP . 'myStep/menu.json'), true);
-            foreach(is_array($menu)?($menu[array_key_last($menu)]['items']??[]):[] as $item) $groups['扩展'][] = ['url' => self::setURL($item['link']), 'label' => $item['name'], 'current' => 'false'];
+            foreach(pluginAdminMenu('Admin',is_array($menu)?($menu[array_key_last($menu)]['items']??[]):[]) as $item) $groups['扩展'][] = ['url' => $item['link'], 'label' => $item['name'], 'current' => 'false'];
         }
         $navigation = [];
         foreach($groups as $titleGroup => $links) $navigation[] = ['content' => $this->view('navigation_group', ['title' => $titleGroup], ['links' => $links])];

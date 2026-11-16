@@ -20,4 +20,5 @@
 
 <button class="adm-button" type="submit">删除文件</button>
 </form><!--if:end-->
+<a class="adm-button" href="<!--guide_url|html-->" target="_blank" rel="noopener noreferrer">指南</a>
 </div>

@@ -1,6 +1,7 @@
 body {
     overflow-x:hidden;
 }
+.breadcrumb-item.cms-tag-current { min-width: 0; }
 a:hover {
     color:#fa5ba5;
     text-decoration:none;

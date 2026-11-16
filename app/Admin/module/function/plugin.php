@@ -14,13 +14,14 @@ return [
      * @return string 插件安装、启停、顺序、导出和卸载
      */
     'plugins' => function() {
+        require_once PLUGIN.'interface_plugin.class.php';
         $installed = $this->installed();
         $catalog = $this->catalog(PLUGIN);
         $rows = $orders = [];
         foreach($catalog as $id => $info) {
             $record = $installed[$id]??null;
             $active = $record && trim($record['active']) === '1';
-            $actions = $this->ui->view('plugin_actions', ['toggle_label' => $active ? '停用' : '启用', 'idx' => $id, 'setting_url' => $this->ui->url($record?'function/plugin/setting':'function/plugin/view', ['idx'=>$id])], [], ['installed' => (bool)$record]);
+            $actions = $this->ui->view('plugin_actions', ['guide_url'=>pluginGuideURL($id), 'toggle_label' => $active ? '停用' : '启用', 'idx' => $id, 'setting_url' => $this->ui->url($record?'function/plugin/setting':'function/plugin/view', ['idx'=>$id])], [], ['installed' => (bool)$record]);
             if($record) $orders[] = ['idx' => $id, 'name' => $info['name'], 'state' => $active ? '已启用' : '已停用', 'order' => (int)$record['order']];
             $rows[] = ['name'=>$info['name'], 'idx'=>$id, 'version'=>$info['ver'], 'state'=>$record?(trim($record['active'])==='1'?'已启用':'已停用'):'未安装', 'intro'=>$info['intro'], 'actions'=>$actions];
         }

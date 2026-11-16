@@ -1,5 +1,6 @@
 <?PHP
 require 'inc.php';
+require_once PLUGIN.'interface_plugin.class.php';
 // Basic Parameter init
 global $id, $web_info, $web_id, $group, $group_info;
 $mystep->regTag('pages', 'app\CMS\parsePages');
@@ -28,6 +29,9 @@ function checkPower($idx='func', $val='', &$list=[]) {
     global $group_info;
     $result = false;
     if($idx=='func') {
+        if($val==='plugin/manage') {
+            return pluginAdminAuthorized($_GET['_plugin']??'',$_GET['_plugin_page']??'','CMS');
+        }
         if($val=='' || $val=='info') return true;
         $admin_cat = \app\CMS\getCache('admin_cat')['admin_cat_plat'];
         $val = \app\CMS\checkVal($admin_cat, 'path', $val);
@@ -74,6 +78,7 @@ if(!empty($info_app['path'][1]) && is_dir(PATH.'module/admin/'.$info_app['path']
         myStep::info('module_missing');
     }
     if(!checkPower('func', implode('/', array_slice($info_app['path'],1,2)))) {
+        if($info_app['path'][1]==='plugin') http_response_code(403);
         myStep::info('admin_nopower', $path_admin);
     }
     $mystep->setAddedContent('end', '<script type="application/javascript" src="'.ROOT_WEB.'static/js/checkForm.js"></script>');
@@ -93,5 +98,8 @@ if(!empty($info_app['path'][1]) && is_dir(PATH.'module/admin/'.$info_app['path']
     $t->assign('path_admin', $path_admin);
     $t->assign('websites', myString::toJson($website));
     $t->assign('web_id', $web_info['web_id']);
+    $pluginLinks=array_values(array_filter(pluginAdminLinks('CMS'),static fn($entry)=>pluginAdminAuthorized($entry['idx'],$entry['page'],'CMS')));
+    $t->setIf('plugin_menu',count($pluginLinks)>0);
+    $t->setLoop('plugin_menu',$pluginLinks,true);
     $content = $mystep->render($t);
 }

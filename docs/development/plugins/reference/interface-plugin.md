@@ -52,6 +52,15 @@ class plugin_hello implements interface_plugin {
 | `changePluginRoute` | 持有源映射旁路锁，合并插件映射并调用路由器同步编译规则。 |
 | `savePluginFile` | 先完整写入同目录临时文件，再原子替换配置/脚本，并清除对应 OPcache。 |
 | `setPluginTemplate` | 创建外层页面模板及插件内容模板，不覆盖应用全局模板配置。 |
+| `pluginFrameworkAdministrator` | 只校验框架管理员，用于受信源码和系统级操作。 |
+| `pluginAdminBackend` | 读取同名应用核心类的原生后台入口和授权回调。 |
+| `pluginAdminPages` | 读取插件info的admin声明及对应模块／模板白名单。 |
+| `pluginAppBindings` | 读取应用plugin.php的实际绑定。 |
+| `pluginManagementURL` | 保留原生后台、插件选择及业务分页的管理链接。 |
+| `pluginAdminLinks` | 按启用状态、绑定和运行顺序生成动态菜单。 |
+| `pluginAdminAuthorized` | 核验原生后台及插件委托的应用权限。 |
+| `pluginPageAdministrator` | 插件在已校验的当前模块中复核管理身份。 |
+| `pluginAdminMenu` | 合并静态框架菜单与动态声明并去重。 |
 | `pluginPageHost` | 检查应用是否提供通用插件后台布局适配器，myStep作为内置缺省后台。 |
 | `pluginPageApplication` | 从可信Referer识别插件页面的外层后台，缺省返回myStep。 |
 | `pluginPageURL` | 生成保留插件后台展示标记的页面链接，支持三种路由及原查询参数。 |
@@ -81,7 +90,7 @@ public static function check(&$result);
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`plugin/interface_plugin.class.php:63`。
+定位：`plugin/interface_plugin.class.php:76`。
 
 ### interface_plugin::install
 
@@ -101,7 +110,7 @@ public static function install();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`plugin/interface_plugin.class.php:73`。
+定位：`plugin/interface_plugin.class.php:86`。
 
 ### interface_plugin::uninstall
 
@@ -121,7 +130,7 @@ public static function uninstall();
 
 调用位置：由框架内部、PHP引擎或对应扩展协议触发。扩展时保留可见性、引用参数和父类／接口签名，不通过公开HTTP参数指定此方法。
 
-定位：`plugin/interface_plugin.class.php:83`。
+定位：`plugin/interface_plugin.class.php:96`。
 
 ### addPluginLink
 
@@ -146,7 +155,7 @@ function addPluginLink($name, $path);
 $result = addPluginLink($name, $path);
 ```
 
-定位：`plugin/interface_plugin.class.php:95`。
+定位：`plugin/interface_plugin.class.php:108`。
 
 ### removePluginLink
 
@@ -170,7 +179,7 @@ function removePluginLink($path);
 $result = removePluginLink($path);
 ```
 
-定位：`plugin/interface_plugin.class.php:122`。
+定位：`plugin/interface_plugin.class.php:135`。
 
 ### changePluginMenu
 
@@ -194,7 +203,7 @@ function changePluginMenu($change);
 $result = changePluginMenu($change);
 ```
 
-定位：`plugin/interface_plugin.class.php:159`。
+定位：`plugin/interface_plugin.class.php:172`。
 
 ### pluginDirectory
 
@@ -219,7 +228,7 @@ function pluginDirectory($idx, $required = true);
 $result = pluginDirectory($idx, $required);
 ```
 
-定位：`plugin/interface_plugin.class.php:185`。
+定位：`plugin/interface_plugin.class.php:198`。
 
 ### setPluginApps
 
@@ -248,7 +257,7 @@ function setPluginApps($idx, array $apps, array $required = []);
 $result = setPluginApps($idx, $apps, $required);
 ```
 
-定位：`plugin/interface_plugin.class.php:205`。
+定位：`plugin/interface_plugin.class.php:218`。
 
 ### setPluginOrder
 
@@ -275,7 +284,7 @@ function setPluginOrder(array $orders);
 $result = setPluginOrder($orders);
 ```
 
-定位：`plugin/interface_plugin.class.php:266`。
+定位：`plugin/interface_plugin.class.php:279`。
 
 ### buildPluginPackage
 
@@ -302,7 +311,7 @@ function buildPluginPackage($idx);
 $result = buildPluginPackage($idx);
 ```
 
-定位：`plugin/interface_plugin.class.php:317`。
+定位：`plugin/interface_plugin.class.php:330`。
 
 ### pluginQueryURL
 
@@ -325,7 +334,7 @@ function pluginQueryURL($url,$params=[]);
 $result = pluginQueryURL($url, $params);
 ```
 
-定位：`plugin/interface_plugin.class.php:354`。
+定位：`plugin/interface_plugin.class.php:367`。
 
 ### regPluginRoute
 
@@ -351,7 +360,7 @@ function regPluginRoute($idx);
 $result = regPluginRoute($idx);
 ```
 
-定位：`plugin/interface_plugin.class.php:379`。
+定位：`plugin/interface_plugin.class.php:392`。
 
 ### removePluginRoute
 
@@ -375,7 +384,7 @@ function removePluginRoute($idx);
 $result = removePluginRoute($idx);
 ```
 
-定位：`plugin/interface_plugin.class.php:393`。
+定位：`plugin/interface_plugin.class.php:406`。
 
 ### changePluginRoute
 
@@ -405,7 +414,7 @@ function changePluginRoute($idx, $remove = false);
 $result = changePluginRoute($idx, $remove);
 ```
 
-定位：`plugin/interface_plugin.class.php:413`。
+定位：`plugin/interface_plugin.class.php:426`。
 
 ### savePluginFile
 
@@ -432,7 +441,7 @@ function savePluginFile($file, $content);
 $result = savePluginFile($file, $content);
 ```
 
-定位：`plugin/interface_plugin.class.php:450`。
+定位：`plugin/interface_plugin.class.php:463`。
 
 ### setPluginTemplate
 
@@ -462,7 +471,7 @@ function setPluginTemplate($idx, $page='', $mode = true);
 $result = setPluginTemplate($idx, $page, $mode);
 ```
 
-定位：`plugin/interface_plugin.class.php:478`。
+定位：`plugin/interface_plugin.class.php:491`。
 
 ### pluginPageHost
 
@@ -486,7 +495,7 @@ function pluginPageHost($app);
 $result = pluginPageHost($app);
 ```
 
-定位：`plugin/interface_plugin.class.php:512`。
+定位：`plugin/interface_plugin.class.php:687`。
 
 ### pluginPageApplication
 
@@ -514,7 +523,7 @@ function pluginPageApplication($referer=null);
 $result = pluginPageApplication($referer);
 ```
 
-定位：`plugin/interface_plugin.class.php:530`。
+定位：`plugin/interface_plugin.class.php:705`。
 
 ### pluginPageURL
 
@@ -543,7 +552,7 @@ function pluginPageURL($url='', array $params=[], $app=null);
 $result = pluginPageURL($url, $params, $app);
 ```
 
-定位：`plugin/interface_plugin.class.php:571`。
+定位：`plugin/interface_plugin.class.php:746`。
 
 ### pluginAdminURL
 
@@ -574,13 +583,13 @@ function pluginAdminURL($path, array $params=[], $app=null);
 $result = pluginAdminURL($path, $params, $app);
 ```
 
-定位：`plugin/interface_plugin.class.php:594`。
+定位：`plugin/interface_plugin.class.php:769`。
 
 ### renderPluginPage
 
 功能说明：统一装配已启用插件的后台模块及内容模板，返回主体HTML。
 
-不重新启动插件、会话或宿主控制器。模块仍在独立函数作用域中执行，保留tpl、tpl_sub、
+不重新启动插件、会话或宿主控制器。原生应用仅对admin中app_admin=true的页面委托权限。模块仍在独立函数作用域中执行，保留tpl、tpl_sub、
 path_plugin、page_app以及配置别名；模块设置的content包括空串和0均原样采用。
 编译按插件及展示后台隔离，内容不缓存；展示上下文在正常返回或异常时恢复。
 
@@ -607,7 +616,7 @@ function renderPluginPage($idx, $page='', $app=null, $tpl=null);
 $result = renderPluginPage($idx, $page, $app, $tpl);
 ```
 
-定位：`plugin/interface_plugin.class.php:621`。
+定位：`plugin/interface_plugin.class.php:872`。
 
 ### showPluginPage
 
@@ -640,7 +649,7 @@ function showPluginPage($idx, $page='', $mode=null);
 $result = showPluginPage($idx, $page, $mode);
 ```
 
-定位：`plugin/interface_plugin.class.php:684`。
+定位：`plugin/interface_plugin.class.php:941`。
 
 ### setPriority
 
@@ -667,7 +676,7 @@ function setPriority($idx);
 $result = setPriority($idx);
 ```
 
-定位：`plugin/interface_plugin.class.php:738`。
+定位：`plugin/interface_plugin.class.php:995`。
 
 ### removePriority
 
@@ -691,4 +700,149 @@ function removePriority($idx);
 $result = removePriority($idx);
 ```
 
-定位：`plugin/interface_plugin.class.php:755`。
+定位：`plugin/interface_plugin.class.php:1012`。
+
+
+## 动态后台参数与示例
+
+这些接口使用当前框架会话与配置；原生应用必须先提供自己的登录路由和授权回调。
+
+### pluginFrameworkAdministrator
+
+无参数，返回bool。只在框架账号及sysop同时匹配时为true。
+
+```php
+if (!pluginFrameworkAdministrator()) {
+    throw new DomainException('仅框架管理员可以修改PHP源码');
+}
+```
+
+### pluginAdminBackend
+
+`pluginAdminBackend(string $app)` 返回array或null。app为应用目录名；返回的path是原生插件模块路由，authorize是接收idx/page的bool回调，admin_path可指定后台根路径。未接入返回null，声明不合法抛UnexpectedValueException。
+
+```php
+$backend = pluginAdminBackend('CMS');
+// ['path' => 'admin_cms/plugin/manage/', 'admin_path' => 'admin_cms',
+//  'authorize' => ['CMS', 'pluginAdminAuthorized']]
+```
+
+### pluginAdminPages
+
+`pluginAdminPages(string $idx)` 返回页面字典。idx为插件目录；只有info.admin中声明且实际具备同名module/template的页面才会返回。
+
+```php
+$pages = pluginAdminPages('cform');
+$name = $pages['manage']['name']; // 表单管理
+```
+
+### pluginAppBindings
+
+`pluginAppBindings(string $app)` 返回插件标识到true的字典。读取app/应用/plugin.php，重复标识去重；无效应用或缺失文件返回空数组。它不代表插件已启用，也不代替业务权限。
+
+```php
+$bound = isset(pluginAppBindings('CMS')['cform']);
+```
+
+### pluginManagementURL
+
+`pluginManagementURL($idx, $page='', array $params=[], $app=null)` 返回string。idx为插件目录，page为空时使用idx；params为业务查询参数；app为空时使用当前插件宿主，缺省myStep。原生后台的_plugin和_plugin_page不能被params改写，业务page仍用于分页。非法页面或宿主抛InvalidArgumentException。
+
+```php
+$url = pluginManagementURL('cform', 'manage', ['mid' => 12, 'page' => 2], 'CMS');
+// 后台路径依配置生成，例如：
+// /admin_cms/plugin/manage/?mid=12&page=2&_plugin=cform&_plugin_page=manage
+```
+
+### pluginAdminLinks
+
+`pluginAdminLinks(string $app)` 返回菜单列表。每项包含idx/page/name/url/app_admin/permission，顺序遵循已启用插件的order；myStep／Admin总后台包含全部已启用插件声明的页面，其他应用只包含实际绑定的页面。此函数返回候选项，当前用户权限还需筛选。
+
+```php
+$links = array_values(array_filter(
+    pluginAdminLinks('CMS'),
+    static fn($entry) => pluginAdminAuthorized($entry['idx'], $entry['page'], 'CMS')
+));
+$tpl->setLoop('plugin_menu', $links, true);
+```
+
+### pluginAdminAuthorized
+
+`pluginAdminAuthorized(string $idx, string $page, string $app)` 返回bool。原生应用入口要求插件启用、应用绑定、页面声明和真实控制器应用匹配。非框架管理员还要求app_admin=true且通过应用authorize回调；单纯布局选择不授予权限。
+
+```php
+if (!pluginAdminAuthorized('cform', 'manage', 'CMS')) {
+    http_response_code(403);
+    throw new DomainException('没有表单管理权限');
+}
+$content = renderPluginPage('cform', 'manage', 'CMS');
+```
+
+### pluginPageAdministrator
+
+`pluginPageAdministrator(string $idx)` 返回bool。框架管理员可通过；应用管理员仅在renderPluginPage已经授权的同一插件／应用上下文内通过。模块返回或抛异常后，该权限上下文自动恢复。
+
+```php
+// 放在cform自身的管理处理器内。
+if (!pluginPageAdministrator('cform')) {
+    throw new DomainException('需要表单管理权限');
+}
+```
+
+### pluginAdminMenu
+
+`pluginAdminMenu(string $app, array $legacy=[])` 返回name/link菜单项，保留原可选样式字段，link已经是生成后的URL。为框架后台合并原插件菜单与动态入口，声明admin的插件不再使用安装时遗留入口，并按URL去重。
+
+```php
+$items = pluginAdminMenu('Admin', $existingPluginMenu);
+// 交给模板时将name和link作为文本／属性转义，不再额外拼接根路径。
+```
+
+原生后台完整接入说明见[插件动态后台入口](../../../../plugin/README.md#19-应用后台动态入口)。
+
+### pluginCheckText
+
+`pluginCheckText($result)` 将插件条件检查中的HTML说明转换为可转义显示的多行文本。`result`为check返回的文本或HTML；br、段落和列表保留换行，版本比较中的`<9`、`<=`不会被当作标签误删，空内容显示统一提示。
+
+```php
+$text = pluginCheckText('PHP >=8.5.12且<9 / mbstring；需要可写目录');
+// PHP >=8.5.12且<9
+// mbstring
+// 需要可写目录
+```
+
+返回值仍为纯文本，模板使用`|html`转义并以pre-wrap显示；检查是否通过仍以原check的布尔结果为准。
+
+### pluginGuideURL
+
+`pluginGuideURL($idx, $fragment='')` 返回独立插件指南地址。`idx` 为插件目录名，`fragment` 是README标题生成的锚点，不含`#`。地址按当前框架 `router.mode` 生成，与插件安装／启用状态和后台会话无关；非法目录名或缺失目录抛出`InvalidArgumentException`。
+
+```php
+$url = pluginGuideURL('redis', 'setting-timeout');
+// rewrite：/plugin/guide?idx=redis#setting-timeout
+// path_info：/index.php/plugin/guide?idx=redis#setting-timeout
+// query_string：/index.php?/plugin/guide&idx=redis#setting-timeout
+```
+
+### pluginReadmeData
+
+`pluginReadmeData($idx)` 返回 `plugin_help_url` 和 `plugin_help_map` 两个字符串。只读取本插件根 `README.md` 的设置标题，不执行元信息或业务模块。没有可读文档时返回空地址和空JSON对象。链接直接进入插件统一guide，默认只解析所选插件README，文内公开Markdown引用由同一独立入口按受限ref阅读，不登记到框架指南的目录和搜索。
+
+```php
+$help = pluginReadmeData('redis');
+$tpl->assign($help); // HTML属性使用|html转义。
+```
+
+标题约定见[插件使用说明与设置帮助](../../../../plugin/README.md#插件使用说明与设置帮助)。
+
+### pluginReadmeControls
+
+`pluginReadmeControls($idx, $content)` 返回增加项目名称下方逐项帮助后的管理HTML。`idx` 为已验证插件名，`content` 为已生成HTML；原始控件与提交数据保持不变。它按README标题登记本地脚本和样式，没有文档时原样返回。业务管理入口继续负责身份验证，公开的README阅读页不承担业务授权。
+
+```php
+$content = pluginReadmeControls('cform', $content);
+```
+
+`renderPluginPage` 已自动调用，无需重复包裹。隐藏凭证及未声明说明的业务字段不会误加链接；已有填写帮助链接会复用，避免同一项目出现两条说明。
+
+插件guide的声明、读取、链接和页面输出统一位于 `plugin/guide.php`，不另建PHP类文件或模板脚本。README标题格式及独立CHANGELOG约定见[插件指南格式](../../../../plugin/README.md#指南与更新历史格式)。

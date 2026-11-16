@@ -11,6 +11,18 @@ $app_root = myStep::setURL($app_root);
 if($app_root=='/') $app_root = '';
 
 if(isset($tpl)) {
+    require_once PLUGIN.'interface_plugin.class.php';
+    $adminMenu=json_decode(myFile::getLocal(APP.'myStep/menu.json'),true);
+    $adminMenu=is_array($adminMenu)?$adminMenu:[];
+    $last=array_key_last($adminMenu);
+    foreach($adminMenu as $key=>&$group) {
+        $group['link']=($group['link']??'#')==='#'?'#':myStep::setURL($group['link']);
+        if($key===$last) $group['items']=pluginAdminMenu('myStep',$group['items']??[]);
+        else foreach($group['items'] as &$item) $item['link']=myStep::setURL($item['link']);
+        unset($item);
+    }
+    unset($group);
+    $tpl->assign('admin_menu_json',json_encode($adminMenu,JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_THROW_ON_ERROR));
     $tpl->assign('db', empty($ms_setting->db->password)?'n':'y')
         ->assign('path', trim($path, '/'))
         ->assign('path_root', ROOT_WEB)

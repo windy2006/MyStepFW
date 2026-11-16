@@ -1,6 +1,6 @@
 <?PHP
 return array(
-    'name' => 'MySQL 服务器设置',
+    'name' => '数据库设置',
     'list' => [
         'host' => array(
             'name' => '服务器地址',

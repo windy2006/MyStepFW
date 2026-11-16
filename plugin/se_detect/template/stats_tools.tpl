@@ -1,0 +1,2 @@
+<nav><a href="<!--rules|html-->">识别规则</a> · <a href="<!--visits|html-->">IP记录</a> · <a href="<!--daily|html-->">每日统计</a></nav><form method="post" action="<!--url|html-->"><!--csrf--><input type="hidden" name="action" value="export_stats"><button class="btn btn-light">导出全部统计JSON</button></form>
+<form method="post" action="<!--url|html-->"><!--csrf--><button class="btn btn-light" name="action" value="refresh_catalog">补充内置规则</button></form>

@@ -11,6 +11,7 @@
 - [memcached · 应用缓存后端替换](memcached.md)
 - [redis · 缓存、会话与业务连接](redis.md)
 - [social · 第三方会员登录](social.md)
+- [wechat · 微信网页功能](wechat.md)
 - [sample · 插件机制演示](sample.md)
 
 [文档总览](../../README.md)

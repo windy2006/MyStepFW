@@ -49,7 +49,7 @@
 </footer>
 <script type="application/javascript">
 if(self!=top) top.location.href = location.href;
-$.get('<!--url_prefix-->app/myStep/menu.json?'+(new Date()).getTime(), function(data) {
+(function(data) {
     let obj_top = $("#top_nav");
     let obj_side = $("#list > div:first");
     let obj = {}, obj_sub = {};
@@ -57,7 +57,7 @@ $.get('<!--url_prefix-->app/myStep/menu.json?'+(new Date()).getTime(), function(
         if(typeof data[i].link == 'undefined') data[i].link = "#";
         if(typeof data[i].icon == 'undefined') data[i].icon = "glyphicon glyphicon-asterisk";
         obj = $('<li class="nav-item dropdown"></li>');
-        obj.append($('<a class="nav-link" href="<!--url_prefix-->'+data[i].link+'"><span class="'+data[i].icon+'"></span> '+data[i].name+'</a>'));
+        obj.append($('<a class="nav-link" href="'+data[i].link+'"><span class="'+data[i].icon+'"></span> '+data[i].name+'</a>'));
         if(data[i].items.length===0) {
             obj_top.append(obj);
             continue;
@@ -66,13 +66,13 @@ $.get('<!--url_prefix-->app/myStep/menu.json?'+(new Date()).getTime(), function(
             obj.find('a:first').addClass("dropdown-toggle").attr("data-toggle", "dropdown");
             obj_sub = $('<div class="dropdown-menu dropdown-menu-left"></div>');
             for(let x=0, n=data[i].items.length;x<n;x++) {
-                $('<a>').addClass("dropdown-item").attr("href", '<!--url_prefix-->'+data[i].items[x].link).text(data[i].items[x].name).appendTo(obj_sub);
+                $('<a>').addClass("dropdown-item").attr("href", data[i].items[x].link).text(data[i].items[x].name).appendTo(obj_sub);
             }
             obj_sub.appendTo(obj);
         }
         obj_top.append(obj);
         for(let x=0, n=data[i].items.length;x<n;x++) {
-            obj = $('<a>').addClass("dropdown-item").attr("href", '<!--url_prefix-->'+data[i].items[x].link).text(" " + data[i].items[x].name);
+            obj = $('<a>').addClass("dropdown-item").attr("href", data[i].items[x].link).text(" " + data[i].items[x].name);
             if(typeof data[i].items[x].addon != 'undefined') obj.attr(data[i].items[x].addon);
             if(typeof data[i].items[x].icon == 'undefined') data[i].items[x].icon = data[i].icon;
             obj.prepend($('<span>').addClass(data[i].items[x].icon)).appendTo(obj_side);
@@ -98,7 +98,7 @@ $.get('<!--url_prefix-->app/myStep/menu.json?'+(new Date()).getTime(), function(
         $('a[href$="/db"]').hide();
     }
     setURL('<!--path_root-->');
-}, "json");
+})(<!--admin_menu_json-->);
 $('#list').mousewheel(function(e){
     let obj = $('#list > div');
     let top = parseInt(obj.css('top'));

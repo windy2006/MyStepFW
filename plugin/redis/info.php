@@ -7,6 +7,6 @@
  */
 global $mystep;
 $mystep->setLanguagePack(__DIR__.'/language/',$mystep->setting->gen->language);
-return ['name'=>$mystep->getLanguage('plugin_redis_name'),'idx'=>'redis','ver'=>'1.0.1',
+return ['name'=>$mystep->getLanguage('plugin_redis_name'),'idx'=>'redis','ver'=>'1.0.2',
     'intro'=>$mystep->getLanguage('plugin_redis_intro'),'copyright'=>$mystep->getLanguage('plugin_redis_copyright'),
     'description'=>$mystep->getLanguage('plugin_redis_description')];

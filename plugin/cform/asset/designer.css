@@ -1,0 +1,495 @@
+/* 仅作用于cform设计器；字段列表与独立浮动编辑层，不依赖宿主弹窗库。 */
+#cf-designer {
+    max-width: 1200px;
+    color: inherit;
+}
+#cf-designer [hidden] {
+    display: none !important;
+}
+#cf-designer .form-control {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+#cf-designer .cf-page-heading,
+#cf-designer .cf-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+#cf-designer h2 {
+    margin: 0 0 6px;
+}
+#cf-designer h3 {
+    font-size: 19px;
+    margin: 0 0 12px;
+}
+#cf-designer h4 {
+    font-size: 15px;
+    margin: 0 0 12px;
+}
+#cf-designer .cf-page-heading p,
+#cf-designer .cf-section-heading p {
+    color: #66758a;
+    font-size: 13px;
+    margin: 0 0 12px;
+}
+#cf-designer .cf-section {
+    padding: 20px;
+    border: 1px solid #dce3ec;
+    border-radius: 10px;
+    margin: 16px 0;
+    background: var(--surface, #fff);
+}
+#cf-designer .cf-basic-grid,
+#cf-designer .cf-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+}
+#cf-designer .cf-basic-grid > label,
+#cf-designer .cf-editor-grid > label {
+    display: block;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 0;
+}
+#cf-designer label > .form-control {
+    margin-top: 6px;
+}
+#cf-designer .cf-wide {
+    grid-column: 1/-1;
+}
+#cf-designer small {
+    display: block;
+    margin-top: 5px;
+    color: #67778b;
+    font-size: 12px;
+    font-weight: 400;
+}
+#cf-designer .cf-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    margin: 16px 0 8px;
+}
+#cf-designer .cf-flags label {
+    font-size: 14px;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+}
+#cf-designer .cf-flags input {
+    margin: 0;
+    accent-color: #287e8b;
+}
+#cf-designer .cf-toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+#cf-designer .cf-count {
+    font-size: 12px;
+    font-weight: 400;
+    color: #6b7a8c;
+    margin-left: 6px;
+}
+#cf-designer .cf-section-heading {
+    margin-bottom: 16px;
+}
+
+#cf-designer .cf-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e4e9f0;
+    border-radius: 7px;
+}
+#cf-designer .cf-field-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+#cf-designer .cf-field-table th {
+    background: #f5f7fa;
+    color: #526278;
+    font-weight: 600;
+    white-space: nowrap;
+}
+#cf-designer .cf-field-table th,
+#cf-designer .cf-field-table td {
+    padding: 11px 12px;
+    vertical-align: middle;
+    text-align: left;
+    border-bottom: 1px solid #e8edf3;
+}
+#cf-designer .cf-field-table tr:last-child td {
+    border-bottom: 0;
+}
+#cf-designer .cf-field-table tbody tr:hover {
+    background: #f8fafc;
+}
+#cf-designer .cf-field-table td:nth-child(1) {
+    width: 48px;
+    color: #7c8a9c;
+}
+#cf-designer .cf-field-table td:nth-child(2) {
+    font-family: ui-monospace, monospace;
+    color: #53677f;
+}
+#cf-designer .cf-field-table td:nth-child(5) {
+    max-width: 250px;
+    overflow-wrap: anywhere;
+    color: #6c7b8d;
+}
+#cf-designer .cf-row-actions {
+    display: flex;
+    gap: 4px;
+    white-space: nowrap;
+}
+#cf-designer .cf-row-actions button {
+    font-size: 12px;
+    padding: 3px 7px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: #216d97;
+    cursor: pointer;
+}
+#cf-designer .cf-row-actions button:hover {
+    background: #eaf2f8;
+}
+#cf-designer .cf-row-actions button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+#cf-designer .cf-row-actions button[data-action="delete"] {
+    color: #b14949;
+}
+#cf-designer .cf-field-name {
+    display: block;
+    font-weight: 500;
+}
+#cf-designer .cf-badges {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+#cf-designer .cf-badge {
+    font-size: 11px;
+    color: #66758a;
+    background: #eef2f6;
+    border-radius: 3px;
+    padding: 1px 5px;
+}
+#cf-designer .cf-more summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+#cf-designer .cf-more[open] > .cf-basic-grid {
+    margin-top: 20px;
+}
+#cf-designer .cf-more textarea {
+    min-height: 100px;
+}
+#cf-designer .cf-save-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin: 20px 0 8px;
+}
+#cf-designer .cf-save-bar small {
+    margin: 0;
+}
+#cf-designer .cf-error,
+#cf-designer #cf-design-error {
+    color: #b42318;
+    white-space: pre-wrap;
+    margin: 10px 0 0;
+}
+#cf-designer .cf-dialog {
+    position: fixed;
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    width: min(760px, calc(100% - 32px));
+    max-width: calc(100% - 32px);
+    max-height: 92vh;
+    max-height: 92dvh;
+    padding: 0;
+    border: 1px solid #d7e0eb;
+    border-radius: 12px;
+    box-shadow: 0 24px 90px #0e1b3440;
+    background: #fff;
+    color: #26374c;
+    z-index: 10000;
+}
+#cf-designer .cf-dialog::backdrop {
+    background: #15243c80;
+}
+#cf-designer .cf-dialog:not([open]) {
+    display: none;
+}
+#cf-designer .cf-dialog[open] {
+    display: flex;
+    flex-direction: column;
+}
+#cf-designer .cf-dialog > form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+    max-height: 92vh;
+    max-height: 92dvh;
+    margin: 0;
+}
+#cf-designer .cf-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e3e9f1;
+    flex-shrink: 0;
+}
+#cf-designer .cf-modal-header h3 {
+    margin: 0 0 6px;
+}
+#cf-designer .cf-modal-header p,
+#cf-designer .cf-editor-part > p {
+    margin: 0;
+    color: #718095;
+    font-size: 12px;
+}
+#cf-designer .cf-close {
+    font-size: 26px;
+    line-height: 1;
+    background: transparent;
+    border: 0;
+    color: #738198;
+    cursor: pointer;
+    padding: 0 4px;
+}
+#cf-designer .cf-modal-body {
+    padding: 22px 24px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    min-height: 0;
+}
+#cf-designer .cf-editor-part {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #e5ebf2;
+}
+#cf-designer .cf-editor-part > .cf-editor-grid {
+    margin-top: 12px;
+}
+#cf-designer .cf-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #e3e9f1;
+    flex-shrink: 0;
+    background: #f8fafc;
+}
+#cf-designer .cf-footer-spacer {
+    flex: 1;
+}
+#cf-designer .cf-json-editor {
+    font-family: ui-monospace, monospace;
+    min-height: 300px;
+    font-size: 12px;
+}
+#cf-designer .cf-dialog textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+#cf-designer .cf-dialog:focus {
+    outline: none;
+}
+#cf-designer .cf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: #15243c80;
+    z-index: 9999;
+}
+@media (max-width: 620px) {
+    #cf-designer .cf-section {
+        padding: 14px;
+    }
+    #cf-designer .cf-basic-grid,
+    #cf-designer .cf-editor-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    #cf-designer .cf-modal-header,
+    #cf-designer .cf-modal-footer {
+        padding: 14px 16px;
+    }
+    #cf-designer .cf-modal-body {
+        padding: 16px;
+    }
+    #cf-designer .cf-dialog {
+        width: calc(100% - 16px);
+        max-width: calc(100% - 16px);
+    }
+    #cf-designer .cf-save-bar small {
+        width: 100%;
+    }
+    #cf-designer .cf-field-table {
+        min-width: 720px;
+    }
+}
+
+#cf-designer .cf-drag-handle {
+    border: 0;
+    background: transparent;
+    color: #526b86;
+    font-size: 22px;
+    padding: 0 8px 0 0;
+    cursor: grab;
+    touch-action: none;
+    vertical-align: middle;
+}
+#cf-designer .cf-drag-handle:focus-visible {
+    outline: 2px solid #287e8b;
+    outline-offset: 2px;
+}
+#cf-designer .cf-field-table .cf-dragging {
+    background: #e0f2f5;
+    outline: 2px solid #287e8b;
+    outline-offset: -2px;
+}
+body.cf-sorting,
+body.cf-sorting * {
+    cursor: grabbing !important;
+    user-select: none !important;
+}
+#cf-designer .cf-field-table td:first-child {
+    white-space: nowrap;
+    width: 70px;
+}
+
+#cf-designer .cf-source-editor {
+    font:
+        13px/1.6 ui-monospace,
+        monospace;
+    min-height: 300px;
+    white-space: pre;
+    tab-size: 4;
+}
+#cf-designer [data-cf-default-source] {
+    max-height: 300px;
+    overflow: auto;
+    background: #f5f7fa;
+    padding: 12px;
+    white-space: pre-wrap;
+}
+#cf-designer #cf-template-select {
+    max-width: 420px;
+}
+#cf-designer [data-cf-template-panel] {
+    margin-top: 20px;
+}
+
+#cf-designer .CodeMirror {
+    border: 1px solid #c4cfdd;
+    border-radius: 6px;
+    font:
+        13px/1.65 ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Consolas,
+        monospace;
+    margin-bottom: 12px;
+    max-width: 100%;
+    text-align: left;
+}
+#cf-designer .CodeMirror pre {
+    background: none;
+    border: 0;
+    padding: 0 4px;
+    white-space: pre;
+    overflow: visible;
+    font: inherit;
+    word-break: normal;
+}
+#cf-designer .CodeMirror textarea {
+    min-height: 0;
+    width: auto;
+    max-width: none;
+    padding: 0;
+    border: 0;
+}
+#cf-designer .CodeMirror-gutters {
+    background: #f5f7fa;
+    border-right: 1px solid #e0e6ee;
+}
+#cf-designer .CodeMirror-activeline-background {
+    background: #f0f7fc;
+}
+
+/* 导入／导出的源码编辑区占满浮动层可用空间。 */
+#cf-designer #cf-import-dialog {
+    width: min(1100px, calc(100% - 32px));
+    height: min(780px, 92vh);
+    height: min(780px, 92dvh);
+}
+
+#cf-designer #cf-import-editor {
+    height: 100%;
+}
+
+#cf-designer #cf-import-dialog .cf-modal-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+#cf-designer #cf-import-dialog .cf-modal-body > label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+}
+
+#cf-designer #cf-import-json {
+    flex: 1;
+    width: 100%;
+    min-height: 180px;
+    resize: none;
+}
+
+#cf-designer #cf-import-error:empty,
+#cf-designer #cf-copy-status:empty {
+    display: none;
+}
+
+#cf-designer[data-cf-recovery="1"] [aria-labelledby="cf-basic-title"],
+#cf-designer[data-cf-recovery="1"] [aria-labelledby="cf-fields-title"],
+#cf-designer[data-cf-recovery="1"] .cf-save-bar small {
+    display: none;
+}
+#cf-designer .cf-recovery-link {
+    margin-left: 16px;
+}
+#cf-designer .cf-recovery-link[href=""] {
+    display: none;
+}
+
+#cf-designer [data-cf-event-note]:empty {
+    display: none;
+}

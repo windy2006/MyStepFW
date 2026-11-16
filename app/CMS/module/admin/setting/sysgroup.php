@@ -48,6 +48,10 @@ function build_page($method) {
     } else {
         $admin_cat = $admin_cat['admin_cat_plat'];
     }
+    foreach(pluginAdminLinks('CMS') as $entry) {
+        if(!$entry['app_admin']) continue;
+        $admin_cat[]=['id'=>$entry['permission'],'pid'=>0,'name'=>'插件：'.$entry['name']];
+    }
     $tpl_setting['name'] = 'set_sysgroup_'.($method=='list'?'list':'input');
     $tpl = new myTemplate($tpl_setting, false);
 
@@ -66,7 +70,7 @@ function build_page($method) {
                 $record['power_func'] = '';
                 for($i=0,$m=count($thePowerFunc); $i<$m; $i++) {
                     $theFunc = \app\CMS\getPara($admin_cat, 'id', $thePowerFunc[$i]);
-                    $record['power_func'] .= $theFunc['name'].', ';
+                    $record['power_func'] .= (is_array($theFunc)?$theFunc['name']:$thePowerFunc[$i]).', ';
                 }
                 $record['power_func'] = substr($record['power_func'], 0, -2);
             }

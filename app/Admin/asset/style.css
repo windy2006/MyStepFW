@@ -224,6 +224,13 @@
 .adm-config-row > small { grid-column: 2; color: #63748c; }
 .adm-config-row > small:empty { display: none; }
 .adm-config-control { min-width: 0; }
+.adm-alias-control { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-width: 0; }
+.adm-alias-control input { flex: 1 1 180px; min-width: 0; }
+.adm-alias-control .adm-button { flex-shrink: 0; white-space: nowrap; }
+.adm-method-heading { display: grid; grid-template-columns: minmax(130px, 22%) minmax(0, 1fr); align-items: center; gap: 20px; grid-column: 1 / -1; min-width: 0; }
+.adm-panel .adm-method-heading h3 { margin: 0; overflow-wrap: anywhere; }
+.adm-method-heading .adm-field { margin: 0; min-width: 0; }
+.adm-method-row > pre { grid-column: 1 / -1; margin: 6px 0 0; }
 .adm-panel-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .adm-panel .adm-panel-heading h2, .adm-panel .adm-panel-heading form { margin: 0; }
 .adm-help { color: #63748c; margin: 0 0 16px; line-height: 1.8; }
@@ -235,6 +242,7 @@
     .adm-config-rows > .adm-config-row { grid-template-columns: minmax(0, 1fr); padding: 14px; }
     .adm-config-row > span { padding-top: 0; }
     .adm-config-row > small { grid-column: 1; }
+    .adm-method-heading { grid-template-columns: minmax(0, 1fr); gap: 10px; }
 }
 
 /* PHP 7.4 phpinfo原生样式；限定内容区域，表格自适应并保留溢出滚动。 */
@@ -259,3 +267,22 @@
 #adm-phpinfo hr { width: 934px; max-width: 100%; background-color: #ccc; border: 0; height: 1px; }
 
 .adm-api-settings form>.adm-field{padding:14px 16px;border-bottom:1px solid var(--line,#dfe5ee)}.adm-api-settings form>.adm-field:nth-of-type(even){background:#f3f6fa}.adm-api-settings h2{margin-bottom:14px}
+
+/* 源码框复用本地CodeMirror，限制表格列宽并保持窄屏可用。 */
+.adm-panel .adm-code-editor {
+    max-width: 100%;
+    min-width: 0;
+    border: 1px solid #d9e1ee;
+    border-radius: 6px;
+    font: 13px/1.7 ui-monospace, SFMono-Regular, monospace;
+}
+.adm-panel .adm-code-editor.CodeMirror-focused { border-color: #3675cf; box-shadow: 0 0 0 2px #3675cf1a; }
+.adm-panel .adm-code-editor.is-invalid { border-color: #c03942; }
+.adm-panel .adm-code-editor textarea { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.adm-panel .adm-code-editor .CodeMirror-gutters { background: #f4f6fa; border-right: 1px solid #e3e8f0; }
+.adm-panel .adm-code-editor.CodeMirror-fullscreen { z-index: 1100; border-radius: 0; }
+#class-rows { table-layout: fixed; min-width: 720px; }
+#class-rows th:nth-child(1) { width: 20%; }
+#class-rows th:nth-child(2) { width: 17%; }
+#class-rows th:nth-child(3) { width: 48%; }
+#class-rows th:nth-child(4) { width: 15%; }

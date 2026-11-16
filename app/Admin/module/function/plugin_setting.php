@@ -16,6 +16,9 @@ return [
     'pluginSettings' => function() {
         $id = $this->ui->input('idx');
         list($dir, $class, $info) = $this->plugin($id);
+        $help = pluginReadmeData($id);
+        $this->ui->addJS(STATICS.'js/pluginHelp.js');
+        $this->ui->addCSS(STATICS.'css/pluginHelp.css');
         $installed = isset($this->installed()[$id]);
         $result = '';
         $canInstall = $class::check($result);
@@ -33,7 +36,7 @@ return [
             $selected = in_array($app,$mandatory,true) || in_array($id,AdminStore::read(APP.$app.'/plugin.php'),true);
             $apps[] = ['id'=>$app, 'name'=>$meta['name'], 'selected'=>$selected?'checked':''];
         }
-        return $this->ui->view($installed?'function_plugin_setting':'function_plugin_view', ['idx'=>$id,'name'=>$info['name']??$id,'intro'=>$info['intro']??'','check_result'=>strip_tags($result),'check_label'=>$canInstall?'通过':'未通过','config_fields'=>$configFields,'version'=>$version,'registry_version'=>AdminStore::version(PLUGIN.'plugin.db')], ['apps'=>$apps], ['can_install'=>$installed || $canInstall]);
+        return $this->ui->view($installed?'function_plugin_setting':'function_plugin_view', $help+['idx'=>$id,'name'=>$info['name']??$id,'intro'=>$info['intro']??'','description'=>$info['description']??($info['intro']??''),'check_result'=>pluginCheckText($result),'check_label'=>$canInstall?'通过':'失败','check_state'=>$canInstall?'pass':'fail','config_fields'=>$configFields,'version'=>$version,'registry_version'=>AdminStore::version(PLUGIN.'plugin.db')], ['apps'=>$apps], ['can_install'=>$installed || $canInstall]);
     },
     /**
      * 功能说明：执行受信插件安装并登记注册表和应用绑定。

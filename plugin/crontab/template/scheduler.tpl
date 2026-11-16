@@ -1,0 +1,1 @@
+<p>调度状态：<strong><!--status|html--></strong> · <a href="<!--logs|html-->">执行日志（最近200条）</a></p><form method="post" action="<!--url|html-->"><!--csrf--><button class="btn btn-primary" name="action" value="start">启动调度</button><button class="btn btn-light" name="action" value="stop">停止调度</button><button class="btn btn-light" name="action" value="tick">检查到期任务</button></form>

@@ -3,9 +3,9 @@
         <div class="col-12 col-lg-8 p-0">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-0 d-flex">
-                    <li class="breadcrumb-item p-2"><a href="<!--url_prefix_app-->"><span class="glyphicon glyphicon-home"></span> 首页</a></li>
-                    <li class="breadcrumb-item p-2"><a href="<!--url_prefix_app-->tag">文章标签</a></li>
-                    <li class="breadcrumb-item p-2 flex-grow-1"><!--tag--></li>
+                    <li class="breadcrumb-item p-2 flex-shrink-0"><a href="<!--url_prefix_app-->"><span class="glyphicon glyphicon-home"></span> 首页</a></li>
+                    <li class="breadcrumb-item p-2 flex-shrink-0"><a href="<!--url_prefix_app-->tag">文章标签</a></li>
+                    <li class="breadcrumb-item p-2 flex-grow-1 cms-tag-current" aria-current="page"><span class="d-block text-truncate" title="<!--tag|html-->"><!--tag|html--></span></li>
                 </ol>
             </nav>
             <!--tag limit="20" count="2"-->

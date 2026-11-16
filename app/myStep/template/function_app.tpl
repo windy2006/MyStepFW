@@ -4,6 +4,7 @@
     </div>
     <div class="card-body p-0">
         <form method="post">
+            <input type="hidden" name="plugin_registry_version" value="<!--plugin_registry_version|html-->" />
 <!--loop:start key="app"-->
             <table class="table table-sm table-striped table-hover mb-4 border-bottom">
                 <tr>
@@ -14,6 +15,7 @@
                         <a href="<!--path_admin-->/function/language?app=<!--app_app-->">【语言】</a>
                         <a href="#" data-toggle="modal" data-target="#plugin" data-app="<!--app_app-->">【插件】</a>
                         <a href="<!--url_prefix--><!--app_app-->" target="_blank">【查看】</a>
+                        <a href="<!--app_help_url|html-->" target="_blank" rel="noopener noreferrer">【说明】</a>
                         <!--app_update-->
                         <input type="hidden" name="plugin[]" id="<!--app_app-->" value="<!--app_plugin-->" />
                         <input type="hidden" name="name[]" value="<!--app_app-->" />
@@ -35,8 +37,9 @@
 <!--loop:end-->
             <table class="table table-sm table-striped table-hover mb-4 border-bottom">
                 <tr>
-                    <td width="100"><b>插件路由：</b></td>
+                    <td width="100"><b>路由扩展：</b></td>
                     <td>
+                        <p class="small text-muted mb-2">用于增加新的路由规则（格式参考框架路由规则说明）<br />路由源相对于网站根，例如 plugin/manager/route.php。</p>
                         <textarea name="route_plugin" class="form-control" rows="5"><!--route_plugin--></textarea>
                     </td>
                 </tr>
@@ -60,6 +63,7 @@
                 </button>
             </div>
             <div class="modal-body">
+                <p class="text-muted">仅列出已安装并启用的插件。</p>
                 <!--loop:start key="plugin"-->
                 <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="plugin_<!--plugin_idx-->" value="<!--plugin_idx-->" name="plugin" />

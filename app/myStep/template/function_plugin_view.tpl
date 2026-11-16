@@ -1,4 +1,4 @@
-<div class="card w-100 mb-5 mb-sm-2">
+<div class="card w-100 mb-5 mb-sm-2" data-plugin-help data-plugin-help-url="<!--plugin_help_url|html-->" data-plugin-help-map="<!--plugin_help_map|html-->">
     <div class="card-header bg-info text-white">
         <b><span class="glyphicon glyphicon-cog"></span> 插件安装 - “<!--name-->”</b>
     </div>
@@ -6,7 +6,7 @@
         <form method="post" class="form-inline" onsubmit="return checkForm(this)">
         <table class="table table-striped table-hover m-0">
             <tr>
-                <td class="text-center"><!--info--></td>
+                <td class="text-center"><strong class="plugin-check-status plugin-check-<!--check_state|html-->" role="status">条件检查：<!--check_label|html--></strong></td>
             </tr>
             <tr>
                 <td style="line-height:22px;">
@@ -16,7 +16,7 @@
                     <b>功能描述：</b><!--intro--><br />
                     <b>版权信息：</b><!--copyright--><br />
                     <b>检测信息：</b>
-                    <div style="margin-top:-22px;margin-left:70px;"><!--check--></div>
+                    <pre class="plugin-check-details"><!--check|html--></pre>
                     <b>插件简介：</b>
                     <div style="margin-top:-22px;margin-left:70px;"><!--description--></div>
                 </td>
@@ -40,11 +40,14 @@
             </tr>
             <tr>
                 <td align="center">
-                    <input type="hidden" value="<!--idx-->" name="idx" />
-                    <button class="btn btn-primary btn-sm mr-3 <!--btn_install-->" type="submit"> 安 装 </button>
-                    <button class="btn btn-primary btn-sm mr-3" type="button" onclick="location.reload()"> 复 查 </button>
-                    <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
-                    <button class="btn btn-primary btn-sm mr-3" type="button" onClick="history.go(-1)" > 返 回 </button>
+                    <div class="plugin-settings-actions plugin-settings-actions-center">
+                        <input type="hidden" value="<!--idx-->" name="idx" />
+                        <button class="btn btn-primary btn-sm <!--btn_install-->" type="submit"> 安 装 </button>
+                        <a class="btn btn-primary btn-sm" href="<!--plugin_help_url|html-->" target="_blank" rel="noopener noreferrer">插件说明</a>
+                        <button class="btn btn-primary btn-sm" type="button" onclick="location.reload()"> 复 查 </button>
+                        <button class="btn btn-primary btn-sm" type="reset"> 复 位 </button>
+                        <button class="btn btn-primary btn-sm" type="button" onClick="history.go(-1)" > 返 回 </button>
+                    </div>
                 </td>
             </tr>
         </table>

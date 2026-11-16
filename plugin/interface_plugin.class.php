@@ -10,6 +10,10 @@
  *   addPluginLink($name, $path) — 幂等增加/更新插件菜单，保留其余菜单内容。
  *   removePluginLink($path) — 删除指定插件的全部重复菜单项，空菜单回到框架插件管理入口。
  *   changePluginMenu($change) — 持有旁路锁执行菜单读改写，避免同时安装插件时丢失菜单。
+ *   pluginCheckText($result) — 保留换行与版本比较符号的检查说明纯文本转换。
+ *   pluginGuideURL($idx, $fragment = '') — 生成与插件README一对一的独立指南地址。
+ *   pluginReadmeData($idx) — 读取README设置标题及独立指南地址。
+ *   pluginReadmeControls($idx, $content) — 保持业务HTML原样，为管理页增加逐项说明容器。
  *   pluginDirectory($idx, $required = true) — 校验插件标识并返回目录，加载资源时同时检查目录存在且不是符号链接。
  *   setPluginApps($idx, array $apps, array $required = []) — 在有序文件锁内同步应用绑定，保留其他插件及强制绑定，无变化不重写。
  *   setPluginOrder(array $orders) — 在注册表单次排他读改写中校验并稳定保存0到99的运行顺序。
@@ -20,6 +24,15 @@
  *   changePluginRoute($idx, $remove = false) — 持有源映射旁路锁，合并插件映射并调用路由器同步编译规则。
  *   savePluginFile($file, $content) — 先完整写入同目录临时文件，再原子替换配置/脚本，并清除对应 OPcache。
  *   setPluginTemplate($idx, $page='', $mode = true) — 创建外层页面模板及插件内容模板，不覆盖应用全局模板配置。
+ *   pluginFrameworkAdministrator() — 独立判断框架管理员，源码权限使用此入口。
+ *   pluginAdminBackend($app) — 读取同名应用核心类的原生后台声明。
+ *   pluginAdminPages($idx) — 读取插件info中的管理模块白名单。
+ *   pluginAppBindings($app) — 读取应用plugin.php的实际插件绑定。
+ *   pluginManagementURL($idx, $page='', array $params=[], $app=null) — 生成保留原生后台上下文的管理地址。
+ *   pluginAdminLinks($app) — 按启用状态及应用绑定动态生成插件菜单数据。
+ *   pluginAdminAuthorized($idx, $page, $app) — 核验框架管理员或插件显式委托的应用权限。
+ *   pluginPageAdministrator($idx) — 在已授权的模块作用域内复核插件管理权限。
+ *   pluginAdminMenu($app, array $legacy=[]) — 合并原框架菜单与动态入口并去重。
  *   pluginPageHost($app) — 检查应用是否提供通用插件布局适配器。
  *   pluginPageApplication($referer=null) — 从可信来源识别外层后台，缺省myStep。
  *   pluginPageURL($url='', array $params=[], $app=null) — 为插件自身链接保留展示上下文。
@@ -502,6 +515,168 @@ function setPluginTemplate($idx, $page='', $mode = true) {
 }
 
 /**
+ * 功能说明：判断当前会话是否为框架管理员，不把应用管理员或布局标记当作授权。
+ * 参数说明：无显式参数。
+ * @return bool 框架管理员账号及sysop状态均匹配时为true
+ */
+function pluginFrameworkAdministrator() {
+    $user=$GLOBALS['ms_setting']->value('gen.s_usr');
+    return is_string($user) && $user!=='' && myReq::session('ms_user')===$user && myReq::session('sysop')==='y';
+}
+
+/**
+ * 功能说明：读取应用核心类声明的原生插件后台入口及授权回调，不启动应用或连接数据库。
+ * myStep和Admin沿用既有插件路由与布局；其他应用可在同名核心类中声明pluginBackend。
+ * @param string $app 应用目录名
+ * @return array|null path为站内框架路径，authorize为应用管理员校验回调，admin_path可指定后台根路径；未接入返回null
+ * @throws UnexpectedValueException 应用返回的入口声明不合法
+ */
+function pluginAdminBackend($app) {
+    if(!is_string($app) || !preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$app)) return null;
+    if(in_array($app,['myStep','Admin'],true)) return null;
+    $directory=APP.$app.'/';$file=$directory.$app.'.class.php';
+    if(is_link(rtrim($directory,'/')) || is_link($file) || !is_file($directory.'info.php') || !is_file($file)) return null;
+    if(!class_exists($app,false)) require_once $file;
+    if(!is_subclass_of($app,myStep::class) || !is_callable([$app,'pluginBackend'])) return null;
+    static $backends=[];
+    if(isset($backends[$app])) return $backends[$app];
+    $backend=$app::pluginBackend();
+    if(!is_array($backend) || !is_string($backend['path']??null) ||
+        !preg_match('#\A[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*/?\z#D',$backend['path']) ||
+        !is_callable($backend['authorize']??null)) throw new UnexpectedValueException('Invalid plugin backend declaration');
+    if(array_key_exists('admin_path',$backend) && (!is_string($backend['admin_path']) || !preg_match('#\A[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*/?\z#D',$backend['admin_path']))) throw new UnexpectedValueException('Invalid plugin backend root path');
+    return $backends[$app]=$backend;
+}
+
+/**
+ * 功能说明：读取插件info中的admin页面声明，页面须有同名module与template，不执行插件业务类。
+ * @param string $idx 插件标识
+ * @return array 页面名到name、path及app_admin声明的字典；未声明返回空数组
+ */
+function pluginAdminPages($idx) {
+    $directory=pluginDirectory($idx);
+    static $cache=[];
+    if(isset($cache[$directory])) return $cache[$directory];
+    $info=(static fn($file)=>include $file)($directory.'info.php');
+    $pages=[];
+    foreach(is_array($info['admin']??null)?$info['admin']:[] as $page=>$entry) {
+        if(!is_string($page) || !preg_match('/\A\w+\z/D',$page) || !is_array($entry) ||
+            !is_string($entry['name']??null) || trim($entry['name'])==='' ||
+            !is_file($directory.'module/'.$page.'.php') || !is_file($directory.'template/'.$page.'.tpl')) continue;
+        $path=$entry['path']??($idx.'/'.$page.'/');
+        if(!is_string($path) || !preg_match('#\A[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*/?\z#D',$path)) continue;
+        $pages[$page]=['name'=>$entry['name'],'path'=>$path,'app_admin'=>($entry['app_admin']??false)===true];
+    }
+    return $cache[$directory]=$pages;
+}
+
+/**
+ * 功能说明：读取应用当前生效插件绑定，目录标识必须有效；不把插件info.app当作实际绑定。
+ * @param string $app 应用目录名
+ * @return array 插件标识到true的字典
+ */
+function pluginAppBindings($app) {
+    if(!is_string($app) || !preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$app)) return [];
+    $file=APP.$app.'/plugin.php';
+    if(is_link(APP.$app) || is_link($file) || !is_file(APP.$app.'/info.php') || !is_file($file)) return [];
+    if(function_exists('opcache_invalidate')) opcache_invalidate($file,true);
+    $bindings=(static fn($path)=>include $path)($file);
+    return array_fill_keys(array_filter(is_array($bindings)?$bindings:[],static fn($name)=>is_string($name) && preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$name)),true);
+}
+
+/**
+ * 功能说明：生成插件管理链接，原生后台保留插件/页面选择，业务page分页参数不会冲突。
+ * @param string $idx 插件标识
+ * @param string $page 声明的后台页面，默认使用插件标识
+ * @param array $params 业务查询参数；不能覆盖原生入口的_plugin及_plugin_page
+ * @param string|null $app 宿主应用；null读取当前插件上下文，默认myStep
+ * @return string 支持框架三种路由的站内URL
+ * @throws InvalidArgumentException 插件页或展示应用不合法
+ */
+function pluginManagementURL($idx,$page='',array $params=[],$app=null) {
+    $pages=pluginAdminPages($idx);
+    if($page==='') $page=$idx;
+    if(!is_string($page) || !preg_match('/\A\w+\z/D',$page)) throw new InvalidArgumentException('Invalid plugin page');
+    if($app===null) $app=$GLOBALS['plugin_page_app']??'myStep';
+    $backend=pluginAdminBackend($app);
+    if($backend!==null) {
+        if(!isset($pages[$page])) throw new InvalidArgumentException('Plugin backend page is not declared');
+        unset($params['_plugin_app']);
+        return pluginQueryURL(myStep::setURL($backend['path']),array_replace($params,['_plugin'=>$idx,'_plugin_page'=>$page]));
+    }
+    return pluginPageURL(myStep::setURL($pages[$page]['path']??($idx.'/'.$page.'/')),$params,$app);
+}
+
+/**
+ * 功能说明：按注册表启用顺序实时生成后台入口，不写菜单或数据库。
+ * myStep/Admin总后台保留全部已启用插件入口，其他应用按plugin.php实际绑定筛选。
+ * @param string $app 宿主应用名；其他应用需在核心类声明pluginBackend
+ * @return array 每项包含idx/page/name/url/app_admin/permission；调用方仍须按用户权限筛选
+ */
+function pluginAdminLinks($app) {
+    if(!pluginPageHost($app) && pluginAdminBackend($app)===null) return [];
+    $central=in_array($app,['myStep','Admin'],true);
+    $bindings=$central?[]:pluginAppBindings($app);$links=[];
+    foreach(myStep::activePlugins() as $idx=>$unused) {
+        if((!$central && !isset($bindings[$idx])) || !is_file(PLUGIN.$idx.'/info.php') || is_link(PLUGIN.$idx)) continue;
+        foreach(pluginAdminPages($idx) as $page=>$entry) $links[]=$entry+[
+            'idx'=>$idx,'page'=>$page,'url'=>pluginManagementURL($idx,$page,[],$app),
+            'permission'=>'plugin:'.$idx.':'.$page
+        ];
+    }
+    return $links;
+}
+
+/**
+ * 功能说明：校验原生应用后台插件权限；应用授权须同时满足启用、绑定和插件显式委托。
+ * 其他应用只能在自己的真实控制器请求内授权；Referer、_plugin_app与请求参数不授予权限。
+ * @param string $idx 插件标识
+ * @param string $page 后台模块名
+ * @param string $app 宿主应用名
+ * @return bool 具备框架管理员权限或通过应用原生授权时为true
+ */
+function pluginAdminAuthorized($idx,$page,$app) {
+    if(!is_string($idx) || !preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$idx) || !is_string($page) || !preg_match('/\A\w+\z/D',$page)) return false;
+    if(!isset(myStep::activePlugins()[$idx]) || !is_file(PLUGIN.$idx.'/info.php') || is_link(PLUGIN.$idx)) return false;
+    if(in_array($app,['myStep','Admin'],true)) return pluginFrameworkAdministrator();
+    $backend=pluginAdminBackend($app);
+    if($backend===null) return pluginPageHost($app) && pluginFrameworkAdministrator();
+    $pages=pluginAdminPages($idx);
+    if(!isset(pluginAppBindings($app)[$idx],$pages[$page]) || ($GLOBALS['info_app']['app']??'')!==$app) return false;
+    if(pluginFrameworkAdministrator()) return true;
+    return $pages[$page]['app_admin'] && (bool)call_user_func($backend['authorize'],$idx,$page);
+}
+
+/**
+ * 功能说明：供插件自身复核管理员身份；应用委托仅在公共装配器验证后的当前模块作用域生效。
+ * @param string $idx 插件标识
+ * @return bool 框架管理员或当前已授权的同一插件管理上下文
+ */
+function pluginPageAdministrator($idx) {
+    if(pluginFrameworkAdministrator()) return true;
+    $context=$GLOBALS['plugin_admin_context']??[];
+    return ($context['authorized']??false)===true && ($context['idx']??'')===$idx && ($context['app']??'')===($GLOBALS['info_app']['app']??null);
+}
+
+/**
+ * 功能说明：合并原框架插件菜单与动态声明；声明过admin的插件不再沿用安装时的静态入口。
+ * @param string $app 宿主后台
+ * @param array $legacy 原静态插件菜单项
+ * @return array name/link及原可选样式字段，link已是框架生成URL；按URL去重
+ */
+function pluginAdminMenu($app,array $legacy=[]) {
+    $items=[];
+    foreach($legacy as $item) {
+        if(!is_array($item) || !is_string($item['link']??null) || !is_string($item['name']??null)) continue;
+        $idx=explode('/',trim($item['link'],'/'))[0];
+        if(preg_match('/\A[a-zA-Z][a-zA-Z0-9_]*\z/D',$idx) && is_file(PLUGIN.$idx.'/info.php') && !is_link(PLUGIN.$idx) && pluginAdminPages($idx)) continue;
+        $item['link']=myStep::setURL($item['link']);$items[$item['link']]=$item;
+    }
+    foreach(pluginAdminLinks($app) as $entry) $items[$entry['url']]=['name'=>$entry['name'],'link'=>$entry['url']];
+    return array_values($items);
+}
+
+/**
  * 功能说明：检查应用是否提供通用插件后台布局适配器，myStep作为内置缺省后台。
  *
  * 仅检查应用标识及固定文件，不由请求参数指定包含路径，也不读取应用业务配置。
@@ -594,16 +769,92 @@ function pluginPageURL($url='', array $params=[], $app=null) {
 function pluginAdminURL($path, array $params=[], $app=null) {
     if($app===null) $app=$GLOBALS['plugin_page_app']??'myStep';
     if(!pluginPageHost($app)) throw new InvalidArgumentException('Invalid plugin presentation application');
-    $prefix=$app==='myStep'?trim($GLOBALS['ms_setting']->gen->path_admin,'/'):$app;
+    if($app==='myStep') {
+        $prefix=$GLOBALS['ms_setting']->value('gen.path_admin','');
+        if(!is_string($prefix) || $prefix==='') {
+            $config=new myConfig(APP.'myStep/config.php');
+            $prefix=$config->value('gen.path_admin','console');
+        }
+        $prefix=trim($prefix,'/');
+    } else $prefix=$app;
     return pluginQueryURL(myStep::setURL($prefix.'/'.ltrim($path,'/')),$params);
+}
+
+/**
+ * 功能说明：把插件条件检查说明转换为可转义显示的多行文本。
+ *
+ * 保留br及列表／段落换行，去除展示标签；先保护<9、<=等比较文本，避免strip_tags
+ * 将版本范围及后续说明误删。输出仍是纯文本，模板必须使用|html转义。
+ * @param string $result 插件check输出的文本或HTML说明
+ * @return string 规范化换行的完整文本；空说明使用统一提示
+ */
+function pluginCheckText($result) {
+    $text=is_scalar($result)?(string)$result:'';
+    $text=preg_replace('~<(script|style)\b[^>]*>.*?</\1\s*>~is','',$text);
+    $text=preg_replace('~<br\b[^>]*>|</(?:p|div|li|tr|h[1-6])\s*>~i',"\n",$text);
+    $text=preg_replace('~<(?!/?[a-zA-Z!])~','&lt;',$text);
+    $text=html_entity_decode(strip_tags($text),ENT_QUOTES|ENT_HTML5,'UTF-8');
+    $text=str_replace(["\r\n","\r",'；'],["\n","\n","\n"],$text);
+    $text=preg_replace('~[ \t]+/[ \t]+~',"\n",$text);
+    $text=preg_replace('/[ \t]*\n[ \t]*/',"\n",$text);
+    $text=trim(preg_replace('/\n{3,}/',"\n\n",$text));
+    return $text===''?'无额外条件说明。':$text;
+}
+
+/**
+ * 功能说明：生成插件自身README的独立指南链接，不受安装、启用或后台路由限制。
+ * @param string $idx 插件目录名
+ * @param string $fragment 标题锚点，不含#（默认：''）
+ * @return string 遵循当前框架路由模式的插件guide URL，写入HTML属性前需转义
+ * @throws InvalidArgumentException 插件目录名不合法或目录不存在
+ */
+function pluginGuideURL($idx, $fragment='') {
+    pluginDirectory($idx);
+    require_once __DIR__.'/guide.php';
+    return (new pluginGuide(PLUGIN,ROOT_WEB,myStep::setURL('plugin/guide')))->url($idx,$fragment);
+}
+
+/**
+ * 功能说明：读取当前插件README的设置标题，准备与其一对一的帮助链接。
+ * @param string $idx 已存在的插件目录名
+ * @return array plugin_help_url、plugin_help_map；没有文档时返回空地址和空JSON
+ * @throws InvalidArgumentException 插件目录标识不合法或目录不存在
+ */
+function pluginReadmeData($idx) {
+    pluginDirectory($idx);
+    require_once __DIR__.'/guide.php';
+    $guide=new pluginGuide(PLUGIN,ROOT_WEB,myStep::setURL('plugin/guide'));
+    try {$text=$guide->read($idx);}
+    catch(OutOfBoundsException $error) {return ['plugin_help_url'=>'','plugin_help_map'=>'{}'];}
+    return ['plugin_help_url'=>$guide->url($idx),'plugin_help_map'=>json_encode((object)pluginGuide::settings($text),JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)];
+}
+
+/**
+ * 功能说明：给插件管理正文套用逐项说明容器，业务HTML与控件保持原样。
+ * @param string $idx 已验证的插件名
+ * @param string $content 模块已生成的HTML
+ * @return string 没有设置说明时返回原文；否则使用框架核心模板生成帮助容器
+ * @global myStep $mystep 当前宿主，负责登记本地脚本和样式
+ */
+function pluginReadmeControls($idx, $content) {
+    global $mystep;
+    $data=pluginReadmeData($idx);
+    if($data['plugin_help_url']==='') return $content;
+    $mystep->addJS(STATICS.'js/pluginHelp.js');
+    $mystep->addCSS(STATICS.'css/pluginHelp.css');
+    $template=new myTemplate(['name'=>'plugin_help','path'=>APP.'myStep/template/','style'=>'','path_compile'=>CACHE.'template/plugin_help/'],false);
+    $template->assign($data+['content'=>$content]);
+    return $mystep->render($template);
 }
 
 /**
  * 功能说明：统一装配已启用插件的后台模块及内容模板，返回主体HTML。
  *
+ * 原生应用后台仅对admin声明中app_admin=true的页面委托权限，其余仍要求框架管理员。
  * 不重新启动插件、会话或宿主控制器。模块仍在独立函数作用域中执行，保留tpl、tpl_sub、
  * path_plugin、page_app以及历史全局配置别名；模块设置的content包括空串和0均原样采用。
  * 编译按插件及展示后台隔离，内容不缓存；展示上下文在正常返回或异常时恢复。
+ * 按README设置标题增加独立插件指南链接，原有控件与表单处理保持不变。
  *
  * @param string $idx 插件目录名，必须已安装且启用
  * @param string $page 模块及模板同名页；空串使用插件名（默认：''）
@@ -620,16 +871,20 @@ function pluginAdminURL($path, array $params=[], $app=null) {
  */
 function renderPluginPage($idx, $page='', $app=null, $tpl=null) {
     global $mystep,$S,$ms_setting,$info_app;
-    $user=$ms_setting->gen->s_usr;
-    if(!is_string($user) || $user==='' || myReq::session('ms_user')!==$user || myReq::session('sysop')!=='y') throw new RuntimeException('Administrator login required');
     $path_plugin=pluginDirectory($idx);
     if(!isset(myStep::activePlugins()[$idx])) throw new InvalidArgumentException('Plugin is not active');
     if($page==='') $page=$idx;
     if(!is_string($page) || !preg_match('/\A\w+\z/D',$page)) throw new InvalidArgumentException('Invalid plugin page');
     if(!is_file($path_plugin.'template/'.$page.'.tpl')) throw new RuntimeException('Plugin page template is missing');
     if($app===null) $app=$GLOBALS['plugin_page_app']??($info_app['app']??'myStep');
-    if(!pluginPageHost($app)) throw new InvalidArgumentException('Invalid plugin presentation application');
+    if(!pluginPageHost($app) && pluginAdminBackend($app)===null) throw new InvalidArgumentException('Invalid plugin presentation application');
+    if(!pluginAdminAuthorized($idx,$page,$app)) {
+        http_response_code(403);
+        throw new RuntimeException('Administrator login required');
+    }
     $had=array_key_exists('plugin_page_app',$GLOBALS);$previous=$GLOBALS['plugin_page_app']??null;
+    $hadAdmin=array_key_exists('plugin_admin_context',$GLOBALS);$previousAdmin=$GLOBALS['plugin_admin_context']??null;
+    $GLOBALS['plugin_admin_context']=['idx'=>$idx,'page'=>$page,'app'=>$app,'authorized'=>true];
     $GLOBALS['plugin_page_app']=$page_app=$app;
     try {
         if(is_file($path_plugin.'class.php')) require_once $path_plugin.'class.php';
@@ -637,9 +892,10 @@ function renderPluginPage($idx, $page='', $app=null, $tpl=null) {
         if($tpl===null) $tpl=new myTemplate($GLOBALS['tpl_setting'],false);
         $tpl_sub=new myTemplate(['name'=>$page,'path'=>$path_plugin.'template/','style'=>'','path_compile'=>CACHE.'template/plugin/'.$idx.'/'.$app.'/'],false);
         $tpl_sub->assign('root_web',ROOT_WEB);
-        $tpl_sub->assign('path_admin',$app==='myStep'?($S instanceof myConfig?$S:$ms_setting)->value('gen.path_admin','console'):$app);
-        $tpl_sub->assign('plugin_setting_url',pluginAdminURL('function/plugin/setting/',['idx'=>$idx],$app));
-        $tpl_sub->assign('plugin_page_url',pluginPageURL('',[],$app));
+        $backend=pluginAdminBackend($app);
+        $tpl_sub->assign('path_admin',$app==='myStep'?($S instanceof myConfig?$S:$ms_setting)->value('gen.path_admin','console'):($backend['admin_path']??$app));
+        $tpl_sub->assign('plugin_setting_url',pluginFrameworkAdministrator()?pluginAdminURL('function/plugin/setting/',['idx'=>$idx],pluginPageHost($app)?$app:'myStep'):'');
+        $tpl_sub->assign('plugin_page_url',pluginAdminBackend($app)!==null?pluginManagementURL($idx,$page,[],$app):pluginPageURL('',[],$app));
         /**
          * 功能说明：隔离模块局部变量，保留历史模板和配置别名及显式输出内容。
          *
@@ -656,9 +912,10 @@ function renderPluginPage($idx, $page='', $app=null, $tpl=null) {
             if(is_file($path_plugin.'module/'.$page.'.php')) include $path_plugin.'module/'.$page.'.php';
             return isset($content)?$content:null;
         })($path_plugin,$page,$page_app,$tpl,$tpl_sub);
-        return $content!==null?$content:$mystep->render($tpl_sub);
+        return pluginReadmeControls($idx,$content!==null?$content:$mystep->render($tpl_sub));
     } finally {
         if($had) $GLOBALS['plugin_page_app']=$previous;else unset($GLOBALS['plugin_page_app']);
+        if($hadAdmin) $GLOBALS['plugin_admin_context']=$previousAdmin;else unset($GLOBALS['plugin_admin_context']);
     }
 }
 

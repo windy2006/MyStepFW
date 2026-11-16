@@ -3,6 +3,32 @@ class CMS extends myStep {
     public static $log = '';
 
     /**
+     * 功能说明：声明CMS原生插件管理入口；仅读取后台路径，不启动控制器或数据库。
+     * 参数说明：无显式参数。
+     * @return array path为框架相对路由，authorize为CMS组群权限回调
+     */
+    public static function pluginBackend(): array {
+        $config=new myConfig(__DIR__.'/config.php');
+        $path=trim((string)$config->value('web.path_admin','admin_cms'),'/');
+        return ['path'=>$path.'/plugin/manage/','admin_path'=>$path,'authorize'=>[self::class,'pluginAdminAuthorized']];
+    }
+
+    /**
+     * 功能说明：按CMS管理员会话及组群授权访问已委托的插件，不复用普通会员身份。
+     * @param string $idx 插件标识
+     * @param string $page 后台页面名
+     * @return bool 全部功能权限或单独plugin:插件:页面权限匹配时为true
+     */
+    public static function pluginAdminAuthorized(string $idx,string $page): bool {
+        if(($GLOBALS['info_app']['app']??'')!=='CMS' || !is_string(myReq::session('ms_cms_op')) || myReq::session('ms_cms_op')==='') return false;
+        $groups=\app\CMS\getCache('sys_group');
+        $group=\app\CMS\checkVal($groups,'group_id',myReq::session('ms_cms_group'));
+        if(!is_array($group)) return false;
+        $permissions=explode(',',(string)($group['power_func']??''));
+        return in_array('all',$permissions,true) || in_array('plugin:'.$idx.':'.$page,$permissions,true);
+    }
+
+    /**
      * 功能说明：构造CMS普通会员适配器；使用独立、抛异常的会员连接，避免认证事务失败进入页面错误回调。
      * 参数说明：无显式参数。
      * @return interface_user 普通会员适配器，不创建另一个控制器或自动迁移表

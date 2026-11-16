@@ -23,7 +23,12 @@ return [
         $reflection = new ReflectionClass($class);
         foreach($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             $name = $method->name;
-            $methods[] = ['name' => $name, 'doc' => $method->getDocComment()?:''];
+            $methods[] = [
+                'name' => $name,
+                'doc' => $method->getDocComment()?:'暂无方法说明。',
+                'alias' => strpos($name, '__') !== 0 ? (array_search($name, $aliases, true)?:'') : '',
+                'disabled' => strpos($name, '__') === 0 ? 'disabled' : '',
+            ];
             if(strpos($name, '__') !== 0) $editable[] = ['name' => $name, 'alias' => array_search($name, $aliases, true)?:''];
         }
         return $this->ui->view('setting_detail', ['class' => $class, 'version' => $version], ['methods' => $methods, 'aliases' => $editable]);

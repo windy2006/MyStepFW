@@ -106,6 +106,7 @@ app 是管理页的应用关联元信息，不是插件活动状态或 API 权�
 
 `config/default.php` 是默认配置表单说明，`language/default.php` 是界面语言文件，根 `config.php` 是当前值，三者不可互换。新旧管理页的语言选择和回退实现有所不同，需提供实际使用的语言版本，不假定任意缺失语言都会自动回退。
 
+
 ## 6. 两种页面装配及公共辅助函数
 
 `showPluginPage($idx, $page='', $mode=null)` 先检查框架后台登录、管理员权限及插件启用状态，再创建子模板、包含可选的 module/页名.php，最后交给外层布局显示。页名为空使用插件标识，对应 template/页名.tpl 必须存在。模块在独立函数作用域中执行，可使用 `$tpl_sub`、`$tpl`、`$path_plugin`、`$page_app` 和配置别名；不能照搬 index.php 的 `$this` 上下文。模块已设置 `$content` 时直接采用，包括空串及字符串0，避免重复渲染。
@@ -393,7 +394,7 @@ return ['Hello', 'pluginLayout'];
 
 应用核心类的 `public static pluginLayout($body, array $context)` 接收已经渲染的可信插件HTML，以及 `plugin/page/app/title` 上下文，返回 `myTemplate`，由原业务控制器统一输出。适配器在自己的应用目录内准备导航、对应功能模板和本地CSS/JS，遵循应用的模板path/style/default回退；不要重复执行 `myStep::init/start`、启动会话或替换业务配置、数据库、路由及控制器。临时模板／应用上下文必须在异常时也恢复。
 
-Admin实现位于 `app/Admin/plugin_layout.php` 和 `Admin::pluginLayout()`，通用功能模板为 `template/default/plugin.tpl`。自定义风格可提供 `main.tpl` 和 `plugin.tpl`，未提供时遵循原框架default回退；通用内容样式限定在 `.adm-plugin-page`。CSS/JS缓存按插件及布局配置隔离，页面和内容均不缓存。CMS等其他后台若要采用自身布局，需要按同一协议提供一次适配器。
+Admin实现位于 `app/Admin/plugin_layout.php` 和 `Admin::pluginLayout()`，通用功能模板为 `template/default/plugin.tpl`。自定义风格可提供 `main.tpl` 和 `plugin.tpl`，未提供时遵循原框架default回退；通用内容样式限定在 `.adm-plugin-page`。CSS/JS缓存按插件及布局配置隔离，页面和内容均不缓存。CMS通过原生后台入口承载插件页面，接入方法见下节。
 
 已有 `/Admin/manager/`、`plugin_manager::pageApplication()` 和 `pageContent()` 保留为入口，内部委托公共逻辑；新插件不复制manager的专用模块。页面鉴权、GET写入拒绝及POST CSRF验证仍由原框架和插件入口负责，展示适配不绕过这些流程。
 
@@ -407,6 +408,51 @@ myPacker、整站打包与文件校验共用 allow/ignore 解析：按当前目�
 
 开发指南中的 `docs/**/cache`、`docs/**/session` 是文档分类，不按运行缓存或会话过滤；源码目录中的缓存、会话及上传数据仍受保护。应用和插件发布白名单显式保留 README.md，使安装后的框架指南包含开发规范。
 
+## 19. 应用后台动态入口
+
+插件在 `info.php` 的 `admin` 中声明管理页，页面名与 `module/页面.php`、`template/页面.tpl` 对应。例如：
+
+```php
+'admin' => [
+    'manage' => [
+        'name' => '表单管理',
+        'path' => 'cform/manage/',
+        'app_admin' => true,
+    ],
+],
+```
+
+`name` 是菜单名称；`path` 是框架管理后台使用的插件路由，省略时为 `插件标识/页面/`。`app_admin` 默认为 false，只有明确设为 true 的页面才能交给应用管理员。源码编辑、系统设置等高权限操作应再次使用 `pluginFrameworkAdministrator()` 单独校验。
+
+插件管理中的“生效应用”保存到各应用的 `plugin.php`。`pluginAdminLinks('CMS')` 只列出已安装、启用、绑定且具备实际模块和模板的页面，顺序遵循插件运行顺序。取消绑定或停用后，新请求中的菜单和原生管理入口同时失效。无需安装时逐个改写应用菜单或业务数据库。 新旧框架总后台（myStep／Admin）保留全部已启用插件声明的管理入口，不受应用绑定限制；CMS等应用后台继续按绑定及用户权限筛选。
+
+| 接口 | 用途 |
+| --- | --- |
+| `pluginAdminLinks($app)` | 返回 idx、page、name、url、app_admin、permission；菜单展示前再按当前用户权限筛选 |
+| `pluginAdminAuthorized($idx, $page, $app)` | 复核实际应用、活动状态、绑定、页面声明和应用授权 |
+| `renderPluginPage($idx, $page, $app)` | 校验权限，在当前控制器内渲染插件主体，结束或异常后恢复上下文 |
+| `pluginManagementURL($idx, $page, $params, $app)` | 生成分页、表单及返回地址；省略app使用当前插件宿主 |
+| `pluginPageAdministrator($idx)` | 插件在已授权管理模块内部复核管理身份 |
+| `pluginFrameworkAdministrator()` | 仅判断框架管理员；用于PHP模板／扩展等受信源码操作 |
+
+接入应用在同名核心类提供 `public static pluginBackend(): array`，返回 `path`（原生后台模块的框架路由）和 `authorize`（接收插件标识、页面名并返回bool的权限回调），可选 `admin_path` 指定供主体模板使用的后台根路径。回调必须验证应用管理员身份及功能权限；普通会员登录不等于后台授权。应用后台模块调用 `renderPluginPage()`，HTML仍交给对应模板和当前控制器输出，不启动第二个框架或会话。
+
+CMS的实现为 `CMS::pluginBackend()`／`CMS::pluginAdminAuthorized()`，管理模块位于 `app/CMS/module/admin/plugin/manage.php`，对应 `template/admin/plugin_manage.tpl`。组群中可单独勾选“插件：表单管理”，存储的权限为 `plugin:cform:manage`；“全部权限”也允许访问。CMS菜单只展示当前用户可用的插件页。
+
+```php
+// 应用后台内：准备菜单数据，交给应用自己的模板。
+$links = array_values(array_filter(
+    pluginAdminLinks('CMS'),
+    static fn($entry) => pluginAdminAuthorized($entry['idx'], $entry['page'], 'CMS')
+));
+$tpl->setLoop('plugin_menu', $links, true);
+
+// 插件管理模块内部：保留宿主后台与业务分页参数。
+$url = pluginManagementURL('cform', 'manage', ['mid' => 12, 'page' => 2]);
+```
+
+原生入口用 `_plugin`／`_plugin_page` 固定选择声明的插件页，业务分页仍使用 `page`，不可从请求拼接任意包含路径。`_plugin_app` 和 Referer 仍只用于框架后台的外观选择，不授予应用管理员身份。应用插件入口应由既有登录路由和框架CSRF保护覆盖；写操作继续只接受POST。
+
 ## 存储插件的提前加载与管理验证
 
 普通`index.php`在框架缓存和登录Session之后执行。需要作为全局存储的插件应由显式选择触发`myStep::storagePlugin($id)`：插件必须已安装启用，`class.php`实现既有`interface_plugin`及静态`load()`方法；`check(&$result)`只检查环境，`load()`只加载声明，不擅自覆盖缓存或连接网络。全局存储不依赖应用绑定。
@@ -416,3 +462,68 @@ myPacker、整站打包与文件校验共用 allow/ignore 解析：按当前目�
 ## 普通会员认证插件范例
 
 [social第三方登录](social/README.md)将平台协议、身份存储、邮件流程及module/template保留在插件目录；公共myUser/interface_user属于框架，CMS适配器位于app/CMS/lib.php。初始化只登记模块，显式安装才准备数据库；表单使用checkForm，服务端复核CSRF。此模式适用于其他需要宿主业务服务的插件。
+
+## 插件使用说明与设置帮助
+
+每个插件在自己的根目录维护 `README.md`，介绍功能、安装和管理入口，并逐项解释全局参数及管理页设置。每项说明应包含参数名称、用途、取值或单位、空值含义和可直接参照的示例；不要写入真实密钥或站点私有配置。
+
+设置说明使用固定的三级标题，以保持链接稳定：
+
+```markdown
+### setting-timeout
+
+**连接超时**（`timeout`）
+
+等待连接的最长秒数。示例：`2`。
+
+### field-name
+
+**任务名称**（`name`）
+
+显示在任务列表的名称。示例：`每日统计`。
+```
+
+- 安装／设置页：`setting-参数名`；嵌套配置以短横线连接，例如 `setting-group-timeout`。
+- 管理页：`field-控件名`；例如 `name="templates[mail_cn]"` 对应 `field-templates-mail_cn`。
+- 重复密码框指向原密码参数的说明。生效应用属于后台通用绑定，不在单插件README中重复说明，也不生成填写说明链接。
+
+新旧后台按这些标题在项目名称下方添加“填写说明”，指向本插件的独立指南及标题锚点，按框架的 `router.mode` 自动生成 rewrite、PATH_INFO 或查询串模式的链接；例如rewrite模式为 `/plugin/guide?idx=redis#setting-timeout`。指南一对一读取该插件根目录的README.md，不登记到框架系统指南，也不提供跨文档目录或搜索；安装前、停用后及未登录时均可阅读。插件列表的“指南”按钮、安装页安装按钮后的“插件说明”和逐项帮助使用同一个入口。
+
+自定义插件管理页应继续通过 `renderPluginPage`／`showPluginPage` 装配，控件使用稳定的 `name`，业务记录输入与设置名称区分；没有对应章节的输入不会误加链接。独立装配页面时可在已验证身份后使用 `pluginReadmeControls('插件名', $html)` 增强；它保留原始业务HTML，使用现有本地 `static/js/pluginHelp.js` 与样式，无新增外部依赖。
+
+
+插件说明统一由插件guide读取各插件根目录的`README.md`，不要在插件module或根目录另外建立PHP说明阅读页，也不要链接到模块PHP文件。安装／设置页和管理页共用`pluginReadmeData()`及`pluginHelp.js`，整体说明链接进入插件guide，逐项说明使用README标题生成的锚点。说明阅读不依赖安装、启用、应用绑定或登录状态；业务管理操作仍保留原有权限。框架入口兼容将全部请求重写到index.php的服务器与网站子目录部署。
+
+生成指南地址请调用 `pluginGuideURL()` 或 `pluginReadmeData()`，复用框架 `myStep::setURL()` 的当前路由设置，不手工固定为查询串。阅读器保留当前入口的链接形式，并支持网站子目录。
+
+
+## 指南与更新历史格式
+
+插件根目录的使用指南统一命名为 `README.md`，一级标题使用“中文名（目录名）＋小号版本”：
+
+```markdown
+# 表单构建系统（cform） <small>v2.3.0</small>
+
+## 功能概述
+介绍插件能完成什么。
+
+## 安装与设置
+说明安装、启用和进入设置的步骤。
+
+## 设置说明
+### setting-table_prefix
+**独立表前缀**（`table_prefix`）
+说明用途、取值、单位、默认或留空行为，并给出可用示例。
+
+## 更新历史
+版本变更和需要调整的配置见[版本更新历史](CHANGELOG.md)。
+```
+
+指南描述当前版本的操作和参数，不混入功能改造原因、旧功能保留原因或更新流水。使用 `CHANGELOG.md` 累计记录功能新增、缺陷修复及需要用户调整的配置；既有记录保留，新记录按版本追加。功能版本变化时同步README标题。
+
+统一阅读器只使用 `plugin/guide.php` 一个PHP文件，声明、解析与页面输出在同一文件内，本地CSS单独维护。默认一对一读取当前插件README；文内引用的历史、事件和公开开发资料也由同一入口阅读，受限 `ref` 只允许公开Markdown，不能指定配置、备份或源码文件。无需登录、安装或启用插件即可阅读说明，业务管理权限不受影响。
+
+标题锚点按小写、去标点和空格转短横线生成，重复标题加编号；中文和百分号编码的片段使用同样规则。例如 `## 19. 应用后台动态入口` 对应 `#19-应用后台动态入口`。文中使用相对Markdown链接，阅读器负责按当前框架路由模式转换，避免手工写死域名和后台地址。
+
+
+中文界面的设置项目名称（含重复输入名称）及分组标题控制在6个字符以内，中英混排时字母和空格也计入长度。用明确短名表达用途，单位、取值范围和平台完整术语放在describe或README中；不得依靠截断显示掩盖原名称。参数键和帮助锚点保持稳定，名称调整时同步使用指南中的项目名。英文译名保持自然、完整的表达。

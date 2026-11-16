@@ -16,7 +16,7 @@ namespace app\Admin {
         $required = ['type' => 'string', 'required' => true];
         $array = ['type' => 'array', 'default' => []];
         $action = function ($handler, $fields = []) {
-            $mutex = in_array($handler, ['installPlugin', 'savePlugin', 'togglePlugin', 'uninstallPlugin', 'deletePlugin', 'orderPlugins'], true)
+            $mutex = in_array($handler, ['installPlugin', 'savePlugin', 'togglePlugin', 'uninstallPlugin', 'deletePlugin', 'orderPlugins', 'saveApp'], true)
                 ? 'plugins' : ($handler === 'saveSettings' ? 'settings' : (in_array($handler, ['uploadApp', 'uploadPlugin'], true) ? 'packages' : ''));
             return ['handler' => $handler, 'fields' => $fields, 'mutex' => $mutex];
         };
@@ -85,8 +85,8 @@ namespace app\Admin {
             'function/app' => [
                 'title' => '应用管理', 'group' => '功能', 'module' => 'function/app', 'view' => 'apps',
                 'actions' => [
-                    'save' => $action('saveApp', ['name' => $required, 'route' => 'string', 'plugins' => $array, 'version' => $required, 'plugin_version' => $required]),
-                    'mapping' => $action('saveMapping', ['mapping' => $array, 'version' => $required]),
+                    'save' => $action('saveApp', ['name' => $required, 'route' => 'string', 'plugins' => $array, 'version' => $required, 'plugin_version' => $required, 'registry_version' => $required]),
+                    'mapping' => $action('saveMapping', ['mapping' => 'string', 'version' => $required]),
                     'upload' => $action('uploadApp'),
                 ],
             ],

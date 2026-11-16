@@ -9,9 +9,9 @@
                 <tr align="center" class="bg-secondary text-white">
                     <td width="40">排序</td>
                     <td>名称</td>
-                    <td width="40">版本</td>
+                    <td width="60">版本</td>
                     <td>描述</td>
-                    <td width="170">操作</td>
+                    <td width="220">操作</td>
                 </tr>
 <!--loop:start key="list_1"-->
                 <tr align="center">
@@ -27,6 +27,7 @@
                         <a class="btn btn-sm btn-info" href="<!--path_admin-->/function/plugin/active/?idx=<!--list_1_idx-->"><!--list_1_active--></a>
                         <a class="btn btn-sm btn-info" href="<!--path_admin-->/function/plugin/setting/?idx=<!--list_1_idx-->">设置</a>
                         <a class="btn btn-sm btn-info" href="<!--path_admin-->/function/plugin/pack/?idx=<!--list_1_idx-->">打包</a>
+                        <a class="btn btn-sm btn-info" href="<!--list_1_guide_url|html-->" target="_blank" rel="noopener noreferrer">指南</a>
                     </td>
                 </tr>
 <!--loop:end-->
@@ -50,7 +51,7 @@
                 <td>名称</td>
                 <td width="40">版本</td>
                 <td>描述</td>
-                <td width="170">操作</td>
+                <td width="220">操作</td>
             </tr>
 <!--loop:start key="list_2"-->
             <tr align="center">
@@ -62,6 +63,7 @@
                     <a class="btn btn-sm btn-info" href="<!--path_admin-->/function/plugin/uninstall/?idx=<!--list_2_idx-->" onclick="return confirm('本功能主要用于清除安装未成功的插件残留，可能会造成一些错误记录！ 请按确定继续。')">清除</a>
                     <a class="btn btn-sm btn-info" href="<!--path_admin-->/function/plugin/delete/?idx=<!--list_2_idx-->" onclick="return confirm('是否确认删除当前插件？')">删除</a>
                     <a class="btn btn-sm btn-info" href="<!--path_admin-->/function/plugin/pack/?idx=<!--list_2_idx-->">打包</a>
+                    <a class="btn btn-sm btn-info" href="<!--list_2_guide_url|html-->" target="_blank" rel="noopener noreferrer">指南</a>
                 </td>
             </tr>
 <!--loop:end-->

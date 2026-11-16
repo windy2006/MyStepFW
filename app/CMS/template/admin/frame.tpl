@@ -9,7 +9,18 @@
             <a class="dropdown-item" theme="purple" href="#">紫色主题</a>
             <a class="dropdown-item" theme="brown" href="#">棕色主题</a>
         </div>
-        <ul id="main_nav" class="navbar-nav mr-auto mt-2 mt-lg-0"></ul>
+        <ul id="main_nav" class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <!--if:start key="plugin_menu"-->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><span class="fa fa-plug" aria-hidden="true"></span> 插件</a>
+                <div class="dropdown-menu">
+                    <!--loop:start key="plugin_menu"-->
+                    <a class="dropdown-item" href="<!--plugin_menu_url|html-->"><!--plugin_menu_name|html--></a>
+                    <!--loop:end-->
+                </div>
+            </li>
+            <!--if:end-->
+        </ul>
     </div>
     <ul class="nav">
         <li class="nav-item d-inline d-sm-none d-md-inline">
@@ -51,7 +62,7 @@
                 </ul>
                 <div id="list_frame" class="tab-content border-top">
                     <div class="tab-pane fade show active" id="tab_main">
-                        <iframe src="<!--path_admin-->info/" title="后台首页" class="frame" frameborder="0" allowtransparency="true"></iframe>
+                        <iframe src="<!--path_admin-->info/" class="frame" frameborder="0" allowtransparency="true"></iframe>
                     </div>
                 </div>
             </div>

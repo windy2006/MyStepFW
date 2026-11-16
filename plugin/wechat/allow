@@ -1,0 +1,13 @@
+README.md
+info.php
+class.php
+WeChatClient.php
+index.php
+config.php
+config_default.php
+config/
+module/
+template/
+asset/
+allow
+CHANGELOG.md

@@ -8,4 +8,12 @@
 
 Referer 只帮助选择外观，管理员校验、CSRF 和业务权限单独执行。页面内表单、返回链接及 AJAX 地址使用 `pluginPageURL()`／`pluginAdminURL()` 等现有辅助入口，避免切换宿主后又跳回固定旧后台。详见插件规范的后台通用布局部分。
 
+## 原生后台与动态菜单
+
+应用需要使用自己的管理员会话时，在同名核心类声明 `pluginBackend()`，由已有后台模块承载 `renderPluginPage()`。插件info的admin声明决定可管理的页面；注册表活动状态和应用plugin.php决定菜单范围，应用权限回调决定哪些管理员能访问。
+
+CMS已有通用入口，cform支持应用管理员管理字段及记录，源码仅框架管理员可改。菜单与表单地址使用 `pluginAdminLinks()`／`pluginManagementURL()`，不用逐个插件复制页面或维护菜单表。
+
+详见[应用后台动态入口](../../../plugin/README.md#19-应用后台动态入口)及[应用后台引用插件](../../../app/README.md#14-应用后台引用插件)。
+
 [插件规范](README.md)

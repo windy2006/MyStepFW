@@ -70,7 +70,9 @@ switch($method) {
         }
         $check = $class::check($check_info);
         $t->assign('btn_install', $check?'':'d-none');
-        $t->assign('check', $check_info);
+        $t->assign('check', pluginCheckText($check_info));
+        $t->assign('check_label',$check?'通过':'失败');
+        $t->assign('check_state',$check?'pass':'fail');
         $t->assign('info', $mystep->getLanguage('plugin_check_'.($check?'ok':'fail')));
     case 'setting':
         if(myReq::check('post')) {
@@ -82,6 +84,9 @@ switch($method) {
             myStep::redirect($app_root.'/function/plugin/');
         }
         $t->assign($info);
+        $t->assign(pluginReadmeData($idx));
+        $mystep->addJS(STATICS.'js/pluginHelp.js');
+        $mystep->addCSS(STATICS.'css/pluginHelp.css');
         if(!is_file(PLUGIN.$idx.'/config.php')) {
             $result = '<h4 class="text-center">'.$mystep->getLanguage('plugin_no_setting').'</h4>';
         } else {
@@ -228,6 +233,7 @@ switch($method) {
         foreach($data as $v) {
             $v['active'] = $mystep->getLanguage('plugin_'.($v['active']==1 ? 'deactive' : 'active'));
             $v['update'] = (version_compare($v['ver'], $check_plugin[$v['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.$ms_setting->gen->path_admin.'/plugin/'.$v['idx'].'">Update to v'.$check_plugin[$v['idx']].'</a>]': '';
+            $v['guide_url']=is_file(PLUGIN.$v['idx'].'/info.php')?pluginGuideURL($v['idx']):'';
             $t->setLoop('list_1', $v);
             if(($k = array_search($v['idx'], $dirs))!==false) unset($dirs[$k]);
         }
@@ -240,6 +246,7 @@ switch($method) {
                 $info = array('name'=>$mystep->getLanguage('unknown'), 'ver'=>$mystep->getLanguage('unknown'), 'intro'=>$mystep->getLanguage('plugin_no_info'), 'idx'=>$v);
             }
             $info['update'] = (version_compare($info['ver'], $check_plugin[$info['idx']]??'')<0) ? '<br />[<a href="'.ROOT_WEB.$ms_setting->gen->path_admin.'/plugin/'.$info['idx'].'">Update to v'.$check_plugin[$info['idx']].'</a>]': '';
+            $info['guide_url']=is_file(PLUGIN.$info['idx'].'/info.php')?pluginGuideURL($info['idx']):'';
             $t->setLoop('list_2', $info);
         }
         $t->assign('max_size', myFile::getByte(ini_get('upload_max_filesize')));

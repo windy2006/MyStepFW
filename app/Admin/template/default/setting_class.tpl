@@ -8,7 +8,7 @@
 <!--loop:start key="rules"--><tr>
 <td><input name="rows[<!--rules_index|html-->][path]" value="<!--rules_path|html-->"></td>
 <td><input name="rows[<!--rules_index|html-->][ext]" data-default-value=".php,.class.php" value="<!--rules_ext|html-->"></td>
-<td><textarea name="rows[<!--rules_index|html-->][idx]" rows="4" data-default-value="array ()"><!--rules_idx|html--></textarea></td>
+<td><textarea data-admin-code="php-array" name="rows[<!--rules_index|html-->][idx]" rows="4" data-default-value="array ()"><!--rules_idx|html--></textarea></td>
 <td><a class="adm-link" href="<!--rules_view_url|html-->" data-row-existing>查看</a><button type="button" data-remove-row <!--rules_remove_disabled-->>移除</button></td></tr><!--loop:end-->
 </tbody></table></div>
 <div class="adm-actions">

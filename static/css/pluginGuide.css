@@ -1,0 +1,41 @@
+/* 独立插件README阅读页；不加载后台框架指南样式或外部资源。 */
+:root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #26364a; background: #f4f6fa; }
+* { box-sizing: border-box; }
+body { margin: 0; line-height: 1.8; }
+a { color: #185aab; text-underline-offset: .2em; overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid #185aab; outline-offset: 3px; }
+.plugin-guide-heading { display: flex; align-items: baseline; gap: 1rem; padding: 1rem max(1.25rem, calc((100% - 1280px)/2)); color: #fff; background: #183b64; }
+.plugin-guide-heading span { opacity: .8; }
+.plugin-guide-layout { display: grid; grid-template-columns: 260px minmax(0,1fr); gap: 1.25rem; max-width: 1320px; padding: 1.25rem; margin: auto; align-items: start; }
+.plugin-guide-nav { position: sticky; top: 1rem; border: 1px solid #dfe5ef; border-radius: .6rem; background: #fff; }
+.plugin-guide-nav summary { padding: .65rem 1rem; font-weight: 700; cursor: pointer; }
+.plugin-guide-nav nav { max-height: calc(100vh - 8rem); overflow-y: auto; }
+.plugin-guide-nav ul { list-style: none; margin: 0; padding: 0 .5rem .8rem; }
+.plugin-guide-nav a { display: block; padding: .3rem .55rem; border-radius: .3rem; text-decoration: none; }
+.plugin-guide-nav a:hover { background: #eaf2fc; }
+.plugin-guide-nav li[data-level="3"] { padding-left: .75rem; font-size: .88rem; }
+.plugin-guide-document, .plugin-guide-error { min-width: 0; padding: 1.5rem 2rem; background: #fff; border: 1px solid #dfe5ef; border-radius: .6rem; overflow-wrap: anywhere; }
+.plugin-guide-error { max-width: 900px; margin: 1.5rem auto; }
+.plugin-guide-document :is(h1,h2,h3,h4,h5,h6) { line-height: 1.5; scroll-margin-top: 1.25rem; }
+.plugin-guide-document h1 { font-size: 1.9rem; margin-top: 0; }
+.plugin-guide-document h2 { border-bottom: 1px solid #e4e9f1; padding-bottom: .3rem; margin-top: 2rem; font-size: 1.45rem; }
+.plugin-guide-document h3 { font-size: 1.1rem; margin-top: 1.7rem; }
+.plugin-guide-document :target { outline: 2px solid #b6d5ff; background: #eaf3ff; outline-offset: .3rem; }
+.plugin-guide-document pre { overflow: auto; padding: 1rem; border-radius: .4rem; background: #f1f4f8; line-height: 1.6; white-space: pre; }
+.plugin-guide-document code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .88em; }
+.plugin-guide-document :not(pre)>code { padding: .1em .3em; border-radius: .2em; background: #f1f4f8; }
+.plugin-guide-document table { display: block; max-width: 100%; border-collapse: collapse; overflow: auto; }
+.plugin-guide-document th, .plugin-guide-document td { padding: .5rem .7rem; border: 1px solid #dfe5ef; vertical-align: top; }
+.plugin-guide-document th { background: #eef3fa; }
+.plugin-guide-document img { max-width: 100%; height: auto; }
+.plugin-guide-document blockquote { margin-left: 0; padding-left: 1rem; border-left: 3px solid #9cbbdf; color: #52647b; }
+@media(max-width: 760px) {
+    .plugin-guide-layout { grid-template-columns: minmax(0,1fr); padding: .75rem; }
+    .plugin-guide-nav { position: static; }
+    .plugin-guide-nav nav { max-height: 13rem; }
+    .plugin-guide-document { padding: 1rem; }
+    .plugin-guide-document h1 { font-size: 1.5rem; }
+}
+
+.plugin-guide-document h1 .plugin-guide-version { font-size: .55em; font-weight: 400; color: #65778e; white-space: nowrap; }
+.plugin-guide-heading a { color: #fff; font-size: .9rem; margin-left: auto; }

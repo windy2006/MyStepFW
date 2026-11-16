@@ -6,7 +6,7 @@
  * 使用说明：由myConfig::build生成表单，输入规则由框架checkForm处理，保存前仍执行服务端验证。
  */
 return array(
-    'name' => 'Redis 设置',
+    'name' => '存储设置',
     'list' => [
         'host' => array(
             'name' => '服务器',

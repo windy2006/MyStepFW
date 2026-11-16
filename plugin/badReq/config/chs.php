@@ -13,7 +13,7 @@ return array(
             'type' => array('text', '', '100')
         ),
         'cookie' => array(
-            'name' => 'Cookie名称',
+            'name' => '检测标识',
             'describe' => '不接受Cookie的访问将会被阻止，留空为取消检测',
             'type' => array('text', 'alpha_', '10')
         ),

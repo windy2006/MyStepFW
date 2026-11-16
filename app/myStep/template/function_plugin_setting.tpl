@@ -1,4 +1,4 @@
-<div class="card w-100 mb-5 mb-sm-2">
+<div class="card w-100 mb-5 mb-sm-2" data-plugin-help data-plugin-help-url="<!--plugin_help_url|html-->" data-plugin-help-map="<!--plugin_help_map|html-->">
     <div class="card-header bg-info text-white">
         <b><span class="glyphicon glyphicon-cog"></span> 插件设置 - “<!--name-->”</b>
     </div>
@@ -24,10 +24,13 @@
                 </tr>
                 <tr>
                     <td align="center">
-                        <input type="hidden" value="<!--idx-->" name="idx" />
-                        <button class="btn btn-primary btn-sm mr-3" type="submit"> 确 认 </button>
-                        <button class="btn btn-primary btn-sm mr-3" type="reset"> 复 位 </button>
-                        <button class="btn btn-primary btn-sm mr-3" type="button" onClick="history.go(-1)" > 返 回 </button>
+                        <div class="plugin-settings-actions plugin-settings-actions-center">
+                            <input type="hidden" value="<!--idx-->" name="idx" />
+                            <button class="btn btn-primary btn-sm" type="submit"> 确 认 </button>
+                            <a class="btn btn-primary btn-sm" href="<!--plugin_help_url|html-->" target="_blank" rel="noopener noreferrer">插件说明</a>
+                            <button class="btn btn-primary btn-sm" type="reset"> 复 位 </button>
+                            <button class="btn btn-primary btn-sm" type="button" onClick="history.go(-1)" > 返 回 </button>
+                        </div>
                     </td>
                 </tr>
             </table>

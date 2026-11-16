@@ -1,0 +1,51 @@
+/* 插件README填写说明：链接置于项目名称下方，仅作用于显式标记的设置容器。 */
+[data-plugin-help] .plugin-help-title { display: inline-block; max-width: 100%; vertical-align: top; }
+[data-plugin-help] .plugin-field-help {
+    display: block;
+    margin: .2rem 0 0;
+    font-size: .8rem;
+    font-weight: normal;
+    line-height: 1.5;
+    white-space: nowrap;
+    text-decoration: underline;
+    text-underline-offset: .15em;
+}
+[data-plugin-help] .plugin-field-help:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+[data-plugin-help] .form-inline label.plugin-help-title { display: inline-block; }
+/* 安装／保存按钮与应用绑定保持间隔，说明入口采用宿主已有按钮样式。 */
+[data-plugin-help] .plugin-settings-actions {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #e1e7f0;
+}
+[data-plugin-help] .plugin-settings-actions-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.plugin-check-status {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid;
+    border-radius: 5px;
+    font-weight: 700;
+}
+.plugin-check-pass { color: #146c43; background: #e7f5ec; border-color: #abd3bd; }
+.plugin-check-fail { color: #b02a37; background: #fbeaec; border-color: #e5b3ba; }
+.plugin-check-details {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: inherit;
+    font-size: .9rem;
+    line-height: 1.7;
+    padding: 12px 14px;
+    margin: 12px 0 20px;
+    background: #f5f7fa;
+    border: 1px solid #e1e7f0;
+    border-radius: 5px;
+}

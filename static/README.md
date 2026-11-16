@@ -22,3 +22,7 @@
 - [checkForm.js函数详解](../docs/frontend/javascript/checkform-reference.md)
 
 [文档总览](../docs/README.md)
+
+插件设置页的逐项帮助指向各插件独立的README指南，由本地 `js/pluginHelp.js` 和 `css/pluginHelp.css` 提供，控件对应章节及插件接入方法见[插件使用说明](../plugin/README.md#插件使用说明与设置帮助)。
+
+独立插件指南由 `plugin/guide.php` 解析本插件README，页面仅使用本地 `css/pluginGuide.css`；与框架指南的目录和搜索无关。

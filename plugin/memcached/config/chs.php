@@ -1,6 +1,6 @@
 <?PHP
 return array(
-    'name' => 'MemCached缓存设置',
+    'name' => '缓存设置',
     'list' => [
         'server' => array(
             'name' => '服务器',
