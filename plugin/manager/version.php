@@ -3607,4 +3607,56 @@ if(is_file(PLUGIN.\'plugin.db\')) {
     } finally {$registry->close();}
 }',
   ),
+  '2.6.4' => array (
+    'info' => '隔离PHP代码与升级迁移变量作用域，保留默认配置及已有插件设置',
+    'file' => array (
+      0 => '/config/version.php',
+      1 => '/lib/function.php',
+      2 => '/plugin/manager/CHANGELOG.md',
+      3 => '/plugin/manager/README.md',
+      4 => '/plugin/manager/class.php',
+      5 => '/plugin/manager/info.php',
+      6 => '/plugin/manager/version.php',
+    ),
+    'setting' => array(),
+    'code' => '(static function() {
+$defaults = [
+    \'ad_show\' => [],
+    \'se_detect\' => [\'retention_days\' => 365],
+    \'visitstat\' => [],
+    \'crontab\' => [\'interval\' => 120, \'batch\' => 5],
+    \'xcode\' => [],
+    \'cform\' => [\'table_prefix\' => \'cf8_\', \'upload_bytes\' => 5242880, \'submit_interval\' => 300],
+];
+if(is_file(PLUGIN.\'wechat/config_default.php\')) $defaults[\'wechat\'] = include PLUGIN.\'wechat/config_default.php\';
+foreach($defaults as $id => $setting) {
+    $directory = PLUGIN.$id.\'/\';
+    $file = $directory.\'config.php\';
+    if(is_link($directory) || is_link(rtrim($directory, \'/\')) || is_link($file)) throw new RuntimeException(\'插件默认配置路径不能为符号链接：\'.$id);
+    if(!is_dir($directory) || file_exists($file)) continue;
+    $content = "<?php\\nreturn ".var_export($setting, true).";\\n";
+    $handle = @fopen($file, \'x\');
+    if(!$handle) {
+        clearstatcache(true, $file);
+        if(is_file($file) && !is_link($file)) continue;
+        throw new RuntimeException(\'无法建立插件默认配置：\'.$id);
+    }
+    try {
+        if(fwrite($handle, $content) !== strlen($content) || !fflush($handle)) throw new RuntimeException(\'插件默认配置写入不完整：\'.$id);
+    } finally {fclose($handle);}
+}
+if(is_file(PLUGIN.\'plugin.db\')) {
+    $registry = new myDb(\'simpleDB\', \'plugin\', PLUGIN);
+    try {
+        if($registry->check() && !$registry->mutate(static function(&$rows, $columns) {
+            if(!isset($columns[\'ver\'])) return true;
+            $versions = [\'manager\'=>\'1.1.10\', \'badReq\'=>\'1.0.2\', \'memcached\'=>\'1.0.4\', \'myBackup\'=>\'1.0.2\', \'redis\'=>\'1.0.2\', \'social\'=>\'1.0.1\'];
+            foreach($rows as &$row) if(isset($versions[trim($row[\'idx\']??\'\')])) $row[\'ver\'] = $versions[trim($row[\'idx\'])];
+            unset($row);
+            return true;
+        })) throw new RuntimeException(\'无法同步已安装插件版本。\');
+    } finally {$registry->close();}
+}
+})();',
+  ),
 );

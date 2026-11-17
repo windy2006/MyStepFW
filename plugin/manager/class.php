@@ -23,6 +23,7 @@
  *   public static plugin_manager::artifactURL($file, $public = false) — 生成经后台认证的归档下载路由，不直接暴露受保护的临时缓存目录。
  *   public static plugin_manager::publicArtifact($name, $token) — 校验公开差异归档的随机下载凭据，仅允许读取对应文件且有效期为15分钟。
  *   public static plugin_manager::installPackage($type, $idx, $file) — 校验应用/插件安装目标并发布本机下载的归档，使用解包器的完整预检及回滚。
+ *   protected static plugin_manager::isolatedUpdateCode(array $codes) — 隔离迁移脚本与旧版执行器的局部变量，不改变历史记录。
  *   public static plugin_manager::createUpdateArchive(array $detail) — 创建保留全部更新操作的离线ZIP，仅写暂存。
  *   public static plugin_manager::applyUpdateArchive($file) — 校验新旧离线ZIP并交给统一发布流程。
  *   public static plugin_manager::applyUpdate(array $detail) — 锁内预检、备份与发布更新，最后提交版本。
@@ -469,7 +470,7 @@ class plugin_manager implements interface_plugin {
                         }
                     }
                     $list_file = array_values(array_unique($list_file));
-                    $result = array('file'=>$list_file, 'content'=>array(), 'kind'=>array(), 'setting'=>$list_setting, 'code'=>$list_code);
+                    $result = array('file'=>$list_file, 'content'=>array(), 'kind'=>array(), 'setting'=>$list_setting, 'code'=>self::isolatedUpdateCode($list_code));
                     $result['runtime']=$runtime;
                     for($i=0,$m=count($result['file']); $i<$m; $i++) {
                         if(file_exists(self::sourcePath($result['file'][$i]))) {
@@ -1072,6 +1073,20 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
         finally {if(is_file($payload))unlink($payload);}
     }
     /**
+     * 功能说明：包装受信迁移脚本，隔离旧版执行器的临时文件和输出缓冲变量。
+     *
+     * 在线响应、离线包和本机应用更新统一使用；不修改历史版本记录。
+     * 包装保留脚本返回与异常行为，脚本可通过global访问框架资源。
+     *
+     * @param array $codes 由decodeUpdate校验后的受信PHP迁移脚本数组
+     * @return array 在独立函数作用域执行的PHP脚本数组，顺序不变
+     */
+    protected static function isolatedUpdateCode(array $codes) {
+        foreach($codes as &$code) $code="(static function() {\n".$code."\n})();";
+        unset($code);
+        return $codes;
+    }
+    /**
      * 功能说明：将已校验更新生成可离线上传的ZIP，清单保存删除、目录、配置和迁移指令。
      *
      * 不修改网站源文件、回滚资料和缓存；文件内容保留二进制字节及原始相对路径。
@@ -1084,6 +1099,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
     public static function createUpdateArchive(array $detail) {
         $detail=self::decodeUpdate(gzdeflate(serialize($detail)));
         self::assertUpdateRuntime($detail);
+        $detail['code']=self::isolatedUpdateCode($detail['code']);
         $id=bin2hex(random_bytes(8));$zipfile=self::artifactPath('update_'.$id.'.zip');
         $dir=CACHE.'tmp/manager/work_'.$id.'/';$files=[];
         $manifest=['format'=>1,'runtime'=>$detail['runtime'],'file'=>$detail['file'],'kind'=>$detail['kind'],'setting'=>$detail['setting'],'code'=>$detail['code']];
@@ -1224,7 +1240,7 @@ $list_file_md5 = '.var_export($list_file_md5, true).';
                 try {$config->save();}
                 catch(Throwable $error) {throw new RuntimeException('Cannot publish update configuration: config/config.php; 请检查配置、配置锁及目录权限，确认配置未被并发修改后重试。',0,$error);}
             }
-            foreach($detail['code'] as $code) myEval($code,false);
+            foreach(self::isolatedUpdateCode($detail['code']) as $code) myEval($code,false);
             foreach(['script','template','language','app'] as $cache) if(file_exists(CACHE.$cache) && !myFile::del(CACHE.$cache)) throw new RuntimeException('Cannot clear update cache');
             if(!myStep::clearDataCache()) throw new RuntimeException('Cannot clear data cache after update');
             if($version!==null) {

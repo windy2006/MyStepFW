@@ -234,7 +234,7 @@ function isHttps() {
 }
 
 /**
- * 功能说明：自定义代码执行
+ * 功能说明：在独立作用域执行受信PHP代码，隔离脚本变量与临时文件／输出缓冲清理状态。
  *
  * @param string $code 受信PHP代码文本，不接受不可信用户输入
  * @param bool $return true取得include/表达式的返回值，false捕获并返回执行输出；不直接发送捕获内容（默认：false）
@@ -249,11 +249,17 @@ function myEval($code, $return = false) {
         $code = '<?php'."\n".$code;
     }
     $level = ob_get_level();
+    /**
+     * 功能说明：隔离被执行脚本的局部变量，避免覆盖外层的清理状态。
+     * @param string $path 完整写入后的临时PHP文件路径
+     * @return mixed 脚本显式返回的值
+     */
+    $evaluate = static function($path) {return include($path);};
     try {
         if(file_put_contents($file, $code, LOCK_EX) !== strlen($code)) throw new RuntimeException('Cannot write evaluation file');
-        if($return) return include($file);
+        if($return) return $evaluate($file);
         ob_start();
-        include($file);
+        $evaluate($file);
         return ob_get_contents();
     } finally {
         while(ob_get_level() > $level) ob_end_clean();

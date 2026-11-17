@@ -1,4 +1,4 @@
-# 打包与更新（manager） <small>v1.1.9</small>
+# 打包与更新（manager） <small>v1.1.10</small>
 
 ## 功能概述
 
